@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch25",
+  "chapter_title": "Auto-Optimization and AI-Assisted Compilation",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 43,
+  "catalog_tier_a": 18,
+  "binding_count": 241,
+  "quality_binding_count": 241,
+  "sentence_count": 331,
+  "claim_sentence_count": 331,
+  "unbound_claim_sentences": 90,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 44,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

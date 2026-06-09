@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "hw_aware_profiling",
       "label": "fig:hw_aware_profiling_pipeline",
-      "caption": "Hw Aware Profiling optimization pipeline in Compiler-Driven End-to-End Performance Tuning.",
+      "caption": "HW Aware Profiling optimization pipeline in Compiler-Driven End-to-End Performance Tuning.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Hw Aware Profiling"
+          "detail": "HW Aware Profiling"
         },
         {
           "name": "On-chip",

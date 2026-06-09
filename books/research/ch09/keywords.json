@@ -1,0 +1,182 @@
+[
+  {
+    "term": "hierarchical synchronization and communication",
+    "weight": 18
+  },
+  {
+    "term": "deadlock detection",
+    "weight": 14
+  },
+  {
+    "term": "hardware sync pick",
+    "weight": 14
+  },
+  {
+    "term": "sync hierarchy",
+    "weight": 14
+  },
+  {
+    "term": "YiRage sync pass",
+    "weight": 14
+  },
+  {
+    "term": "deadlock detection LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "hardware sync pick LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "sync hierarchy LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage sync pass LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "GPU CPU",
+    "weight": 12
+  },
+  {
+    "term": "sync barrier",
+    "weight": 12
+  },
+  {
+    "term": "YiRage sync",
+    "weight": 12
+  },
+  {
+    "term": "deadlock",
+    "weight": 11
+  },
+  {
+    "term": "barrier",
+    "weight": 10
+  },
+  {
+    "term": "CPU",
+    "weight": 10
+  },
+  {
+    "term": "GPU",
+    "weight": 10
+  },
+  {
+    "term": "NPU",
+    "weight": 10
+  },
+  {
+    "term": "sync",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "communication",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "hierarchical",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "synchronization",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

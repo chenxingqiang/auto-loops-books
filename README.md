@@ -68,6 +68,7 @@ Point a coding agent at [`program_books.md`](program_books.md) and alternate **`
 | [`book_loop.py`](book_loop.py) / `uv run book-loop` | CLI entry → [`loops/iterate.py`](loops/iterate.py) |
 | [`book_prepare.py`](book_prepare.py) | `OUTLINE` rubric + `quality_score` harness (**do not change scoring during loops**) |
 | [`research_tools.py`](research_tools.py) | Per-chapter Scholar search → `books/research/<id>/` |
+| [`citation_loop.py`](citation_loop.py) | Per-chapter bib (≥25), sentence bindings, strict verify, `\citep` apply |
 | [`book_visuals.py`](book_visuals.py) | Figure/table plan, TikZ render, audit |
 | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) | Unified voice — engineer-narrative; gold standard = ch01 |
 | [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md) | Fact gate — web-verify numbers/examples; `verified_facts.jsonl` + URLs |
@@ -86,6 +87,8 @@ uv run book-loop status [--pick sequential|weakest]
 uv run book-loop step [--chapter ch01] [--skip-research] [--research-dry-run] [--skip-compile] [--pick sequential|weakest]
 uv run book-loop run --max-steps N [--bootstrap-only] [--skip-research] [--chapter ch01]
 uv run book-loop insert-visuals --chapter ch01
+uv run book-loop citation-loop --all --crossref-only --apply-tex --merge-bib
+uv run citation-loop verify --all
 ```
 
 | Flag | Meaning |
@@ -124,7 +127,9 @@ Engineer-narrative, problem-first, hardware↔software bound, multi-hardware (GP
 
 ### Fact verification (mandatory)
 
-Every **numeric claim, vendor spec, or worked example** must be **web-searched and cross-checked** (≥2 query passes) before entering the manuscript. Log primary URLs in `books/research/<chapter_id>/verified_facts.jsonl`; cite with matching `book.bib` links. Protocol: [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md). Unverified numbers stay in `\vispending{}` / TBD only.
+Every **numeric claim, vendor spec, or worked example** must be **web-searched and cross-checked** (≥2 query passes) before entering the manuscript. Log primary URLs in `books/research/<chapter_id>/verified_facts.jsonl`; cite with matching `book.bib` / `citations_merged.bib` links. Protocol: [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md). Unverified numbers stay in `\vispending{}` / TBD only.
+
+**Citation loop (orthogonal to fact gate):** `citation-loop` builds per-chapter `chapter.bib` (≥25 papers), binds claim sentences via chapter keywords, strict-verifies, then `apply` writes `\citep{}` into `build/chapters/*.tex`. Run `merge-bib` before compile.
 
 ### Research & visuals (per chapter)
 

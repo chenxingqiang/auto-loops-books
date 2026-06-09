@@ -1,0 +1,618 @@
+{
+  "chapter_id": "ch25",
+  "timestamp": "2026-06-10T02:46:47.095711",
+  "min_papers": 25,
+  "paper_count": 43,
+  "sentence_count": 331,
+  "binding_count": 265,
+  "papers": [
+    {
+      "bib_key": "liu2025aportableautotunin",
+      "title": "A Portable Auto-Tuning Framework for Quantum Compilation Optimization Based on D3QN",
+      "link": "https://doi.org/10.1145/3746709.3746950",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization",
+        "compilation"
+      ],
+      "reference": "Yi Liu, Yuqiong Jin, Jinchen Xu (2025). A Portable Auto-Tuning Framework for Quantum Compilation Optimization Based on D3QN. Retrieved from https://doi.org/10.1145/3746709.3746950",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wu2025aiassistedcustomer",
+      "title": "AI-assisted customer behavior analysis and hotel loyalty strategy optimization",
+      "link": "https://doi.org/10.55670/fpll.futech.4.3.10",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "auto",
+        "reward",
+        "AI-assisted",
+        "auto-optimization",
+        "ship"
+      ],
+      "reference": "Danqing Wu, Qiuya Ma (2025). AI-assisted customer behavior analysis and hotel loyalty strategy optimization. Retrieved from https://doi.org/10.55670/fpll.futech.4.3.10",
+      "abstract": "This research explores the application of artificial intelligence (AI) technologies in transforming the analysis of customer behavior and refining customer loyalty strategies in the hospitality sector. Most traditional loyalty programs are characterized by static segmentation and standardized reward frameworks, often disregarding evolving customer priorities and shifting market dynamics. Using an AI-powered system based on deep learning, natural language processing, and predictive analytics, we analyzed 3.2 million transactions from 846,000 customers across five international hotel chains globally. The system identifies behavioral patterns that are overlooked by traditional analysis methods through the continuous processing of heterogeneous data streams such as booking, service usage, soci",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2026intentspeczerointr",
+      "title": "IntentSpec: Zero-Intrusion Contract Compilation and Oine Acceptance Testing for Heterogeneous AI Agents",
+      "link": "https://doi.org/10.2139/ssrn.6674899",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "AI-assisted",
+        "compilation",
+        "constraints",
+        "miss",
+        "teams"
+      ],
+      "reference": "Ting Liu (2026). IntentSpec: Zero-Intrusion Contract Compilation and Oine Acceptance Testing for Heterogeneous AI Agents. Retrieved from https://doi.org/10.2139/ssrn.6674899",
+      "abstract": "AI-assisted software teams increasingly rely on heterogeneous agent interfaces: repository instruction les, IDE rule les, structured-output schemas, and machine-readable planning artifacts. The governance intent behind these artifacts is often stable across tools, but the artifacts themselves are duplicated, edited, and reviewed in incompatible formats. This fragmentation makes it dicult to keep permissions, safety constraints, human conrmation rules, and output requirements consistent without modifying every downstream agent runtime. We present IntentSpec, a local-rst tool that turns a single task-governance contract into native artifacts for multiple AI-agent workows. Developers author an intent.yaml contract describing the task goal, permissions, constraints, conrmation gates, output co",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "kummarapurug2024aidrivenpredictive",
+      "title": "AI-Driven Predictive Scaling for Multi-Cloud Resource Management: Using Adaptive Forecasting, Cost-Optimization, and Auto-Tuning Algorithms",
+      "link": "https://doi.org/10.21275/sr241015062841",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization"
+      ],
+      "reference": "Charan Shankar Kummarapurugu (2024). AI-Driven Predictive Scaling for Multi-Cloud Resource Management: Using Adaptive Forecasting, Cost-Optimization, and Auto-Tuning Algorithms. Retrieved from https://doi.org/10.21275/sr241015062841",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "merouani2025agenticautoschedul",
+      "title": "Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization",
+      "link": "https://doi.org/10.1109/pact65351.2025.00027",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization"
+      ],
+      "reference": "Massinissa Merouani, Islem Kara Bernou, Riyadh Baghdadi (2025). Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization. Retrieved from https://doi.org/10.1109/pact65351.2025.00027",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "xu2023aiassistedisphyper",
+      "title": "AI-assisted ISP hyperparameter auto tuning",
+      "link": "https://doi.org/10.1109/aicas57966.2023.10168574",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "AI-assisted"
+      ],
+      "reference": "Fa Xu, Zihao Liu, et al. (2023). AI-assisted ISP hyperparameter auto tuning. Retrieved from https://doi.org/10.1109/aicas57966.2023.10168574",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rustamov20235genabledinterneto",
+      "title": "5G-Enabled Internet of Things: Latency Optimization through AI-Assisted Network Slicing",
+      "link": "https://doi.org/10.48161/qtj.v2n1a18",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 37,
+      "matched_keywords": [
+        "auto",
+        "AI-assisted",
+        "auto-optimization"
+      ],
+      "reference": "Kamoliddin Rustamov (2023). 5G-Enabled Internet of Things: Latency Optimization through AI-Assisted Network Slicing. Retrieved from https://doi.org/10.48161/qtj.v2n1a18",
+      "abstract": "The confluence of Fifth-Generation (5G) wireless technology and the Internet of Things (IoT) heralds a new era of hyper-connectivity, enabling transformative applications from autonomous vehicles and industrial automation to extended reality and remote surgery. A critical performance indicator for many of these applications is ultra-reliable low-latency communication (URLLC), where delays must be bounded within milliseconds. However, the heterogeneous and dynamic nature of IoT traffic presents a monumental challenge to consistently meeting these stringent latency requirements. Traditional network management paradigms, which are largely static and reactive, are ill-suited for this task.This paper posits that the synergy of two cornerstone 5G technologies—Network Slicing and Artificial Intel",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "boulaich2025aiassistedmetasurf",
+      "title": "AI-Assisted Metasurface Antennas Design/Optimization and Performance Enhancement Techniques: A Comprehensive Survey",
+      "link": "https://doi.org/10.36227/techrxiv.176107672.20879524/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "AI-assisted",
+        "surface"
+      ],
+      "reference": "Mohamed Hamza Boulaich, Said Ohamouddou, et al. (2025). AI-Assisted Metasurface Antennas Design/Optimization and Performance Enhancement Techniques: A Comprehensive Survey. Retrieved from https://doi.org/10.36227/techrxiv.176107672.20879524/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "collins2024rlornotrlparsingth",
+      "title": "RL or not RL? Parsing the processes that support human reward-based learning.",
+      "link": "https://doi.org/10.31234/osf.io/he3pm",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "reward",
+        "routinely"
+      ],
+      "reference": "Anne Collins (2024). RL or not RL? Parsing the processes that support human reward-based learning.. Retrieved from https://doi.org/10.31234/osf.io/he3pm",
+      "abstract": "{Reinforcement Learning (RL) algorithms have had tremendous success accounting for reward-based learning across species, in both behavior and brain. In particular, simple model-free RL models, such as delta-rule or Q-learning, are routinely used to model instrumental learning in bandit tasks, and they capture variance in brain signals. However, reward-based learning in humans recruits multiple processes, including high-level processes such as memory and low-level ones such as choice perseveration; their contributions can easily be mistakenly attributed to RL computations. Here, we investigate how much of RL-like behavior is supported by RL computations in a context where other processes can be factored out. Re-analysis and computational modeling of seven data sets spanning hundreds of part",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rana2025quantumaihybridarc",
+      "title": "Quantum-AI Hybrid Architecture for Intelligent Fault Detection and Auto-Remediation in Distributed Cloud Systems",
+      "link": "https://doi.org/10.1109/iccmso67468.2025.00082",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "auto"
+      ],
+      "reference": "Milankumar Rana (2025). Quantum-AI Hybrid Architecture for Intelligent Fault Detection and Auto-Remediation in Distributed Cloud Systems. Retrieved from https://doi.org/10.1109/iccmso67468.2025.00082",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "vy2026revidaicouponcode2",
+      "title": "Revid AI Coupon Code 20SAVE – 20% OFF Auto Clip Creator AI | Apr 2026",
+      "link": "https://doi.org/10.55277/researchhub.mm2iwu99.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "auto"
+      ],
+      "reference": "Vy Vy (2026). Revid AI Coupon Code 20SAVE – 20% OFF Auto Clip Creator AI | Apr 2026. Retrieved from https://doi.org/10.55277/researchhub.mm2iwu99.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "oreoluwa2026securedataplaneopt",
+      "title": "Secure Data Plane Optimization for Ultra-Low-Latency Networks Using AI-Assisted Traffic Engineering",
+      "link": "https://doi.org/10.2139/ssrn.5988935",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Omole Oreoluwa (2026). Secure Data Plane Optimization for Ultra-Low-Latency Networks Using AI-Assisted Traffic Engineering. Retrieved from https://doi.org/10.2139/ssrn.5988935",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "erban2026behaviorallyadapti",
+      "title": "Behaviorally Adaptive Portfolio Optimization Under Uncertainty: An AI-Assisted Robust Framework for Cryptocurrency Investments",
+      "link": "https://doi.org/10.20944/preprints202605.1675.v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Florentin Șerban, Bogdan Vrinceanu (2026). Behaviorally Adaptive Portfolio Optimization Under Uncertainty: An AI-Assisted Robust Framework for Cryptocurrency Investments. Retrieved from https://doi.org/10.20944/preprints202605.1675.v1",
+      "abstract": "Cryptocurrency markets are characterized by elevated volatility, structural instability, and rapidly changing investor sentiment, which significantly challenge traditional portfolio optimization methodologies. Under such conditions, static portfolio allocation models frequently fail to ade-quately incorporate uncertainty, behavioral adaptation, and dynamic market responsiveness into the investment decision-making process. In parallel, recent advances in artificial intelligence and data-driven financial systems have transformed modern portfolio management by enabling adaptive investment strategies capable of processing large volumes of financial information in real time. Nevertheless, AI-assisted portfolio systems often remain highly sensitive to noisy market signals, parameter instability,",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2024aiassistedlandscap",
+      "title": "AI-Assisted Landscape Design Optimization and Innovation Research based on AI Assistance",
+      "link": "https://doi.org/10.37394/232018.2025.13.3",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Lin Wang, Leichang Huang, Jiaji Gao (2024). AI-Assisted Landscape Design Optimization and Innovation Research based on AI Assistance. Retrieved from https://doi.org/10.37394/232018.2025.13.3",
+      "abstract": "Urban fashion landscape, as an important carrier of urban image communication, is an important content of enhancing urban cultural ecology and promoting the construction of urban cultural tourism. As AI painting is widely involved in design as a tool, AI painting can play a role in urban fashion landscape design, especially in establishing the connection between regional cultural characteristics and fashion to create new creative possibilities. Through literature collation and case analysis of existing design typical cases, the original process of urban fashion landscape design is clarified, AI painting is used for design practice, and the participation of AI painting in urban fashion landscape design is evaluated, to provide innovative design ideas for fashion landscape designers.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "movchan2022investigationintoa",
+      "title": "INVESTIGATION INTO AI-ASSISTED OPTIMIZATION OF THIN-WALLED CROSS-SECTIONS",
+      "link": "https://doi.org/10.30888/2709-2267.2025-31-00-018",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Oleksandr Movchan (2022). INVESTIGATION INTO AI-ASSISTED OPTIMIZATION OF THIN-WALLED CROSS-SECTIONS. Retrieved from https://doi.org/10.30888/2709-2267.2025-31-00-018",
+      "abstract": "This research reviews the integration of artificial intelligence in structural cross-section selection, highlighting supervised learning, reinforcement learning, evolutionary algorithms, and physics-informed models as complementary methodologies. Supervis",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "bhimavarapu2025aiassistedgamemech",
+      "title": "AI-Assisted Game Mechanics Optimization for Multiplayer Environments",
+      "link": "https://doi.org/10.4018/979-8-3373-4637-3.ch003",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Usharani Bhimavarapu (2025). AI-Assisted Game Mechanics Optimization for Multiplayer Environments. Retrieved from https://doi.org/10.4018/979-8-3373-4637-3.ch003",
+      "abstract": "Dynamic game balancing needs to be performed in order to sustain the interest, challenge, and enjoyment of players in contemporary computer games. The static balancing techniques have failed to ascertain variations across various skill levels of players and thus will result in frustration or boredom. The article explores the application of artificial intelligence (AI) algorithms for dynamic game balancing and optimisation for real-time tuning of game parameters. Gameplay data, such as interactions between a single player, groups of enemies, stage manager, and world objects across a set of test levels, are gathered and preprocessed for computation. Remora Optimization-based features are chosen to restrict computational complexity without undermining important gameplay dynamics. Bi-Stacked L",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kwany2024optimizationoffemt",
+      "title": "Optimization of femtosecond pulses by AI-assisted spectral phase modulation: influence of spectral resolution",
+      "link": "https://doi.org/10.1364/cleo_at.2024.jw2a.49",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "A. Kwaśny, M. Krakowski, G. Soboń (2024). Optimization of femtosecond pulses by AI-assisted spectral phase modulation: influence of spectral resolution. Retrieved from https://doi.org/10.1364/cleo_at.2024.jw2a.49",
+      "abstract": "We investigate the possibility of optimization of ultrashort laser pulses by spectral phase modulation using machine learning algorithms. The Grey Wolf Algorithm is applied, and the efficiency of various spectral resolution patterns is examined.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chavan2026aiassistedmaterial",
+      "title": "AI-Assisted Material Strength Evaluation and Structural Health Monitoring of Buildings",
+      "link": "https://doi.org/10.71443/9789349552449-09",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": "Chetan S. Chavan, Debabrata Das (2026). AI-Assisted Material Strength Evaluation and Structural Health Monitoring of Buildings. Retrieved from https://doi.org/10.71443/9789349552449-09",
+      "abstract": "The performance, durability, and safety of modern buildings are inherently dependent on the mechanical properties of construction materials and the continuous assessment of structural health. Traditional material evaluation and monitoring approaches are limited in scalability, real-time assessment, and predictive capability, creating challenges for high-rise and complex urban structures. Artificial intelligence (AI) has emerged as a transformative solution, enabling predictive modeling of material strength, anomaly detection, and proactive structural health monitoring (SHM) through integration with advanced sensing networks and digital infrastructure. This chapter presents a comprehensive overview of AI-assisted material strength evaluation and SHM, highlighting machine learning and deep l",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "khurana2026artificialintellig",
+      "title": "Artificial Intelligence (AI) –Assisted Optimization of Online Gastrointestinal Patient Education Materials: A Cross-Sectional Study (Preprint)",
+      "link": "https://doi.org/10.2196/preprints.103870",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "independent",
+        "miss"
+      ],
+      "reference": "Vriti Khurana, Medha Tekriwa, Hany Eskarou (2026). Artificial Intelligence (AI) –Assisted Optimization of Online Gastrointestinal Patient Education Materials: A Cross-Sectional Study (Preprint). Retrieved from https://doi.org/10.2196/preprints.103870",
+      "abstract": "\nBACKGROUND\nPatient education materials (PEMs) related to gastroenterology are often written at a level above the recommended sixth-grade reading level, which is suboptimal for accessibility. Large language models (LLMs) can enhance the readability of PEMs, but their effectiveness in this regard remains to be evaluated.\n\n\nOBJECTIVE\nThe goal of this research is to identify if LLMs can optimize the readability and understandability of gastroenterology (GI)-focused PEMs to a more accessible level, and if different models perform differently.\n\n\nMETHODS\nA cross-sectional review was performed on 60 PEMs that were randomly sampled from three GI-focused websites (American Cancer Society [ACS], American College of Gastroenterology [ACG], and American Gastroenterological Association [AGA]). PEMs wer",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2025aiassistedpersonal",
+      "title": "AI-assisted personalized learning path optimization strategy",
+      "link": "https://doi.org/10.70517/ijhsa464334",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ],
+      "reference": " (2025). AI-assisted personalized learning path optimization strategy. Retrieved from https://doi.org/10.70517/ijhsa464334",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yang2023compilationoptimiz",
+      "title": "Compilation Optimization",
+      "link": "https://doi.org/10.1007/978-981-99-4947-2_17",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
+      ],
+      "reference": "HcySun Yang (2023). Compilation Optimization. Retrieved from https://doi.org/10.1007/978-981-99-4947-2_17",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "louvros2025crosslayeroptimiza",
+      "title": "Cross Layer Optimization Using AI/ML Assisted Federated Edge Learning in 6G Networks",
+      "link": "https://doi.org/10.20944/preprints202511.0751.v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "miss"
+      ],
+      "reference": "Spyridon Louvros, AnupKumar Pandey, et al. (2025). Cross Layer Optimization Using AI/ML Assisted Federated Edge Learning in 6G Networks. Retrieved from https://doi.org/10.20944/preprints202511.0751.v1",
+      "abstract": "This paper introduces a novel methodology that integrates 6G wireless Federated Edge Learning (FEEL) frameworks with optimization strategies spanning from the MAC layer to the Physical layer. In the context of mobile edge computing, ensuring robust channel estimation within the 6G network slicing paradigm presents critical challenges, particularly in managing data retransmissions. Inaccurate updates from distributed 6G devices can undermine the reliability of Federated Learning (FL), affecting its overall performance. To address this, we propose an AI/ML assisted algorithm for global optimization in FL-based 6G networks, where the decision-making process leverages radial basis functions (RBF) to assess options based on learned preferences rather than relying on direct evaluations of the ob",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sundaram2022taskspecificrobotb",
+      "title": "Task-specific robot base pose optimization for robot-assisted surgeries",
+      "link": "https://doi.org/10.3389/frobt.2022.899646",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "constraints"
+      ],
+      "reference": "Ashok M. Sundaram, Nikola Budjakoski, et al. (2022). Task-specific robot base pose optimization for robot-assisted surgeries. Retrieved from https://doi.org/10.3389/frobt.2022.899646",
+      "abstract": "Preoperative planning and intra-operative system setup are crucial steps to successfully integrate robotically assisted surgical systems (RASS) into the operating room. Efficiency in terms of setup planning directly affects the overall procedural costs and increases acceptance of RASS by surgeons and clinical personnel. Due to the kinematic limitations of RASS, selecting an optimal robot base location and surgery access point for the patient is essential to avoid potentially critical complications due to reachability issues. To this end, this work proposes a novel versatile method for RASS setup and planning based on robot capability maps (CMAPs). CMAPs are a common tool to perform workspace analysis in robotics, as they are in general applicable to any robot kinematics. However, CMAPs hav",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kovalchuk2020pairsofargumentsdi",
+      "title": "Pairs of Arguments (Dissoi logoi)",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.70-78",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "treat"
+      ],
+      "reference": "Xenia Kovalchuk (2020). Pairs of Arguments (Dissoi logoi). Retrieved from https://doi.org/10.47850/rl.2020.1.2.70-78",
+      "abstract": "The paper is a Russian translation of the first three chapters of a sophistic text, conventionally called the Pairs of Arguments (Dissoi logoi). Transmitted as an appendix to the works of Sextus Empiricus, this collection of short treaties seeks to show the sophistic (Protagorean) way of argumentation. They address such opposite notions as bad and good, ugly and beautiful, unjust and just, and explore the possibilities of arguing pro and contra a given position.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "podoynitsyna2020privateuniversitie",
+      "title": "Private universities and elite formation in Russia: Yakut case",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.141-149",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "ship"
+      ],
+      "reference": "Irina Podoynitsyna (2020). Private universities and elite formation in Russia: Yakut case. Retrieved from https://doi.org/10.47850/rl.2020.1.2.141-149",
+      "abstract": "The article is devoted to the problem of functioning of private universities in society, determining their place in the educational process. A parallel is drawn with the work of private educational institutions in the United States, which have a glorious history of development dating back to the XVII century. The author of the article relies on the analysis of special literature on this issue, identifies success factors of American universities and “failure factors” of private universities in Yakutia, and also refers to a large-scale sociological study of graduates of the M. K. Ammosov North-Eastern Federal University. Research conducted under his leadership (Yakutsk, 469 respondents, 2016, 2017, 2018). The Author concludes that the history of private universities in Russia, which began in",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sanzhenakov2020institutionalizati",
+      "title": "Institutionalization of a philosophical school: the origins of Justus Lipsius’ neostoicism",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.95-101",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "miss"
+      ],
+      "reference": "Alexander Sanzhenakov (2020). Institutionalization of a philosophical school: the origins of Justus Lipsius’ neostoicism. Retrieved from https://doi.org/10.47850/rl.2020.1.2.95-101",
+      "abstract": "The article is devoted to the consideration of the neostoicism of Justus Lipsius (1547–1606) in order to show that there is a set of reasons for the renovation and institutionalization of any philosophical school: the historical context, education, community, personality and biography of its leader. As for Justus Lipsius, a philologist and publisher of ancient texts (Tacitus, Seneca), the following factors influenced. Since Lipsius lived in turbulent times (the 16th century was marked by the Reformation and religious wars), he could not help but pay attention to Stoic philosophy, designed to give peace of mind in an unsettled world. Lipsius received an excellent education at a Jesuit college and at two universities – Cologne and Louvain. He was instilled in a love of ancient literature dur",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020foundationsofrelat",
+      "title": "Foundations of relativism by J. Margolis in the polemic of R. Rorty and H. Putnam",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.79-87",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "treat"
+      ],
+      "reference": " (2020). Foundations of relativism by J. Margolis in the polemic of R. Rorty and H. Putnam. Retrieved from https://doi.org/10.47850/rl.2020.1.2.79-87",
+      "abstract": "The polemic about the realism of H. Putnam and R. Rorty is a remarkable event of the 20th century for a number of reasons. Forming within the analytical philosophy, and using the most relevant concepts and ideas of this direction as arguments, this polemic for almost three decades of its existence balanced on the border with relativism, the least popular and admited direction of philosophy of the 20th century. Putnam's arguments against metaphysical realism reject any \"point of view of God\", entail \"internalism\", accept the concept of incommensurability of conceptual schemes and the relativization the reality described by the epistemic agent to his experience. Rorty's arguments reject not only relativism, but also realism, but his concepts of ethnocentrism and solidarity also take the view",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "berestov2020afeatureoftheconce",
+      "title": "A FEATURE OF THE CONCEPTION INHERITANCE IN THE ELEATIC SCHOOL OF PHILOSOPHY",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.28-51",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "treat"
+      ],
+      "reference": "Igor Berestov (2020). A FEATURE OF THE CONCEPTION INHERITANCE IN THE ELEATIC SCHOOL OF PHILOSOPHY. Retrieved from https://doi.org/10.47850/rl.2020.1.2.28-51",
+      "abstract": "The purpose of the paper is to identify common theses supposedly shared by Parmenides and Zeno of Elea. In order to achieve this goal, we show that an alternative interpretation of the aporia from 29 B 1 DK is possible, in which we don’t deal with an infinite division of an extended being, but we deal with a regression of relations of an arbitrary type. These relations are connecting an arbitrary type of constituents of a complex object. In this case, the aporia proves the impossibility of a complex object of any type, not just the impossibility of an extended object. Finally, we show that interpreted in this way Zeno’s reasoning from 29 B 1 DK, and appropriately interpreted Parmenides’ proofs of the unity of being in 28 B 8 DK can be treated as based on a holistic assumption. This enables",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anikina2020functioningofthepr",
+      "title": "Functioning of the P. Ricoeur's mimetic circle in the various narrative representations of the past",
+      "link": "https://doi.org/10.47850/rl.2020.1.2.5-19",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "independent"
+      ],
+      "reference": "Alexandra Anikina (2020). Functioning of the P. Ricoeur's mimetic circle in the various narrative representations of the past. Retrieved from https://doi.org/10.47850/rl.2020.1.2.5-19",
+      "abstract": "Scholar’s and mythological historical narratives coexist independently, but now they have been increasingly confused. To find ways to compare them and highlight the properties which distinguish them, we turn to P. Ricoeur's concept of triple mimesis. Narratives are cognitive tools, so they are almost omnipresent. Since there is nothing in the narrative that would distinguish one type from another, it is necessary to pay attention to how they function, to the ways of representing reality that use different types of narratives. For this, the article uses the concept of P. Ricoeur's mimetic circle, which takes into account not only the narrative dimension itself, but also its “depth”, the degree of approximation to reality.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 18,
+    "B": 23,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:42.856759"
+}

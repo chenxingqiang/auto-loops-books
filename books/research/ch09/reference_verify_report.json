@@ -1,0 +1,273 @@
+{
+  "chapter_id": "ch09",
+  "chapter_title": "Hierarchical Synchronization and Communication",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch09/keywords.json",
+  "keyword_count": 45,
+  "top_keywords": [
+    {
+      "term": "hierarchical synchronization and communication",
+      "weight": 18
+    },
+    {
+      "term": "deadlock detection",
+      "weight": 14
+    },
+    {
+      "term": "hardware sync pick",
+      "weight": 14
+    },
+    {
+      "term": "sync hierarchy",
+      "weight": 14
+    },
+    {
+      "term": "YiRage sync pass",
+      "weight": 14
+    },
+    {
+      "term": "deadlock detection LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "hardware sync pick LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "sync hierarchy LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage sync pass LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "GPU CPU",
+      "weight": 12
+    },
+    {
+      "term": "sync barrier",
+      "weight": 12
+    },
+    {
+      "term": "YiRage sync",
+      "weight": 12
+    },
+    {
+      "term": "deadlock",
+      "weight": 11
+    },
+    {
+      "term": "barrier",
+      "weight": 10
+    },
+    {
+      "term": "CPU",
+      "weight": 10
+    },
+    {
+      "term": "GPU",
+      "weight": 10
+    },
+    {
+      "term": "NPU",
+      "weight": 10
+    },
+    {
+      "term": "sync",
+      "weight": 10
+    },
+    {
+      "term": "YiRage",
+      "weight": 10
+    },
+    {
+      "term": "bottleneck",
+      "weight": 9
+    },
+    {
+      "term": "bytes",
+      "weight": 9
+    },
+    {
+      "term": "chapter summary",
+      "weight": 9
+    },
+    {
+      "term": "communication",
+      "weight": 9
+    },
+    {
+      "term": "compiler",
+      "weight": 9
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

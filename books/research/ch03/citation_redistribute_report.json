@@ -1,0 +1,144 @@
+{
+  "chapter_id": "ch03",
+  "pool_count": 34,
+  "assigned_count": 34,
+  "unassigned_count": 0,
+  "sections_with_cites": 15,
+  "unique_keys_in_tex": 30,
+  "pool_path": "books/research/ch03/citation_pool.json",
+  "sections_used": [
+    "Bandwidth Floors and Decode",
+    "Benchmark Method",
+    "CPU Roofline Sanity Check",
+    "Chapter Summary",
+    "Constraint Matrix",
+    "GPU Constraints",
+    "Handoff to Chapter~4",
+    "Hardware Aware Compile",
+    "Hardware Landscape",
+    "NPU Constraints",
+    "Pedagogical Summary for Compiler Engineers",
+    "Security and Multi-Tenant Interactions",
+    "Tooling Interfaces for Chip Models",
+    "YiRage Modeling",
+    "chapter"
+  ],
+  "cites_applied": 30,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch03_hardware_constraints.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "patel2025llminference",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "chen2020compilerbasedhardw",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "yirage2026",
+      "section": "chapter",
+      "relevance_score": 33,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "bathusha2026llmtunahyperparame",
+      "section": "Hardware Landscape",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "kim2025cppclusterednpupim",
+      "section": "Hardware Landscape",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "NPU"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "dao2023flashdecoding",
+      "section": "Hardware Landscape",
+      "relevance_score": 16,
+      "matched_keywords": [
+        "inference"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "nvidia2024cudagraphs",
+      "section": "Hardware Landscape",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "yang2025automaticpowerelec",
+      "section": "Hardware Landscape",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "liu2024deepseekv3",
+      "section": "Hardware Landscape",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "peng2025secnpusecuringllmi",
+      "section": "Hardware Landscape",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "NPU"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "dao2022flashattention",
+      "section": "Hardware Landscape",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "memory"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "carmona2025characterizationof",
+      "section": "Hardware Landscape",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "GPU",
+        "compiler",
+        "gpus"
+      ]
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:38.028709"
+}

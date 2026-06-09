@@ -1,0 +1,247 @@
+{
+  "chapter_id": "ch05",
+  "chapter_title": "AMD XDNA/AIE Dataflow Architecture",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch05/keywords.json",
+  "keyword_count": 70,
+  "top_keywords": [
+    {
+      "term": "AMD XDNA/AIE dataflow architecture",
+      "weight": 18
+    },
+    {
+      "term": "architecture tradeoffs",
+      "weight": 14
+    },
+    {
+      "term": "CUDA XDNA mapping",
+      "weight": 14
+    },
+    {
+      "term": "dataflow conclusion",
+      "weight": 14
+    },
+    {
+      "term": "online softmax HW",
+      "weight": 14
+    },
+    {
+      "term": "static dataflow rules",
+      "weight": 14
+    },
+    {
+      "term": "XDNA tiles",
+      "weight": 14
+    },
+    {
+      "term": "YiRage XDNA backend",
+      "weight": 14
+    },
+    {
+      "term": "architecture tradeoffs LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "CUDA XDNA mapping LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "dataflow conclusion LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "online softmax HW LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "static dataflow rules LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "XDNA tiles LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage XDNA backend LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "AI compiler optimization",
+      "weight": 12
+    },
+    {
+      "term": "AI hardware architecture",
+      "weight": 12
+    },
+    {
+      "term": "buffer descriptor TMA",
+      "weight": 12
+    },
+    {
+      "term": "CUDA XDNA",
+      "weight": 12
+    },
+    {
+      "term": "dataflow inference",
+      "weight": 12
+    },
+    {
+      "term": "dataflow kernel optimization",
+      "weight": 12
+    },
+    {
+      "term": "softmax carrier",
+      "weight": 12
+    },
+    {
+      "term": "static dataflow",
+      "weight": 12
+    },
+    {
+      "term": "XDNA AIE",
+      "weight": 12
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 28,
+      "matched_keywords": [
+        "inference",
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 18,
+      "matched_keywords": [
+        "architecture"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 20,
+      "matched_keywords": [
+        "inference"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 11,
+      "matched_keywords": [
+        "TMA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 58,
+      "matched_keywords": [
+        "CUDA",
+        "inference",
+        "decode",
+        "GPU"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 40,
+      "matched_keywords": [
+        "XDNA",
+        "architecture"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 10,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

@@ -1,0 +1,926 @@
+{
+  "chapter_id": "ch20",
+  "timestamp": "2026-06-10T02:46:20.870039",
+  "min_papers": 25,
+  "paper_count": 62,
+  "sentence_count": 251,
+  "binding_count": 250,
+  "papers": [
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "link": "https://doi.org/10.3390/mi16020193",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ],
+      "reference": "Yue Zhang, Yunshan Tang, et al. (2025). A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks. Retrieved from https://doi.org/10.3390/mi16020193",
+      "abstract": "The deep learning object detection algorithm has been widely applied in the field of synthetic aperture radar (SAR). By utilizing deep convolutional neural networks (CNNs) and other techniques, these algorithms can effectively identify and locate targets in SAR images, thereby improving the accuracy and efficiency of detection. In recent years, achieving real-time monitoring of regions has become a pressing need, leading to the direct completion of real-time SAR image target detection on airborne or satellite-borne real-time processing platforms. However, current GPU-based real-time processing platforms struggle to meet the power consumption requirements of airborne or satellite applications. To address this issue, a low-power, low-latency deep learning SAR object detection algorithm accel",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "link": "https://doi.org/10.1109/aero53065.2022.9843789",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "fusion"
+      ],
+      "reference": "Dan Shen, Mengquing Guo, et al. (2022). Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation. Retrieved from https://doi.org/10.1109/aero53065.2022.9843789",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "backend",
+        "optim",
+        "YiRage",
+        "CPU",
+        "Mirage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "link": "https://doi.org/10.20944/preprints202308.1360.v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ],
+      "reference": "Yulu Wang, Yi Han, et al. (2023). An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System. Retrieved from https://doi.org/10.20944/preprints202308.1360.v1",
+      "abstract": "In autonomous driving systems, high-speed and real-time image processing, along with object recognition, are crucial technologies. This paper builds upon the research achievements in in-dustrial item sorting systems and proposes an object recognition and sorting system for auton-omous driving. In industrial sorting lines, goods sorting robots often need to work at high speeds to efficiently sort large volumes of items. This poses a challenge to the robot&#039;s real-time vision and sorting capabilities, making it both practical and economically viable to implement a real-time and low-cost sorting system in a real-world industrial sorting line. Existing sorting systems have limitations such as high cost, high computing resource consumption, and high power consump-tion. These issues lead to ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "link": "https://doi.org/10.25144/15942",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "RO LANE, WJ HOLMES, T LAMONT-SMITH (2023). TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE. Retrieved from https://doi.org/10.25144/15942",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "link": "https://doi.org/10.22541/au.177153748.85426739/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Heiko Grimberg (2026). STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm. Retrieved from https://doi.org/10.22541/au.177153748.85426739/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "link": "https://doi.org/10.1145/3560828.3564010",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "David S. Koblah, Fatemeh Ganji, et al. (2022). Hardware Moving Target Defenses against Physical Attacks. Retrieved from https://doi.org/10.1145/3560828.3564010",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "link": "https://doi.org/10.1117/12.2519497",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Naeem Akbar, Sara Tehsin, et al. (2019). Hardware design of correlation filters for target detection. Retrieved from https://doi.org/10.1117/12.2519497",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "link": "https://doi.org/10.23977/acss.2026.100209",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": " (2026). Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies. Retrieved from https://doi.org/10.23977/acss.2026.100209",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "link": "https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jyotiranjan Panda, Pradipta Kumar Nanda, Tuhinansu Pradhan (2023). Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi. Retrieved from https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "abstract": "AbstractVideo object tracking in real-world scenarios is one of the challenging problems of computer vision. The issue is compounded in the presence of varying illumination conditions, dynamic entities of the background, and bad weather conditions. In this research, a particle filter based new video object tracking scheme is developed with the proposed notions of target remodeling and reinitialization. During the tracking phase, the target is remodeled in each frame to take care of the changing scene dynamics over frames. The target is remodeled by fused feature distributions chosen from the created bank of fused feature distributions having discriminating potential to differentiate the target and the background in a given frame. The fused feature bank is created by fusing two features fro",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "link": "https://doi.org/10.1109/lsens.2024.3359693",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Nicolai Kern, Pirmin Schoeder, Christian Waldschmidt (2024). Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications. Retrieved from https://doi.org/10.1109/lsens.2024.3359693",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "link": "https://doi.org/10.23919/eurad54643.2022.9924830",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pirmin Schoeder, Arne Martin, et al. (2022). A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities. Retrieved from https://doi.org/10.23919/eurad54643.2022.9924830",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "link": "https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Rishi Agarwal, Sathwik Gundala, G S S Chalapathi (2023). Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs). Retrieved from https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "link": "https://doi.org/10.1109/globecom59602.2025.11432143",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jiapeng Li, Changsheng You, Chao Zhou (2025). Near-field Target Localization under Hardware Impairments. Retrieved from https://doi.org/10.1109/globecom59602.2025.11432143",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "link": "https://doi.org/10.1109/access.2025.3565674",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Lucas Urbanski, Gustavo Farhat Araujo, et al. (2025). Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images. Retrieved from https://doi.org/10.1109/access.2025.3565674",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "link": "https://doi.org/10.1109/igarss52108.2023.10283237",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Wentian Du, Jie Chen, Zhixiang Huang (2023). SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search. Retrieved from https://doi.org/10.1109/igarss52108.2023.10283237",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "link": "https://doi.org/10.52202/078372-0119",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Stefano Silvestrini, Andrea Colagrossi, et al. (2024). Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection. Retrieved from https://doi.org/10.52202/078372-0119",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "link": "https://doi.org/10.1109/icort46471.2019.9069610",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pradipta Roy, Dipak Das, et al. (2019). Hardware Software Co-Design for Real Time Detection of Small Target in IR Video. Retrieved from https://doi.org/10.1109/icort46471.2019.9069610",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "link": "https://doi.org/10.25729/2413-0133-2018-1-11",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Давлиева А.С., Гвоздев В.Е., Гузаиров М.Б. (2018). ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET. Retrieved from https://doi.org/10.25729/2413-0133-2018-1-11",
+      "abstract": "В настоящей работе рассматривается подход к исследованию свойства живучести аппаратно-программных комплексов (АПК) по показателю целевой эффективности с учетом интервальной неопределенности компонентов структуры состояний. Описывается задача оценки влияния вариативности показателей эффективности АПК в разных режимах функционирования на оценку живучести по среднему значению показателя целевой эффективности. Приводятся результаты исследований, соответствующие различным структурам состояний АПК.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "link": "https://doi.org/10.1051/itmconf/20193015029",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Tatiana A. Lepekhina, Vadim I. Nikolaev (2019). Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests. Retrieved from https://doi.org/10.1051/itmconf/20193015029",
+      "abstract": "Methods of hardware-software simulation of test scenes of varying complexity are proposed for synthetic aperture space radar (SAR) ground tests and testing its components, as well as for checking its end-to- end characteristics and calibration during flight tests. The principles of designing and features of the hardware implementation of an active simulator of radar targets are described. Some methods for solving problems associated with the synchronization of received and generated signals are proposed.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "link": "https://doi.org/10.1201/9781003196938-8",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Mattia Rossi, Nicola Toscani, et al. (2021). Basic Settings: Serial Communication COM and Hardware Target. Retrieved from https://doi.org/10.1201/9781003196938-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "link": "https://doi.org/10.1615/telecomradeng.v78.i12.50",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Subhankar Shome, A. K. Singh, et al. (2019). PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION. Retrieved from https://doi.org/10.1615/telecomradeng.v78.i12.50",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "saileshwar2023themirageofbreakin",
+      "title": "The Mirage of Breaking Mirage: Analyzing the Modeling Pitfalls in Emerging “Attacks” on Mirage",
+      "link": "https://doi.org/10.1109/lca.2023.3297875",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "pitfall",
+        "emerging",
+        "Mirage"
+      ],
+      "reference": "Gururaj Saileshwar, Moinuddin Qureshi (2023). The Mirage of Breaking Mirage: Analyzing the Modeling Pitfalls in Emerging “Attacks” on Mirage. Retrieved from https://doi.org/10.1109/lca.2023.3297875",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mujkanovic2020optimisingaitraini",
+      "title": "Optimising AI Training Deployments using Graph Compilers and Containers",
+      "link": "https://doi.org/10.1109/hpec43674.2020.9286153",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "compilers"
+      ],
+      "reference": "Nina Mujkanovic, Karthee Sivalingam, Alfio Lazzaro (2020). Optimising AI Training Deployments using Graph Compilers and Containers. Retrieved from https://doi.org/10.1109/hpec43674.2020.9286153",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "joshi2026tacitapotentiacoll",
+      "title": "Tacita Potentia: Collective Dominance in India: An Emerging Threat or a Doctrinal Mirage?",
+      "link": "https://doi.org/10.54648/woco2026006",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 46,
+      "matched_keywords": [
+        "case",
+        "emerging",
+        "Mirage"
+      ],
+      "reference": "Sudhanwa Sandeep Joshi (2026). Tacita Potentia: Collective Dominance in India: An Emerging Threat or a Doctrinal Mirage?. Retrieved from https://doi.org/10.54648/woco2026006",
+      "abstract": "\nIn contemporary times, rapid globalization and increasing digitization have fundamentally reshaped market structures, leading to higher concentration levels and the emergence of oligopolistic markets across key industries. As competition increasingly falters not due to explicit collusion but due to information-aided and algorithmic conscious parallelism, traditional antitrust frameworks – designed primarily to punish conspiracies through overt agreements – find themselves inadequate to address these modern threats to competitive integrity. This enforcement vacuum has prompted antitrust jurisdictions to reconsider how competition law should evolve in response.The European Union (EU), recognizing the limitations of conventional positions, developed the concept of collective dominance to cap",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023proceedingsofthe20",
+      "title": "Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI",
+      "link": "https://doi.org/10.1145/3615338",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "compilers"
+      ],
+      "reference": " (2023). Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI. Retrieved from https://doi.org/10.1145/3615338",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "poudel2026impactofaiassisted",
+      "title": "Impact of AI-Assisted Online Compilers in Programming Education",
+      "link": "https://doi.org/10.1109/ictp67998.2026.11485283",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "compilers"
+      ],
+      "reference": "Amrit Poudel, Pratikshya Shrestha (2026). Impact of AI-Assisted Online Compilers in Programming Education. Retrieved from https://doi.org/10.1109/ictp67998.2026.11485283",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "shen2018rethinkingcompiler",
+      "title": "Rethinking compilers in the rise of machine learning and AI (keynote)",
+      "link": "https://doi.org/10.1145/3178372.3183634",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "compilers"
+      ],
+      "reference": "Xipeng Shen (2018). Rethinking compilers in the rise of machine learning and AI (keynote). Retrieved from https://doi.org/10.1145/3178372.3183634",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "tuleuov2024compilers",
+      "title": "Compilers",
+      "link": "https://doi.org/10.1007/978-1-4842-9563-2_9",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "compilers"
+      ],
+      "reference": "Berik I. Tuleuov, Ademi B. Ospanova (2024). Compilers. Retrieved from https://doi.org/10.1007/978-1-4842-9563-2_9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mittal2025navigatingthedigit",
+      "title": "Navigating the Digital Mirage: The Impact of Deepfakes and AI on Older Adults' Ability to Discern Authentic Content",
+      "link": "https://doi.org/10.36948/ijfmr.2025.v07i05.59035",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "Mirage",
+        "ship"
+      ],
+      "reference": "Ansh Mittal (2025). Navigating the Digital Mirage: The Impact of Deepfakes and AI on Older Adults' Ability to Discern Authentic Content. Retrieved from https://doi.org/10.36948/ijfmr.2025.v07i05.59035",
+      "abstract": "The proliferation of artificial intelligence and deepfake technology has redefined digital authenticity, creating profound implications for older adults who increasingly engage online for communication, information, and entertainment. This study, “Navigating the Digital Mirage: The Impact of Deepfakes and AI on Older Adults’ Ability to Discern Authentic Content”, investigates how cognitive ageing, technological literacy gaps, and socio-emotional factors collectively shape seniors’ susceptibility to AI-generated misinformation. Drawing upon literature across cognitive psychology, communication studies, and AI ethics, the paper identifies key vulnerabilities including diminished information processing speed, reliance on heuristic trust, and social isolation that amplify exposure to deepfake-",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "link": "https://doi.org/10.1016/j.vrih.2023.12.001",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Xiaofei Ren, Jian He, et al. (2024). Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR. Retrieved from https://doi.org/10.1016/j.vrih.2023.12.001",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "link": "https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Hao ZHANG, Jin HUANG, et al. (2019). Trajectory prediction model for crossing-based target selection. Retrieved from https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "link": "https://doi.org/10.1109/hst.2018.8383907",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Zhiming Zhang, Qiaoyan Yu, et al. (2018). FPGA-oriented moving target defense against security threats from malicious FPGA tools. Retrieved from https://doi.org/10.1109/hst.2018.8383907",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "link": "https://doi.org/10.1109/host49136.2021.9702274",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Yichen Jiang, Huifeng Zhu, et al. (2021). TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection. Retrieved from https://doi.org/10.1109/host49136.2021.9702274",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mills2025arewetrippingthemi",
+      "title": "Are We Tripping? The Mirage of AI Hallucinations",
+      "link": "https://doi.org/10.2139/ssrn.5127162",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Anna Mills, Nate Angell (2025). Are We Tripping? The Mirage of AI Hallucinations. Retrieved from https://doi.org/10.2139/ssrn.5127162",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "lohrasbi2025theroimiragedecons",
+      "title": "The ROI Mirage: Deconstructing the Economic Failure of AI in Healthcare",
+      "link": "https://doi.org/10.2139/ssrn.5804082",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Nader Lohrasbi (2025). The ROI Mirage: Deconstructing the Economic Failure of AI in Healthcare. Retrieved from https://doi.org/10.2139/ssrn.5804082",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "lohrasbi2025theroimiragedecons_18",
+      "title": "The ROI Mirage: Deconstructing the Economic Failure of Isolated AI Adoption in Healthcare Enterprises",
+      "link": "https://doi.org/10.2139/ssrn.5792523",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Nader Lohrasbi (2025). The ROI Mirage: Deconstructing the Economic Failure of Isolated AI Adoption in Healthcare Enterprises. Retrieved from https://doi.org/10.2139/ssrn.5792523",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "nelson2026themirageofaidereg",
+      "title": "The Mirage of AI deregulation",
+      "link": "https://doi.org/10.1126/science.aee4900",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Alondra Nelson (2026). The Mirage of AI deregulation. Retrieved from https://doi.org/10.1126/science.aee4900",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "milani2026themirageofmeaning",
+      "title": "The Mirage of Meaning",
+      "link": "https://doi.org/10.1201/9781003739999-3",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Martin Milani (2026). The Mirage of Meaning. Retrieved from https://doi.org/10.1201/9781003739999-3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tacelli2025fragmentsoftruthai",
+      "title": "Fragments of Truth: AI-nCLE and the Mirage of Universal Benefit",
+      "link": "https://doi.org/10.1016/j.pan.2025.07.006",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Matteo Tacelli, Paolo Giorgio Arcidiacono (2025). Fragments of Truth: AI-nCLE and the Mirage of Universal Benefit. Retrieved from https://doi.org/10.1016/j.pan.2025.07.006",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wilson2024isthereanaimetrics",
+      "title": "Is There an AI Metrics Mirage?",
+      "link": "https://doi.org/10.1511/2024.112.2.68",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Joseph Wilson (2024). Is There an AI Metrics Mirage?. Retrieved from https://doi.org/10.1511/2024.112.2.68",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2025vol1no22025aiineme",
+      "title": "Vol. 1 No. 2 (2025): AI in Emerging Fields (Special Issue)",
+      "link": "https://doi.org/10.70445/gjeac.1.2.",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ],
+      "reference": " (2025). Vol. 1 No. 2 (2025): AI in Emerging Fields (Special Issue). Retrieved from https://doi.org/10.70445/gjeac.1.2.",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "khan2025aiandemergingtechn",
+      "title": "AI and Emerging Technology Domains",
+      "link": "https://doi.org/10.1201/9781003682615-1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ],
+      "reference": "Richard R. Khan (2025). AI and Emerging Technology Domains. Retrieved from https://doi.org/10.1201/9781003682615-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2026aimiragemedicalalg",
+      "title": "AI Mirage: medical algorithms and the vanishing autopsy",
+      "link": "https://doi.org/10.1136/bmjqs-2026-020083",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Qi Wang (2026). AI Mirage: medical algorithms and the vanishing autopsy. Retrieved from https://doi.org/10.1136/bmjqs-2026-020083",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tyssedal2026themirageofabundan",
+      "title": "The Mirage of Abundance: Why\n                    <scp>AI</scp>\n                    Cannot End Scarcity and Implications for\n                    <scp>AI</scp>\n                    Risk",
+      "link": "https://doi.org/10.1111/josp.70059",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Jens Jørund Tyssedal (2026). The Mirage of Abundance: Why\n                    <scp>AI</scp>\n                    Cannot End Scarcity and Implications for\n                    <scp>AI</scp>\n                    Risk. Retrieved from https://doi.org/10.1111/josp.70059",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "saha2026aiintheemergingeco",
+      "title": "AI in the Emerging Economy Integrating Data, Decision, and Development",
+      "link": "https://doi.org/10.65525/svup.9788199651586.2026.1-158",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ],
+      "reference": "Malayendu Saha, Anirban Hazra (2026). AI in the Emerging Economy Integrating Data, Decision, and Development. Retrieved from https://doi.org/10.65525/svup.9788199651586.2026.1-158",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "arnold2021aiaccidentsanemerg",
+      "title": "AI Accidents: An Emerging Threat",
+      "link": "https://doi.org/10.51593/20200072",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ],
+      "reference": "Zachary Arnold, Helen Toner (2021). AI Accidents: An Emerging Threat. Retrieved from https://doi.org/10.51593/20200072",
+      "abstract": "As modern machine learning systems become more widely used, the potential costs of malfunctions grow. This policy brief describes how trends we already see today—both in newly deployed artificial intelligence systems and in older technologies—show how damaging the AI accidents of the future could be. It describes a wide range of hypothetical but realistic scenarios to illustrate the risks of AI accidents and offers concrete policy suggestions to reduce these risks.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "salmeron2025fromdigitalfacadet",
+      "title": "From Digital Facade To True Transformation: Overcoming The AI Mirage In SMEs",
+      "link": "https://doi.org/10.5465/amproc.2025.21260poster",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Natacha Belaud Salmeron, Romain MATIAS (2025). From Digital Facade To True Transformation: Overcoming The AI Mirage In SMEs. Retrieved from https://doi.org/10.5465/amproc.2025.21260poster",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sharma2024decodingthemiragea",
+      "title": "Decoding the Mirage: A Comprehensive Review of DeepFake AI in Image and Video Manipulation",
+      "link": "https://doi.org/10.1109/iccsc62048.2024.10830322",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ],
+      "reference": "Shivansh Sharma, Garvita Ahuja, et al. (2024). Decoding the Mirage: A Comprehensive Review of DeepFake AI in Image and Video Manipulation. Retrieved from https://doi.org/10.1109/iccsc62048.2024.10830322",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 29,
+    "A": 30,
+    "C": 3
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:41.720289"
+}

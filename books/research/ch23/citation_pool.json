@@ -1,0 +1,342 @@
+{
+  "chapter_id": "ch23",
+  "pool_count": 32,
+  "bib_keys": [
+    "zhou2025dsmoedynamicexpert",
+    "memoryfloor2026",
+    "patel2025llminference",
+    "fan2025ellieenergyefficie",
+    "qiao2026tellmeanefficiente",
+    "kamath2025podascpttentionscp",
+    "lu2025moeopuanfpgaoverla",
+    "hu2025communicationeffic",
+    "shi2026socialmoemultiagen",
+    "ma2025taskorientedmoelor",
+    "yirage2026",
+    "hong2024llmaidedcompilatio",
+    "faldu2019posterdomainspecia",
+    "barrak2025traceabilityandacc",
+    "zarb2025programsynthesiswi",
+    "ahammad2025magisterllmbasedte",
+    "robotin2025specializedinforma",
+    "more2026macvaspecializedmu",
+    "taxbreak2026",
+    "kyaw2024epicensembledpoiso",
+    "merouani2025agenticautoschedul",
+    "asheim2022aspecializedbtborg",
+    "dao2023flashdecoding",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "zhou2025dsmoedynamicexpert",
+      "title": "DS-MoE: Dynamic Expert Scheduling for Efficient MoE-based LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 112,
+      "matched_keywords": [
+        "moe scheduling",
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "fan2025ellieenergyefficie",
+      "title": "ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "qiao2026tellmeanefficiente",
+      "title": "TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "kamath2025podascpttentionscp",
+      "title": "POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "lu2025moeopuanfpgaoverla",
+      "title": "MoE-OPU: An FPGA Overlay Processor Leveraging Expert Parallelism for MoE-based Large Language Models",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "hu2025communicationeffic",
+      "title": "Communication-Efficient MoE Fine-Tuning with Locality-Aware Expert Placement",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "shi2026socialmoemultiagen",
+      "title": "SOCIAL-MOE: Multi-Agent Expert Architecture with Social Reasoning and Normative Autonomy",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "ma2025taskorientedmoelor",
+      "title": "Task-Oriented MoE-LoRA: Expert Specialization and Routing for Remote Sensing Image Segmentation",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "LLM",
+        "CPU",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "hong2024llmaidedcompilatio",
+      "title": "LLM-Aided Compilation for Tensor Accelerators",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "compilation"
+      ]
+    },
+    {
+      "bib_key": "faldu2019posterdomainspecia",
+      "title": "POSTER: Domain-Specialized Cache Management for Graph Analytics",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "cache",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "barrak2025traceabilityandacc",
+      "title": "Traceability and Accountability in Role-Specialized Multi-Agent LLM Pipelines",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "zarb2025programsynthesiswi",
+      "title": "Program Synthesis with LLM-Predicted Minimal Specialized Grammars",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "ahammad2025magisterllmbasedte",
+      "title": "MAGISTER: LLM-Based Test Generation with Role-Specialized Agents",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "robotin2025specializedinforma",
+      "title": "Specialized Information Retrieval with Improved Reliability via LLM Finetuning",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "more2026macvaspecializedmu",
+      "title": "MACV: A Specialized Multi-Agent and Consensus Framework for Reliable LLM Outputs",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "kyaw2024epicensembledpoiso",
+      "title": "EPIC: Ensembled Poisoning Identification and Classification for LLM Backdoor Defense",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "merouani2025agenticautoschedul",
+      "title": "Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "asheim2022aspecializedbtborg",
+      "title": "A Specialized BTB Organization for Servers",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

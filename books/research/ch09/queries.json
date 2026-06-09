@@ -1,0 +1,15 @@
+[
+  "\"Hierarchical Synchronization and Communication\"",
+  "\"sync\" AND \"barrier\"",
+  "\"GPU\" AND \"CPU\"",
+  "\"deadlock\" LLM inference optimization",
+  "\"YiRage\" AND \"sync\"",
+  "\"hierarchical synchronization and communication\" AND \"deadlock detection\"",
+  "\"hardware sync pick\" AND \"sync hierarchy\"",
+  "\"YiRage sync pass\" AND \"deadlock detection LLM inference compiler\"",
+  "\"hardware sync pick LLM inference compiler\" AND \"sync hierarchy LLM inference compiler\"",
+  "\"YiRage sync pass LLM inference compiler\" AND \"GPU CPU\"",
+  "\"sync barrier\" AND \"YiRage sync\"",
+  "\"deadlock\" AND \"barrier\"",
+  "\"CPU\" AND \"GPU\""
+]

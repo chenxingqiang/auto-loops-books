@@ -1,0 +1,208 @@
+{
+  "chapter_id": "ch13",
+  "pool_count": 21,
+  "bib_keys": [
+    "park2026cpugpuworkloaddist",
+    "wu2023pytorch20thejourne",
+    "memoryfloor2026",
+    "yirage2026",
+    "jeong2026flowgraphawaretili",
+    "dao2023flashdecoding",
+    "pronk2026beyondmodeloptimiz",
+    "patel2025llminference",
+    "semianalysis2024tma",
+    "malaraju2025aiaugmentedcompile",
+    "cummins2022compilergymrobustp",
+    "li2025llmpoweredautomate",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "park2026cpugpuworkloaddist",
+      "title": "CPU-GPU Workload Distribution during Throughput-Oriented LLM Inference on Single-GPU Systems",
+      "source_tier": "A",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "GPU CPU",
+        "CPU",
+        "GPU",
+        "NPU",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "wu2023pytorch20thejourne",
+      "title": "PyTorch 2.0: The Journey to Bringing Compiler Technologies to the Core of PyTorch (Keynote)",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "core"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "jeong2026flowgraphawaretili",
+      "title": "Flow-Graph-Aware Tiling and Rescheduling for Memory-Efficient On-Device Inference",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "tiling"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "parallel",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "pronk2026beyondmodeloptimiz",
+      "title": "Beyond Model Optimization: Practical Energy-Efficient LLM Inference Through Context-Aware Input Reduction",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "NPU"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ]
+    },
+    {
+      "bib_key": "malaraju2025aiaugmentedcompile",
+      "title": "AI-Augmented Compiler Optimization for Energyefficient Software Execution on Embedded Systems",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "cummins2022compilergymrobustp",
+      "title": "CompilerGym: Robust, Performant Compiler Optimization Environments for AI Research",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "li2025llmpoweredautomate",
+      "title": "LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "bottleneck"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

@@ -1,0 +1,739 @@
+{
+  "chapter_id": "ch08",
+  "timestamp": "2026-06-10T02:45:31.513111",
+  "min_papers": 25,
+  "paper_count": 52,
+  "sentence_count": 256,
+  "binding_count": 204,
+  "papers": [
+    {
+      "bib_key": "dalabaev2020kinematicflowparam",
+      "title": "Kinematic Flow Parameters During Liquid Movement in Pressurized Water Pipelines",
+      "link": "https://doi.org/10.37200/ijpr/v24i5/pr2020666",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "pipeline",
+        "movement",
+        "pipelines"
+      ],
+      "reference": "Umriddin Dalabaev (2020). Kinematic Flow Parameters During Liquid Movement in Pressurized Water Pipelines. Retrieved from https://doi.org/10.37200/ijpr/v24i5/pr2020666",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "arifjanov2020hydraulicfrictionc",
+      "title": "Hydraulic Friction Coefficient at Hydraulic Mixing Movement in Pressure Pipelines",
+      "link": "https://doi.org/10.5373/jardcs/v12sp7/20202233",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "pipeline",
+        "movement",
+        "pipelines"
+      ],
+      "reference": "Aybek Arifjanov (2020). Hydraulic Friction Coefficient at Hydraulic Mixing Movement in Pressure Pipelines. Retrieved from https://doi.org/10.5373/jardcs/v12sp7/20202233",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "huemer2020timingdomaincrossi",
+      "title": "Timing Domain Crossing using Muller Pipelines",
+      "link": "https://doi.org/10.1109/async49171.2020.00014",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ],
+      "reference": "Florian Huemer, Andreas Steininger (2020). Timing Domain Crossing using Muller Pipelines. Retrieved from https://doi.org/10.1109/async49171.2020.00014",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lowry2025lumbeepipelines",
+      "title": "Lumbee Pipelines",
+      "link": "https://doi.org/10.2307/jj.32726732",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ],
+      "reference": "David Shane Lowry (2025). Lumbee Pipelines. Retrieved from https://doi.org/10.2307/jj.32726732",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chong2021stressintensityfac",
+      "title": "Stress Intensity Factor of Double Cracks on Seabed-Spanning Pipeline Surface under the Spring Boundary",
+      "link": "https://doi.org/10.1061/(asce)ps.1949-1204.0000609",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "surface"
+      ],
+      "reference": "Zhewen Chong, Tingxia Ma, et al. (2021). Stress Intensity Factor of Double Cracks on Seabed-Spanning Pipeline Surface under the Spring Boundary. Retrieved from https://doi.org/10.1061/(asce)ps.1949-1204.0000609",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhao2023rbgcrepurposethebu",
+      "title": "RBGC: Repurpose the Buffer of Fixed Graphics Pipeline to Enhance GPU Cache",
+      "link": "https://doi.org/10.1145/3583781.3590305",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "GPU"
+      ],
+      "reference": "Haoyu Zhao, Longbing Zhang, Fuxin Zhang (2023). RBGC: Repurpose the Buffer of Fixed Graphics Pipeline to Enhance GPU Cache. Retrieved from https://doi.org/10.1145/3583781.3590305",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "priantama2019implementasialgori",
+      "title": "IMPLEMENTASI ALGORITMA BACKGROUND SUBTRACTION UNTUK DETEKSI TINGGI MUKA AIR (TMA) PADA APLIKASI PERINGATAN DINI BANJIR BANDANG BERBASIS PENGOLAHAN CITRA",
+      "link": "https://doi.org/10.25134/buffer.v5i2.2184",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "NPU",
+        "TMA"
+      ],
+      "reference": "Rio Priantama (2019). IMPLEMENTASI ALGORITMA BACKGROUND SUBTRACTION UNTUK DETEKSI TINGGI MUKA AIR (TMA) PADA APLIKASI PERINGATAN DINI BANJIR BANDANG BERBASIS PENGOLAHAN CITRA. Retrieved from https://doi.org/10.25134/buffer.v5i2.2184",
+      "abstract": "AbstrakBanjir merupakan fenomena yang hampir selalu terjadi setiap tahun di berbagai daerah di seluruh Indonesia dengan bermacam variasi siklus. Pada musim hujan, tingginya curah hujan yang dan daerah aliran sungai yang menyempit dan terjadi pendangkalan, tidak lagi mampu menampung aliran air sehingga terjadi banjir bandang. Mekanisme peringatan banjir berjalan dengan kearifan lokal secara tradisional yang sangat bergantung pada ketersediaan dan kemampuan cepat tanggap dari personal yang ditugaskan mengawasi sungai. Oleh karena itu inovasi pengembangan dari sistem yang ada diharapkan mampu memberikan informasi dan data secara berkala dan menjadi peringatan lebih awal terhadap banjir bandang guna meminimalisir dampak.Pengolahan citra dapat dimanfaatkan sebagai dasar inovasi dari mekanisme p",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mao2026designandimplement",
+      "title": "Design and implementation of reorder buffer in superscalar pipeline processor",
+      "link": "https://doi.org/10.54097/bhcm1856",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ],
+      "reference": "Chenyang Mao (2026). Design and implementation of reorder buffer in superscalar pipeline processor. Retrieved from https://doi.org/10.54097/bhcm1856",
+      "abstract": "With the increasing demand for high performance and low power consumption in System-on-Chip (SoC) scenarios such as mobile terminals and servers, superscalar processors have become the core computing unit of high-performance SoCs by virtue of their multi-instruction parallel capabilities. However, the out-of-order execution mechanism of superscalar processors leads to contradictions between \"out-of-order completion\" and \"in-order commit\" of instructions, as well as difficulties in state recovery when branch prediction fails or exceptions occur. To solve these problems, this paper designs and implements a Reorder Buffer (ROB) module for 4-way issue superscalar pipelines. The ROB module adopts a parameterized design (data width 64bit, depth 32 entries) to realize functions such as instructio",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "asuquo2025amachinelearningpi",
+      "title": "A Machine-Learning Pipeline for Predicting Methanol Yield in a Double-Pass Plug-Flow Reactor Using a Synthetic Langmuir–Hinshelwood Dataset",
+      "link": "https://doi.org/10.26434/chemrxiv-2025-j2l4q",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "pipeline",
+        "production"
+      ],
+      "reference": "Anthony Asuquo (2025). A Machine-Learning Pipeline for Predicting Methanol Yield in a Double-Pass Plug-Flow Reactor Using a Synthetic Langmuir–Hinshelwood Dataset. Retrieved from https://doi.org/10.26434/chemrxiv-2025-j2l4q",
+      "abstract": "Methanol synthesis from syngas (CO/CO₂/H₂) is vital for sustainable chemical production; however, traditional kinetic models hinder rapid reactor optimisation [1]. We present a reproducible machine-learning pipeline to predict methanol yield in a double-pass plug-flow reactor, utilising a synthetic dataset (n = 5,000) derived from a Langmuir–Hinshelwood (L-H) kinetic model [2]. Operating conditions—temperature (473–573 K), pressure (50–150 bar), first-pass residence time (5–20 s), and second-pass residence time (10–30 s)—were sampled, with a 75% yield cap enforcing thermodynamic limits [3]. Exploratory data analysis revealed a strong temperature correlation (), guiding feature engineering (e.g., pressure/temperature ratio) [4].  Model comparison via 5-fold cross-validation on the training ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "Hopper"
+      ],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ghosh2026thedoublethreatpar",
+      "title": "The Double Threat Paradox: Do Dual Banking Systems Buffer Climate and Geopolitical Shocks? ​",
+      "link": "https://doi.org/10.2139/ssrn.6732019",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Saibal Ghosh (2026). The Double Threat Paradox: Do Dual Banking Systems Buffer Climate and Geopolitical Shocks? ​. Retrieved from https://doi.org/10.2139/ssrn.6732019",
+      "abstract": "The study examines the stabilising role of specialised Islamic retail banks amid compounding global shocks. Using a large sample of MENA country banks from 2011 to 2024, the analysis explores how the interaction between Geopolitical Risk (GPR) and Net Climate Risk (NCR) affects financial stability. The results reveal a significant stability premium for specialised retail Islamic banks, which demonstrate greater resilience than their conventional and diversified peers during dual shocks. Analysis of transmission channels indicates that this resilience is attributable to conservative risk-weighted asset adjustments and proactive loan-loss provisioning, supported by a stable, loyalty-driven retail deposit base. Local projection estimates show that these institutions act as instantaneous shock",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "hanson2023pipelinetripledoub",
+      "title": "Pipeline Triple-Double: Designing for 3 Pipe Materials with 2 Diameter Alternates",
+      "link": "https://doi.org/10.26226/m.6464eac022bfe100123c8dd7",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Hunter Hanson (2023). Pipeline Triple-Double: Designing for 3 Pipe Materials with 2 Diameter Alternates. Retrieved from https://doi.org/10.26226/m.6464eac022bfe100123c8dd7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "su2020acomparisonofsingl",
+      "title": "A Comparison of Single-Buffer and Double-Buffer Design in a Systolic Array Generator",
+      "link": "https://doi.org/10.1088/1742-6596/1693/1/012197",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Dongchu Su, Yong Li (2020). A Comparison of Single-Buffer and Double-Buffer Design in a Systolic Array Generator. Retrieved from https://doi.org/10.1088/1742-6596/1693/1/012197",
+      "abstract": "Abstract\nIn application fields such as face recognition and image recognition using deep learning, more convolution operations are required for the increasing amount of data. Therefore, the use of systolic array acceleration is becoming a key technology trend to accelerate the development of deep learning applications. In previous designs, most of the systolic array used single-buffer or double-buffer structures, but most of them did not compare the difference between the two in detail. This work designs and implements a three-level systolic array generator, which can be configured in single-buffer or double-buffer modes. We also program the generated systolic array accelerator on Nexys-Vedio FPGA to explore the performance and overhead of single-buffer and double-buffer structure modes. T",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2026doublelayerdatadri",
+      "title": "Double-Layer Data-Driven Risk Assessment and Prediction of Drainage Pipeline Networks",
+      "link": "https://doi.org/10.1061/jpsea2.pseng-1799",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Zhoufeng Wang, Jialei Chen, et al. (2026). Double-Layer Data-Driven Risk Assessment and Prediction of Drainage Pipeline Networks. Retrieved from https://doi.org/10.1061/jpsea2.pseng-1799",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hanson2021pipelinetripledoub",
+      "title": "Pipeline Triple-Double—Designing for Three Pipe Materials with Two Diameter Alternates",
+      "link": "https://doi.org/10.1061/9780784483619.043",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Hunter Hanson (2021). Pipeline Triple-Double—Designing for Three Pipe Materials with Two Diameter Alternates. Retrieved from https://doi.org/10.1061/9780784483619.043",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2020learninghowtodrive",
+      "title": "Learning how to drive using DDPG Algorithm with Double Experience Buffer Priority Sampling",
+      "link": "https://doi.org/10.1109/cac51589.2020.9327101",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Jiapeng Zhang, Lin Li, Chuanfei Hu (2020). Learning how to drive using DDPG Algorithm with Double Experience Buffer Priority Sampling. Retrieved from https://doi.org/10.1109/cac51589.2020.9327101",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nakagawa2026evosubsterapipelin",
+      "title": "EvoSubster: a pipeline for evolutionary inference of single- and double-base substitution spectra",
+      "link": "https://doi.org/10.1093/bioadv/vbag154",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Mariko Nakagawa, Martin C Frith (2026). EvoSubster: a pipeline for evolutionary inference of single- and double-base substitution spectra. Retrieved from https://doi.org/10.1093/bioadv/vbag154",
+      "abstract": "Abstract\n\nMotivation\nMutational processes differ widely across the tree of life, yet most existing resources focus on somatic mutations in humans or on a limited set of well-studied species.\n\n\nResults\nWe present EvoSubster, a simple and extensible pipeline for inferring evolutionary single-base and double-base substitution spectra from closely related species using a parsimony-based three-genome comparison. The pipeline automatically downloads NCBI genomes, aligns them, infers substitution direction, quantifies single-base and double-base substitutions, and outputs visualizations. Applying EvoSubster to diverse fungal and cnidarian genomes revealed distinct lineage-specific substitutional signatures, including TTA&gt;TCA and TTA&gt;TGA in mushroom-forming fungi within Agaricomycetes, ACA&g",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2020areferenceguideddo",
+      "title": "A Reference-Guided Double Pipeline Face Image Completion Network",
+      "link": "https://doi.org/10.3390/electronics9111969",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Hongrui Liu, Shuoshi Li, et al. (2020). A Reference-Guided Double Pipeline Face Image Completion Network. Retrieved from https://doi.org/10.3390/electronics9111969",
+      "abstract": "The existing face image completion approaches cannot be utilized to rationally complete damaged face images where their identity information is completely lost due to being obscured by center masks. Hence, in this paper, a reference-guided double-pipeline face image completion network (RG-DP-FICN) is designed within the framework of the generative adversarial network (GAN) completing the identity information of damaged images utilizing reference images with the same identity as damaged images. To reasonably integrate the identity information of reference images into completed images, the reference image is decoupled into identity features (e.g., the contour of eyes, eyebrows, nose) and pose features (e.g., the orientation of face and the positions of the facial features), and then the resu",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dong2022ultrathindoublebar",
+      "title": "Ultra-thin double barrier AlGaN/GaN high threshold voltage HEMT with graded AlGaN/Si3N4 gate and p-type buffer layer",
+      "link": "https://doi.org/10.21203/rs.3.rs-1787077/v1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "kexiu dong, Yangyi Zhang, Bingting Wang (2022). Ultra-thin double barrier AlGaN/GaN high threshold voltage HEMT with graded AlGaN/Si3N4 gate and p-type buffer layer. Retrieved from https://doi.org/10.21203/rs.3.rs-1787077/v1",
+      "abstract": "Abstract\nAn ultra-thin double barrier enhancement mode (E-mode) AlGaN/GaN high electron mobility transistor (HEMT) with p-type buffer layer and Si  3  N  4  /graded p-AlGaN gate is proposed and investigated by Silvaco TCAD. The simulation results show that the designed HEMT can obtain a high threshold voltage over 5.0 V and large gate swing. The maximum gate leakage current is 3.11×10  -4  A/mm at 30 V gate voltage, which decreases four orders of magnitude compared to the conventional double barrier HEMTs. Due to the p-type buffer layer, the cut-off frequency for the proposed HEMT is raised over three-times compared to the conventional double barrier structure HEMT with n-type buffer layer. Meanwhile the designed HEMT exhibits high breakdown voltage and large current-gain. Moreover, the im",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022protectiveproperti",
+      "title": "PROTECTIVE PROPERTIES OF PIPELINE INSULATION WITH A BUFFER LAYER BASED ON LIQUID ORGANIC HYDROGEN CARRIERS",
+      "link": "https://doi.org/10.25791/infizik.11.2022.1294",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Х.К. ДЖУМАБАЕВ, О.Р. ЛАТЫПОВ, Д.Е. БУГАЙ (2022). PROTECTIVE PROPERTIES OF PIPELINE INSULATION WITH A BUFFER LAYER BASED ON LIQUID ORGANIC HYDROGEN CARRIERS. Retrieved from https://doi.org/10.25791/infizik.11.2022.1294",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shukla2020doubledifferential",
+      "title": "Double Differential Modulation for Buffer-Aided Cooperative Relaying with Priority-Based Max Link Selection",
+      "link": "https://doi.org/10.1109/ict49546.2020.9239540",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Ashish Kant Shukla, Manav R. Bhatnagar (2020). Double Differential Modulation for Buffer-Aided Cooperative Relaying with Priority-Based Max Link Selection. Retrieved from https://doi.org/10.1109/ict49546.2020.9239540",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kumar2023developmentofcemno",
+      "title": "Development of CeMnO2 and CeMnO2 buffer layer nanomaterials for CIGSSe/perovskite double-graded solar cells",
+      "link": "https://doi.org/10.1016/j.optmat.2023.114548",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Raushan Kumar, Alisha Priya (2023). Development of CeMnO2 and CeMnO2 buffer layer nanomaterials for CIGSSe/perovskite double-graded solar cells. Retrieved from https://doi.org/10.1016/j.optmat.2023.114548",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "feng2023studyonthemechanis",
+      "title": "Study on the Mechanism of Buffer Absorbing Energy of Double-Layer Heterostructure Based on Viscoelastic Materials for Mems Devices",
+      "link": "https://doi.org/10.2139/ssrn.4556922",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Denghu Feng, Yunbo Shi, et al. (2023). Study on the Mechanism of Buffer Absorbing Energy of Double-Layer Heterostructure Based on Viscoelastic Materials for Mems Devices. Retrieved from https://doi.org/10.2139/ssrn.4556922",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "li2021trajectorybasedpri",
+      "title": "Trajectory Based Prioritized Double Experience Buffer for Sample-Efficient Policy Optimization",
+      "link": "https://doi.org/10.1109/access.2021.3097357",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ],
+      "reference": "Shengxiang Li, Ou Li, et al. (2021). Trajectory Based Prioritized Double Experience Buffer for Sample-Efficient Policy Optimization. Retrieved from https://doi.org/10.1109/access.2021.3097357",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "f2021numericalstudyonto",
+      "title": "Numerical Study on Torsional Behavior of Carbon Steel-Concrete-Stainless Steel Double-Skin Tube (Dst) Used in Submarine Pipeline",
+      "link": "https://doi.org/10.1115/1.0000792v",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "Wang F, Wen-Qi Xie, Lin-Hai Han (2021). Numerical Study on Torsional Behavior of Carbon Steel-Concrete-Stainless Steel Double-Skin Tube (Dst) Used in Submarine Pipeline. Retrieved from https://doi.org/10.1115/1.0000792v",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "fuss2021doublewallhardened",
+      "title": "Double-wall hardened abrasion resistant steel pipeline systems for hydraulic and pneumatic mine backfill conveying",
+      "link": "https://doi.org/10.1201/9781003211488-56",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ],
+      "reference": "H. Fuss, M. Jost (2021). Double-wall hardened abrasion resistant steel pipeline systems for hydraulic and pneumatic mine backfill conveying. Retrieved from https://doi.org/10.1201/9781003211488-56",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020async2020commentar",
+      "title": "ASYNC 2020 Commentary",
+      "link": "https://doi.org/10.1109/async49171.2020.00002",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). ASYNC 2020 Commentary. Retrieved from https://doi.org/10.1109/async49171.2020.00002",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020async2020committee",
+      "title": "ASYNC 2020 Committees",
+      "link": "https://doi.org/10.1109/async49171.2020.00006",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). ASYNC 2020 Committees. Retrieved from https://doi.org/10.1109/async49171.2020.00006",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020async2020opinion",
+      "title": "ASYNC 2020 Opinion",
+      "link": "https://doi.org/10.1109/async49171.2020.00005",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). ASYNC 2020 Opinion. Retrieved from https://doi.org/10.1109/async49171.2020.00005",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023async2023coverpage",
+      "title": "ASYNC 2023 Cover Page",
+      "link": "https://doi.org/10.1109/async58294.2023.10239676",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2023). ASYNC 2023 Cover Page. Retrieved from https://doi.org/10.1109/async58294.2023.10239676",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020async2020index",
+      "title": "ASYNC 2020 Index",
+      "link": "https://doi.org/10.1109/async49171.2020.00024",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). ASYNC 2020 Index. Retrieved from https://doi.org/10.1109/async49171.2020.00024",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020freshideaspapersas",
+      "title": "Fresh Ideas Papers: ASYNC 2020",
+      "link": "https://doi.org/10.1109/async49171.2020.00007",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). Fresh Ideas Papers: ASYNC 2020. Retrieved from https://doi.org/10.1109/async49171.2020.00007",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020async2020toc",
+      "title": "ASYNC 2020 TOC",
+      "link": "https://doi.org/10.1109/async49171.2020.00004",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2020). ASYNC 2020 TOC. Retrieved from https://doi.org/10.1109/async49171.2020.00004",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023async2023organizin",
+      "title": "ASYNC 2023 Organizing Committee",
+      "link": "https://doi.org/10.1109/async58294.2023.10239678",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2023). ASYNC 2023 Organizing Committee. Retrieved from https://doi.org/10.1109/async58294.2023.10239678",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2018messagefromtheasyn",
+      "title": "Message from the ASYNC 2018 Chairs",
+      "link": "https://doi.org/10.1109/async.2018.00005",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2018). Message from the ASYNC 2018 Chairs. Retrieved from https://doi.org/10.1109/async.2018.00005",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023async2023messagefr",
+      "title": "ASYNC 2023 Message from the Organizing Committee",
+      "link": "https://doi.org/10.1109/async58294.2023.10239595",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": " (2023). ASYNC 2023 Message from the Organizing Committee. Retrieved from https://doi.org/10.1109/async58294.2023.10239595",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "groot2022asyncwithandfor",
+      "title": "Async With and For",
+      "link": "https://doi.org/10.1007/978-1-4842-8140-6_5",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": "Coen de Groot (2022). Async With and For. Retrieved from https://doi.org/10.1007/978-1-4842-8140-6_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vail2022transcendingthedou",
+      "title": "Transcending the Double Movement",
+      "link": "https://doi.org/10.4324/9781003133186-7",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "movement"
+      ],
+      "reference": "John Vail (2022). Transcending the Double Movement. Retrieved from https://doi.org/10.4324/9781003133186-7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kautsch2023introducingasyncaw",
+      "title": "Introducing async/await",
+      "link": "https://doi.org/10.1007/978-1-4842-8695-1_2",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ],
+      "reference": "Andrés Ibañez Kautsch (2023). Introducing async/await. Retrieved from https://doi.org/10.1007/978-1-4842-8695-1_2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 21,
+    "A": 29,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:38.924063"
+}

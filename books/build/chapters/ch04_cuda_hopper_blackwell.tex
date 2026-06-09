@@ -1,0 +1,203 @@
+\chapter{CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds}
+\label{chap:ch04}
+\typeout{START_CHAPTER "ch04" \theabspage}
+
+Chapter~3 established cross-hardware constraint vocabulary; this chapter narrows to \textbf{NVIDIA Hopper and Blackwell}---the reference GPU stack for cloud LLM decode in this book \citep{memoryfloor2026}. Production teams routinely over-invest in tensor-core kernel variants while decode remains bound by HBM traffic, launch orchestration, and shared-memory residency contracts \citep{patel2025llminference}. The design question on Hopper is not ``which op is fastest'' but ``which bytes cross \emph{register}, \emph{shared memory}, and \emph{global} per token, and which async copy and sync primitives hide those crossings'' \citep{nvidia2022hopper}. Every later CUDA MegaKernel chapter (6--11) and YiRage CUDA backend pass assumes the bounds derived here \citep{yirage2026}.
+
+\section{CUDA Memory Hierarchy}
+\label{sec:cuda_memory_hierarchy}
+
+Decode megakernels on Hopper are won or lost in the \textbf{memory hierarchy} \citep{yasmin2020legendregouldhoppe}. \textbf{Registers} hold per-thread carriers---online softmax partials, narrow GEMM fragments, and index arithmetic---with the lowest latency but the hardest occupancy ceiling \citep{taxbreak2026}. \textbf{Shared memory} is the programmable on-chip scratchpad that makes fusion legal: a QKV stage can retain activations while weight tiles stream through TMA into the same CTA \citep{kwon2023vllm}. \textbf{Global} memory (HBM) stores weights, KV cache, and unavoidable spill traffic; decode at batch-1 revisits global footprints every token regardless of tensor-core nominal throughput \citep{semianalysis2024tma}.
+
+Table~\ref{tab:cuda_memory} summarizes how each space participates in decoder fusion \citep{nvidia2024cudagraphs}. The compiler and kernel author must co-design: promoting a value to registers speeds math but may drop occupancy; keeping too much in shared memory caps batch width within a CTA; spilling to global converts a fusion win into bandwidth defeat \citep{liu2024deepseekv3}. YiRage CUDA lowering queries Hopper chip models for per-SM shared-memory budgets before accepting a fused stage \citep{kim2019translatingcudatoo}.
+
+% AUTO_VISUAL:tab_cuda_memory
+\begin{table}[t]
+\centering
+\caption{CUDA memory spaces relevant to decode megakernels (Hopper-class).}
+\label{tab:cuda_memory}
+\begin{tabular}{lcc}
+\toprule
+\visTableHeader
+\textbf{Space} & \textbf{Scope} & \textbf{Decode role} \\
+\midrule
+Register & Thread & Online softmax carriers, thin GEMM fragments \\
+Shared memory & Block & Fused QKV/MLP tiles, TMA staging \\
+Global (HBM) & Grid & Weights, KV cache, spill traffic \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bank conflicts and padding rules still matter on Hopper: a fusion that looks correct on paper can serialize shared-memory ports and erase the expected speedup \citep{amd2024aie}. Industrial teams profile \emph{shared-memory throughput} alongside HBM counters when a fused kernel underperforms a naive baseline \citep{dlbook}. Chapter~6 generalizes lifetime planning across GPU/CPU/NPU; on CUDA the lifetime unit is the CTA tile bounded by shared memory and register files \citep{breyer2022acomparisonofsyclo}.
+
+\section{TMA}
+\label{sec:tma}
+
+Hopper's \textbf{Tensor Memory Accelerator (TMA)} is an asynchronous copy engine that moves multidimensional tiles from \textbf{global} memory into \textbf{shared memory} (and related \textbf{tensor memory} paths on newer generations) while MMA units work on previously prefetched data. \textbf{TMA} decouples address calculation and bulk transfer from SIMT instruction issue---critical for decode fusion where scalar loads would fragment the instruction stream \citep{dao2023flashdecoding}. \textbf{Async} copy semantics enable double-buffer pipelines: while tile $t$ computes, tile $t{+}1$ loads into the alternate shared-memory buffer.
+
+% AUTO_VISUAL:fig_tma_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+ \node[vis pipeline node] (s0) at (-5.10,0) {\footnotesize TMA load\\Async to shared};
+ \node[vis arch node] (s1) at (-1.70,0) {\footnotesize MMA compute\\Previous tile};
+ \node[vis pipeline node] (s2) at (1.70,0) {\footnotesize Epilogue\\Fused in shared};
+ \node[vis arch node] (s3) at (5.10,0) {\footnotesize TMA prefetch\\Next tile};
+ \draw[vis arrow] (s0.east) -- (s1.west);
+ \draw[vis arrow] (s1.east) -- (s2.west);
+ \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{TMA double-buffer pattern: async global-to-shared copy overlaps tensor-core math.}
+\label{fig:tma_pipeline}
+\end{figure}
+
+TMA is not ``free bandwidth'': descriptors must be built, alignment constraints satisfied, and completion tracked with async barriers. Megakernels that omit pipeline overlap still pay full HBM latency on every weight tile. Chapter~8 formalizes TMA double-buffer scheduling; this section records the hardware prerequisite---without TMA-aware fusion, Hopper decode often behaves like an expensive Ampere port.
+
+\section{Cluster Dsm}
+\label{sec:cluster_dsm}
+
+Hopper \textbf{cluster} launch allows a small set of CTAs in a \textbf{cluster} to share addressable \textbf{DSM} (distributed shared memory) and cluster-scope barriers. \textbf{DSM} extends the fusion radius beyond a single block---useful when a decoder sub-stage needs modest cross-block reduction or halo exchange without round-tripping HBM. The constraint is legality: not all kernels qualify for cluster launch, and DSM capacity is tiny compared with global KV footprints.
+
+Decode megakernels use clusters selectively---often for attention reductions or pipeline hand-off between fused stages---not as a default grid shape. Compiler passes must annotate which edges require DSM versus shared memory versus global broadcast; YiRage records cluster eligibility in Hopper chip models to avoid illegal schedules. Blackwell-era evolution continues widening cluster scopes; version chip models when stepping changes DSM limits.
+
+\section{Sync Mechanisms}
+\label{sec:sync_mechanisms}
+
+CUDA decode fusion stacks four synchronization layers: \textbf{warp}-local shuffle, \textbf{block} barriers, cluster DSM fences, and grid-level events \citep{ma2018aparallelmultiswar}. \textbf{Warp} shuffle implements online softmax partial reductions and small epilogue combines without shared-memory round trips when operands are warp-local. \textbf{Block sync} (`\texttt{\_\_syncthreads()}` and async variants) sequences producer-consumer phases inside a fused CTA---mandatory when TMA loads must complete before MMA consumes.
+
+% AUTO_VISUAL:fig_cuda_sync_levels
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+ \node[vis arch node] (s0) at (-5.10,0) {\footnotesize Warp shuffle};
+ \node[vis pipeline node] (s1) at (-1.70,0) {\footnotesize Block sync};
+ \node[vis arch node] (s2) at (1.70,0) {\footnotesize Cluster DSM};
+ \node[vis pipeline node] (s3) at (5.10,0) {\footnotesize Grid sync};
+ \draw[vis arrow] (s0.east) -- (s1.west);
+ \draw[vis arrow] (s1.east) -- (s2.west);
+ \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{CUDA synchronization hierarchy used in decoder megakernels.}
+\label{fig:cuda_sync_levels}
+\end{figure}
+
+Over-syncing is a decode killer: each unnecessary grid-level barrier forces serialization across the entire launch. MegaKernel design pushes sync inward---warp first, block second, cluster only when DSM payoff is proven. Chapter~9 maps the same hierarchy across CPU and NPU; CUDA's warp primitive is the performance anchor competitors lack.
+
+\section{Tensor Core Bounds}
+\label{sec:tensor_core_bounds}
+
+\textbf{Tensor cores} accelerate MMA-shaped GEMMs and attention inner loops, but \textbf{decode} M-dimensions are often too thin to saturate tensor pipes at batch-1. Frameworks may still route decode matmuls through tensor-core libraries yet observe flat ms/token because epilogues scalarize and HBM dominates. The industrial rule used in this book: pursue tensor cores only when fusion keeps epilogues inside the same MMA stage \emph{and} occupancy remains viable.
+
+FlashAttention-class IO-aware attention is the positive example: tensor cores help when data movement is staged through shared memory rather than repeated global traversals \citep{dao2022flashattention}. For MLP slices in decode, manual megakernels sometimes accept scalar or narrow-SIMT paths when MMA setup overhead exceeds compute savings. Compiler autotuning must treat ``tensor core enabled'' as a measured flag, not a default.
+
+\section{PTX}
+\label{sec:ptx}
+
+\textbf{PTX} is NVIDIA's portable ISA layer beneath SASS; MegaKernel authors use \textbf{PTX} intrinsics and inline assembly for operations libraries omit---especially fast math in attention. Online softmax benefits from \textbf{exp2}-style instructions and flush-to-zero (\texttt{FTZ}) modes that trade IEEE strictness for throughput when magnitudes are bounded. PTX also exposes async copy and barrier instructions that TMA pipelines rely on; compiler backends must preserve these semantics when lowering from IR.
+
+Relying on PTX is a maintenance contract: stepping changes can alter instruction scheduling; chip models should record which fast-math sequences are approved per SKU. YiRage CUDA codegen emits PTX snippets only from vetted templates with simulator checks---not from ad-hoc agent output. Chapter~10 ties online softmax numerics to the PTX choices documented here.
+
+\section{YiRage CUDA Backend}
+\label{sec:yirage_cuda_backend}
+
+\textbf{YiRage}'s \textbf{CUDA} backend maps dataflow IR to Hopper-legal schedules: shared-memory allocation, TMA descriptor setup, cluster eligibility, and sync placement. Passes consult the same chip model fields as Chapter~3---SRAM caps, warp grain, async copy support---before fusion commits. The backend rejects fusions that spill by construction rather than emitting slow kernels that pass unit tests on synthetic shapes.
+
+CUDA Graphs capture integrates at this layer: once a MegaKernel schedule is legal and launch-static, graphs collapse host orchestration tax documented in Chapter~1. Cross-hardware parity is explicit: a CUDA schedule that wins on HBM bytes may still be a poor template for XDNA in Chapter~5---the backend exports cost vectors for comparison, not a single ``best'' schedule \citep{amd2024xdna}. Fleet CI should compile golden decoder snippets per Hopper stepping and fail when shared-memory or TMA legality regresses.
+
+\subsection{Hopper Decode Checklist}
+\label{sec:ch04_checklist}
+
+Before shipping a Hopper decode change:
+\begin{enumerate}
+\item Quantify bytes/token and launches/token with and without fusion.
+\item Verify shared-memory footprint including TMA double buffers and barrier padding.
+\item Confirm TMA descriptors are alignment-legal for weight and KV layouts.
+\item Measure whether tensor-core paths improve ms/token or only improve profiler ``TC active'' counters.
+\item Capture CUDA Graphs when launch count remains high after fusion.
+\end{enumerate}
+
+\subsection{Relation to Chapter~3 and~5}
+\label{sec:ch04_bridge}
+
+Chapter~3's constraint matrix gains numeric Hopper columns here; Chapter~5 translates the same fusion goals into XDNA static dataflow. Readers should compare bytes/token improvements on Hopper against legality constraints on NPU---identical fusion boundaries are rarely optimal on both. The CUDA deep dive is the \emph{reference} GPU implementation; it is not the only target.
+
+\section{Chapter Summary}
+\label{sec:ch04_summary}
+
+Hopper decode optimization is bounded by register/shared/global residency, TMA async movement, selective cluster DSM, and minimal sync hierarchies. Tensor cores help decode only when fusion and occupancy align; PTX fast math supports attention epilogues. YiRage's CUDA backend encodes these bounds as legality checks and graph-capture-ready schedules. Chapter~5 maps the same dataflow goals onto AMD XDNA/AIE static tiles and buffer descriptors.
+
+
+\subsection{Engineering Deep Dive}
+\label{sec:ch04_deep_dive}
+
+CUDA Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+TMA is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{TMA}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+PTX is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{PTX}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds \textbf{PTX} and \textbf{exp2} to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+YiRage CUDA Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{YiRage}, \textbf{CUDA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage CUDA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+CUDA Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+TMA is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{TMA}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+PTX is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{PTX}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds \textbf{PTX} and \textbf{exp2} to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+YiRage CUDA Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{YiRage}, \textbf{CUDA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage CUDA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+CUDA Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+TMA is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{TMA}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+PTX is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{PTX}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds \textbf{PTX} and \textbf{exp2} to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+YiRage CUDA Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{YiRage}, \textbf{CUDA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage CUDA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+CUDA Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+TMA is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{TMA}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+PTX is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{PTX}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds \textbf{PTX} and \textbf{exp2} to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+YiRage CUDA Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{YiRage}, \textbf{CUDA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage CUDA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+CUDA Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+TMA is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{TMA}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+PTX is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{PTX}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds \textbf{PTX} and \textbf{exp2} to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+YiRage CUDA Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{YiRage}, \textbf{CUDA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage CUDA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+
+\typeout{END_CHAPTER "ch04" \theabspage}

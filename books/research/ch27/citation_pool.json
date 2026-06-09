@@ -1,0 +1,270 @@
+{
+  "chapter_id": "ch27",
+  "pool_count": 25,
+  "bib_keys": [
+    "zhang2019whenneuralarchitec",
+    "liu2024scorchneuralarchit",
+    "chakraborty2019hardwaresoftwareco",
+    "yang2019ahighlyintegratedh",
+    "dubey2026hardwaresoftwareco",
+    "a2025reviewonhardwareac",
+    "shang2020hardwaresoftwareco",
+    "manohar2022hardwaresoftwareco",
+    "wolf2022sessiondetailsaddr",
+    "liao2026acceleratingpostqu",
+    "anon2023proceedingsofthe20",
+    "yirage2026",
+    "memoryfloor2026",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "patel2025llminference",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "zhang2019whenneuralarchitec",
+      "title": "When Neural Architecture Search Meets Hardware Implementation: from Hardware Awareness to Co-Design",
+      "source_tier": "A",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "liu2024scorchneuralarchit",
+      "title": "SCORCH: Neural Architecture Search and Hardware Accelerator Co-design with Reinforcement Learning",
+      "source_tier": "A",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "chakraborty2019hardwaresoftwareco",
+      "title": "Hardware-Software Co-Design Based Obfuscation of Hardware Accelerators",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "yang2019ahighlyintegratedh",
+      "title": "A Highly Integrated Hardware/Software Co-Design and Co-Verification Platform",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "dubey2026hardwaresoftwareco",
+      "title": "Hardware-Software Co-design Implementation of 32 bit RISC V",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "a2025reviewonhardwareac",
+      "title": "Review on Hardware Accelerator Hardware Software Co-Design for Machine Learning",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "shang2020hardwaresoftwareco",
+      "title": "Hardware/Software Co-design for Evolvable Hardware by Genetic Algorithm",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "manohar2022hardwaresoftwareco",
+      "title": "Hardware/software Co-design for Neuromorphic Systems",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "wolf2022sessiondetailsaddr",
+      "title": "Session details: Addressing Sensor Security through Hardware/Software Co-Design",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "liao2026acceleratingpostqu",
+      "title": "Accelerating Post-Quantum Cryptography via LLM-Driven Hardware-Software Co-Design",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "anon2023proceedingsofthe20",
+      "title": "Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "edge",
+        "compiler",
+        "compilers"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 31,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

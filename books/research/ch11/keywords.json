@@ -1,0 +1,202 @@
+[
+  {
+    "term": "full decoder MegaKernel implementation",
+    "weight": 18
+  },
+  {
+    "term": "benchmark results",
+    "weight": 14
+  },
+  {
+    "term": "MegaKernel structure",
+    "weight": 14
+  },
+  {
+    "term": "qkv attn mlp",
+    "weight": 14
+  },
+  {
+    "term": "source walkthrough",
+    "weight": 14
+  },
+  {
+    "term": "benchmark results LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "MegaKernel structure LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "qkv attn mlp LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "source walkthrough LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "benchmark speedup",
+    "weight": 12
+  },
+  {
+    "term": "MegaKernel decoder",
+    "weight": 12
+  },
+  {
+    "term": "qkv attention",
+    "weight": 12
+  },
+  {
+    "term": "source implement",
+    "weight": 12
+  },
+  {
+    "term": "attention",
+    "weight": 10
+  },
+  {
+    "term": "benchmark",
+    "weight": 10
+  },
+  {
+    "term": "decoder",
+    "weight": 10
+  },
+  {
+    "term": "implement",
+    "weight": 10
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 10
+  },
+  {
+    "term": "qkv",
+    "weight": 10
+  },
+  {
+    "term": "source",
+    "weight": 10
+  },
+  {
+    "term": "speedup",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "full",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "implementation",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

@@ -1,0 +1,126 @@
+{
+  "chapter_id": "ch25",
+  "pool_count": 18,
+  "assigned_count": 18,
+  "unassigned_count": 0,
+  "sections_with_cites": 2,
+  "unique_keys_in_tex": 17,
+  "pool_path": "books/research/ch25/citation_pool.json",
+  "sections_used": [
+    "Rl Autotune",
+    "chapter"
+  ],
+  "cites_applied": 17,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch25_auto_optimization.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "memoryfloor2026",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "taxbreak2026",
+      "section": "chapter",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "liu2025aportableautotunin",
+      "section": "Rl Autotune",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization",
+        "compilation"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "merouani2025agenticautoschedul",
+      "section": "Rl Autotune",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "rana2025quantumaihybridarc",
+      "section": "Rl Autotune",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "auto"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "dao2022flashattention",
+      "section": "Rl Autotune",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "kwon2023vllm",
+      "section": "Rl Autotune",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "liu2024deepseekv3",
+      "section": "Rl Autotune",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "xu2023aiassistedisphyper",
+      "section": "Rl Autotune",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "AI-assisted"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "patel2025llminference",
+      "section": "Rl Autotune",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "nvidia2022hopper",
+      "section": "Rl Autotune",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "amd2024xdna",
+      "section": "Rl Autotune",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:42.943511"
+}

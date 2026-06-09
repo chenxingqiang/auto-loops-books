@@ -1,0 +1,16 @@
+[
+  "\"IREE: MLIR-Native Runtime and Compilation\"",
+  "\"hardware\" AND \"target\"",
+  "\"pass\" AND \"lower\"",
+  "\"codegen\" AND \"backend\"",
+  "\"tun\" AND \"profile\"",
+  "\"case\" AND \"benchmark\"",
+  "\"IREE: MLIR-native runtime and compilation\" AND \"IREE\"",
+  "\"IREE arch passes\" AND \"IREE case study\"",
+  "\"IREE codegen\" AND \"IREE HW matrix\"",
+  "\"IREE tuning\" AND \"IREE arch passes LLM inference compiler\"",
+  "\"IREE case study LLM inference compiler\" AND \"IREE codegen LLM inference compiler\"",
+  "\"IREE HW matrix LLM inference compiler\" AND \"IREE tuning LLM inference compiler\"",
+  "\"case benchmark\" AND \"codegen backend\"",
+  "\"hardware target\" AND \"pass lower\""
+]

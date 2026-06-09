@@ -1,0 +1,522 @@
+[
+  {
+    "term": "LLM inference performance bottlenecks: from symptoms to root causes",
+    "weight": 18
+  },
+  {
+    "term": "LLM inference prefill decode",
+    "weight": 18
+  },
+  {
+    "term": "LLM inference performance bottlenecks",
+    "weight": 17
+  },
+  {
+    "term": "single token decode latency",
+    "weight": 16
+  },
+  {
+    "term": "kernel launch overhead GPU",
+    "weight": 15
+  },
+  {
+    "term": "memory bandwidth bound decode",
+    "weight": 15
+  },
+  {
+    "term": "benchmark gap",
+    "weight": 14
+  },
+  {
+    "term": "decode pain",
+    "weight": 14
+  },
+  {
+    "term": "FlashAttention flash-decoding",
+    "weight": 14
+  },
+  {
+    "term": "framework issues",
+    "weight": 14
+  },
+  {
+    "term": "memory not compute",
+    "weight": 14
+  },
+  {
+    "term": "multi hardware",
+    "weight": 14
+  },
+  {
+    "term": "operator fusion MegaKernel",
+    "weight": 14
+  },
+  {
+    "term": "overhead quant",
+    "weight": 14
+  },
+  {
+    "term": "PagedAttention vLLM",
+    "weight": 14
+  },
+  {
+    "term": "prefill decode",
+    "weight": 14
+  },
+  {
+    "term": "PyTorch Hugging Face inference",
+    "weight": 14
+  },
+  {
+    "term": "YiRage preview",
+    "weight": 14
+  },
+  {
+    "term": "benchmark gap LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "decode pain LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "framework issues LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "kv cache optimization",
+    "weight": 13
+  },
+  {
+    "term": "memory not compute LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "multi hardware LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "overhead quant LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "prefill decode LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage preview LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "benchmark baseline flash fusion MegaKernel",
+    "weight": 12
+  },
+  {
+    "term": "cross-hardware LLM serving",
+    "weight": 12
+  },
+  {
+    "term": "CUDA Graphs inference",
+    "weight": 12
+  },
+  {
+    "term": "decode latency LLM",
+    "weight": 12
+  },
+  {
+    "term": "GPU CPU NPU differ hardware",
+    "weight": 12
+  },
+  {
+    "term": "Hugging Face Transformers inference",
+    "weight": 12
+  },
+  {
+    "term": "kernel fusion MegaKernel",
+    "weight": 12
+  },
+  {
+    "term": "kernel launch overhead",
+    "weight": 12
+  },
+  {
+    "term": "launch overhead kernel percent ratio ms",
+    "weight": 12
+  },
+  {
+    "term": "memory bandwidth compute arithmetic",
+    "weight": 12
+  },
+  {
+    "term": "operator fusion kernel",
+    "weight": 12
+  },
+  {
+    "term": "prefill decode LLM",
+    "weight": 12
+  },
+  {
+    "term": "PyTorch Hugging Face kernel operator fusion",
+    "weight": 12
+  },
+  {
+    "term": "PyTorch inference optimization",
+    "weight": 12
+  },
+  {
+    "term": "single token batch 1 low batch latency",
+    "weight": 12
+  },
+  {
+    "term": "YiRage compiler dataflow preview case",
+    "weight": 12
+  },
+  {
+    "term": "batch",
+    "weight": 11
+  },
+  {
+    "term": "decode",
+    "weight": 11
+  },
+  {
+    "term": "global memory",
+    "weight": 11
+  },
+  {
+    "term": "GPU/CPU/NPU",
+    "weight": 11
+  },
+  {
+    "term": "kernel",
+    "weight": 11
+  },
+  {
+    "term": "kernel launch",
+    "weight": 11
+  },
+  {
+    "term": "LLM",
+    "weight": 11
+  },
+  {
+    "term": "prefill",
+    "weight": 11
+  },
+  {
+    "term": "PyTorch/Hugging Face",
+    "weight": 11
+  },
+  {
+    "term": "rtx5090/AMD AIE/x86",
+    "weight": 11
+  },
+  {
+    "term": "token",
+    "weight": 11
+  },
+  {
+    "term": "YiRage",
+    "weight": 11
+  },
+  {
+    "term": "benchmark baseline flash",
+    "weight": 10
+  },
+  {
+    "term": "compute arithmetic",
+    "weight": 10
+  },
+  {
+    "term": "differ hardware",
+    "weight": 10
+  },
+  {
+    "term": "fusion MegaKernel",
+    "weight": 10
+  },
+  {
+    "term": "GPU CPU NPU",
+    "weight": 10
+  },
+  {
+    "term": "latency",
+    "weight": 10
+  },
+  {
+    "term": "launch overhead kernel",
+    "weight": 10
+  },
+  {
+    "term": "memory bandwidth",
+    "weight": 10
+  },
+  {
+    "term": "operator fusion",
+    "weight": 10
+  },
+  {
+    "term": "percent ratio ms",
+    "weight": 10
+  },
+  {
+    "term": "preview case",
+    "weight": 10
+  },
+  {
+    "term": "PyTorch Hugging Face kernel",
+    "weight": 10
+  },
+  {
+    "term": "single token batch 1 low batch",
+    "weight": 10
+  },
+  {
+    "term": "YiRage compiler",
+    "weight": 10
+  },
+  {
+    "term": "YiRage compiler dataflow",
+    "weight": 10
+  },
+  {
+    "term": "AIE",
+    "weight": 9
+  },
+  {
+    "term": "anti-patterns that waste engineering cycles",
+    "weight": 9
+  },
+  {
+    "term": "attention",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "because",
+    "weight": 9
+  },
+  {
+    "term": "cache",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "CUDA",
+    "weight": 9
+  },
+  {
+    "term": "decode phase",
+    "weight": 9
+  },
+  {
+    "term": "diagnostic workflow: taxbreak and memory-floor studies",
+    "weight": 9
+  },
+  {
+    "term": "dispatch",
+    "weight": 9
+  },
+  {
+    "term": "FlashAttention",
+    "weight": 9
+  },
+  {
+    "term": "framework",
+    "weight": 9
+  },
+  {
+    "term": "from symptoms to design requirements",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GEMM",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "gpus",
+    "weight": 9
+  },
+  {
+    "term": "graphs",
+    "weight": 9
+  },
+  {
+    "term": "h100",
+    "weight": 9
+  },
+  {
+    "term": "hardware-aware",
+    "weight": 9
+  },
+  {
+    "term": "HBM",
+    "weight": 9
+  },
+  {
+    "term": "HIP",
+    "weight": 9
+  },
+  {
+    "term": "industry benchmarks: native frameworks vs.\\ fused kernels",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "launch",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "layer",
+    "weight": 9
+  },
+  {
+    "term": "limits of mainstream PyTorch and Hugging Face inference",
+    "weight": 9
+  },
+  {
+    "term": "LLM inference",
+    "weight": 9
+  },
+  {
+    "term": "measurement methodology used in this book",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "memory",
+    "weight": 9
+  },
+  {
+    "term": "memory bandwidth, not peak flops",
+    "weight": 9
+  },
+  {
+    "term": "model",
+    "weight": 9
+  },
+  {
+    "term": "multi-hardware pain points: GPU, CPU, and NPU",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "NUMA",
+    "weight": 9
+  },
+  {
+    "term": "often",
+    "weight": 9
+  },
+  {
+    "term": "opening case study: YiRage cross-hardware compilation preview",
+    "weight": 9
+  },
+  {
+    "term": "PagedAttention",
+    "weight": 9
+  },
+  {
+    "term": "prefill and decode: two performance regimes",
+    "weight": 9
+  },
+  {
+    "term": "prefill phase",
+    "weight": 9
+  },
+  {
+    "term": "PyTorch",
+    "weight": 9
+  },
+  {
+    "term": "quantifying overheads: launches, memory, and scheduling",
+    "weight": 9
+  },
+  {
+    "term": "roofline intuition for decoder layers",
+    "weight": 9
+  },
+  {
+    "term": "SIMD",
+    "weight": 9
+  },
+  {
+    "term": "step",
+    "weight": 9
+  },
+  {
+    "term": "tensor",
+    "weight": 9
+  },
+  {
+    "term": "tensor cores and decode: a common misconfiguration",
+    "weight": 9
+  },
+  {
+    "term": "the decode pain point: single-token, low-batch latency",
+    "weight": 9
+  },
+  {
+    "term": "throughput",
+    "weight": 9
+  },
+  {
+    "term": "verified reference numbers (literature snapshot)",
+    "weight": 9
+  },
+  {
+    "term": "vLLM",
+    "weight": 9
+  },
+  {
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "why disaggregated serving changes the optimization target",
+    "weight": 9
+  },
+  {
+    "term": "XDNA",
+    "weight": 9
+  }
+]

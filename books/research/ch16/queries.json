@@ -1,0 +1,16 @@
+[
+  "\"TVM and Apache TVM Stack\"",
+  "\"hardware\" AND \"target\"",
+  "\"pass\" AND \"lower\"",
+  "\"codegen\" AND \"backend\"",
+  "\"tun\" AND \"profile\"",
+  "\"case\" AND \"benchmark\"",
+  "\"TVM and apache TVM stack\" AND \"TVM arch passes\"",
+  "\"TVM case study\" AND \"TVM codegen\"",
+  "\"TVM HW matrix\" AND \"TVM tuning\"",
+  "\"TVM arch passes LLM inference compiler\" AND \"TVM case study LLM inference compiler\"",
+  "\"TVM codegen LLM inference compiler\" AND \"TVM HW matrix LLM inference compiler\"",
+  "\"TVM tuning LLM inference compiler\" AND \"case benchmark\"",
+  "\"codegen backend\" AND \"hardware target\"",
+  "\"pass lower\" AND \"tun profile\""
+]

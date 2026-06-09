@@ -1,0 +1,259 @@
+{
+  "chapter_id": "ch10",
+  "chapter_title": "Attention Online Softmax Optimization",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch10/keywords.json",
+  "keyword_count": 48,
+  "top_keywords": [
+    {
+      "term": "attention online softmax optimization",
+      "weight": 18
+    },
+    {
+      "term": "cross hardware",
+      "weight": 14
+    },
+    {
+      "term": "fusion boundary",
+      "weight": 14
+    },
+    {
+      "term": "numerical stability",
+      "weight": 14
+    },
+    {
+      "term": "online softmax",
+      "weight": 14
+    },
+    {
+      "term": "cross hardware LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "fusion boundary LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "numerical stability LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "online softmax LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "fuse MegaKernel",
+      "weight": 12
+    },
+    {
+      "term": "GPU XDNA",
+      "weight": 12
+    },
+    {
+      "term": "stable exp",
+      "weight": 12
+    },
+    {
+      "term": "exp",
+      "weight": 10
+    },
+    {
+      "term": "fuse",
+      "weight": 10
+    },
+    {
+      "term": "GPU",
+      "weight": 10
+    },
+    {
+      "term": "MegaKernel",
+      "weight": 10
+    },
+    {
+      "term": "online",
+      "weight": 10
+    },
+    {
+      "term": "softmax",
+      "weight": 10
+    },
+    {
+      "term": "stable",
+      "weight": 10
+    },
+    {
+      "term": "XDNA",
+      "weight": 10
+    },
+    {
+      "term": "attention",
+      "weight": 9
+    },
+    {
+      "term": "bottleneck",
+      "weight": 9
+    },
+    {
+      "term": "bytes",
+      "weight": 9
+    },
+    {
+      "term": "chapter summary",
+      "weight": 9
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 38,
+      "matched_keywords": [
+        "exp",
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 20,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 18,
+      "matched_keywords": [
+        "attention"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 18,
+      "matched_keywords": [
+        "attention"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

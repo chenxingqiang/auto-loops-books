@@ -1,0 +1,275 @@
+{
+  "chapter_id": "ch10",
+  "pool_count": 26,
+  "bib_keys": [
+    "lee2021gatedrecurrentcont",
+    "hirayae2025hardwareorientedan",
+    "deng2024zerothorderalgorit",
+    "yirage2026",
+    "patel2025llminference",
+    "deng2025whysoftmaxattentio",
+    "cho2021filterpruningviaso",
+    "koohpayegani2024simasimplesoftmaxf",
+    "patil2023streamingbilingual",
+    "wang2021escapingthegradien",
+    "bhola2024securingindustrial",
+    "koca2023hardwareefficients",
+    "kim2024alowpowerattention",
+    "memoryfloor2026",
+    "amd2024xdna",
+    "s2022digitalimplementat",
+    "dao2022flashattention",
+    "dao2023flashdecoding",
+    "kwon2023vllm",
+    "taxbreak2026",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "lee2021gatedrecurrentcont",
+      "title": "Gated Recurrent Context: Softmax-Free Attention for Online Encoder-Decoder Speech Recognition",
+      "source_tier": "A",
+      "relevance_score": 104,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "attention",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "hirayae2025hardwareorientedan",
+      "title": "Hardware-Oriented and Precisely Approximated Online Softmax for Deep Learning Models",
+      "source_tier": "A",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "deng2024zerothorderalgorit",
+      "title": "Zero-th Order Algorithm for Softmax Attention Optimization",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "optimization"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "CPU",
+        "optimization",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "exp",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "deng2025whysoftmaxattentio",
+      "title": "Why Softmax Attention Outperforms Linear Attention",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "cho2021filterpruningviaso",
+      "title": "Filter Pruning Via Softmax Attention",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "koohpayegani2024simasimplesoftmaxf",
+      "title": "SimA: Simple Softmax-free Attention for Vision Transformers",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "patil2023streamingbilingual",
+      "title": "Streaming Bilingual End-to-End ASR Model Using Attention Over Multiple Softmax",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "wang2021escapingthegradien",
+      "title": "Escaping the Gradient Vanishing: Periodic Alternatives of Softmax in Attention Mechanism",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "bhola2024securingindustrial",
+      "title": "Securing Industrial IoT Networks Using Conv2D-Attention Approach with Softmax Classifier",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "koca2023hardwareefficients",
+      "title": "Hardware-efficient Softmax Approximation for Self-Attention Networks",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "kim2024alowpowerattention",
+      "title": "A Low Power Attention and Softmax Accelerator for Large Language Models Inference",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
+      "bib_key": "s2022digitalimplementat",
+      "title": "Digital Implementation of the Softmax Activation Function and the Inverse Softmax Function",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

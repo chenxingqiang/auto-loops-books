@@ -19,6 +19,9 @@ dependencies = [
 [project.scripts]
 book-loop = "loops.iterate:main"
 fact-verify = "fact_verify:main"
+research-tools = "research_tools:main"
+citation-loop = "citation_loop:main"
+proper-nouns = "book_proper_nouns:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -26,7 +29,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["loops"]
-py-modules = ["fact_verify"]
+py-modules = ["fact_verify", "book_proper_nouns", "research_tools", "book_prepare", "citation_loop"]
 
 [tool.uv]
 package = true

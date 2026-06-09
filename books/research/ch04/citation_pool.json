@@ -1,0 +1,190 @@
+{
+  "chapter_id": "ch04",
+  "pool_count": 18,
+  "bib_keys": [
+    "yirage2026",
+    "memoryfloor2026",
+    "patel2025llminference",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "kim2019translatingcudatoo",
+    "breyer2022acomparisonofsyclo",
+    "ma2018aparallelmultiswar",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "yasmin2020legendregouldhoppe",
+    "dao2023flashdecoding",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "amd2024aie",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "YiRage CUDA backend",
+        "YiRage CUDA",
+        "CUDA",
+        "YiRage",
+        "CPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "memory bandwidth",
+        "CUDA",
+        "decode",
+        "GPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "tensor core"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "kim2019translatingcudatoo",
+      "title": "Translating CUDA to OpenCL for Hardware Generation using Neural Machine Translation",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "breyer2022acomparisonofsyclo",
+      "title": "A Comparison of SYCL, OpenCL, CUDA, and OpenMP for Massively Parallel Support Vector Machine Classification on Multi-Vendor Hardware",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "ma2018aparallelmultiswar",
+      "title": "A Parallel Multi-swarm Particle Swarm Optimization Algorithm Based on CUDA Streams",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ]
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Hopper"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
+      "bib_key": "yasmin2020legendregouldhoppe",
+      "title": "Legendre-Gould Hopper Based Sheffer Polynomials: Properties and Applications",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Hopper"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 11,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

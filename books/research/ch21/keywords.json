@@ -1,0 +1,210 @@
+[
+  {
+    "term": "unified AI compiler analysis and cross-hardware benchmark",
+    "weight": 18
+  },
+  {
+    "term": "compile overhead",
+    "weight": 14
+  },
+  {
+    "term": "compiler ratings",
+    "weight": 14
+  },
+  {
+    "term": "HW binding",
+    "weight": 14
+  },
+  {
+    "term": "search space",
+    "weight": 14
+  },
+  {
+    "term": "YiRage benchmark",
+    "weight": 14
+  },
+  {
+    "term": "compile overhead LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "compiler ratings LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "HW binding LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "search space LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage benchmark LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "compiler rating",
+    "weight": 12
+  },
+  {
+    "term": "hardware binding",
+    "weight": 12
+  },
+  {
+    "term": "search autotun",
+    "weight": 12
+  },
+  {
+    "term": "autotun",
+    "weight": 10
+  },
+  {
+    "term": "benchmark",
+    "weight": 10
+  },
+  {
+    "term": "binding",
+    "weight": 10
+  },
+  {
+    "term": "compile",
+    "weight": 10
+  },
+  {
+    "term": "compiler",
+    "weight": 10
+  },
+  {
+    "term": "hardware",
+    "weight": 10
+  },
+  {
+    "term": "overhead",
+    "weight": 10
+  },
+  {
+    "term": "rating",
+    "weight": 10
+  },
+  {
+    "term": "search",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "analysis",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "cross-hardware",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "unified",
+    "weight": 9
+  }
+]

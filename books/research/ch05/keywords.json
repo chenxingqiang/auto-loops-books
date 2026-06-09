@@ -1,0 +1,282 @@
+[
+  {
+    "term": "AMD XDNA/AIE dataflow architecture",
+    "weight": 18
+  },
+  {
+    "term": "architecture tradeoffs",
+    "weight": 14
+  },
+  {
+    "term": "CUDA XDNA mapping",
+    "weight": 14
+  },
+  {
+    "term": "dataflow conclusion",
+    "weight": 14
+  },
+  {
+    "term": "online softmax HW",
+    "weight": 14
+  },
+  {
+    "term": "static dataflow rules",
+    "weight": 14
+  },
+  {
+    "term": "XDNA tiles",
+    "weight": 14
+  },
+  {
+    "term": "YiRage XDNA backend",
+    "weight": 14
+  },
+  {
+    "term": "architecture tradeoffs LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "CUDA XDNA mapping LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "dataflow conclusion LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "online softmax HW LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "static dataflow rules LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "XDNA tiles LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage XDNA backend LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "buffer descriptor TMA",
+    "weight": 12
+  },
+  {
+    "term": "CUDA XDNA",
+    "weight": 12
+  },
+  {
+    "term": "dataflow inference",
+    "weight": 12
+  },
+  {
+    "term": "dataflow kernel optimization",
+    "weight": 12
+  },
+  {
+    "term": "softmax carrier",
+    "weight": 12
+  },
+  {
+    "term": "static dataflow",
+    "weight": 12
+  },
+  {
+    "term": "XDNA AIE",
+    "weight": 12
+  },
+  {
+    "term": "YiRage XDNA",
+    "weight": 12
+  },
+  {
+    "term": "buffer descriptor",
+    "weight": 11
+  },
+  {
+    "term": "CUDA",
+    "weight": 11
+  },
+  {
+    "term": "dma",
+    "weight": 11
+  },
+  {
+    "term": "online softmax",
+    "weight": 11
+  },
+  {
+    "term": "pass",
+    "weight": 11
+  },
+  {
+    "term": "ping-pong",
+    "weight": 11
+  },
+  {
+    "term": "tile",
+    "weight": 11
+  },
+  {
+    "term": "TMA",
+    "weight": 11
+  },
+  {
+    "term": "vs XDNA",
+    "weight": 11
+  },
+  {
+    "term": "XDNA",
+    "weight": 11
+  },
+  {
+    "term": "XDNA carrier",
+    "weight": 11
+  },
+  {
+    "term": "XDNA/AIE",
+    "weight": 11
+  },
+  {
+    "term": "AIE",
+    "weight": 10
+  },
+  {
+    "term": "carrier",
+    "weight": 10
+  },
+  {
+    "term": "dataflow",
+    "weight": 10
+  },
+  {
+    "term": "inference",
+    "weight": 10
+  },
+  {
+    "term": "softmax",
+    "weight": 10
+  },
+  {
+    "term": "static",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "architecture",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

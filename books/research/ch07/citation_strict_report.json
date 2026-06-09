@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch07",
+  "chapter_title": "Static Role Assignment and Schedule-Free Kernels",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 61,
+  "catalog_tier_a": 20,
+  "binding_count": 183,
+  "quality_binding_count": 183,
+  "sentence_count": 266,
+  "claim_sentence_count": 266,
+  "unbound_claim_sentences": 83,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 48,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

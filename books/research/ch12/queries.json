@@ -1,0 +1,15 @@
+[
+  "\"Three Kernel Execution Modes\"",
+  "\"eager\" AND \"PyTorch\"",
+  "\"CUDA Graphs\" LLM inference optimization",
+  "\"MegaKernel\" LLM inference optimization",
+  "\"hardware\" AND \"trade\"",
+  "\"three kernel execution modes\" AND \"eager mode\"",
+  "\"graph mode\" AND \"MegaKernel mode\"",
+  "\"mode selection\" AND \"eager mode LLM inference compiler\"",
+  "\"graph mode LLM inference compiler\" AND \"MegaKernel mode LLM inference compiler\"",
+  "\"mode selection LLM inference compiler\" AND \"eager PyTorch\"",
+  "\"hardware trade\" AND \"CUDA Graphs\"",
+  "\"MegaKernel\" AND \"eager\"",
+  "\"hardware\" AND \"PyTorch\""
+]

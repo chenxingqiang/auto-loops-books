@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch04",
+  "chapter_title": "CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 46,
+  "catalog_tier_a": 18,
+  "binding_count": 147,
+  "quality_binding_count": 147,
+  "sentence_count": 237,
+  "claim_sentence_count": 227,
+  "unbound_claim_sentences": 80,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 80,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

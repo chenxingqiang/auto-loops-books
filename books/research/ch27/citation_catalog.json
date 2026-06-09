@@ -1,0 +1,988 @@
+{
+  "chapter_id": "ch27",
+  "timestamp": "2026-06-10T02:46:56.386343",
+  "min_papers": 25,
+  "paper_count": 63,
+  "sentence_count": 226,
+  "binding_count": 225,
+  "papers": [
+    {
+      "bib_key": "pasupuleti2026aihardwarecodesign",
+      "title": "AI Hardware Co-Design for Green Computing, Photonic Acceleration and Sustainable Data Centres",
+      "link": "https://doi.org/10.62311/nesx/rb2m-978-81-686966-8-6",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 156,
+      "matched_keywords": [
+        "edge cloud",
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "cloud",
+        "co-design",
+        "edge",
+        "hardware",
+        "constraints",
+        "future",
+        "miss",
+        "treat"
+      ],
+      "reference": "Murali Krishna Pasupuleti (2026). AI Hardware Co-Design for Green Computing, Photonic Acceleration and Sustainable Data Centres. Retrieved from https://doi.org/10.62311/nesx/rb2m-978-81-686966-8-6",
+      "abstract": "Abstract:\nThis academic manuscript develops an integrated framework for AI hardware co-design in green computing, photonic acceleration and sustainable data-centre transformation. It argues that the future of artificial intelligence infrastructure depends on coordinated decisions across algorithms, accelerators, memory systems, optical interconnects, scheduling policies, cooling systems, carbon accounting and institutional governance. The book advances a cross-layer research design that treats energy, latency, throughput, thermal behaviour, reliability and emissions as jointly modelled outcomes rather than separate engineering indicators. It integrates statistical modelling, causal inference, machine learning, MLOps, policy-as-code and sectoral governance to produce reproducible frameworks",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2019whenneuralarchitec",
+      "title": "When Neural Architecture Search Meets Hardware Implementation: from Hardware Awareness to Co-Design",
+      "link": "https://doi.org/10.1109/isvlsi.2019.00014",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Xinyi Zhang, Weiwen Jiang, et al. (2019). When Neural Architecture Search Meets Hardware Implementation: from Hardware Awareness to Co-Design. Retrieved from https://doi.org/10.1109/isvlsi.2019.00014",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024scorchneuralarchit",
+      "title": "SCORCH: Neural Architecture Search and Hardware Accelerator Co-design with Reinforcement Learning",
+      "link": "https://doi.org/10.1109/isqed60706.2024.10528756",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Siqin Liu, Avinash Karanth (2024). SCORCH: Neural Architecture Search and Hardware Accelerator Co-design with Reinforcement Learning. Retrieved from https://doi.org/10.1109/isqed60706.2024.10528756",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "massolino2020acompactandscalabl",
+      "title": "A Compact and Scalable Hardware/Software Co-design of SIKE",
+      "link": "https://doi.org/10.46586/tches.v2020.i2.245-271",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Pedro Maat C. Massolino, Patrick Longa, et al. (2020). A Compact and Scalable Hardware/Software Co-design of SIKE. Retrieved from https://doi.org/10.46586/tches.v2020.i2.245-271",
+      "abstract": "We present efficient and compact hardware/software co-design implementations of the Supersingular Isogeny Key Encapsulation (SIKE) protocol on field-programmable gate arrays (FPGAs). In order to be better equipped for different post-quantum scenarios, our architectures were designed to feature high-flexibility by covering all the currently available parameter sets and with support for primes up to 1016 bits. In particular, any of the current SIKE parameters equivalent to the post-quantum security of AES-128/192/256 and SHA3-256 can be selected and run on-the-fly. This security scalability property, together with the small footprint and efficiency of our architectures, makes them ideal for embedded applications in a post-quantum world. In addition, the proposed implementations exhibit regul",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ghelamallah2024retractedfpgabased",
+      "title": "RETRACTED: FPGA-based Hardware/Firmware Co-Design for Real-Time Radiometric Correction Onboard Microsatellite",
+      "link": "https://doi.org/10.21203/rs.3.rs-4231530/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware",
+        "real"
+      ],
+      "reference": "Youcef GHELAMALLAH., Azzeddine RACHEDI (2024). RETRACTED: FPGA-based Hardware/Firmware Co-Design for Real-Time Radiometric Correction Onboard Microsatellite. Retrieved from https://doi.org/10.21203/rs.3.rs-4231530/v1",
+      "abstract": "Abstract\nThe authors have requested that this preprint be removed from Research Square.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pasupuleti2025fastfashionvsluxur",
+      "title": "Fast Fashion vs. Luxury:: AI-Powered Consumer Preferences and Future Trends",
+      "link": "https://doi.org/10.62311/nesx/rb49",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "api",
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Murali Krishna Pasupuleti (2025). Fast Fashion vs. Luxury:: AI-Powered Consumer Preferences and Future Trends. Retrieved from https://doi.org/10.62311/nesx/rb49",
+      "abstract": "Abstract:\nThis book explores the dynamic interplay between fast fashion and luxury fashion in the age of artificial intelligence (AI), focusing on how data-driven technologies are reshaping consumer behavior, brand strategies, and future trends. Drawing on insights from consumer psychology, branding theory, and AI applications in retail, the chapters uncover how algorithms influence personalization, purchasing patterns, and emotional brand engagement across market segments. It analyzes the emergence of predictive analytics in product design and demand forecasting, the role of AI in sustainability narratives, and the changing definitions of exclusivity in a digitally democratized marketplace. Case studies and sectoral comparisons contextualize the contrasting appeal of affordability versus ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "xie2019blackcomb2hardware",
+      "title": "Blackcomb2: Hardware-Software Co-design for Nonvolatile Memory in Exascale Systems",
+      "link": "https://doi.org/10.2172/1485357",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Yuan Xie (2019). Blackcomb2: Hardware-Software Co-design for Nonvolatile Memory in Exascale Systems. Retrieved from https://doi.org/10.2172/1485357",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chakraborty2019hardwaresoftwareco",
+      "title": "Hardware-Software Co-Design Based Obfuscation of Hardware Accelerators",
+      "link": "https://doi.org/10.1109/isvlsi.2019.00104",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Abhishek Chakraborty, Ankur Srivastava (2019). Hardware-Software Co-Design Based Obfuscation of Hardware Accelerators. Retrieved from https://doi.org/10.1109/isvlsi.2019.00104",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "skliarova2019hardwaresoftwareco",
+      "title": "Hardware/Software Co-design",
+      "link": "https://doi.org/10.1007/978-3-030-20721-2_6",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Iouliia Skliarova, Valery Sklyarov (2019). Hardware/Software Co-design. Retrieved from https://doi.org/10.1007/978-3-030-20721-2_6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tampouratzis2022handsonhardwaresof",
+      "title": "Hands on Hardware / Software Co-Design",
+      "link": "https://doi.org/10.1201/9781003338390-9",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Nikolaos Tampouratzis (2022). Hands on Hardware / Software Co-Design. Retrieved from https://doi.org/10.1201/9781003338390-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yang2019ahighlyintegratedh",
+      "title": "A Highly Integrated Hardware/Software Co-Design and Co-Verification Platform",
+      "link": "https://doi.org/10.1109/mdat.2018.2841029",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Shufan Yang, Zheqi Yu (2019). A Highly Integrated Hardware/Software Co-Design and Co-Verification Platform. Retrieved from https://doi.org/10.1109/mdat.2018.2841029",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2023ahardwareandsoftwa",
+      "title": "A Hardware and Software Co-design Framework for Energy Efficient Neuromorphic Systems",
+      "link": "https://doi.org/10.2172/1985762",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Hai Li, Brady Taylor (2023). A Hardware and Software Co-design Framework for Energy Efficient Neuromorphic Systems. Retrieved from https://doi.org/10.2172/1985762",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2021hardwaresoftwareco",
+      "title": "Hardware/Software Co-Design using ZYNQ SoC",
+      "link": "https://doi.org/10.31838/jvcs/03.01.03",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": " (2021). Hardware/Software Co-Design using ZYNQ SoC. Retrieved from https://doi.org/10.31838/jvcs/03.01.03",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dubey2026hardwaresoftwareco",
+      "title": "Hardware-Software Co-design Implementation of 32 bit RISC V",
+      "link": "https://doi.org/10.1109/cipher70417.2026.11523931",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Nihali Dubey, Dheeraj Kumar Sharma (2026). Hardware-Software Co-design Implementation of 32 bit RISC V. Retrieved from https://doi.org/10.1109/cipher70417.2026.11523931",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "a2025reviewonhardwareac",
+      "title": "Review on Hardware Accelerator Hardware Software Co-Design for Machine Learning",
+      "link": "https://doi.org/10.1109/i-pact65952.2025.11307887",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "VedanthSrivatson A, Sivanantham Sathasivam, Prakash Ramachandran (2025). Review on Hardware Accelerator Hardware Software Co-Design for Machine Learning. Retrieved from https://doi.org/10.1109/i-pact65952.2025.11307887",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schreiber2018blackcomb2hardware",
+      "title": "Blackcomb 2: Hardware-Software Co-design for Non-Volatile Memory in Exascale Systems",
+      "link": "https://doi.org/10.2172/1469892",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Robert Schreiber, Harumi Kuno (2018). Blackcomb 2: Hardware-Software Co-design for Non-Volatile Memory in Exascale Systems. Retrieved from https://doi.org/10.2172/1469892",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shang2020hardwaresoftwareco",
+      "title": "Hardware/Software Co-design for Evolvable Hardware by Genetic Algorithm",
+      "link": "https://doi.org/10.1109/icaiis49377.2020.9194828",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Qianyi Shang, Lijun Chen, Ruoxiong Tong (2020). Hardware/Software Co-design for Evolvable Hardware by Genetic Algorithm. Retrieved from https://doi.org/10.1109/icaiis49377.2020.9194828",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "manohar2022hardwaresoftwareco",
+      "title": "Hardware/software Co-design for Neuromorphic Systems",
+      "link": "https://doi.org/10.1109/cicc53496.2022.9772863",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Rajit Manohar (2022). Hardware/software Co-design for Neuromorphic Systems. Retrieved from https://doi.org/10.1109/cicc53496.2022.9772863",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "morshed2021embeddedsystemsaha",
+      "title": "Embedded Systems – A Hardware-Software Co-Design Approach",
+      "link": "https://doi.org/10.1007/978-3-030-66808-2",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Bashir I Morshed (2021). Embedded Systems – A Hardware-Software Co-Design Approach. Retrieved from https://doi.org/10.1007/978-3-030-66808-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gao2026topologyoptimizati",
+      "title": "Topology-Optimization-Guided Hardware-Control Co-Design Framework for Lightweight Precision Motion Systems",
+      "link": "https://doi.org/10.2139/ssrn.6556644",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Junnan Gao, Jingjie Wu, Lei Zhou (2026). Topology-Optimization-Guided Hardware-Control Co-Design Framework for Lightweight Precision Motion Systems. Retrieved from https://doi.org/10.2139/ssrn.6556644",
+      "abstract": "The development of precision motion stages with light moving weight and excellent control capability is critical for a wide range of high-tech applications. While over-actuation strategies have demonstrated excellent performances, existing approaches rely on heuristic structural designs and typically only regulate the fundamental flexible mode, which can limit system performance  and generalizability. To address these issues, this paper proposes a novel topology-optimization (TO)-guided hardware-control co-design framework for lightweight over-actuated precision motion systems. The proposed approach utilizes TO for structural concept exploration, followed by sequential stage structure shape and feedback controller optimization. The framework is evaluated by the design optimization for a ma",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "wolf2022sessiondetailsaddr",
+      "title": "Session details: Addressing Sensor Security through Hardware/Software Co-Design",
+      "link": "https://doi.org/10.1145/3578428",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Marilyn Wolf (2022). Session details: Addressing Sensor Security through Hardware/Software Co-Design. Retrieved from https://doi.org/10.1145/3578428",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liao2026acceleratingpostqu",
+      "title": "Accelerating Post-Quantum Cryptography via LLM-Driven Hardware-Software Co-Design",
+      "link": "https://doi.org/10.1109/isqed69900.2026.11534751",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ],
+      "reference": "Yuchao Liao, Tosiron Adegbija, Roman Lysecky (2026). Accelerating Post-Quantum Cryptography via LLM-Driven Hardware-Software Co-Design. Retrieved from https://doi.org/10.1109/isqed69900.2026.11534751",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rahman2025cyberaitrends",
+      "title": "Cyber AI Trends",
+      "link": "https://doi.org/10.4018/979-8-3373-0543-1.ch010",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "api",
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Mir Mehedi Rahman, Sazzad Hossain, et al. (2025). Cyber AI Trends. Retrieved from https://doi.org/10.4018/979-8-3373-0543-1.ch010",
+      "abstract": "Generative Artificial Intelligence (AI) is opening new paths in the detection and prevention of cyberbullying. As we know, AI is shaping and improving the future of cyber, industry, automation, manufacturing, healthcare etc. with challenges of privacy concerns, job losses issues, and increased rules. This chapter explores future trends in AI-driven tools designed to reduce online bullying including various cybercrime across social media platforms, messaging apps, and other digital platforms. Ethical concerns like security and privacy, fairness, and avoiding bias are also discussed, aiming to ensure that AI tools are used responsibly and transparently. By combining technical advancements with an understanding of social impact, this chapter presents a vision for AI systems that create safer,",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vatta2026futuretrendsinaidr",
+      "title": "Future trends in AI-driven misinformation detection and prevention",
+      "link": "https://doi.org/10.1201/9781003626558-17",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Sonia Vatta, Jasmeet Singh Sobti (2026). Future trends in AI-driven misinformation detection and prevention. Retrieved from https://doi.org/10.1201/9781003626558-17",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "schiff2025futuretrendsinglob",
+      "title": "Future Trends in Global AI Governance",
+      "link": "https://doi.org/10.2139/ssrn.5343797",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Daniel Schiff (2025). Future Trends in Global AI Governance. Retrieved from https://doi.org/10.2139/ssrn.5343797",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "catania2021emergingtrendsandf",
+      "title": "Emerging Trends and Future Directions for AI in Immunology",
+      "link": "https://doi.org/10.1201/9781003137931-6",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Louis J. Catania (2021). Emerging Trends and Future Directions for AI in Immunology. Retrieved from https://doi.org/10.1201/9781003137931-6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "p2025currentandfuturetr",
+      "title": "Current and Future Trends in Maritime AI",
+      "link": "https://doi.org/10.24868/11233",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Riley, J P, Rajabally, E (2025). Current and Future Trends in Maritime AI. Retrieved from https://doi.org/10.24868/11233",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dey2026futuretrendsinaipo",
+      "title": "Future Trends in AI-Powered Language Education",
+      "link": "https://doi.org/10.1201/9781003659921-15",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Sandip Dey (2026). Future Trends in AI-Powered Language Education. Retrieved from https://doi.org/10.1201/9781003659921-15",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "uthman2025thefutureofexplain",
+      "title": "The Future of Explainable AI in Cybersecurity: Trends and Innovations",
+      "link": "https://doi.org/10.2139/ssrn.5140433",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Hamzah Uthman (2025). The Future of Explainable AI in Cybersecurity: Trends and Innovations. Retrieved from https://doi.org/10.2139/ssrn.5140433",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "ranjan2025aiagentsfuturetren",
+      "title": "AI Agents: Future Trends in Enterprise AI",
+      "link": "https://doi.org/10.1007/979-8-8688-1542-3_9",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Sumit Ranjan, Divya Chembachere, Lanwin Lobo (2025). AI Agents: Future Trends in Enterprise AI. Retrieved from https://doi.org/10.1007/979-8-8688-1542-3_9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2025futuretrendsingene",
+      "title": "Future Trends in Generative AI Security",
+      "link": "https://doi.org/10.1002/9781394368532.ch8",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": " (2025). Future Trends in Generative AI Security. Retrieved from https://doi.org/10.1002/9781394368532.ch8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "darnell2026aiandfuturetrends",
+      "title": "AI and Future Trends",
+      "link": "https://doi.org/10.4135/9798348856502",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Jamey A. Darnell (2026). AI and Future Trends. Retrieved from https://doi.org/10.4135/9798348856502",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "thakur2026futuretrendsandinn",
+      "title": "Future Trends and Innovations in AI",
+      "link": "https://doi.org/10.1201/9781003637301-11",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Reena Thakur, Nischal Puri, Pradnya Borkar (2026). Future Trends and Innovations in AI. Retrieved from https://doi.org/10.1201/9781003637301-11",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "berton2026futuretrendsinrhel",
+      "title": "Future Trends in RHEL AI",
+      "link": "https://doi.org/10.1007/979-8-8688-1901-8_8",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Luca Berton (2026). Future Trends in RHEL AI. Retrieved from https://doi.org/10.1007/979-8-8688-1901-8_8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ching2025futureperspectives",
+      "title": "Future Perspectives and Trends in AI-Creative Collaborations",
+      "link": "https://doi.org/10.1201/9781003533016-9",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Vivian Ching, Dinesh Mothi (2025). Future Perspectives and Trends in AI-Creative Collaborations. Retrieved from https://doi.org/10.1201/9781003533016-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cynthia2025challengesandfutur",
+      "title": "Challenges and Future Trends in Implementing AI in Healthcare",
+      "link": "https://doi.org/10.1201/9781003481959-12",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Adanze Nge Cynthia (2025). Challenges and Future Trends in Implementing AI in Healthcare. Retrieved from https://doi.org/10.1201/9781003481959-12",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "aminabee2025futuretrendsinaipo",
+      "title": "Future Trends in AI-Powered Drug Discovery",
+      "link": "https://doi.org/10.4324/9781003616177-9",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Shaik Aminabee, Atmakuri Lakshmana Rao (2025). Future Trends in AI-Powered Drug Discovery. Retrieved from https://doi.org/10.4324/9781003616177-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "deckker2025theriseofaiindigit",
+      "title": "The Rise of AI in Digital Advertising: Trends, Challenges, and Future Directions",
+      "link": "https://doi.org/10.55248/gengpi.6.0325.1162",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Dinesh Deckker, Subhashini Sumanasekar (2025). The Rise of AI in Digital Advertising: Trends, Challenges, and Future Directions. Retrieved from https://doi.org/10.55248/gengpi.6.0325.1162",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dhanaraj2025futuretrendsanddir",
+      "title": "Future Trends and Directions in GenAI for Education",
+      "link": "https://doi.org/10.1201/9781003537359-11",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Rajesh Kumar Dhanaraj, Balasamy Krishnasamy, et al. (2025). Future Trends and Directions in GenAI for Education. Retrieved from https://doi.org/10.1201/9781003537359-11",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023proceedingsofthe20",
+      "title": "Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI",
+      "link": "https://doi.org/10.1145/3615338",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "edge",
+        "compiler",
+        "compilers"
+      ],
+      "reference": " (2023). Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI. Retrieved from https://doi.org/10.1145/3615338",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "levendovics2025futuretrendsairobo",
+      "title": "Future Trends: AI × Robot",
+      "link": "https://doi.org/10.1007/978-981-96-6635-5_14",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ],
+      "reference": "Renáta Levendovics, Tamás Levendovics, Tamás Haidegger (2025). Future Trends: AI × Robot. Retrieved from https://doi.org/10.1007/978-981-96-6635-5_14",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "morshed2021hardwaredesign",
+      "title": "Hardware Design",
+      "link": "https://doi.org/10.1007/978-3-030-66808-2_3",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ],
+      "reference": "Bashir I. Morshed (2021). Hardware Design. Retrieved from https://doi.org/10.1007/978-3-030-66808-2_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chauhan2025designofhardwareac",
+      "title": "Design of Hardware Accelerated Co-Processor for Neural Inference Computations",
+      "link": "https://doi.org/10.5220/0013921700004919",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ],
+      "reference": "Kushagra Chauhan, R. Nagadevi (2025). Design of Hardware Accelerated Co-Processor for Neural Inference Computations. Retrieved from https://doi.org/10.5220/0013921700004919",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023hardwaresoftwareco",
+      "title": "Hardware/Software Co‐Design for CNN Acceleration",
+      "link": "https://doi.org/10.1002/9781394171910.ch14",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ],
+      "reference": " (2023). Hardware/Software Co‐Design for CNN Acceleration. Retrieved from https://doi.org/10.1002/9781394171910.ch14",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 31,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "darwish2024geospatialaifuture",
+      "title": "Geospatial AI Future Perspectives",
+      "link": "https://doi.org/10.4018/979-8-3693-8054-3.ch011",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "future",
+        "ship"
+      ],
+      "reference": "Dina Darwish (2024). Geospatial AI Future Perspectives. Retrieved from https://doi.org/10.4018/979-8-3693-8054-3.ch011",
+      "abstract": "Geocomputation and geospatial artificial intelligence (GeoAI) play crucial roles in propelling geographic information science (GIS) and Earth observation into a new era. GeoAI has transformed conventional geospatial analysis and mapping, changing the approaches for comprehending and overseeing intricate human–natural systems. Nonetheless, challenges persist in multiple facets of geospatial applications concerning natural, built, and social environments, as well as in the integration of distinctive geospatial features into GeoAI models. At the same time, geospatial and Earth data play essential roles in geocomputation and GeoAI studies, as they can efficiently uncover geospatial patterns, factors, relationships, and decision-making processes. This chapter focuses on several topics related t",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "architecture"
+      ],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "architecture"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bhargava2023edgeaiempoweredblo",
+      "title": "Edge-AI-empowered blockchain",
+      "link": "https://doi.org/10.1201/9781003244592-16",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "edge"
+      ],
+      "reference": "Amitabh Bhargava, Deepshikha Bhargava, Ajay Rana (2023). Edge-AI-empowered blockchain. Retrieved from https://doi.org/10.1201/9781003244592-16",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nijhawan2023edgeaitoolsandtech",
+      "title": "Edge-AI tools and techniques for healthcare",
+      "link": "https://doi.org/10.1201/9781003244592-2",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "edge"
+      ],
+      "reference": "Rahul Nijhawan, Sunpreet Bhatia (2023). Edge-AI tools and techniques for healthcare. Retrieved from https://doi.org/10.1201/9781003244592-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dadheech2026theimpactofaionhum",
+      "title": "The Impact of AI on Human-Machine Collaboration: Defining the Future of Work with AI",
+      "link": "https://doi.org/10.1201/9781003592204-11",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "future"
+      ],
+      "reference": "Shaloo Dadheech (2026). The Impact of AI on Human-Machine Collaboration: Defining the Future of Work with AI. Retrieved from https://doi.org/10.1201/9781003592204-11",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "doan2024artificialintellig",
+      "title": "Artificial Intelligence (AI) in Tourism",
+      "link": "https://doi.org/10.1108/978-1-83753-970-320241001",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "real"
+      ],
+      "reference": "Seden Doğan, İlayda Zeynep Niyet (2024). Artificial Intelligence (AI) in Tourism. Retrieved from https://doi.org/10.1108/978-1-83753-970-320241001",
+      "abstract": "Abstract\nArtificial Intelligence (AI) has revolutionised the tourism industry, offering personalised experiences and streamlining operations. AI provides customised recommendations for travellers through data analysis and machine learning, making their journeys more meaningful. It has also improved efficiency through automated processes, chatbots and enhanced security measures. AI's ability to analyse large volumes of data enables tourism organisations to make data-driven decisions and target their marketing strategies effectively. One of the most notable contributions of AI in tourism is its ability to offer personalised recommendations. By analysing vast travel history, preferences and online behaviour, AI systems can provide tailored suggestions for destinations, accommodations, activit",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 35,
+    "A": 25,
+    "C": 3
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:43.100893"
+}

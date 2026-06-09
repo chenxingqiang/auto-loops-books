@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch26",
+  "chapter_title": "Production Deployment and Engineering Best Practices",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 62,
+  "catalog_tier_a": 14,
+  "binding_count": 107,
+  "quality_binding_count": 107,
+  "sentence_count": 271,
+  "claim_sentence_count": 271,
+  "unbound_claim_sentences": 164,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 51,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

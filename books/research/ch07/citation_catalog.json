@@ -1,0 +1,917 @@
+{
+  "chapter_id": "ch07",
+  "timestamp": "2026-06-10T02:45:27.419686",
+  "min_papers": 25,
+  "paper_count": 61,
+  "sentence_count": 266,
+  "binding_count": 213,
+  "papers": [
+    {
+      "bib_key": "asada2020roadblocksofiopara",
+      "title": "Roadblocks of I/O Parallelization: Removing H/W Contentions by Static Role Assignment in VNFs",
+      "link": "https://doi.org/10.1109/cloudnet51028.2020.9335803",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "assignment"
+      ],
+      "reference": "Masahiro Asada, Ryota Kawashima, et al. (2020). Roadblocks of I/O Parallelization: Removing H/W Contentions by Static Role Assignment in VNFs. Retrieved from https://doi.org/10.1109/cloudnet51028.2020.9335803",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yang2024verticallyresolved",
+      "title": "Vertically resolved analysis of the Madden-Julian Oscillation highlights the role of convective transport of moist static energy",
+      "link": "https://doi.org/10.22541/essoar.171415889.93835700/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production",
+        "surface"
+      ],
+      "reference": "Da Yang, Lin Yao, Walter Hannah (2024). Vertically resolved analysis of the Madden-Julian Oscillation highlights the role of convective transport of moist static energy. Retrieved from https://doi.org/10.22541/essoar.171415889.93835700/v1",
+      "abstract": "We simulate the Madden-Julian oscillation (MJO) over an aquaplanet with uniform surface temperature using the multiscale modeling framework (MMF) configuration of the Energy Exascale Earth System Model (E3SM-MMF). The model produces MJO-like features that have a similar spatial structure and propagation behavior to the observed MJO. To explore the processes involved in the propagation and maintenance of these MJO-like features, we perform a vertically resolved moist static energy (MSE) analysis for the MJO. Unlike the column-integrated MSE analysis, our method emphasizes the local production of MSE variance and quantifies how individual physical processes amplify and propagate the MJO’s characteristic vertical structure. We find that radiation, convection, and boundary layer processes all ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chi2024essaysonstaticandd",
+      "title": "Essays on Static and Dynamic Preferential Trade Agreement Formation: Role of Political Economy and Scale Economies",
+      "link": "https://doi.org/10.32920/25178651",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production"
+      ],
+      "reference": "Eric Conglin Chi (2024). Essays on Static and Dynamic Preferential Trade Agreement Formation: Role of Political Economy and Scale Economies. Retrieved from https://doi.org/10.32920/25178651",
+      "abstract": "<p>This dissertation focuses on the static and dynamic formation of preferential trade agreements (PTAs) and examines the implications of (i) political pressures from both exporting and import competing sectors and (ii) varying degree of (dis)economies of scale in production for the equilibrium trade agreements. We use a three country model under both perfectly and imperfectly competitive settings. We endogenize trade agreement formation in static and dynamic settings.</p>\n<p>In the second and third chapters, governments are pressurized from exporting and import competing sectors. To this end, we propose a relatively flexible trade model where countries can be a sole exporter, a sole importer, a competing exporter in some sectors and a competing importer in other sectors. In chapter 2, usi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sakai2026mechanismsofrapide",
+      "title": "Mechanisms of Rapid Entrainment and Acceleration in Landslide-Initiated Debris Flows: The Role of Static Liquefaction",
+      "link": "https://doi.org/10.5194/egusphere-egu26-10193",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "surface"
+      ],
+      "reference": "Naoki Sakai (2026). Mechanisms of Rapid Entrainment and Acceleration in Landslide-Initiated Debris Flows: The Role of Static Liquefaction. Retrieved from https://doi.org/10.5194/egusphere-egu26-10193",
+      "abstract": "IntroductionLandslide-initiated debris flows in post-earthquake settings often exhibit explosive volume growth (bulking) and unexpected acceleration, causing devastation extending far beyond the initial failure footprint. Here, we apply the concept of instantaneous base liquefaction to interpret the catastrophic transition from continuum slope failure to fluidized debris flow. We hypothesize that when a collapsing soil mass overrides a loose, saturated basal layer, it imposes rapid, largely undrained loading. This loading triggers static liquefaction (distinct from seismic cyclic liquefaction) in the runout path, effectively creating a low-resistance basal layer that facilitates deep-seated entrainment and rapid acceleration.  MethodologyTo test this hypothesis, we re-analyzed data from la",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "mantovani2019mechanismofactiono",
+      "title": "Mechanism of Action of Extremely Low Frequency or Static Magnetic Fields on Cells: Role of Oxidative Activation of TRPM2",
+      "link": "https://doi.org/10.20944/preprints201901.0168.v1",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production"
+      ],
+      "reference": "Bernardo Mantovani (2019). Mechanism of Action of Extremely Low Frequency or Static Magnetic Fields on Cells: Role of Oxidative Activation of TRPM2. Retrieved from https://doi.org/10.20944/preprints201901.0168.v1",
+      "abstract": "There have been a great number of investigations about the influence of weak magnetic fields on biological systems, such as isolated cells and whole organisms. This is also a subject of considerable medical concern since old epidemiologic observations have indicated a possible tumorigenic effect of these fields. Their mechanism of action, however, is not firmly established. A large number of biological effects of electromagnetic fields have been attributed either to the production of reactive oxygen species (ROS) or to the entrance Ca2+ in the cell. A new biochemical pathway is proposed that covers these two possibilities: the primary effect of the magnetic field would be by the mechanism of radical pairs resulting in the production of ROS; these could activate the ion channels TRPM2 produ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "simhi2019dissociatinggaitfr",
+      "title": "Dissociating gait from static appearance: A virtual reality study of the role of dynamic identity signatures in person recognition",
+      "link": "https://doi.org/10.31234/osf.io/39g5k",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "independent"
+      ],
+      "reference": "Noa Simhi, Galit Yovel (2019). Dissociating gait from static appearance: A virtual reality study of the role of dynamic identity signatures in person recognition. Retrieved from https://doi.org/10.31234/osf.io/39g5k",
+      "abstract": "Studies on person recognition have primarily examined recognition of static faces, presented on a computer screen at a close distance. Nevertheless, in naturalistic situations we typically see the whole dynamic person, often approaching from a distance. In such cases, facial information may be less clear, and the motion pattern of an individual, their dynamic identity signature (DIS), may be used for person recognition. Studies that examined the role of motion in person recognition, presented videos of people in motion. However, such stimuli do not allow for the dissociation of gait from face and body form, as different identities differ both in their gait and static appearance. To examine the contribution of gait in person recognition, independently from static appearance, we used a virtu",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "maithel2022roleofmoiststatice",
+      "title": "Role of Moist Static Energy Advection in Evolution of Convective Aggregation in Observations",
+      "link": "https://doi.org/10.5194/egusphere-egu22-11294",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Vijit Maithel, Larissa Back (2022). Role of Moist Static Energy Advection in Evolution of Convective Aggregation in Observations. Retrieved from https://doi.org/10.5194/egusphere-egu22-11294",
+      "abstract": "&lt;p&gt;Organization of convection in tropics exhibits a wide range of spatial and temporal scales on account of a complex maze of interactions between clouds, circulation, radiation, and moisture. Somewhere in that maze are also present the mechanisms responsible for the phenomenon of convective self-aggregation in idealized simulations. However, the exact role played by these self-aggregation mechanisms on organization of convection in the real world remains unclear including understanding when convection will aggregate further and when convection will disaggregate. Cloud radiative feedbacks have been found to be important for initiation and maintenance of self-aggregation in idealized modelling studies. In observations too, it has been shown that radiation varies linearly with convecti",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "dolader2026determinantsofperf",
+      "title": "Determinants of performance in CrossFit benchmarks involving repeated Olympic lifts_the role of neuromuscular capacity and static balance_DATASET",
+      "link": "https://doi.org/10.46661/rio.26531",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Ignacio Gómez Dolader (2026). Determinants of performance in CrossFit benchmarks involving repeated Olympic lifts_the role of neuromuscular capacity and static balance_DATASET. Retrieved from https://doi.org/10.46661/rio.26531",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pippi2020fromstaticevidence",
+      "title": "From static evidence to dynamic reality: the role of diffuse fractures",
+      "link": "https://doi.org/10.3997/2214-4609.2020622022",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "O. Pippi, A. Lavenu (2020). From static evidence to dynamic reality: the role of diffuse fractures. Retrieved from https://doi.org/10.3997/2214-4609.2020622022",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vergani2022isolatingtheroleof",
+      "title": "Isolating the role of bone lacunar morphology on static and fatigue fracture progression through numerical simulations",
+      "link": "https://doi.org/10.22541/au.165763640.08045170/v1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Laura Vergani, F. Buccino, Sara Bagherifard (2022). Isolating the role of bone lacunar morphology on static and fatigue fracture progression through numerical simulations. Retrieved from https://doi.org/10.22541/au.165763640.08045170/v1",
+      "abstract": "Currently the onset of bone damage and the interaction of the cracks\nwith the surrounding micro-architecture are still a black box. Motivated\nto address this issue, our research aims at isolating lacunar\nmorphological and densitometric effects on crack advancement under both\nstatic and cyclic loading conditions, by implementing static extended\nfinite element models (XFEM) and fatigue analyses. The effect of lacunar\npathological alterations on damage initiation and progression is\nevaluated; the results indicate that high lacunar density considerably\nreduces the mechanical strength of the specimens, resulting as the most\ninfluencing parameter among the studied ones. Lacunar size has lower\neffect on mechanical strength, reducing it by 2%. Additionally,\nspecific lacunar alignments play a key r",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kocaman2020theroleofstaticvar",
+      "title": "THE ROLE OF STATIC VAR COMPENSATOR AT REACTIVE POWER COMPENSATION",
+      "link": "https://doi.org/10.36222/ejt.659118",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Behçet KOCAMAN, Nurettin ABUT (2020). THE ROLE OF STATIC VAR COMPENSATOR AT REACTIVE POWER COMPENSATION. Retrieved from https://doi.org/10.36222/ejt.659118",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "babati2023theroleofimplement",
+      "title": "The Role of Implementation-Specific Static Analysis",
+      "link": "https://doi.org/10.1109/icosse58936.2023.00009",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Bence Babati, Norbert Pataki (2023). The Role of Implementation-Specific Static Analysis. Retrieved from https://doi.org/10.1109/icosse58936.2023.00009",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2022roleofstatictherap",
+      "title": "Role of Static Therapy Nurses in the Management of Gastrointestinal Tumor Surgery",
+      "link": "https://doi.org/10.47939/mh.v3i3(07).11",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": " (2022). Role of Static Therapy Nurses in the Management of Gastrointestinal Tumor Surgery. Retrieved from https://doi.org/10.47939/mh.v3i3(07).11",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "largavista2026staticwritingstyle",
+      "title": "Static Writing Style in Reaction Papers: The Role of Thematic Progression",
+      "link": "https://doi.org/10.47577/tssj.v83i1.13561",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Lota L. Largavista (2026). Static Writing Style in Reaction Papers: The Role of Thematic Progression. Retrieved from https://doi.org/10.47577/tssj.v83i1.13561",
+      "abstract": "This descriptive qualitative study described the defining characteristics of reaction papers written by college freshman writers in terms of theme markedness and theme types. Anchored on the combined frameworks of Danes’s (1978) three types of theme progression and Hawes’ (2014) subcategories to Danes’ constant progression, constant gap progression, constant type progression, and constant rheme progression, it further examined the thematic development patterns in reaction papers. Using purposeful sampling, 41 reaction papers for the topic, Wiring the Web by Gordon Brown served as data. Results revealed that student writers use numerous marked themes and variations in the theme choices of student writers. Their theme choices include topical, textual, existential, interrogative, interpersona",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sohrabi2023rejuvenationbycomp",
+      "title": "Rejuvenation by compressive elasto-static loading: The role of static stress on a Zr-based metallic glass",
+      "link": "https://doi.org/10.1016/j.jallcom.2022.167715",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "S. Sohrabi, B.Y. Sun, et al. (2023). Rejuvenation by compressive elasto-static loading: The role of static stress on a Zr-based metallic glass. Retrieved from https://doi.org/10.1016/j.jallcom.2022.167715",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dhingra2023roleofthreeparticl",
+      "title": "Role of three particle interactions in the determination of static pair correlation functions",
+      "link": "https://doi.org/10.1016/j.matpr.2023.02.215",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Grima Dhingra (2023). Role of three particle interactions in the determination of static pair correlation functions. Retrieved from https://doi.org/10.1016/j.matpr.2023.02.215",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tan2019rolebasedstaticdes",
+      "title": "Role-based Static Desensitization Protection Method",
+      "link": "https://doi.org/10.1109/isi.2019.8823514",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Hu Tan, Jianfei Chen, et al. (2019). Role-based Static Desensitization Protection Method. Retrieved from https://doi.org/10.1109/isi.2019.8823514",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yulduzkhan2025theroleofsimilesta",
+      "title": "THE ROLE OF SIMILE, STATIC SIMILE, METAPHOR AND COMPARISON IN UZBEK LINGUISTICS",
+      "link": "https://doi.org/10.29013/ejll-24-4-15-19",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Shukhratova Yulduzkhan (2025). THE ROLE OF SIMILE, STATIC SIMILE, METAPHOR AND COMPARISON IN UZBEK LINGUISTICS. Retrieved from https://doi.org/10.29013/ejll-24-4-15-19",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vishwakarma2026roleofanabsorberin",
+      "title": "Role of an absorber in reducing soil pressure on retaining structures under static loading conditions",
+      "link": "https://doi.org/10.1007/s12046-025-03032-1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Khushboo S Vishwakarma, Shruti Shukla (2026). Role of an absorber in reducing soil pressure on retaining structures under static loading conditions. Retrieved from https://doi.org/10.1007/s12046-025-03032-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nakano2020dynamicstictionwit",
+      "title": "Dynamic stiction without static friction: The role of friction vector rotation",
+      "link": "https://doi.org/10.1103/physreve.102.063001",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Ken Nakano, Valentin L. Popov (2020). Dynamic stiction without static friction: The role of friction vector rotation. Retrieved from https://doi.org/10.1103/physreve.102.063001",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anonymous2026topologicalphasetr",
+      "title": "Topological phase transitions by time-dependent electromagnetic fields in frustrated magnets: Role of dynamical and static magnetic fields",
+      "link": "https://doi.org/10.1103/mt2j-r57h",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Anonymous (2026). Topological phase transitions by time-dependent electromagnetic fields in frustrated magnets: Role of dynamical and static magnetic fields. Retrieved from https://doi.org/10.1103/mt2j-r57h",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rajput2026astaticbehaviourof",
+      "title": "A static behaviour of carbon-CNT-metal composite laminate: Role of interphase and waviness via micromechanics",
+      "link": "https://doi.org/10.1201/9781003770442-34",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Leeladhar Rajput, Prasun Jana (2026). A static behaviour of carbon-CNT-metal composite laminate: Role of interphase and waviness via micromechanics. Retrieved from https://doi.org/10.1201/9781003770442-34",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rgenes2024theroleofconstitut",
+      "title": "The Role of Constitutive Models in the Analysis of Static Liquefaction in Tailings Dams",
+      "link": "https://doi.org/10.2139/ssrn.4838522",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ],
+      "reference": "Erick Rógenes, Ian Paes, et al. (2024). The Role of Constitutive Models in the Analysis of Static Liquefaction in Tailings Dams. Retrieved from https://doi.org/10.2139/ssrn.4838522",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "taheriledari2022assignmentofstruct",
+      "title": "Assignment of structural domains in proteins using diffusion kernels on graphs",
+      "link": "https://doi.org/10.1186/s12859-022-04902-9",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "assignment",
+        "fusion",
+        "kernels"
+      ],
+      "reference": "Mohammad Taheri-Ledari, Amirali Zandieh, et al. (2022). Assignment of structural domains in proteins using diffusion kernels on graphs. Retrieved from https://doi.org/10.1186/s12859-022-04902-9",
+      "abstract": "AbstractThough proposing algorithmic approaches for protein domain decomposition has been of high interest, the inherent ambiguity to the problem makes it still an active area of research. Besides, accurate automated methods are in high demand as the number of solved structures for complex proteins is on the rise. While majority of the previous efforts for decomposition of 3D structures are centered on the developing clustering algorithms, employing enhanced measures of proximity between the amino acids has remained rather uncharted. If there exists a kernel function that in its reproducing kernel Hilbert space, structural domains of proteins become well separated, then protein structures can be parsed into domains without the need to use a complex clustering algorithm. Inspired by this id",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ahmadi2019thewarshipassignme",
+      "title": "THE WARSHIP ASSIGNMENT SCHEDULE USING INTEGER PROGRAMMING MODEL",
+      "link": "https://doi.org/10.37875/asro.v10i3.150",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "assignment",
+        "constraints",
+        "ship"
+      ],
+      "reference": "Ahmadi Ahmadi, Benny Sukandari, Agus Mahrowi (2019). THE WARSHIP ASSIGNMENT SCHEDULE USING INTEGER PROGRAMMING MODEL. Retrieved from https://doi.org/10.37875/asro.v10i3.150",
+      "abstract": "Scheduling is an assignment activity that deals with constraints. A number of events can occur in a period of time and location so that objective functions as close as possible can be fulfilled. In the hierarchy of decision making, scheduling is the last step before the start of an operation. Scheduling warship assignments in Kolinlamil are an interesting topic to discuss and find solutions to using mathematical methods. The process of the Kolinlamil warship assignment schedule was carried out to produce an annual shipbuilding schedule. This process not only requires fast follow-up, but also requires systematic and rigorous steps. Where the assignment schedule is a fairly complex combinatorial problem. While making the assignment schedule that is applied at this time is considered less acc",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "masri2021optimalpublicelect",
+      "title": "Optimal Public Electric Bus Fleet Charging Schedule with Solar and Energy Storage Considering Static and Dynamic Route Assignment",
+      "link": "https://doi.org/10.1109/ssci50451.2021.9660053",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ],
+      "reference": "Nicholas Masri, Mertcan Yetkin, et al. (2021). Optimal Public Electric Bus Fleet Charging Schedule with Solar and Energy Storage Considering Static and Dynamic Route Assignment. Retrieved from https://doi.org/10.1109/ssci50451.2021.9660053",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "srivastava2021understandingthero",
+      "title": "UNDERSTANDING THE ROLE OF MICRO-INTERROGATION FOR FRAMING ASSIGNMENT FREE MICRO-LECTURES",
+      "link": "https://doi.org/10.21125/inted.2021.1061",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "role",
+        "assignment"
+      ],
+      "reference": "Siddharth Srivastava, T.V. Prabhakar (2021). UNDERSTANDING THE ROLE OF MICRO-INTERROGATION FOR FRAMING ASSIGNMENT FREE MICRO-LECTURES. Retrieved from https://doi.org/10.21125/inted.2021.1061",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tang2023matchinginastatica",
+      "title": "Matching in a Static Assignment Model",
+      "link": "https://doi.org/10.2139/ssrn.4427177",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ],
+      "reference": "Xueli Tang, Lei Zhao, Shenghao Zhu (2023). Matching in a Static Assignment Model. Retrieved from https://doi.org/10.2139/ssrn.4427177",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "kayum2020efficientstaticwel",
+      "title": "Efficient Static Well Assignment in Parallel Reservoir Simulation",
+      "link": "https://doi.org/10.3997/2214-4609.202011935",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ],
+      "reference": "S. Kayum, M. Rogowski (2020). Efficient Static Well Assignment in Parallel Reservoir Simulation. Retrieved from https://doi.org/10.3997/2214-4609.202011935",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "feng2026daytodaydynamicsfo",
+      "title": "Day-to-Day Dynamics for Schedule-Based Transit Assignment Under Boarding Priority",
+      "link": "https://doi.org/10.2139/ssrn.6653738",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "assignment",
+        "constraints",
+        "ship"
+      ],
+      "reference": "Liyang Feng, Jun Xie, Jiayang Li (2026). Day-to-Day Dynamics for Schedule-Based Transit Assignment Under Boarding Priority. Retrieved from https://doi.org/10.2139/ssrn.6653738",
+      "abstract": "<div>\n Schedule-based transit assignment under vehicle capacity constraints and boarding priority admits two distinct equilibrium paradigms. In user equilibrium with implicit priority (UEIP), travelers' strategies are realized event--activity routes, and priority is represented indirectly through route availability. In user equilibrium with explicit priority (UEEP), travelers choose ex ante transit plans and departure times, while realized routes and costs are generated endogenously through an explicit loading process. Although both paradigms are well established, their day-to-day behavioral foundations and their relationship remain unclear. This paper develops two day-to-day dynamic models. In the realized-route space, we propose the available-capacity-constrained pairwise swapping dynami",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "salim2022graphkernelsbasedo",
+      "title": "Graph kernels based on optimal node assignment",
+      "link": "https://doi.org/10.1016/j.knosys.2022.108519",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "assignment",
+        "kernels"
+      ],
+      "reference": "Asif Salim, S.S. Shiju, S. Sumitra (2022). Graph kernels based on optimal node assignment. Retrieved from https://doi.org/10.1016/j.knosys.2022.108519",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kapetanakis2020assessmentschedule",
+      "title": "Assessment-schedule matching in unanchored indirect treatment comparisons of progression-free survival in cancer studies",
+      "link": "https://doi.org/10.2217/vjbm-2020-0003-media",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "schedule-free",
+        "treat"
+      ],
+      "reference": "Venediktos Kapetanakis, Murtuza Bharmal (2020). Assessment-schedule matching in unanchored indirect treatment comparisons of progression-free survival in cancer studies. Retrieved from https://doi.org/10.2217/vjbm-2020-0003-media",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "simpson2020staticepostersched",
+      "title": "Static ePoster Schedule Jun 7 2019 1:15 - 2:00",
+      "link": "https://doi.org/10.26226/morressier.5ce59b6cdc9313ca708e0148",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "static"
+      ],
+      "reference": "Janis Randall Simpson, Janis Randall Simpson (2020). Static ePoster Schedule Jun 7 2019 1:15 - 2:00. Retrieved from https://doi.org/10.26226/morressier.5ce59b6cdc9313ca708e0148",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "abdelali2024archivemanagements",
+      "title": "Archive Management Schedule And Their Role In Determining The Documents’ Life Cycle:, Management Schedule Of Judicial Archive Documents In Algeria",
+      "link": "https://doi.org/10.53284/2120-011-001-012",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "role"
+      ],
+      "reference": "Abdelhadi Abdelali (2024). Archive Management Schedule And Their Role In Determining The Documents’ Life Cycle:, Management Schedule Of Judicial Archive Documents In Algeria. Retrieved from https://doi.org/10.53284/2120-011-001-012",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mcaleavey2025static",
+      "title": "Static",
+      "link": "https://doi.org/10.5040/9781350579507.00000002",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "static"
+      ],
+      "reference": "Jimmy McAleavey (2025). Static. Retrieved from https://doi.org/10.5040/9781350579507.00000002",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "pilon2023networkandschedule",
+      "title": "Network and Schedule Planning, Aircraft Assignment",
+      "link": "https://doi.org/10.4324/9781003018810-9",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "Ricardo V. Pilon (2023). Network and Schedule Planning, Aircraft Assignment. Retrieved from https://doi.org/10.4324/9781003018810-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yan2020choicebasedairline",
+      "title": "Choice-Based Airline Schedule Design and Fleet Assignment: A Decomposition Approach",
+      "link": "https://doi.org/10.2139/ssrn.3513164",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "Chiwei Yan, Cynthia Barnhart, Vikrant Vaze (2020). Choice-Based Airline Schedule Design and Fleet Assignment: A Decomposition Approach. Retrieved from https://doi.org/10.2139/ssrn.3513164",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2018integratedschedule",
+      "title": "Integrated Schedule Design with the Itinerary‐based Fleet Assignment Model (ISD‐IFAM)",
+      "link": "https://doi.org/10.1002/9781119275909.ch19",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": " (2018). Integrated Schedule Design with the Itinerary‐based Fleet Assignment Model (ISD‐IFAM). Retrieved from https://doi.org/10.1002/9781119275909.ch19",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "laguardia2022universityclasssch",
+      "title": "University Class Schedule Assignment by a Tabu Search Algorithm",
+      "link": "https://doi.org/10.1109/iestec54539.2022.00119",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "José Javier Laguardia, Javier Antonio Flores (2022). University Class Schedule Assignment by a Tabu Search Algorithm. Retrieved from https://doi.org/10.1109/iestec54539.2022.00119",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "thiemann2023hamiltonianrenorma",
+      "title": "Hamiltonian renormalization. VII. Free fermions and doubler free kernels",
+      "link": "https://doi.org/10.1103/physrevd.108.125007",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ],
+      "reference": "T. Thiemann (2023). Hamiltonian renormalization. VII. Free fermions and doubler free kernels. Retrieved from https://doi.org/10.1103/physrevd.108.125007",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "david2018linearlypricedtime",
+      "title": "Linearly priced timed automata for the bus schedule assignment problem",
+      "link": "https://doi.org/10.1109/gol.2018.8378104",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "Balazs David, Mate Hegyhati, Miklos Kresz (2018). Linearly priced timed automata for the bus schedule assignment problem. Retrieved from https://doi.org/10.1109/gol.2018.8378104",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ulrich2021characteristicsofm",
+      "title": "Characteristics of Model-Free Pricing Kernels",
+      "link": "https://doi.org/10.2139/ssrn.3733838",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ],
+      "reference": "Maxim Ulrich, Simon Walther (2021). Characteristics of Model-Free Pricing Kernels. Retrieved from https://doi.org/10.2139/ssrn.3733838",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "lusher2019doesscheduleirregu",
+      "title": "Does schedule irregularity affect productivity? Evidence from random assignment into college classes",
+      "link": "https://doi.org/10.1016/j.labeco.2019.06.004",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "Lester Lusher, Vasil Yasenov, Phuc Luong (2019). Does schedule irregularity affect productivity? Evidence from random assignment into college classes. Retrieved from https://doi.org/10.1016/j.labeco.2019.06.004",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ghiani2023realtimeschedulead",
+      "title": "Real-Time Schedule Adjustments for Conflict-Free Vehicle Routing",
+      "link": "https://doi.org/10.2139/ssrn.4558530",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "schedule-free"
+      ],
+      "reference": "Gianpaolo Ghiani, Emanuela Guerriero, Tommaso Adamo (2023). Real-Time Schedule Adjustments for Conflict-Free Vehicle Routing. Retrieved from https://doi.org/10.2139/ssrn.4558530",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "elking2025anonperiodicpartic",
+      "title": "A Non-Periodic Particle Mesh Ewald Method for Radially Symmetric Kernels in Free Space",
+      "link": "https://doi.org/10.2139/ssrn.5230884",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ],
+      "reference": "Dennis  M. Elking (2025). A Non-Periodic Particle Mesh Ewald Method for Radially Symmetric Kernels in Free Space. Retrieved from https://doi.org/10.2139/ssrn.5230884",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "guo2024schedulefreerollin",
+      "title": "Schedule-Free Rolling",
+      "link": "https://doi.org/10.1007/978-981-99-2086-0_727",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "schedule-free"
+      ],
+      "reference": "Yuan Guo (2024). Schedule-Free Rolling. Retrieved from https://doi.org/10.1007/978-981-99-2086-0_727",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nagkoulis2022pumpingscheduleass",
+      "title": "Pumping schedule assignment using chromatic graphs to reduce groundwater pumping energy consumption",
+      "link": "https://doi.org/10.2166/ws.2022.343",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ],
+      "reference": "Nikolaos Nagkoulis, Yiannis N. Kontos, Konstantinos L. Katsifarakis (2022). Pumping schedule assignment using chromatic graphs to reduce groundwater pumping energy consumption. Retrieved from https://doi.org/10.2166/ws.2022.343",
+      "abstract": "Abstract\nIn this paper, groundwater pumping schedules are examined, in terms of pumping energy consumption minimization. Chromatic graphs are used for the first time to assign groundwater pumping schedules. Assuming that a finite number of users pumps from a common aquifer, we examine the following three pumping scenarios: (a) all users pump simultaneously, (b) users pump during one out of two different periods, (c) users pump during one out four different periods. A computational code, based on Theis equation, is constructed to calculate the drawdowns and, subsequently, the energy consumption, for various well locations, numbers of wells, flow rates, pumping period durations and aquifers' characteristics. We use nearest neighbor graphs and chromatic graphs to represent the interactions of",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 20,
+    "B": 32,
+    "C": 9
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:38.776465"
+}

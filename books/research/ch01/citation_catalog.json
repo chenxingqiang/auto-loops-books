@@ -1,0 +1,807 @@
+{
+  "chapter_id": "ch01",
+  "timestamp": "2026-06-10T02:44:47.350171",
+  "min_papers": 25,
+  "paper_count": 48,
+  "sentence_count": 155,
+  "binding_count": 145,
+  "papers": [
+    {
+      "bib_key": "chowdhury2026ioforllminferencea",
+      "title": "I/O for LLM Inference: A Survey of Storage and Memory Bottlenecks",
+      "link": "https://doi.org/10.21203/rs.3.rs-9036613/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 291,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "FlashAttention flash-decoding",
+        "memory not compute",
+        "prefill decode",
+        "kv cache optimization",
+        "decode latency LLM",
+        "prefill decode LLM",
+        "batch",
+        "decode",
+        "LLM",
+        "prefill",
+        "token",
+        "compute arithmetic",
+        "latency",
+        "attention",
+        "cache",
+        "FlashAttention",
+        "hardware-aware",
+        "HBM",
+        "LLM inference",
+        "memory",
+        "model",
+        "PagedAttention",
+        "throughput"
+      ],
+      "reference": "Rajarshi Chowdhury (2026). I/O for LLM Inference: A Survey of Storage and Memory Bottlenecks. Retrieved from https://doi.org/10.21203/rs.3.rs-9036613/v1",
+      "abstract": "Abstract\n\n                  Deploying Large Language Models at scale has shifted the dominant bottleneck from compute during training to memory and I/O during inference. As parameter counts reach hundreds of billions and context windows stretch past a million tokens, latency and throughput are limited not by arithmetic but by data movement across the memory hierarchy. This survey decomposes inference I/O into three flows---\n                  model weight I/O\n                  ,\n                  Key-Value (KV) cache I/O\n                  , and\n                  activation I/O\n                  ---and uses roofline analysis to map each optimization to the memory-hierarchy level it targets. We cover quantization, PagedAttention, FlashAttention, speculative decoding, KV cache compression, and",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 218,
+      "matched_keywords": [
+        "memory bandwidth bound decode",
+        "CUDA Graphs inference",
+        "batch",
+        "decode",
+        "LLM",
+        "memory bandwidth",
+        "batch-1",
+        "CUDA",
+        "GPU",
+        "graphs",
+        "h100",
+        "LLM inference",
+        "memory"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "fan2025ellieenergyefficie",
+      "title": "ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting",
+      "link": "https://doi.org/10.1109/asap65064.2025.00031",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 172,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill",
+        "LLM inference"
+      ],
+      "reference": "Haoyang Fan, Yi-Chien Lin, Viktor Prasanna (2025). ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting. Retrieved from https://doi.org/10.1109/asap65064.2025.00031",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kamath2025podascpttentionscp",
+      "title": "POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference",
+      "link": "https://doi.org/10.1145/3676641.3715996",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 172,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill",
+        "LLM inference"
+      ],
+      "reference": "Aditya K. Kamath, Ramya Prabhu, et al. (2025). POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference. Retrieved from https://doi.org/10.1145/3676641.3715996",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2025pdacca541tokenssll",
+      "title": "PDAcc: A 541 Tokens/s@Llama-1.2B Effective Throughput Prefill-Decode Disaggregated MCM-based Accelerator for Multi-task Large Language Model Applications",
+      "link": "https://doi.org/10.1109/a-sscc67472.2025.11349430",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 130,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "token",
+        "model",
+        "throughput"
+      ],
+      "reference": "Huanyu Wang, Yang Wang, et al. (2025). PDAcc: A 541 Tokens/s@Llama-1.2B Effective Throughput Prefill-Decode Disaggregated MCM-based Accelerator for Multi-task Large Language Model Applications. Retrieved from https://doi.org/10.1109/a-sscc67472.2025.11349430",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "qiao2026tellmeanefficiente",
+      "title": "TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs",
+      "link": "https://doi.org/10.1145/3748173.3779191",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 118,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ],
+      "reference": "Ye Qiao, Zhiheng Chen, et al. (2026). TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs. Retrieved from https://doi.org/10.1145/3748173.3779191",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "chen2026towardshighgoodput",
+      "title": "Towards High-Goodput LLM Serving with Prefill-decode Multiplexing",
+      "link": "https://doi.org/10.1145/3779212.3790236",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 118,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ],
+      "reference": "Yukang Chen, Weihao Cui, et al. (2026). Towards High-Goodput LLM Serving with Prefill-decode Multiplexing. Retrieved from https://doi.org/10.1145/3779212.3790236",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "tang2026tplatensorparallel",
+      "title": "TPLA: Tensor Parallel Latent Attention for Efficient Disaggregated Prefill &amp; Decode Inference",
+      "link": "https://doi.org/10.1145/3779212.3790237",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "attention",
+        "tensor"
+      ],
+      "reference": "Xiaojuan Tang, Fanxu Meng, et al. (2026). TPLA: Tensor Parallel Latent Attention for Efficient Disaggregated Prefill &amp; Decode Inference. Retrieved from https://doi.org/10.1145/3779212.3790237",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "recasens2025mindthememorygapun",
+      "title": "Mind the Memory Gap: Unveiling GPU Bottlenecks in Large-Batch LLM Inference",
+      "link": "https://doi.org/10.1109/cloud67622.2025.00036",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 98,
+      "matched_keywords": [
+        "batch",
+        "LLM",
+        "GPU",
+        "LLM inference",
+        "memory"
+      ],
+      "reference": "Pol G. Recasens, Ferran Agullo, et al. (2025). Mind the Memory Gap: Unveiling GPU Bottlenecks in Large-Batch LLM Inference. Retrieved from https://doi.org/10.1109/cloud67622.2025.00036",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2026reliabilityofllmin",
+      "title": "Reliability of LLM Inference Engines from a Static Perspective: Root Cause Analysis and Repair Suggestion via Natural Language Reports",
+      "link": "https://doi.org/10.3390/bdcc10020060",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 90,
+      "matched_keywords": [
+        "framework issues",
+        "LLM",
+        "framework",
+        "LLM inference",
+        "model",
+        "tensor",
+        "vLLM"
+      ],
+      "reference": "Hongwei Li, Yongjun Wang (2026). Reliability of LLM Inference Engines from a Static Perspective: Root Cause Analysis and Repair Suggestion via Natural Language Reports. Retrieved from https://doi.org/10.3390/bdcc10020060",
+      "abstract": "Large Language Model (LLM) inference engines are becoming critical system infrastructure, yet their increasing architectural complexity makes defects difficult to be diagnosed and repaired. Existing reliability studies predominantly focus on model behavior or training frameworks, leaving inference engine bugs underexplored, especially in settings where execution-based debugging is impractical. We present a static, issue-centric approach for automated root cause analysis and repair suggestion generation for LLM inference engines. Based solely on issue reports and developer discussions, we construct a real-world defect dataset and annotate each issue with a semantic root cause category and affected system module. Leveraging text-based representations, our framework performs root cause classi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2025decoupledanalysiso",
+      "title": "Decoupled Analysis of DVFS Effects in Prefill and Decode Stages of Large Language Model Inference",
+      "link": "https://doi.org/10.1109/ei268505.2025.11425606",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 90,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "model"
+      ],
+      "reference": "Lei Wang, Qinglai Guo (2025). Decoupled Analysis of DVFS Effects in Prefill and Decode Stages of Large Language Model Inference. Retrieved from https://doi.org/10.1109/ei268505.2025.11425606",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "song2025neuronmmhighperfor",
+      "title": "NeuronMM: High-Performance Matrix Multiplication for LLM Inference on AWS Trainium",
+      "link": "https://doi.org/10.22541/au.176463814.43517852/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 88,
+      "matched_keywords": [
+        "kernel",
+        "LLM",
+        "memory bandwidth",
+        "because",
+        "fusion",
+        "LLM inference",
+        "memory"
+      ],
+      "reference": "Dinghong Song, Jierui Xu, et al. (2025). NeuronMM: High-Performance Matrix Multiplication for LLM Inference on AWS Trainium. Retrieved from https://doi.org/10.22541/au.176463814.43517852/v1",
+      "abstract": "AI accelerators, customized to AI workloads, provide costeffective and high-performance solutions for training and inference. Trainium, an AI accelerator recently developed by Amazon Web Services (AWS), provides an attractive option for LLM training and inference through its heterogeneous architecture. However, leveraging Trainium architecture for high performance can be challenging because of its systolic array architecture and special requirement on data layout. In this paper, we design high-performance matrix multiplication (matmul), a critical compute kernel, for LLM inference on Trainium. We introduce a series of techniques customized to Trainium based on kernel fusion and novel caching strategies to reduce data movement across the software-managed memory hierarchy, maximize SRAM band",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "song2025neuronmmhighperfor_29",
+      "title": "NeuronMM: High-Performance Matrix Multiplicationfor LLM Inference on AWS Trainium",
+      "link": "https://doi.org/10.20944/preprints202511.1093.v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 88,
+      "matched_keywords": [
+        "kernel",
+        "LLM",
+        "memory bandwidth",
+        "because",
+        "fusion",
+        "LLM inference",
+        "memory"
+      ],
+      "reference": "Dinghong Song, Jierui Xu, et al. (2025). NeuronMM: High-Performance Matrix Multiplicationfor LLM Inference on AWS Trainium. Retrieved from https://doi.org/10.20944/preprints202511.1093.v1",
+      "abstract": "AI accelerators, customized to AI workloads, provide cost- effective and high-performance solutions for training and inference. Trainium, an AI accelerator recently developed by Amazon Web Services (AWS), provides an attractive op- tion for LLM training and inference through its heteroge- neous architecture. However, leveraging Trainium architec- ture for high performance can be challenging because of its systolic array architecture and special requirement on data layout. In this paper, we design high-performance ma- trix multiplication (matmul), a critical compute kernel, for LLM inference on Trainium. We introduce a series of tech- niques customized to Trainium based on kernel fusion and novel caching strategies to reduce data movement across the software-managed memory hierarchy, maximi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 81,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "LLM",
+        "YiRage",
+        "CPU",
+        "CUDA",
+        "LLM inference"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nakai2025efficientbatchproc",
+      "title": "Efficient Batch Processing for Private Cloud LLM Inference: Modeling and Performance Comparison",
+      "link": "https://doi.org/10.1109/globecom59602.2025.11432531",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "batch",
+        "LLM",
+        "LLM inference",
+        "model"
+      ],
+      "reference": "Hiroki Nakai, Yoshiaki Inoue, Tetsuya Takine (2025). Efficient Batch Processing for Private Cloud LLM Inference: Modeling and Performance Comparison. Retrieved from https://doi.org/10.1109/globecom59602.2025.11432531",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "attention",
+        "memory",
+        "model",
+        "PagedAttention"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "fukazawa2025llmbasedintermedia",
+      "title": "LLM-based Intermediate Interpretations for Predicting Nurse Stress and Its Causes from Step Count Data",
+      "link": "https://doi.org/10.21203/rs.3.rs-5799716/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "LLM",
+        "framework",
+        "HIP",
+        "model",
+        "step"
+      ],
+      "reference": "Yusuke Fukazawa, Megumi Kodaka (2025). LLM-based Intermediate Interpretations for Predicting Nurse Stress and Its Causes from Step Count Data. Retrieved from https://doi.org/10.21203/rs.3.rs-5799716/v1",
+      "abstract": "Abstract\nPurpose: This study aims to propose and evaluate a hybrid approach that combines Large Language Model (LLM)-based interpretation with machine learning (ML)-based prediction to estimate stress levels and their causes from step count data. The research addresses the gap in existing datasets that lack information on the underlying causes of stress. \nMethods: Step count data, stress assessments (QIDS score), and stress causes were collected from 30 nurses using six questionnaires rated on a 4-point Likert scale over eight days within one month. Two tasks were designed for evaluation: (1) assessing the contribution of intermediate interpretations to the accuracy of stress presence estimation and (2) validating the use of intermediate interpretations for identifying stress causes. BERT ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shen2025efficientllminfere",
+      "title": "Efficient LLM Inference on CPUs",
+      "link": "https://doi.org/10.1007/978-3-031-85747-8_3",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "LLM",
+        "CPU",
+        "LLM inference"
+      ],
+      "reference": "Haihao Shen, Hanwen Chang, et al. (2025). Efficient LLM Inference on CPUs. Retrieved from https://doi.org/10.1007/978-3-031-85747-8_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "attention",
+        "FlashAttention",
+        "memory"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2025llmpoweredautomate",
+      "title": "LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach",
+      "link": "https://doi.org/10.1109/iccvdm66874.2025.11290260",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Xiaoying Li (2025). LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach. Retrieved from https://doi.org/10.1109/iccvdm66874.2025.11290260",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lazuka2024llmpilotcharacteri",
+      "title": "LLM-Pilot: Characterize and Optimize Performance of your LLM Inference Services",
+      "link": "https://doi.org/10.1109/sc41406.2024.00022",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Malgorzata Lazuka, Andreea Anghel, Thomas Parnell (2024). LLM-Pilot: Characterize and Optimize Performance of your LLM Inference Services. Retrieved from https://doi.org/10.1109/sc41406.2024.00022",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "hisaharo2024optimizingllminfer",
+      "title": "Optimizing LLM Inference Clusters for Enhanced Performance and Energy Efficiency",
+      "link": "https://doi.org/10.36227/techrxiv.172348951.12175366/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Soka Hisaharo, Yuki Nishimura, Aoi Takahashi (2024). Optimizing LLM Inference Clusters for Enhanced Performance and Energy Efficiency. Retrieved from https://doi.org/10.36227/techrxiv.172348951.12175366/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "buchanan2026downloadpdfenhanci",
+      "title": "Download Pdf Enhancing LLM Performance: Efficacy, Fine-Tuning, and Inference Techniques by Peyman Passban, Andy Way, Mehdi Rezagholizadeh",
+      "link": "https://doi.org/10.55277/researchhub.e8bh1tw8.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Ryan Buchanan (2026). Download Pdf Enhancing LLM Performance: Efficacy, Fine-Tuning, and Inference Techniques by Peyman Passban, Andy Way, Mehdi Rezagholizadeh. Retrieved from https://doi.org/10.55277/researchhub.e8bh1tw8.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mason2026epubdownloadenhanc",
+      "title": "{epub download} Enhancing LLM Performance: Efficacy, Fine-Tuning, and Inference Techniques by Peyman Passban, Andy Way, Mehdi Rezagholizadeh",
+      "link": "https://doi.org/10.55277/researchhub.23vi5o66.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Bryan Mason (2026). {epub download} Enhancing LLM Performance: Efficacy, Fine-Tuning, and Inference Techniques by Peyman Passban, Andy Way, Mehdi Rezagholizadeh. Retrieved from https://doi.org/10.55277/researchhub.23vi5o66.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2026hybridcryptllmligh",
+      "title": "HybridCrypt-LLM: Lightweight Privacy for LLM Training and Inference",
+      "link": "https://doi.org/10.2139/ssrn.6017945",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Te Li, Yi Guo, Jiaojiao Fu (2026). HybridCrypt-LLM: Lightweight Privacy for LLM Training and Inference. Retrieved from https://doi.org/10.2139/ssrn.6017945",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "arya2024apreliminaryperfor",
+      "title": "A Preliminary Performance Analysis of LLM Inference on Edge Accelerators",
+      "link": "https://doi.org/10.1109/hipcw63042.2024.00069",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Mayank Arya, Yogesh Simmhan (2024). A Preliminary Performance Analysis of LLM Inference on Edge Accelerators. Retrieved from https://doi.org/10.1109/hipcw63042.2024.00069",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "pichlmeier2024performancecharact",
+      "title": "Performance Characterization of Expert Router for Scalable LLM Inference",
+      "link": "https://doi.org/10.1109/bigdata62323.2024.10826121",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Josef Pichlmeier, Philipp Ross, Andre Luckow (2024). Performance Characterization of Expert Router for Scalable LLM Inference. Retrieved from https://doi.org/10.1109/bigdata62323.2024.10826121",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2024llminferenceservin",
+      "title": "LLM Inference Serving: Survey of Recent Advances and Opportunities",
+      "link": "https://doi.org/10.1109/hpec62836.2024.10938426",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "reference": "Baolin Li, Yankai Jiang, et al. (2024). LLM Inference Serving: Survey of Recent Advances and Opportunities. Retrieved from https://doi.org/10.1109/hpec62836.2024.10938426",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "CUDA",
+        "graphs"
+      ],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "xue2025causalinferenceofr",
+      "title": "Causal Inference of Root Zone Soil Moisture Performance in Drought",
+      "link": "https://doi.org/10.5194/egusphere-egu25-82",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "HIP",
+        "layer",
+        "model",
+        "NPU"
+      ],
+      "reference": "Shouye Xue, Guocan Wu (2025). Causal Inference of Root Zone Soil Moisture Performance in Drought. Retrieved from https://doi.org/10.5194/egusphere-egu25-82",
+      "abstract": "Soil moisture plays a crucial role in surface hydrological processes and land–atmosphere interactions. It can influence vegetation growth directly, serving as a significant indicator for monitoring agricultural drought. However, spatially continuous datasets of root zone soil moisture rely on model simulations, introducing numerous uncertainties associated with model parameters and input data. Currently, multiple soil moisture products derived from model simulations exist, but their representation at spatial scales remains unclear. Moreover, their abilities to express soil–atmosphere and soil–vegetation interactions within land–atmosphere coupling are not understood, leading to divergent inclinations toward drought. This study investigates the performance of five soil moisture products, Eu",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "decode",
+        "attention",
+        "PyTorch"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mittal2025performanceoptimiz",
+      "title": "Performance Optimization of LLM-Based Agentic Workloads in Kubernetes Environments: Bottlenecks, Root Causes, and Solutions",
+      "link": "https://doi.org/10.36227/techrxiv.175695550.06231191/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Akshay Mittal, Goutam Tadi (2025). Performance Optimization of LLM-Based Agentic Workloads in Kubernetes Environments: Bottlenecks, Root Causes, and Solutions. Retrieved from https://doi.org/10.36227/techrxiv.175695550.06231191/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "eto2025llmperformancebott",
+      "title": "LLM Performance Bottlenecks on CGLA",
+      "link": "https://doi.org/10.1109/socc66126.2025.11235453",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Yu Eto, Takuto Ando, et al. (2025). LLM Performance Bottlenecks on CGLA. Retrieved from https://doi.org/10.1109/socc66126.2025.11235453",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yu2026precisionbottlenec",
+      "title": "Precision Bottlenecks and Sensitivity Analysis in LLM QuantizationLLM QUANTIZATION BOTTLENECKS",
+      "link": "https://doi.org/10.1145/3804601.3804620",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Jianqing Yu, Qingchun Meng, Bin Li (2026). Precision Bottlenecks and Sensitivity Analysis in LLM QuantizationLLM QUANTIZATION BOTTLENECKS. Retrieved from https://doi.org/10.1145/3804601.3804620",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2025enhancingllmperfor",
+      "title": "Enhancing LLM Performance",
+      "link": "https://doi.org/10.1007/978-3-031-85747-8",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": " (2025). Enhancing LLM Performance. Retrieved from https://doi.org/10.1007/978-3-031-85747-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024refillandprefillan",
+      "title": "Refill and prefill – an opportunity to drive loyalty",
+      "link": "https://doi.org/10.5040/9781399411226.0092",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "prefill"
+      ],
+      "reference": " (2024). Refill and prefill – an opportunity to drive loyalty. Retrieved from https://doi.org/10.5040/9781399411226.0092",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023decodev",
+      "title": "decode, v.",
+      "link": "https://doi.org/10.1093/oed/1327118759",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": " (2023). decode, v.. Retrieved from https://doi.org/10.1093/oed/1327118759",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020decodemap",
+      "title": "DeCODE Map",
+      "link": "https://doi.org/10.32388/enauou",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": " (2020). DeCODE Map. Retrieved from https://doi.org/10.32388/enauou",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "tensor"
+      ],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patria2024optimasiprediksisa",
+      "title": "Optimasi Prediksi Saham dengan Neural Network pada PT Xyz",
+      "link": "https://doi.org/10.51454/decode.v4i3.782",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "model"
+      ],
+      "reference": "Nusandika Patria (2024). Optimasi Prediksi Saham dengan Neural Network pada PT Xyz. Retrieved from https://doi.org/10.51454/decode.v4i3.782",
+      "abstract": "Penelitian ini bertujuan untuk mengoptimalkan prediksi harga saham di PT XYZ menggunakan Neural Network. Latar belakang penelitian ini berfokus pada kebutuhan perusahaan untuk model prediksi saham yang akurat, terutama mengingat fluktuasi yang disebabkan oleh faktor-faktor makroekonomi, seperti suku bunga, inflasi, dan nilai tukar. Metode tradisional dalam analisis saham sering kali tidak dapat menangkap kompleksitas pola dalam data saham, sehingga pendekatan berbasis kecerdasan buatan, seperti Neural Network, dipilih karena kemampuannya dalam memproses data yang kompleks dan non-linear. Metodologi yang digunakan mencakup pengumpulan data historis harga saham, volume perdagangan, suku bunga, inflasi, dan nilai tukar dari periode 2015 hingga 2017. Data tersebut kemudian diproses dengan tekn",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "maghfira2025kriptografihybridm",
+      "title": "Kriptografi Hybrid Menggunakan OTP dan ElGamal Pada Web EMIS",
+      "link": "https://doi.org/10.51454/decode.v5i2.1201",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "model"
+      ],
+      "reference": "Maghfira, Suhardi (2025). Kriptografi Hybrid Menggunakan OTP dan ElGamal Pada Web EMIS. Retrieved from https://doi.org/10.51454/decode.v5i2.1201",
+      "abstract": "Sistem yang berperan besar dalam pengelolaan data pendidikan di Indonesia adalah EMIS (Education Management Information System) yang proses loginnya menggunakan username, password dan verifikasi captcha dalam pengamanannya. Namun, keamanan captcha saja tidak cukup untuk mencegah terjadinya ancaman siber. Oleh karena itu, sistem ini membutuhkan lapisan keamanan tambahan agar tidak terjadi kebocoran data dan akses tidak sah. Dalam penelitian ini digunakanlah kriptografi hybrid One Time Pad (OTP) dan ElGamal yang menggabungkan dua jenis kriptografi yaitu simetris dan asimetris. Sistem akan otomatis menghasilkan kode OTP berupa 6 digit angka yang akan dienkripsi menggunakan One Time Pad. Lalu kunci dari One Time Pad akan dienkripsi lagi menggunakan ElGamal. Pengujian menggunakan Avalanche Effe",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 16,
+    "A": 30,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:35.754043"
+}

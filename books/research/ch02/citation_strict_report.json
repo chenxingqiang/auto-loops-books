@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch02",
+  "chapter_title": "Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 50,
+  "catalog_tier_a": 18,
+  "binding_count": 100,
+  "quality_binding_count": 100,
+  "sentence_count": 154,
+  "claim_sentence_count": 151,
+  "unbound_claim_sentences": 51,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 90,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

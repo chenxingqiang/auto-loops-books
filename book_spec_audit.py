@@ -276,7 +276,7 @@ def audit_chapter_gates(report: AuditReport) -> None:
 
     # ch03 in main.tex order
     main = (BOOKS / "main.tex").read_text(encoding="utf-8") if (BOOKS / "main.tex").exists() else ""
-    inputs = re.findall(r"\\input\{chapters/([^}]+)\}", main)
+    inputs = re.findall(r"\\input\{build/chapters/([^}]+)\}", main)
     outline_files = [s.filename for s in OUTLINE if (CHAPTERS / s.filename).exists()]
     if inputs != outline_files:
         report.add("P1", "build", "main.tex chapter order differs from OUTLINE file existence order")
@@ -290,7 +290,7 @@ def audit_main_tex(report: AuditReport) -> None:
     text = main.read_text(encoding="utf-8")
     for spec in OUTLINE:
         if (CHAPTERS / spec.filename).exists():
-            needle = f"\\input{{chapters/{spec.filename}}}"
+            needle = f"\\input{{build/chapters/{spec.filename}}}"
             if needle not in text:
                 report.add("P2", "build", f"main.tex missing \\input for {spec.chapter_id}")
 

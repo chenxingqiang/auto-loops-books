@@ -1,0 +1,16 @@
+[
+  "\"TMA Double-Buffer Pipelines and Async Movement\"",
+  "\"pipeline\" AND \"double-buffer\"",
+  "\"TMA\" AND \"Hopper\"",
+  "\"dma\" AND \"CPU\"",
+  "\"NPU\" AND \"dma\"",
+  "\"YiRage\" AND \"pipeline\"",
+  "\"TMA double-buffer pipelines and async movement\" AND \"CPU dma\"",
+  "\"GPU TMA\" AND \"NPU pipeline\"",
+  "\"pipeline theory\" AND \"YiRage pipeline gen\"",
+  "\"CPU dma LLM inference compiler\" AND \"GPU TMA LLM inference compiler\"",
+  "\"NPU pipeline LLM inference compiler\" AND \"pipeline theory LLM inference compiler\"",
+  "\"YiRage pipeline gen LLM inference compiler\" AND \"dma CPU\"",
+  "\"NPU dma\" AND \"pipeline double-buffer\"",
+  "\"TMA Hopper\" AND \"YiRage pipeline\""
+]

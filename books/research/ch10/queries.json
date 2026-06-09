@@ -1,0 +1,15 @@
+[
+  "\"Attention Online Softmax Optimization\"",
+  "\"online\" AND \"softmax\"",
+  "\"stable\" AND \"exp\"",
+  "\"GPU\" AND \"XDNA\"",
+  "\"fuse\" AND \"MegaKernel\"",
+  "\"attention online softmax optimization\" AND \"cross hardware\"",
+  "\"fusion boundary\" AND \"numerical stability\"",
+  "\"online softmax\" AND \"cross hardware LLM inference compiler\"",
+  "\"fusion boundary LLM inference compiler\" AND \"numerical stability LLM inference compiler\"",
+  "\"online softmax LLM inference compiler\" AND \"fuse MegaKernel\"",
+  "\"GPU XDNA\" AND \"stable exp\"",
+  "\"exp\" AND \"fuse\"",
+  "\"GPU\" AND \"MegaKernel\""
+]

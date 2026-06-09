@@ -1,0 +1,15 @@
+[
+  "\"Full Decoder MegaKernel Implementation\"",
+  "\"MegaKernel\" AND \"decoder\"",
+  "\"qkv\" AND \"attention\"",
+  "\"source\" AND \"implement\"",
+  "\"benchmark\" AND \"speedup\"",
+  "\"full decoder MegaKernel implementation\" AND \"benchmark results\"",
+  "\"MegaKernel structure\" AND \"qkv attn mlp\"",
+  "\"source walkthrough\" AND \"benchmark results LLM inference compiler\"",
+  "\"MegaKernel structure LLM inference compiler\" AND \"qkv attn mlp LLM inference compiler\"",
+  "\"source walkthrough LLM inference compiler\" AND \"benchmark speedup\"",
+  "\"MegaKernel decoder\" AND \"qkv attention\"",
+  "\"source implement\" AND \"attention\"",
+  "\"benchmark\" AND \"decoder\""
+]

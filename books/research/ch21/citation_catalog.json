@@ -1,0 +1,724 @@
+{
+  "chapter_id": "ch21",
+  "timestamp": "2026-06-10T02:46:25.441792",
+  "min_papers": 25,
+  "paper_count": 48,
+  "sentence_count": 346,
+  "binding_count": 345,
+  "papers": [
+    {
+      "bib_key": "ludmir2024parallaxacompilerf",
+      "title": "PARALLAX: A Compiler for Neutral Atom Quantum Computers under Hardware Constraints",
+      "link": "https://doi.org/10.1109/sc41406.2024.00079",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware",
+        "constraints"
+      ],
+      "reference": "Jason Ludmir, Tirthak Patel (2024). PARALLAX: A Compiler for Neutral Atom Quantum Computers under Hardware Constraints. Retrieved from https://doi.org/10.1109/sc41406.2024.00079",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "shibakov2026multimodelclinical",
+      "title": "Multi-Model Clinical Validation of an AI-Powered Biomarker Analysis Framework: A Cross-Vendor Benchmark on 4,018 NHANES Patients",
+      "link": "https://doi.org/10.64898/2026.02.13.26346284",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 75,
+      "matched_keywords": [
+        "benchmark",
+        "rating",
+        "analysis",
+        "independent",
+        "NPU",
+        "ship"
+      ],
+      "reference": "Dmitrii Shibakov (2026). Multi-Model Clinical Validation of an AI-Powered Biomarker Analysis Framework: A Cross-Vendor Benchmark on 4,018 NHANES Patients. Retrieved from https://doi.org/10.64898/2026.02.13.26346284",
+      "abstract": "Abstract\n\nBackground\nLarge language models (LLMs) show promise for clinical decision support, yet most validation studies evaluate single models, leaving questions about generalizability and vendor dependence unanswered. We assessed whether a standardized biomarker analysis framework maintains clinical-grade accuracy across multiple LLMs from independent providers.\n\n\nMethods\nWe developed a structured prompt-based framework for detecting eight clinical patterns (insulin resistance, diabetes, cardiovascular disease risk, chronic kidney disease risk, systemic inflammation, nutrient deficiency, liver risk, and anemia) from laboratory biomarkers. We evaluated five LLMs from four providers—Grok-3 (xAI), GPT-4o and GPT-4o-mini (OpenAI), Claude Haiku 4.5 (Anthropic), and Gemini 2.0 Flash (Google)—",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "awab2026comparativeanalysi",
+      "title": "Comparative Analysis of the Energy, Water and Carbon Costs of AI Hardware",
+      "link": "https://doi.org/10.2139/ssrn.6580964",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "hardware",
+        "analysis",
+        "GPU",
+        "NPU",
+        "production"
+      ],
+      "reference": "Syed Awab (2026). Comparative Analysis of the Energy, Water and Carbon Costs of AI Hardware. Retrieved from https://doi.org/10.2139/ssrn.6580964",
+      "abstract": "This paper examines the energy, water and carbon costs of AI hardware, expanding from current AI discourse to include AI hardware beyond GPUs: in-production ASICs, NPUs, FPGAs and emerging neuromorphic, biological and brain organoid, analogue, photonic/optical, probabilistic, thermodynamic and quantum. This paper finds that NVIDIA GPUs, the dominant AI hardware of choice, particularly for generative AI and large language models (LLMs), have vastly higher energy, water and carbon costs despite more efficient AI hardware existing in the realms of production and R&amp;D that have demonstrated better energy efficiencies and lower water footprint and carbon footprint. AI ASICs are upto 21 times faster, 10 times more energy efficient with 19 times lower carbon footprints than GPUs. Neuromorphic ",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "schmidt2024phdprojectcompiler",
+      "title": "Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI",
+      "link": "https://doi.org/10.1109/fccm60383.2024.00055",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ],
+      "reference": "Patrick Schmidt, Jürgen Becker (2024). Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI. Retrieved from https://doi.org/10.1109/fccm60383.2024.00055",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "khandelwal2022offloadingcompiler",
+      "title": "Offloading compiler to reduce pipeline dependencies through hardware interlocking by rebuilding MIPS",
+      "link": "https://doi.org/10.21203/rs.3.rs-2026609/v1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ],
+      "reference": "Rajat Khandelwal (2022). Offloading compiler to reduce pipeline dependencies through hardware interlocking by rebuilding MIPS. Retrieved from https://doi.org/10.21203/rs.3.rs-2026609/v1",
+      "abstract": "Abstract\nMIPS is a family of reduced instruction set computer (RISC) ISAs, developed by Prof. John Hennessey at the Stanford University in the early 80s. The goal was to develop a simple processor with hardware equipped to perform traditional five stage pipelining making a large room for general purpose registers. MIPS has a processor along with a coprocessor designed for floating point arithmetic and logic. \nHowever, MIPS uses software methods to avoid dependencies in its pipeline, hence the complete overload to generate NOPs in case of dependencies is done by the compiler. \nRISC aims for a simple processor with pipelining, if possible, making compiler development complex and tricky. The logic to avoid dependencies in the pipeline adds an additional layer of complexity to the compiler whi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yang2025automaticpowerelec",
+      "title": "Automatic Power Electronic PCB Layout Design Based on Generative AI: The Pathway Towards Next-Generation Hardware Compiler",
+      "link": "https://doi.org/10.1109/ecce-europe62795.2025.11238791",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ],
+      "reference": "Xiao Yang, Yu Xiao, et al. (2025). Automatic Power Electronic PCB Layout Design Based on Generative AI: The Pathway Towards Next-Generation Hardware Compiler. Retrieved from https://doi.org/10.1109/ecce-europe62795.2025.11238791",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bernardo2025compilerawareaihar",
+      "title": "Compiler-aware AI Hardware Design for Edge Devices",
+      "link": "https://doi.org/10.1145/3721888.3722095",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ],
+      "reference": "Paul Palomero Bernardo, Patrick Schmid, et al. (2025). Compiler-aware AI Hardware Design for Edge Devices. Retrieved from https://doi.org/10.1145/3721888.3722095",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schmalhofer2025nnhcaneuralnetwork",
+      "title": "NNHC - a Neural Network to Hardware Compiler",
+      "link": "https://doi.org/10.1109/smacd65553.2025.11091838",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ],
+      "reference": "Sascha Schmalhofer, Yasmine Abu-Haeyeh, Lars Hedrich (2025). NNHC - a Neural Network to Hardware Compiler. Retrieved from https://doi.org/10.1109/smacd65553.2025.11091838",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "baglio2026crossplatformhardw",
+      "title": "Cross-platform hardware benchmark of style-based quantum GANs for data augmentation on superconducting and trapped-ion processors",
+      "link": "https://doi.org/10.1063/5.0322308",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "benchmark",
+        "hardware",
+        "cross-hardware"
+      ],
+      "reference": "Julien Baglio (2026). Cross-platform hardware benchmark of style-based quantum GANs for data augmentation on superconducting and trapped-ion processors. Retrieved from https://doi.org/10.1063/5.0322308",
+      "abstract": "In the noisy intermediate-scale quantum era, controlled benchmarks of quantum machine-learning workloads across hardware modalities are needed to quantify how given algorithms behave under native provider execution stacks. This work presents such a benchmark for the style-based quantum generative adversarial network (qGAN) on a high-energy physics data-augmentation task. We compare two commercially available gate-model quantum computers: the IBM ibm_torino hardware, based on superconducting transmon qubits from the Heron chip, and the IonQ aria-1 hardware, based on trapped-ion qubits. The generator architecture and trained parameters are kept fixed, and built-in mitigation is disabled when possible. We report quality and runtime metrics under each provider’s native stack. The workflow uses",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shuo2025acomparativestudyo",
+      "title": "A Comparative Study on the Axial Compression Stability Performance of CFST Columns with Different Cross-Sections: A Meta-Analysis Based on a Unified Benchmark",
+      "link": "https://doi.org/10.30560/ijas.v8n4p91",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "benchmark",
+        "analysis",
+        "unified"
+      ],
+      "reference": "Shan Shuo (2025). A Comparative Study on the Axial Compression Stability Performance of CFST Columns with Different Cross-Sections: A Meta-Analysis Based on a Unified Benchmark. Retrieved from https://doi.org/10.30560/ijas.v8n4p91",
+      "abstract": "CFST columns are widely used in building structures, and their axial compression stability is a key factor in design. The cross-sectional shape may significantly affect the mechanical properties of the column, but existing studies mostly focus on specific shapes and lack systematic comparisons. Through a meta-analysis, systematically evaluate the axial compression stability performance of CFST columns with different cross-sectional shapes (rectangular, elliptical, circular ring-shaped, and circular) under a unified benchmark, and assess the reliability of the existing prediction models. Through a meta-analysis approach, sample data from numerous experimental and numerical studies were integrated. The core method is to uniformly adjust the \"measured bearing capacity/predicted limit\" (Nue/N)",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2022crossmodalobjecttr",
+      "title": "Cross-Modal Object Tracking: Modality-Aware Representations and A Unified Benchmark",
+      "link": "https://doi.org/10.31219/osf.io/cr2gx",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "benchmark",
+        "search",
+        "unified"
+      ],
+      "reference": "Chenglong Li, Tianhao Zhu, et al. (2022). Cross-Modal Object Tracking: Modality-Aware Representations and A Unified Benchmark. Retrieved from https://doi.org/10.31219/osf.io/cr2gx",
+      "abstract": "In many visual systems, visual tracking often bases on RGB image sequences, in which some targets are invalid in low-light conditions, and tracking performance is thus affected significantly. Introducing other modalities such as depth and infrared data is an effective way to handle imaging limitations of individual sources, but multi-modal imaging platforms usually require elaborate designs and cannot be applied in many real-world applications at present. Near-infrared (NIR) imaging becomes an essential part of many surveillance cameras, whose imaging is switchable between RGB and NIR based on the light intensity. These two modalities are heterogeneous with very different visual properties and thus bring big challenges for visual tracking. However, existing works have not studied this chal",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pinkston2026defenseindepthaigo",
+      "title": "Defense-in-Depth AI Governance Combining Pre-Inference and Post-Inference Detection for Robust Safety Assurance Empirical Cross-Model Benchmark Results 3 Frontier Models • Red Team Corpus • CyberGym Exploit Benchmark",
+      "link": "https://doi.org/10.2139/ssrn.6366038",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "benchmark",
+        "rating",
+        "analysis",
+        "NPU"
+      ],
+      "reference": "Melissa Pinkston (2026). Defense-in-Depth AI Governance Combining Pre-Inference and Post-Inference Detection for Robust Safety Assurance Empirical Cross-Model Benchmark Results 3 Frontier Models • Red Team Corpus • CyberGym Exploit Benchmark. Retrieved from https://doi.org/10.2139/ssrn.6366038",
+      "abstract": "<p>Large language models exhibit inconsistent and unreliable native safety behaviors across providers. We present a defense-in-depth architecture combining two complementary proprietary governance systems operating at distinct points in the inference pipeline: a pre-inference input analysis layer and a post-inference output evaluation layer. We benchmark the combined system across three frontier models (Claude Opus 4.6, GPT-5.2, Grok 4.1) using both a custom 12-sequence red team corpus and a curated 120-task subset of the CyberGym exploit generation benchmark.</p>\n<p>Results demonstrate that model-native safety ranges from 0.0% to 81.7% detection depending on model and attack type, while the combined governance system achieves 77.1–91.4% detection on multi-turn social engineering and 76.7–",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "pasupuleti2024indiastatebenchmar",
+      "title": "India State Benchmark of Healthcare AI: A Comparative Cross-Layer Study with G20 And BRICS Reference Pathways",
+      "link": "https://doi.org/10.62311/nesx/rrih1d24",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "benchmark",
+        "analysis",
+        "fusion",
+        "miss"
+      ],
+      "reference": "Murali Krishna Pasupuleti (2024). India State Benchmark of Healthcare AI: A Comparative Cross-Layer Study with G20 And BRICS Reference Pathways. Retrieved from https://doi.org/10.62311/nesx/rrih1d24",
+      "abstract": "Abstract:\nHealthcare artificial intelligence (AI) is increasingly positioned as a strategic lever for improving clinical quality, administrative efficiency, and public health resilience. In India, healthcare is constitutionally and operationally multi-level, requiring capability building at the state/UT layer while aligning with national digital public infrastructure and regulatory trajectories. This report develops an India-first, state/UT-oriented comparative benchmarking approach that is explicitly cross-layer: policy and regulation; infrastructure; data, standards and interoperability; talent and skilling; prosperity and sustainability; innovation and investment; adoption and use-case maturity; risk and trust governance; and outcomes across productivity, inclusion, resilience and susta",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "salunkhe2026intentwithoutenfor",
+      "title": "Intent Without Enforcement: A Regulatory Gap Analysis of AI Hardware Circularity",
+      "link": "https://doi.org/10.2139/ssrn.6752621",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "hardware",
+        "analysis",
+        "cross-hardware"
+      ],
+      "reference": "Vinayak Salunkhe, Shrijeet Purandare (2026). Intent Without Enforcement: A Regulatory Gap Analysis of AI Hardware Circularity. Retrieved from https://doi.org/10.2139/ssrn.6752621",
+      "abstract": "Artificial intelligence infrastructure is rapidly expanding, yet its material impacts are inadequately governed.&nbsp; \n<div>\n <span>This study employs a qualitative Regulatory Gap Analysis to evaluate four EU legislative instruments-the Artificial Intelligence Act (2024), the Ecodesign for Sustainable Products Regulation and its Digital Product Passport mechanism, the Critical Raw Materials Act (2024), and the Waste Electrical and Electronic Equipment Directive-against seven governance needs identified from the AI hardware material lifecycle, assessed across three circular economy evaluative criteria.&nbsp;</span>\n</div>\n<div>\n <span>No instrument fully addresses any identified governance need. The analysis identifies three structural failures: a classification mismatch rendering mass-bas",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2026crosscompilern",
+      "title": "cross-compiler, n.",
+      "link": "https://doi.org/10.1093/oed/6014415142",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": " (2026). cross-compiler, n.. Retrieved from https://doi.org/10.1093/oed/6014415142",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "stuck2024usinglikwidandbyfl",
+      "title": "Using Likwid and Byfl to Benchmark Hardware Performance",
+      "link": "https://doi.org/10.2172/2280550",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "benchmark",
+        "hardware"
+      ],
+      "reference": "Shogo Stuck (2024). Using Likwid and Byfl to Benchmark Hardware Performance. Retrieved from https://doi.org/10.2172/2280550",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mantowsky2021proaianefficientem",
+      "title": "ProAI: An Efficient Embedded AI Hardware for Automotive Applications – a Benchmark Study",
+      "link": "https://doi.org/10.1109/iccvw54120.2021.00113",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "benchmark",
+        "hardware"
+      ],
+      "reference": "Sven Mantowsky, Falk Heuer, et al. (2021). ProAI: An Efficient Embedded AI Hardware for Automotive Applications – a Benchmark Study. Retrieved from https://doi.org/10.1109/iccvw54120.2021.00113",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "stuck2024usinglikwidandbyfl_31",
+      "title": "Using Likwid and Byfl to Benchmark Hardware Performance [Poster]",
+      "link": "https://doi.org/10.2172/2280549",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "benchmark",
+        "hardware"
+      ],
+      "reference": "Shogo Stuck (2024). Using Likwid and Byfl to Benchmark Hardware Performance [Poster]. Retrieved from https://doi.org/10.2172/2280549",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "melnyk2019easyuniversaltrans",
+      "title": "Easy Universal Translator as an Alternative Compiler-Compiler",
+      "link": "https://doi.org/10.23939/acps2019.02.105",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Anatoliy Melnyk, Nazar Kozak (2019). Easy Universal Translator as an Alternative Compiler-Compiler. Retrieved from https://doi.org/10.23939/acps2019.02.105",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mssenbck2025thecompilergenerat",
+      "title": "The Compiler Generator Coco/R",
+      "link": "https://doi.org/10.1007/978-3-031-84813-1_7",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Hanspeter Mössenböck (2025). The Compiler Generator Coco/R. Retrieved from https://doi.org/10.1007/978-3-031-84813-1_7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "biggar2022buildingssainacomp",
+      "title": "Building SSA in a Compiler for PHP",
+      "link": "https://doi.org/10.1007/978-3-030-80515-9_24",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Paul Biggar, David Gregg (2022). Building SSA in a Compiler for PHP. Retrieved from https://doi.org/10.1007/978-3-030-80515-9_24",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cummins2025llmcompilerfoundat",
+      "title": "LLM Compiler: Foundation Language Models for Compiler Optimization",
+      "link": "https://doi.org/10.1145/3708493.3712691",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Chris Cummins, Volker Seeker, et al. (2025). LLM Compiler: Foundation Language Models for Compiler Optimization. Retrieved from https://doi.org/10.1145/3708493.3712691",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amarasinghe2019thesparsetensoralg",
+      "title": "The sparse tensor algebra compiler (keynote)",
+      "link": "https://doi.org/10.1145/3302516.3307361",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Saman Amarasinghe (2019). The sparse tensor algebra compiler (keynote). Retrieved from https://doi.org/10.1145/3302516.3307361",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mzid2022useofcompilerinter",
+      "title": "Use of Compiler Intermediate Representation for Reverse Engineering: A Case Study for GCC Compiler and UML Activity Diagram",
+      "link": "https://doi.org/10.5220/0010821700003119",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ],
+      "reference": "Rania Mzid, Asma Charfi, Najmeddine Etteyeb (2022). Use of Compiler Intermediate Representation for Reverse Engineering: A Case Study for GCC Compiler and UML Activity Diagram. Retrieved from https://doi.org/10.5220/0010821700003119",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "viszkok2025unifiedsastbenchma",
+      "title": "Unified Sast Benchmark: Compare AI-Driven and Traditional Static Analyzers",
+      "link": "https://doi.org/10.2139/ssrn.5291381",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "benchmark",
+        "unified"
+      ],
+      "reference": "Tamás Viszkok, Péter Hegedűs (2025). Unified Sast Benchmark: Compare AI-Driven and Traditional Static Analyzers. Retrieved from https://doi.org/10.2139/ssrn.5291381",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "he2025aunifiedmetricarch",
+      "title": "A Unified Metric Architecture for AI Infrastructure: A Cross-Layer Taxonomy Integrating Economics, Performance, and Efficiency",
+      "link": "https://doi.org/10.2139/ssrn.5808163",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "rating",
+        "unified"
+      ],
+      "reference": "Qi He (2025). A Unified Metric Architecture for AI Infrastructure: A Cross-Layer Taxonomy Integrating Economics, Performance, and Efficiency. Retrieved from https://doi.org/10.2139/ssrn.5808163",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "cyranka2024unifiedlongtermtim",
+      "title": "Unified Long-Term Time Series Forecasting  Benchmark",
+      "link": "https://doi.org/10.2139/ssrn.5002162",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "benchmark",
+        "unified"
+      ],
+      "reference": "Jacek Cyranka, Szymon Haponiuk (2024). Unified Long-Term Time Series Forecasting  Benchmark. Retrieved from https://doi.org/10.2139/ssrn.5002162",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "yan2024uniguardaunifiedha",
+      "title": "UniGuard: A Unified Hardware-oriented Threat Detector for FPGA-based AI Accelerators",
+      "link": "https://doi.org/10.1109/fpl64840.2024.00031",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hardware",
+        "unified"
+      ],
+      "reference": "Xiaobei Yan, Han Qiu, Tianwei Zhang (2024). UniGuard: A Unified Hardware-oriented Threat Detector for FPGA-based AI Accelerators. Retrieved from https://doi.org/10.1109/fpl64840.2024.00031",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "overhead"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "park2023softwareoverviewfo",
+      "title": "Software Overview for On-Device AI and ML Benchmark in Smartphones",
+      "link": "https://doi.org/10.1007/978-3-031-22170-5_5",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "benchmark"
+      ],
+      "reference": "Hyunbin Park, Shiho Kim (2023). Software Overview for On-Device AI and ML Benchmark in Smartphones. Retrieved from https://doi.org/10.1007/978-3-031-22170-5_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "diniz2022hardwarecompilatio",
+      "title": "Hardware Compilation Using SSA",
+      "link": "https://doi.org/10.1007/978-3-030-80515-9_23",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ],
+      "reference": "Pedro C. Diniz, Philip Brisk (2022). Hardware Compilation Using SSA. Retrieved from https://doi.org/10.1007/978-3-030-80515-9_23",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "n2025smartmailhubanaipo",
+      "title": "SmartMail Hub: An AI-Powered Unified Interface for Cross-Platform Email Management",
+      "link": "https://doi.org/10.36227/techrxiv.176127050.02840975/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "unified"
+      ],
+      "reference": "Sakthivel N, Somasundaram R.S (2025). SmartMail Hub: An AI-Powered Unified Interface for Cross-Platform Email Management. Retrieved from https://doi.org/10.36227/techrxiv.176127050.02840975/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "rating"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "risaldi2018simulasipengendali",
+      "title": "SIMULASI PENGENDALIAN ROUTER MIKROTIK MENGGUNAKAN ANDROID",
+      "link": "https://doi.org/10.28989/compiler.v7i1.284",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "rating"
+      ],
+      "reference": "Moh Risaldi, Astika Ayuningtyas (2018). SIMULASI PENGENDALIAN ROUTER MIKROTIK MENGGUNAKAN ANDROID. Retrieved from https://doi.org/10.28989/compiler.v7i1.284",
+      "abstract": "Userman is a tool in mikrotic that serves as a network user. Userman's tools are only accessible by admin and can only be accessed via a computer device. Utilization of handheld or mobile phone device at this time the usual thing because cellular phone or handphone is as companion in carrying out everyday activities. That's what makes Hanphone is very commonplace for some people. This is because some Mobile already has the function and ability more than just the basic function. Android as an operating system that can be embedded in mobile devices have the ability to be installed applications required by the user. In this final project, the mikrotik application can be used to manage the admin that has been in the menu of user management and mikrotik application can also be successful to mon",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "santoso2025onthechromaticnumb",
+      "title": "On the Chromatic Number of Cycle Books Graph",
+      "link": "https://doi.org/10.28989/compiler.v14i1.2930",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "search"
+      ],
+      "reference": "Jaya Santoso (2025). On the Chromatic Number of Cycle Books Graph. Retrieved from https://doi.org/10.28989/compiler.v14i1.2930",
+      "abstract": "Graph coloring is a fundamental topic in graph theory, with various applications in scheduling, networking, and optimization problems. In this study, we investigate the chromatic number of the cycle books graph , a structured graph formed by attaching multiple cycles to a common path . We establish that the chromatic number of    depends on the parity of . Specifically, we prove that if  is even, the chromatic number is , while if  is odd, the chromatic number is . These results provide a deeper understanding of coloring properties in book-like graphs and contribute to the broader study of chromatic numbers in structured graph families. The findings may be extended to other variations of book graphs and related topologies in future research.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "darmastono2020latticeboltzmannps",
+      "title": "LATTICE BOLTZMANN PSEUDO-POTENTIAL MODELLING OF MULTIPHASE DROPLET PHENOMENA",
+      "link": "https://doi.org/10.28989/compiler.v9i2.835",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "surface"
+      ],
+      "reference": "Thomas Ken Darmastono, Bahrul Jalaali (2020). LATTICE BOLTZMANN PSEUDO-POTENTIAL MODELLING OF MULTIPHASE DROPLET PHENOMENA. Retrieved from https://doi.org/10.28989/compiler.v9i2.835",
+      "abstract": "The multiphase modeling of a droplet in a multiphase system is considered becoming a fundamental problem in fluid dynamics. A complex understanding of droplet behavior is critical to reveal a deeper insight into a more complex multiphase system. Droplet behavior studies are necessary to obtain a better understanding of solving multiphase problems in both the science and industrial aspect. The droplet behavior is characterized by a non-dimensional number such as the Eötvös number. In this study, numerical simulation was performed using the Lattice Boltzmann method. Parametric studies of Eötvös number was done. The parametric study of the Eo number is obtained using LBM. Based on the results obtained, it is concluded that the gravitational force influences the downwards rate of the droplet. ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 23,
+    "B": 19,
+    "C": 6
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:41.999194"
+}

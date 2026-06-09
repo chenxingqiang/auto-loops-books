@@ -1,0 +1,16 @@
+[
+  "\"Core Theory: AI Compiler Optimization Principles\"",
+  "\"tiling\" LLM inference optimization",
+  "\"fusion\" LLM inference optimization",
+  "\"layout\" LLM inference optimization",
+  "\"parallel\" LLM inference optimization",
+  "\"GPU\" AND \"CPU\"",
+  "\"core theory: AI compiler optimization principles\" AND \"core theory\"",
+  "\"fusion theory\" AND \"GPU CPU NPU split\"",
+  "\"layout theory\" AND \"parallel scheduling\"",
+  "\"tiling theory\" AND \"fusion theory LLM inference compiler\"",
+  "\"GPU CPU NPU split LLM inference compiler\" AND \"layout theory LLM inference compiler\"",
+  "\"parallel scheduling LLM inference compiler\" AND \"tiling theory LLM inference compiler\"",
+  "\"GPU CPU\" AND \"fusion\"",
+  "\"layout\" AND \"parallel\""
+]

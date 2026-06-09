@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch05",
+  "chapter_title": "AMD XDNA/AIE Dataflow Architecture",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 57,
+  "catalog_tier_a": 25,
+  "binding_count": 216,
+  "quality_binding_count": 216,
+  "sentence_count": 271,
+  "claim_sentence_count": 271,
+  "unbound_claim_sentences": 55,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 70,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

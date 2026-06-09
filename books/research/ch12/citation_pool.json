@@ -1,0 +1,233 @@
+{
+  "chapter_id": "ch12",
+  "pool_count": 22,
+  "bib_keys": [
+    "yamazaki2024acceleratinganover",
+    "fukumura2024visuallyrepresenti",
+    "alizadeh2020machinelearningbas",
+    "chen2019crstateinkernelche",
+    "memoryfloor2026",
+    "nvidia2024cudagraphs",
+    "yirage2026",
+    "antonov2021inferringcustomsyn",
+    "pitigalaarac2024symbolicexecutionf",
+    "hong2021anoveldynamicanaly",
+    "kirchheim2022pytorchoodalibrary",
+    "dao2023flashdecoding",
+    "patel2025llminference",
+    "kwon2023vllm",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "yamazaki2024acceleratinganover",
+      "title": "Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion",
+      "source_tier": "A",
+      "relevance_score": 90,
+      "matched_keywords": [
+        "execution",
+        "fusion",
+        "GPU",
+        "kernel",
+        "mode"
+      ]
+    },
+    {
+      "bib_key": "fukumura2024visuallyrepresenti",
+      "title": "Visually Representing CPU Execution with the KERNEL Educational Computer Model",
+      "source_tier": "A",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "CPU",
+        "execution",
+        "kernel",
+        "mode"
+      ]
+    },
+    {
+      "bib_key": "alizadeh2020machinelearningbas",
+      "title": "Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "execution",
+        "GPU",
+        "kernel"
+      ]
+    },
+    {
+      "bib_key": "chen2019crstateinkernelche",
+      "title": "CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "execution",
+        "GPU",
+        "kernel"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "CUDA Graphs",
+        "CUDA",
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "CUDA Graphs",
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "CPU",
+        "CUDA",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "antonov2021inferringcustomsyn",
+      "title": "Inferring Custom Synthesizable Kernel for Generation of Coprocessors with Out-of-Order Execution",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "execution",
+        "kernel"
+      ]
+    },
+    {
+      "bib_key": "pitigalaarac2024symbolicexecutionf",
+      "title": "Symbolic Execution for Dynamic Kernel Analysis",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "execution",
+        "kernel"
+      ]
+    },
+    {
+      "bib_key": "hong2021anoveldynamicanaly",
+      "title": "A Novel Dynamic Analysis Infrastructure to Instrument Untrusted Execution Flow Across User-Kernel Spaces",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "execution",
+        "kernel"
+      ]
+    },
+    {
+      "bib_key": "kirchheim2022pytorchoodalibrary",
+      "title": "PyTorch-OOD: A Library for Out-of-Distribution Detection based on PyTorch",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "PyTorch"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 19,
+      "matched_keywords": [
+        "PyTorch",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

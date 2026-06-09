@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch03",
+  "chapter_title": "AI Hardware Architecture and Compiler Constraints",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 55,
+  "catalog_tier_a": 34,
+  "binding_count": 169,
+  "quality_binding_count": 169,
+  "sentence_count": 195,
+  "claim_sentence_count": 190,
+  "unbound_claim_sentences": 22,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 115,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

@@ -1,0 +1,959 @@
+{
+  "chapter_id": "ch16",
+  "timestamp": "2026-06-10T02:46:04.040931",
+  "min_papers": 25,
+  "paper_count": 63,
+  "sentence_count": 296,
+  "binding_count": 295,
+  "papers": [
+    {
+      "bib_key": "castell2024experienceguidedmi",
+      "title": "Experience-guided, Mixed-precision Matrix Multiplication with Apache TVM for ARM processors",
+      "link": "https://doi.org/10.21203/rs.3.rs-5017241/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 128,
+      "matched_keywords": [
+        "TVM HW matrix",
+        "TVM tuning",
+        "hardware",
+        "matrix",
+        "optim",
+        "tun",
+        "apache",
+        "TVM"
+      ],
+      "reference": "Adrián Castelló, Héctor Martínez, et al. (2024). Experience-guided, Mixed-precision Matrix Multiplication with Apache TVM for ARM processors. Retrieved from https://doi.org/10.21203/rs.3.rs-5017241/v1",
+      "abstract": "Abstract\nDeep learning (DL) generates new computational tasks that are different from those encountered in classical scientific applications. In particular, DL training and inference require general matrix multiplications (GEMM) with matrix operands that are far from large and square as in other scientific fields. In addition, DL models gain arithmetic/storage complexity, and as a result, reduced precision via quantization is now mainstream for inferring DL models in edge devices. Automatic code generation addresses these new types of GEMM by 1) improving portability between different hardware with only one base code; 2) supporting mixed and reduced precision; and 3) enabling autotuning methods that, given a base operation, perform a (costly) optimization search for the best schedule.\nIn t",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wu2023autotuningapachetv",
+      "title": "Autotuning Apache TVM-based Scientific Applications Using Bayesian Optimization",
+      "link": "https://doi.org/10.1145/3624062.3626079",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 104,
+      "matched_keywords": [
+        "TVM tuning",
+        "optim",
+        "tun",
+        "apache",
+        "TVM"
+      ],
+      "reference": "Xingfu Wu, Praveen Paramasivam, Valerie Taylor (2023). Autotuning Apache TVM-based Scientific Applications Using Bayesian Optimization. Retrieved from https://doi.org/10.1145/3624062.3626079",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "diamantopoul2020agileautotuningofa",
+      "title": "Agile Autotuning of a Transprecision Tensor Accelerator Overlay for TVM Compiler Stack",
+      "link": "https://doi.org/10.1109/fpl50879.2020.00058",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 102,
+      "matched_keywords": [
+        "TVM tuning",
+        "tun",
+        "compiler",
+        "stack",
+        "TVM"
+      ],
+      "reference": "Dionysios Diamantopoulos, Burkhard Ringlein, et al. (2020). Agile Autotuning of a Transprecision Tensor Accelerator Overlay for TVM Compiler Stack. Retrieved from https://doi.org/10.1109/fpl50879.2020.00058",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "link": "https://doi.org/10.3390/mi16020193",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ],
+      "reference": "Yue Zhang, Yunshan Tang, et al. (2025). A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks. Retrieved from https://doi.org/10.3390/mi16020193",
+      "abstract": "The deep learning object detection algorithm has been widely applied in the field of synthetic aperture radar (SAR). By utilizing deep convolutional neural networks (CNNs) and other techniques, these algorithms can effectively identify and locate targets in SAR images, thereby improving the accuracy and efficiency of detection. In recent years, achieving real-time monitoring of regions has become a pressing need, leading to the direct completion of real-time SAR image target detection on airborne or satellite-borne real-time processing platforms. However, current GPU-based real-time processing platforms struggle to meet the power consumption requirements of airborne or satellite applications. To address this issue, a low-power, low-latency deep learning SAR object detection algorithm accel",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2023autotuningquantize",
+      "title": "Auto Tuning Quantized Graph Neural Networks on GPU Tensor Core via TVM",
+      "link": "https://doi.org/10.1109/icftic59930.2023.10456077",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "TVM tuning",
+        "tun",
+        "GPU",
+        "TVM"
+      ],
+      "reference": "Zhiyuan Wang (2023). Auto Tuning Quantized Graph Neural Networks on GPU Tensor Core via TVM. Retrieved from https://doi.org/10.1109/icftic59930.2023.10456077",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "link": "https://doi.org/10.1109/aero53065.2022.9843789",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "fusion"
+      ],
+      "reference": "Dan Shen, Mengquing Guo, et al. (2022). Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation. Retrieved from https://doi.org/10.1109/aero53065.2022.9843789",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "madathil2023optimizingmachinel",
+      "title": "Optimizing Machine Learning Operators and Models for Specific Hardware Using Apache-TVM",
+      "link": "https://doi.org/10.1109/icccnt56998.2023.10306572",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "hardware",
+        "optim",
+        "apache",
+        "TVM"
+      ],
+      "reference": "Kausthub Thekke Madathil, Abhinav Dugar, et al. (2023). Optimizing Machine Learning Operators and Models for Specific Hardware Using Apache-TVM. Retrieved from https://doi.org/10.1109/icccnt56998.2023.10306572",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "link": "https://doi.org/10.20944/preprints202308.1360.v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ],
+      "reference": "Yulu Wang, Yi Han, et al. (2023). An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System. Retrieved from https://doi.org/10.20944/preprints202308.1360.v1",
+      "abstract": "In autonomous driving systems, high-speed and real-time image processing, along with object recognition, are crucial technologies. This paper builds upon the research achievements in in-dustrial item sorting systems and proposes an object recognition and sorting system for auton-omous driving. In industrial sorting lines, goods sorting robots often need to work at high speeds to efficiently sort large volumes of items. This poses a challenge to the robot&#039;s real-time vision and sorting capabilities, making it both practical and economically viable to implement a real-time and low-cost sorting system in a real-world industrial sorting line. Existing sorting systems have limitations such as high cost, high computing resource consumption, and high power consump-tion. These issues lead to ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 69,
+      "matched_keywords": [
+        "backend",
+        "optim",
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "sato2019lsclaparoscopicsac",
+      "title": "LSC (LAPAROSCOPIC SACROCOLPOPEXY) VERSUS UPHOLD TYPE TVM: A CASE CONTROL STUDY 当院におけるLSCとUphold型TVMの治療成績の検討",
+      "link": "https://doi.org/10.5980/jpnjurol.110.112",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 66,
+      "matched_keywords": [
+        "TVM case study",
+        "case",
+        "TVM"
+      ],
+      "reference": "Hirotaka Sato, Sakiko Teramoto, et al. (2019). LSC (LAPAROSCOPIC SACROCOLPOPEXY) VERSUS UPHOLD TYPE TVM: A CASE CONTROL STUDY 当院におけるLSCとUphold型TVMの治療成績の検討. Retrieved from https://doi.org/10.5980/jpnjurol.110.112",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "link": "https://doi.org/10.25144/15942",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "RO LANE, WJ HOLMES, T LAMONT-SMITH (2023). TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE. Retrieved from https://doi.org/10.25144/15942",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "link": "https://doi.org/10.22541/au.177153748.85426739/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Heiko Grimberg (2026). STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm. Retrieved from https://doi.org/10.22541/au.177153748.85426739/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "link": "https://doi.org/10.1145/3560828.3564010",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "David S. Koblah, Fatemeh Ganji, et al. (2022). Hardware Moving Target Defenses against Physical Attacks. Retrieved from https://doi.org/10.1145/3560828.3564010",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "link": "https://doi.org/10.23977/acss.2026.100209",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": " (2026). Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies. Retrieved from https://doi.org/10.23977/acss.2026.100209",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "link": "https://doi.org/10.1117/12.2519497",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Naeem Akbar, Sara Tehsin, et al. (2019). Hardware design of correlation filters for target detection. Retrieved from https://doi.org/10.1117/12.2519497",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "link": "https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jyotiranjan Panda, Pradipta Kumar Nanda, Tuhinansu Pradhan (2023). Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi. Retrieved from https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "abstract": "AbstractVideo object tracking in real-world scenarios is one of the challenging problems of computer vision. The issue is compounded in the presence of varying illumination conditions, dynamic entities of the background, and bad weather conditions. In this research, a particle filter based new video object tracking scheme is developed with the proposed notions of target remodeling and reinitialization. During the tracking phase, the target is remodeled in each frame to take care of the changing scene dynamics over frames. The target is remodeled by fused feature distributions chosen from the created bank of fused feature distributions having discriminating potential to differentiate the target and the background in a given frame. The fused feature bank is created by fusing two features fro",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "link": "https://doi.org/10.23919/eurad54643.2022.9924830",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pirmin Schoeder, Arne Martin, et al. (2022). A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities. Retrieved from https://doi.org/10.23919/eurad54643.2022.9924830",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "link": "https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Rishi Agarwal, Sathwik Gundala, G S S Chalapathi (2023). Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs). Retrieved from https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "link": "https://doi.org/10.1109/globecom59602.2025.11432143",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jiapeng Li, Changsheng You, Chao Zhou (2025). Near-field Target Localization under Hardware Impairments. Retrieved from https://doi.org/10.1109/globecom59602.2025.11432143",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "link": "https://doi.org/10.1109/lsens.2024.3359693",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Nicolai Kern, Pirmin Schoeder, Christian Waldschmidt (2024). Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications. Retrieved from https://doi.org/10.1109/lsens.2024.3359693",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "link": "https://doi.org/10.1109/access.2025.3565674",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Lucas Urbanski, Gustavo Farhat Araujo, et al. (2025). Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images. Retrieved from https://doi.org/10.1109/access.2025.3565674",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "link": "https://doi.org/10.1109/igarss52108.2023.10283237",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Wentian Du, Jie Chen, Zhixiang Huang (2023). SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search. Retrieved from https://doi.org/10.1109/igarss52108.2023.10283237",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "link": "https://doi.org/10.52202/078372-0119",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Stefano Silvestrini, Andrea Colagrossi, et al. (2024). Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection. Retrieved from https://doi.org/10.52202/078372-0119",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "link": "https://doi.org/10.1109/icort46471.2019.9069610",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pradipta Roy, Dipak Das, et al. (2019). Hardware Software Co-Design for Real Time Detection of Small Target in IR Video. Retrieved from https://doi.org/10.1109/icort46471.2019.9069610",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "link": "https://doi.org/10.25729/2413-0133-2018-1-11",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Давлиева А.С., Гвоздев В.Е., Гузаиров М.Б. (2018). ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET. Retrieved from https://doi.org/10.25729/2413-0133-2018-1-11",
+      "abstract": "В настоящей работе рассматривается подход к исследованию свойства живучести аппаратно-программных комплексов (АПК) по показателю целевой эффективности с учетом интервальной неопределенности компонентов структуры состояний. Описывается задача оценки влияния вариативности показателей эффективности АПК в разных режимах функционирования на оценку живучести по среднему значению показателя целевой эффективности. Приводятся результаты исследований, соответствующие различным структурам состояний АПК.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "link": "https://doi.org/10.1051/itmconf/20193015029",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Tatiana A. Lepekhina, Vadim I. Nikolaev (2019). Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests. Retrieved from https://doi.org/10.1051/itmconf/20193015029",
+      "abstract": "Methods of hardware-software simulation of test scenes of varying complexity are proposed for synthetic aperture space radar (SAR) ground tests and testing its components, as well as for checking its end-to- end characteristics and calibration during flight tests. The principles of designing and features of the hardware implementation of an active simulator of radar targets are described. Some methods for solving problems associated with the synchronization of received and generated signals are proposed.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "link": "https://doi.org/10.1201/9781003196938-8",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Mattia Rossi, Nicola Toscani, et al. (2021). Basic Settings: Serial Communication COM and Hardware Target. Retrieved from https://doi.org/10.1201/9781003196938-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2022infraredimagetarge",
+      "title": "Infrared Image Target Detection Algorithm for Hardware Fittings at Tension Clamp of Qishao UHV Transmission Line",
+      "link": "https://doi.org/10.1109/aiam57466.2022.00077",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Wei Zhang, Weiguang Dong, Shengchang Li (2022). Infrared Image Target Detection Algorithm for Hardware Fittings at Tension Clamp of Qishao UHV Transmission Line. Retrieved from https://doi.org/10.1109/aiam57466.2022.00077",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "moreau2018collectiveknowledg",
+      "title": "Collective Knowledge Workflow for Leveraging the VTA-TVM Hardware-Software Stack for FPGA Acceleration of 8-bit ResNet-18 Inference",
+      "link": "https://doi.org/10.1145/3229772",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hardware",
+        "stack",
+        "TVM"
+      ],
+      "reference": "Thierry Moreau, Tianqi Chen, Luis Ceze (2018). Collective Knowledge Workflow for Leveraging the VTA-TVM Hardware-Software Stack for FPGA Acceleration of 8-bit ResNet-18 Inference. Retrieved from https://doi.org/10.1145/3229772",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "moreau2018leveragingthevtatv",
+      "title": "Leveraging the VTA-TVM Hardware-Software Stack for FPGA Acceleration of 8-bit ResNet-18 Inference",
+      "link": "https://doi.org/10.1145/3229762.3229766",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hardware",
+        "stack",
+        "TVM"
+      ],
+      "reference": "Thierry Moreau, Tianqi Chen, Luis Ceze (2018). Leveraging the VTA-TVM Hardware-Software Stack for FPGA Acceleration of 8-bit ResNet-18 Inference. Retrieved from https://doi.org/10.1145/3229762.3229766",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zheng2018collectiveknowledg",
+      "title": "Collective Knowledge Workflow for Optimizing Deep Learning Workloads on ARM GPU with TVM",
+      "link": "https://doi.org/10.1145/3229770",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "GPU",
+        "TVM"
+      ],
+      "reference": "Lanmin Zheng, Tianqi Chen (2018). Collective Knowledge Workflow for Optimizing Deep Learning Workloads on ARM GPU with TVM. Retrieved from https://doi.org/10.1145/3229770",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ayad2023energyefficientecg",
+      "title": "Energy Efficient ECG Classifier Using Smart Lead Switching and Apache TVM",
+      "link": "https://doi.org/10.1109/icmla58977.2023.00034",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "apache",
+        "TVM"
+      ],
+      "reference": "Ahmad Ayad, Mahdi Barhoush, et al. (2023). Energy Efficient ECG Classifier Using Smart Lead Switching and Apache TVM. Retrieved from https://doi.org/10.1109/icmla58977.2023.00034",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "he2020tvmforadrenogpus",
+      "title": "TVM for Adreno GPUs",
+      "link": "https://doi.org/10.1145/3388333.3388667",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "GPU",
+        "TVM"
+      ],
+      "reference": "Li He, Hongqiang Wang, et al. (2020). TVM for Adreno GPUs. Retrieved from https://doi.org/10.1145/3388333.3388667",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kumcham2023insitugrownsweetal",
+      "title": "In-Situ Grown Sweet Alyssum Flowers-Like Co-Rich Comoo4 For High Performance Hybrid Supercapacitors",
+      "link": "https://doi.org/10.2139/ssrn.4358409",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "lower"
+      ],
+      "reference": "PRASAD KUMCHAM, Sreekanth TVM, et al. (2023). In-Situ Grown Sweet Alyssum Flowers-Like Co-Rich Comoo4 For High Performance Hybrid Supercapacitors. Retrieved from https://doi.org/10.2139/ssrn.4358409",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "link": "https://doi.org/10.1016/j.vrih.2023.12.001",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Xiaofei Ren, Jian He, et al. (2024). Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR. Retrieved from https://doi.org/10.1016/j.vrih.2023.12.001",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "link": "https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Hao ZHANG, Jin HUANG, et al. (2019). Trajectory prediction model for crossing-based target selection. Retrieved from https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "link": "https://doi.org/10.1109/hst.2018.8383907",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Zhiming Zhang, Qiaoyan Yu, et al. (2018). FPGA-oriented moving target defense against security threats from malicious FPGA tools. Retrieved from https://doi.org/10.1109/hst.2018.8383907",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "link": "https://doi.org/10.1109/host49136.2021.9702274",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Yichen Jiang, Huifeng Zhu, et al. (2021). TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection. Retrieved from https://doi.org/10.1109/host49136.2021.9702274",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2025aiolosrestrainsthe",
+      "title": "Aiolos restrains the generation of antigen-inexperienced, virtual memory CD8 T (TVM) cells",
+      "link": "https://doi.org/10.1096/mmic2025.s09.p03",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": " (2025). Aiolos restrains the generation of antigen-inexperienced, virtual memory CD8 T (TVM) cells. Retrieved from https://doi.org/10.1096/mmic2025.s09.p03",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "harrison2021coprophagiabreakin",
+      "title": "Coprophagia: breaking a dirty habit (TVM)",
+      "link": "https://doi.org/10.22233/9781913859008.174",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Helen Harrison (2021). Coprophagia: breaking a dirty habit (TVM). Retrieved from https://doi.org/10.22233/9781913859008.174",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018riskreturnandtheti",
+      "title": "Risk, Return, And The Time Value Of Money (TVM)",
+      "link": "https://doi.org/10.1201/b22424-20",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": " (2018). Risk, Return, And The Time Value Of Money (TVM). Retrieved from https://doi.org/10.1201/b22424-20",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "alexander2021visualtimelinesine",
+      "title": "Visual Timelines in Excel to Illustrate TVM Calculations",
+      "link": "https://doi.org/10.2139/ssrn.3762715",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Maura Alexander, Thomas M. Arnold, Joseph Farizo (2021). Visual Timelines in Excel to Illustrate TVM Calculations. Retrieved from https://doi.org/10.2139/ssrn.3762715",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2019theclinicaloutcome",
+      "title": "The Clinical Outcome of TVM or LSC Mesh Suspension for POP",
+      "link": "https://doi.org/10.31525/ct1-nct04139083",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": " (2019). The Clinical Outcome of TVM or LSC Mesh Suspension for POP. Retrieved from https://doi.org/10.31525/ct1-nct04139083",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lu2023theimageofnumerals",
+      "title": "The Image of Numerals with Calibration on TVM",
+      "link": "https://doi.org/10.1109/csce60160.2023.00459",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Ssu-Hsuan Lu (2023). The Image of Numerals with Calibration on TVM. Retrieved from https://doi.org/10.1109/csce60160.2023.00459",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "hillman2022tvmthepublicsnewss",
+      "title": "TVM, the public's news service",
+      "link": "https://doi.org/10.4324/9781003270829-5",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Adrian Hillman (2022). TVM, the public's news service. Retrieved from https://doi.org/10.4324/9781003270829-5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pan2019ureteralstenosisaf",
+      "title": "Ureteral Stenosis after Uterine Suspension Using TVM (Transvaginal Mesh)",
+      "link": "https://doi.org/10.33552/wjgwh.2019.02.000535",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Hun Shan Pan (2019). Ureteral Stenosis after Uterine Suspension Using TVM (Transvaginal Mesh). Retrieved from https://doi.org/10.33552/wjgwh.2019.02.000535",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhu2018tvmbasedmodelforho",
+      "title": "TVM-Based Model for How Climate Change Influence Regional Instability",
+      "link": "https://doi.org/10.1088/1755-1315/208/1/012055",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "MeiYing Zhu (2018). TVM-Based Model for How Climate Change Influence Regional Instability. Retrieved from https://doi.org/10.1088/1755-1315/208/1/012055",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024tvmukadoptsnewname",
+      "title": "TVM UK adopts new name",
+      "link": "https://doi.org/10.1002/vetr.4553",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": " (2024). TVM UK adopts new name. Retrieved from https://doi.org/10.1002/vetr.4553",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yamada2020atvmbasedwidebandp",
+      "title": "A TVM Based Wideband Phase Measurement System by Multiusing One Thermal Voltage Converter",
+      "link": "https://doi.org/10.1109/cpem49742.2020.9191881",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "T. Yamada, Y. Amagai (2020). A TVM Based Wideband Phase Measurement System by Multiusing One Thermal Voltage Converter. Retrieved from https://doi.org/10.1109/cpem49742.2020.9191881",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "alexander2021usingexceltosimula",
+      "title": "Using Excel to Simulate a Financial Calculator and Excel TVM Formulas",
+      "link": "https://doi.org/10.2139/ssrn.3764999",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ],
+      "reference": "Maura Alexander, Thomas M. Arnold, Joseph Farizo (2021). Using Excel to Simulate a Financial Calculator and Excel TVM Formulas. Retrieved from https://doi.org/10.2139/ssrn.3764999",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 24,
+    "A": 36,
+    "C": 3
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:40.574705"
+}

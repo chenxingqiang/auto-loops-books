@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "mlir_hw_matrix",
       "label": "fig:mlir_hw_matrix_pipeline",
-      "caption": "Mlir Hw Matrix optimization pipeline in MLIR: Modern Compiler Infrastructure.",
+      "caption": "Mlir HW Matrix optimization pipeline in MLIR: Modern Compiler Infrastructure.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Mlir Hw Matrix"
+          "detail": "Mlir HW Matrix"
         },
         {
           "name": "On-chip",

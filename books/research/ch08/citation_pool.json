@@ -1,0 +1,284 @@
+{
+  "chapter_id": "ch08",
+  "pool_count": 29,
+  "bib_keys": [
+    "huemer2020timingdomaincrossi",
+    "zhao2023rbgcrepurposethebu",
+    "yirage2026",
+    "memoryfloor2026",
+    "nvidia2022hopper",
+    "zhang2020learninghowtodrive",
+    "shukla2020doubledifferential",
+    "li2021trajectorybasedpri",
+    "patel2025llminference",
+    "anon2020async2020commentar",
+    "anon2020async2020committee",
+    "anon2020async2020opinion",
+    "anon2023async2023coverpage",
+    "anon2020async2020index",
+    "anon2020freshideaspapersas",
+    "anon2020async2020toc",
+    "anon2023async2023organizin",
+    "anon2018messagefromtheasyn",
+    "anon2023async2023messagefr",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "huemer2020timingdomaincrossi",
+      "title": "Timing Domain Crossing using Muller Pipelines",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ]
+    },
+    {
+      "bib_key": "zhao2023rbgcrepurposethebu",
+      "title": "RBGC: Repurpose the Buffer of Fixed Graphics Pipeline to Enhance GPU Cache",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "Hopper"
+      ]
+    },
+    {
+      "bib_key": "zhang2020learninghowtodrive",
+      "title": "Learning how to drive using DDPG Algorithm with Double Experience Buffer Priority Sampling",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "shukla2020doubledifferential",
+      "title": "Double Differential Modulation for Buffer-Aided Cooperative Relaying with Priority-Based Max Link Selection",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "li2021trajectorybasedpri",
+      "title": "Trajectory Based Prioritized Double Experience Buffer for Sample-Efficient Policy Optimization",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2020async2020commentar",
+      "title": "ASYNC 2020 Commentary",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2020async2020committee",
+      "title": "ASYNC 2020 Committees",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2020async2020opinion",
+      "title": "ASYNC 2020 Opinion",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2023async2023coverpage",
+      "title": "ASYNC 2023 Cover Page",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2020async2020index",
+      "title": "ASYNC 2020 Index",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2020freshideaspapersas",
+      "title": "Fresh Ideas Papers: ASYNC 2020",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2020async2020toc",
+      "title": "ASYNC 2020 TOC",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2023async2023organizin",
+      "title": "ASYNC 2023 Organizing Committee",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2018messagefromtheasyn",
+      "title": "Message from the ASYNC 2018 Chairs",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "anon2023async2023messagefr",
+      "title": "ASYNC 2023 Message from the Organizing Committee",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

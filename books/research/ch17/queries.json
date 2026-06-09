@@ -1,0 +1,16 @@
+[
+  "\"OpenAI Triton: Pythonic GPU Kernel Compiler\"",
+  "\"hardware\" AND \"target\"",
+  "\"pass\" AND \"lower\"",
+  "\"codegen\" AND \"backend\"",
+  "\"tun\" AND \"profile\"",
+  "\"case\" AND \"benchmark\"",
+  "\"OpenAI Triton: pythonic GPU kernel compiler\" AND \"OpenAI Triton\"",
+  "\"Triton arch passes\" AND \"Triton case study\"",
+  "\"Triton codegen\" AND \"Triton HW matrix\"",
+  "\"Triton tuning\" AND \"Triton arch passes LLM inference compiler\"",
+  "\"Triton case study LLM inference compiler\" AND \"Triton codegen LLM inference compiler\"",
+  "\"Triton HW matrix LLM inference compiler\" AND \"Triton tuning LLM inference compiler\"",
+  "\"case benchmark\" AND \"codegen backend\"",
+  "\"hardware target\" AND \"pass lower\""
+]

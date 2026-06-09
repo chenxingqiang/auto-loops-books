@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "glow_hw_matrix",
       "label": "fig:glow_hw_matrix_pipeline",
-      "caption": "Glow Hw Matrix optimization pipeline in Glow: Lightweight AI Compiler.",
+      "caption": "Glow HW Matrix optimization pipeline in Glow: Lightweight AI Compiler.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Glow Hw Matrix"
+          "detail": "Glow HW Matrix"
         },
         {
           "name": "On-chip",

@@ -1,0 +1,322 @@
+[
+  {
+    "term": "CUDA Hopper/Blackwell: hardware properties and optimization bounds",
+    "weight": 18
+  },
+  {
+    "term": "CUDA Hopper/Blackwell",
+    "weight": 17
+  },
+  {
+    "term": "cluster dsm",
+    "weight": 14
+  },
+  {
+    "term": "CUDA memory hierarchy",
+    "weight": 14
+  },
+  {
+    "term": "PTX",
+    "weight": 14
+  },
+  {
+    "term": "sync mechanisms",
+    "weight": 14
+  },
+  {
+    "term": "tensor core bounds",
+    "weight": 14
+  },
+  {
+    "term": "TMA",
+    "weight": 14
+  },
+  {
+    "term": "YiRage CUDA backend",
+    "weight": 14
+  },
+  {
+    "term": "cluster dsm LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "CUDA memory hierarchy LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "PTX LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "sync mechanisms LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "tensor core bounds LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "TMA LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage CUDA backend LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "decode latency LLM",
+    "weight": 12
+  },
+  {
+    "term": "memory bandwidth",
+    "weight": 12
+  },
+  {
+    "term": "PTX exp2",
+    "weight": 12
+  },
+  {
+    "term": "register shared memory",
+    "weight": 12
+  },
+  {
+    "term": "tensor core decode",
+    "weight": 12
+  },
+  {
+    "term": "TMA tensor memory",
+    "weight": 12
+  },
+  {
+    "term": "warp block sync",
+    "weight": 12
+  },
+  {
+    "term": "YiRage CUDA",
+    "weight": 12
+  },
+  {
+    "term": "block",
+    "weight": 11
+  },
+  {
+    "term": "cluster",
+    "weight": 11
+  },
+  {
+    "term": "CUDA",
+    "weight": 11
+  },
+  {
+    "term": "decode",
+    "weight": 11
+  },
+  {
+    "term": "dsm",
+    "weight": 11
+  },
+  {
+    "term": "exp2",
+    "weight": 11
+  },
+  {
+    "term": "ftz",
+    "weight": 11
+  },
+  {
+    "term": "register/shared memory/global memory",
+    "weight": 11
+  },
+  {
+    "term": "tensor core",
+    "weight": 11
+  },
+  {
+    "term": "warp shuffle/block sync/cluster dsm/grid sync",
+    "weight": 11
+  },
+  {
+    "term": "YiRage",
+    "weight": 11
+  },
+  {
+    "term": "async",
+    "weight": 10
+  },
+  {
+    "term": "block sync",
+    "weight": 10
+  },
+  {
+    "term": "global",
+    "weight": 10
+  },
+  {
+    "term": "register",
+    "weight": 10
+  },
+  {
+    "term": "shared memory",
+    "weight": 10
+  },
+  {
+    "term": "tensor memory",
+    "weight": 10
+  },
+  {
+    "term": "warp",
+    "weight": 10
+  },
+  {
+    "term": "AIE",
+    "weight": 9
+  },
+  {
+    "term": "alongside",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "codegen",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraint",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "contract",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "FlashAttention",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GEMM",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "HBM",
+    "weight": 9
+  },
+  {
+    "term": "here",
+    "weight": 9
+  },
+  {
+    "term": "Hopper",
+    "weight": 9
+  },
+  {
+    "term": "Hopper decode checklist",
+    "weight": 9
+  },
+  {
+    "term": "illegal",
+    "weight": 9
+  },
+  {
+    "term": "industrial",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "legality",
+    "weight": 9
+  },
+  {
+    "term": "LLM",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "rather",
+    "weight": 9
+  },
+  {
+    "term": "record",
+    "weight": 9
+  },
+  {
+    "term": "relation to chapter~3 and~5",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "XDNA",
+    "weight": 9
+  }
+]

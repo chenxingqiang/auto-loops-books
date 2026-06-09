@@ -1,0 +1,254 @@
+[
+  {
+    "term": "heterogeneous compilation and multi-hardware deployment",
+    "weight": 18
+  },
+  {
+    "term": "hetero cluster",
+    "weight": 14
+  },
+  {
+    "term": "industrial cases",
+    "weight": 14
+  },
+  {
+    "term": "runtime adapt",
+    "weight": 14
+  },
+  {
+    "term": "unified stack",
+    "weight": 14
+  },
+  {
+    "term": "version regression",
+    "weight": 14
+  },
+  {
+    "term": "YiRage cluster",
+    "weight": 14
+  },
+  {
+    "term": "hetero cluster LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "industrial cases LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "runtime adapt LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "unified stack LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "version regression LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage cluster LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "case production",
+    "weight": 12
+  },
+  {
+    "term": "MLIR unified",
+    "weight": 12
+  },
+  {
+    "term": "runtime detect",
+    "weight": 12
+  },
+  {
+    "term": "GPU+CPU",
+    "weight": 11
+  },
+  {
+    "term": "GPU/CPU/NPU",
+    "weight": 11
+  },
+  {
+    "term": "LLM",
+    "weight": 11
+  },
+  {
+    "term": "MLIR/ir",
+    "weight": 11
+  },
+  {
+    "term": "YiRage clustertopology",
+    "weight": 11
+  },
+  {
+    "term": "case",
+    "weight": 10
+  },
+  {
+    "term": "cluster",
+    "weight": 10
+  },
+  {
+    "term": "detect",
+    "weight": 10
+  },
+  {
+    "term": "hetero",
+    "weight": 10
+  },
+  {
+    "term": "MLIR",
+    "weight": 10
+  },
+  {
+    "term": "production",
+    "weight": 10
+  },
+  {
+    "term": "regression",
+    "weight": 10
+  },
+  {
+    "term": "runtime",
+    "weight": 10
+  },
+  {
+    "term": "unified",
+    "weight": 10
+  },
+  {
+    "term": "version",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compilation",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "deployment",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "heterogeneous",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "industrial",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "multi-hardware",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

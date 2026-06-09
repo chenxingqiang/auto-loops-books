@@ -1,0 +1,764 @@
+{
+  "chapter_id": "ch02",
+  "timestamp": "2026-06-10T02:44:53.623361",
+  "min_papers": 25,
+  "paper_count": 50,
+  "sentence_count": 154,
+  "binding_count": 142,
+  "papers": [
+    {
+      "bib_key": "virtanen2025simulationdrivenmu",
+      "title": "Simulation-Driven Multi-Kernel FPGA Dataflow Optimization for Low-Latency and Resource-Efficient Digital Signal Processing Pipelines",
+      "link": "https://doi.org/10.71086/iajse/v12i4/iajse1285",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 126,
+      "matched_keywords": [
+        "dataflow-driven optimization",
+        "AI hardware architecture",
+        "dataflow kernel optimization",
+        "kernel",
+        "dataflow",
+        "graph",
+        "kernels"
+      ],
+      "reference": "Laura Virtanen, Jussi Nieminen (2025). Simulation-Driven Multi-Kernel FPGA Dataflow Optimization for Low-Latency and Resource-Efficient Digital Signal Processing Pipelines. Retrieved from https://doi.org/10.71086/iajse/v12i4/iajse1285",
+      "abstract": "Hardware acceleration in digital signal processing (DSP) applications required by edge computing, wireless communication, and multimedia analytics is becoming more and more apparent because of the high throughput needed and the low latency as well as resource usage required. FPGAs have provided a desirable platform to do such applications due to their reconfigurable architecture and capability of executing highly parallel processing pipelines. Most current DSP accelerators are however designed to optimise a single algorithm e.g. the fast fourier transform or filtering operations and hence not very flexible and therefore do not efficiently utilize resources when more than one kernel needs to be run in the same pipeline. In this paper, a multi-kernel FPGA dataflow optimization framework is s",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gasperini2023ananalysisoftheste",
+      "title": "An analysis of the steepest descent method to efficiently compute the three-dimensional acoustic single-layer operator in the high-frequency regime",
+      "link": "https://doi.org/10.1093/imanum/drac038",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 105,
+      "matched_keywords": [
+        "operator first",
+        "operator compute",
+        "compute",
+        "operator",
+        "layer",
+        "operator-first"
+      ],
+      "reference": "D Gasperini, H- P Beise, et al. (2023). An analysis of the steepest descent method to efficiently compute the three-dimensional acoustic single-layer operator in the high-frequency regime. Retrieved from https://doi.org/10.1093/imanum/drac038",
+      "abstract": "Abstract\nUsing the Cauchy integral theorem, we develop the application of the steepest descent method to efficiently compute the three-dimensional acoustic single-layer integral operator for large wave numbers. Explicit formulas for the splitting points are derived in the one-dimensional case to build suitable complex integration paths. The construction of admissible steepest descent paths is next investigated and some of their properties are stated. Based on these theoretical results, we derive the quadrature scheme of the oscillatory integrals first in dimension one and then extend the methodology to three-dimensional planar triangles. Numerical simulations are finally reported to illustrate the accuracy and efficiency of the proposed approach.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "poirier2026finitevolumediscre",
+      "title": "Finite volume discretization of curl-curl operator to compute magnetic field in low frequency approximation",
+      "link": "https://doi.org/10.1108/compel-10-2024-0429",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 87,
+      "matched_keywords": [
+        "operator first",
+        "operator compute",
+        "compute",
+        "operator",
+        "operator-first"
+      ],
+      "reference": "Wayne Poirier, Mohamed Boubekeur, Abelin Kameni (2026). Finite volume discretization of curl-curl operator to compute magnetic field in low frequency approximation. Retrieved from https://doi.org/10.1108/compel-10-2024-0429",
+      "abstract": "\nPurpose\nThe most used numerical method in electrical engineering resources is the finite element method (FEM). This paper aims to present the use of the finite volume method to solve differential systems that contain the curl-curl operator.\n\n\nDesign/methodology/approach\nTwo discretization approaches have been implemented and tested. In the first one, the authors present the approximation of the curl operator using the diamond scheme. The second approach, called the split-diamond scheme, is a dual version of the first for heterogeneous media. A comparison with FEM software is performed to validate the proposed approaches and highlight the advantages of the second method.\n\n\nFindings\nThe authors validate the adaptation of the curl-curl operator on both schemes. The expected second-order spat",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "calderonbarr2020aspectralelementme",
+      "title": "A spectral element method to compute approximations of the anisotropic diffusion operator with bidimensional tensor coefficient",
+      "link": "https://doi.org/10.1088/1742-6596/1671/1/012011",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator",
+        "fusion"
+      ],
+      "reference": "E A Calderon-Barreto, C A Acosta-Minoli, J E Quiroga-Méndez (2020). A spectral element method to compute approximations of the anisotropic diffusion operator with bidimensional tensor coefficient. Retrieved from https://doi.org/10.1088/1742-6596/1671/1/012011",
+      "abstract": "Abstract\nWe derived a continuous Galerkin spectral element method to compute approximations of the anisotropic diffusion operator with the tensorial coefficient of order two. After writing the operator in the weak form, we calculated spatial integration using the Legendre base. Then, we applied three different methods for the solution of the associated linear system: The Lower-Upper factorization, the biconjugate gradient method and the biconjugate gradient stabilized method with the Richardson preconditioner. To validate the algorithm, we present a convergence study for the Poisson equation when varying the functions of the tensor coefficient. Results show how the algorithm can be used to construct solvers for more complex problems like the anisotropic diffusion-reaction equation.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2023alinearoperatormet",
+      "title": "A Linear Operator Method to Compute the Normal Modes with Rotation of any Asymmetric 3D Planet with Pure Vector Spherical Harmonics",
+      "link": "https://doi.org/10.1088/1674-4527/ace51a",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator",
+        "layer"
+      ],
+      "reference": "Mian Zhang, Cheng-Li Huang (2023). A Linear Operator Method to Compute the Normal Modes with Rotation of any Asymmetric 3D Planet with Pure Vector Spherical Harmonics. Retrieved from https://doi.org/10.1088/1674-4527/ace51a",
+      "abstract": "Abstract\nIn order to compute the free core nutation of the terrestrial planets, such as Earth and Mars, the Moon and lower degree normal modes of the Jovian planets, we propose a linear operator method (LOM). Generalized surface spherical harmonics (GSSHs) are usually applied to the elliptical models with a stress tensor, which cannot be expressed in vector spherical harmonics explicitly. However, GSSHs involve complicated math. LOM is an alternative to GSSHs, whereas it only deals with the coupling fields of the same azimuthal order m, as is the case when a planet model is axially symmetric and rotates about that symmetry axis. We extend LOM to any asymmetric 3D model. The lower degree spheroidal modes of the Earth are computed to validate our method, and the results agree very well with ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hernandez2026thermodynamictheor",
+      "title": "Thermodynamic Theory of Token Compute Allocation -&amp;nbsp;Optimal Inference-Time Compute Distribution via Statistical Mechanics, with Empirical Validation",
+      "link": "https://doi.org/10.2139/ssrn.6372339",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "cross hardware",
+        "AI hardware architecture",
+        "compute",
+        "HIP",
+        "token"
+      ],
+      "reference": "Antonio Lopez Hernandez (2026). Thermodynamic Theory of Token Compute Allocation -&amp;nbsp;Optimal Inference-Time Compute Distribution via Statistical Mechanics, with Empirical Validation. Retrieved from https://doi.org/10.2139/ssrn.6372339",
+      "abstract": "<p>We present a thermodynamic framework for distributing inference-time compute optimally across token positions in autoregressive language models. Our flagship result is a Bose–Einstein-like phase transition: below a critical compute budget Ccrit, a macroscopic fraction of compute condenses onto the hardest tokens, with the active-token fraction scaling as n(C) ∝ (C/Ccrit)1/α . A Jarzynski equality for autoregressive inference is derived and verified via Monte Carlo simulation.</p>\n<p>On production benchmarks (HumanEval, GSM8K, SQuAD), TCA-guided allocation achieves significant speedups with minimal quality degradation, outperforming uniform, early-exit, speculative decoding, D-LLMs, and SelfBudgeter baselines.</p>\n<p>The framework comprises eight theorems: water-filling allocation, a Lan",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "li2024anewmethodtocomput",
+      "title": "A New Method to Compute the Blood Flow Equation Using the Physics-Informed Neural Operator with Applications in Cardiovascular Problems",
+      "link": "https://doi.org/10.2139/ssrn.4808841",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Lingfeng Li, Xue-Cheng Tai, Raymond Chan (2024). A New Method to Compute the Blood Flow Equation Using the Physics-Informed Neural Operator with Applications in Cardiovascular Problems. Retrieved from https://doi.org/10.2139/ssrn.4808841",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "nasrin2021computeinmemoryups",
+      "title": "Compute-in-Memory Upside Down: A Learning Operator Co-Design Perspective for Scalability",
+      "link": "https://doi.org/10.23919/date51398.2021.9474119",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Shamma Nasrin, Priyesh Shukla, et al. (2021). Compute-in-Memory Upside Down: A Learning Operator Co-Design Perspective for Scalability. Retrieved from https://doi.org/10.23919/date51398.2021.9474119",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2024anewmethodtocomput_33",
+      "title": "A new method to compute the blood flow equations using the physics-informed neural operator",
+      "link": "https://doi.org/10.1016/j.jcp.2024.113380",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Lingfeng Li, Xue-Cheng Tai, Raymond Hon-Fu Chan (2024). A new method to compute the blood flow equations using the physics-informed neural operator. Retrieved from https://doi.org/10.1016/j.jcp.2024.113380",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gautier2024anewadjustableloca",
+      "title": "A new adjustable localization operator method to compute local stresses and strains at notched bodies under multiaxial cyclic loading",
+      "link": "https://doi.org/10.1016/j.ijfatigue.2024.108194",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Ewann Gautier, Bruno Levieil, et al. (2024). A new adjustable localization operator method to compute local stresses and strains at notched bodies under multiaxial cyclic loading. Retrieved from https://doi.org/10.1016/j.ijfatigue.2024.108194",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "faes2020breakingthedoublel",
+      "title": "Breaking the Double Loop: Operator Norm Theory as a Tool to Compute with Imprecise Probabilities",
+      "link": "https://doi.org/10.3850/978-981-14-8593-0_5707-cd",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Matthias G. R. Faes, Marcos A. Valdebenito, et al. (2020). Breaking the Double Loop: Operator Norm Theory as a Tool to Compute with Imprecise Probabilities. Retrieved from https://doi.org/10.3850/978-981-14-8593-0_5707-cd",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hanke2023representationtheo",
+      "title": "Representation Theory Based Algorithm to Compute Boltzmann’s Bilinear Collision Operator in the Irreducible Spectral Burnett Ansatz Efficiently",
+      "link": "https://doi.org/10.1007/s10915-023-02168-8",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Andrea Hanke, Manuel Torrilhon (2023). Representation Theory Based Algorithm to Compute Boltzmann’s Bilinear Collision Operator in the Irreducible Spectral Burnett Ansatz Efficiently. Retrieved from https://doi.org/10.1007/s10915-023-02168-8",
+      "abstract": "AbstractNumerically solving the Boltzmann equation is computationally expensive in part due to the number of variables the distribution function depends upon. Another contributor to the complexity of the Boltzmann Equation is the quadratic collision operator describing changes in the distribution function due to colliding particle pairs. Solving it as efficiently as possible has been a topic of recent research, e.g. Cai and Torrilhon (Phys Fluids 31(12):126105, 2019. https://doi.org/10.1063/1.5127114), Wang and Cai (J Comput Phys 397:108815, 2019. https://doi.org/10.1016/j.jcp.2019.07.014), Cai et al. (Comput Fluids 200:104456, 2020. https://doi.org/10.1016/j.compfluid.2020.104456). In this paper we exploit results from representation theory to find a very efficient algorithm both in terms",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2026esup4supcimrramane",
+      "title": "E\n                    <sup>4</sup>\n                    -CIM RRAM: An Evolvable Operator Framework from Linear to High-Order Compute-in-Memory via Monolithic 3D Integration",
+      "link": "https://doi.org/10.1109/edtm65772.2026.11497549",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ],
+      "reference": "Zongwei Wang, Houcheng Liu, et al. (2026). E\n                    <sup>4</sup>\n                    -CIM RRAM: An Evolvable Operator Framework from Linear to High-Order Compute-in-Memory via Monolithic 3D Integration. Retrieved from https://doi.org/10.1109/edtm65772.2026.11497549",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lehdonvirta2024computenorthvscomp",
+      "title": "Compute North vs. Compute South: The Uneven Possibilities of Compute-based AI Governance Around the Globe",
+      "link": "https://doi.org/10.31235/osf.io/8yp7z",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "global",
+        "compute",
+        "GPU",
+        "graph",
+        "HIP"
+      ],
+      "reference": "Vili Lehdonvirta, Boxi Wu, Zoe Hawkins (2024). Compute North vs. Compute South: The Uneven Possibilities of Compute-based AI Governance Around the Globe. Retrieved from https://doi.org/10.31235/osf.io/8yp7z",
+      "abstract": "Governments have begun to view AI compute infrastructures, including advanced AI chips, as a geostrategic resource. This is partly because “compute governance” is believed to be emerging as an important tool for governing AI systems. In this governance model, states that host AI compute capacity within their territorial jurisdictions are likely to be better placed to impose their rules on AI systems than states that do not. In this study, we provide the first attempt at mapping the global geography of public cloud GPU compute, one partic- ularly important category of AI compute infrastructure. Us- ing a census of hyperscale cloud providers’ cloud regions, we observe that the world is divided into “Compute North” coun- tries that host AI compute relevant for AI development (ie. training), “",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "decode",
+        "GPU",
+        "graph",
+        "graphs"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "graph",
+        "graphs"
+      ],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "figurelli2025towardevidencethat",
+      "title": "Toward Evidence That Travels in P vs NP: A Hypothesis-Driven, Verifiable Kernel Architecture (K) for 3-SAT&lt;b&gt;&lt;/b&gt;",
+      "link": "https://doi.org/10.20944/preprints202509.2467.v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 51,
+      "matched_keywords": [
+        "kernel",
+        "register",
+        "every",
+        "layer"
+      ],
+      "reference": "Rogério Figurelli (2025). Toward Evidence That Travels in P vs NP: A Hypothesis-Driven, Verifiable Kernel Architecture (K) for 3-SAT&lt;b&gt;&lt;/b&gt;. Retrieved from https://doi.org/10.20944/preprints202509.2467.v1",
+      "abstract": "We step outside the P = NP vs. P ≠ NP dichotomy and, following a co-evolutionary, hypothesis-first program, we frame evidence by the accounting constraint P(L, t) + NP(L, t) = 1, where t indexes registered time windows and L indexes structural layers of analysis. The credit assigned to constructive computation P(L, t) versus certificate-based reasoning NP(L, t) may shift across windows and layers, but their sum is conserved by design. Within this multilayer, time-indexed lens, we propose a test object for proof in 3-SAT: a small, auditable branching set K. Our operational hypothesis is that, within controlled experimental windows, there exists K ⊆ V(F) with |K| ≤ c·log n such that, for every partial assignment α: K → {0,1}, the restricted formula F ∣ α terminates in polynomial time and emi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sun2019powerdrivendnndata",
+      "title": "Power-Driven DNN Dataflow Optimization on FPGA",
+      "link": "https://doi.org/10.1109/iccad45719.2019.8942085",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 50,
+      "matched_keywords": [
+        "dataflow-driven optimization",
+        "dataflow"
+      ],
+      "reference": "Qi Sun, Tinghuan Chen, et al. (2019). Power-Driven DNN Dataflow Optimization on FPGA. Retrieved from https://doi.org/10.1109/iccad45719.2019.8942085",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 49,
+      "matched_keywords": [
+        "YiRage",
+        "CPU",
+        "CUDA",
+        "Triton"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jindal2026positiveoperatorva",
+      "title": "Positive operator-valued noncommutative polynomials are squares",
+      "link": "https://doi.org/10.1007/s00020-026-02828-y",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "operator",
+        "every",
+        "NPU"
+      ],
+      "reference": "Abhay Jindal, Igor Klep, Scott McCullough (2026). Positive operator-valued noncommutative polynomials are squares. Retrieved from https://doi.org/10.1007/s00020-026-02828-y",
+      "abstract": "Abstract\n\n                    We establish operator-valued versions of the earlier foundational factorization results for noncommutative polynomials due to Helton (Ann. Math., 2002) and one of the authors (Linear Alg. Appl., 2001). Specifically, we show that every positive operator-valued noncommutative polynomial\n                    p\n                    admits a single-square factorization\n                    \n\n$$p=r^{*}r$$\n\n\np\n=\n\nr\n\n\n∗\n\n\nr\n\n\n\n\n                    . An analogous statement holds for operator-valued noncommutative trigonometric polynomials (i.e., operator-valued elements of a free group algebra). Our approach follows the now standard sum-of-squares (sos) paradigm but requires new results and constructions tailored to operator coefficients. Assuming a positive\n             ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "decode",
+        "tier"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2020akerneldrivenbrdfm",
+      "title": "A kernel-driven BRDF model to inform satellite-derived visible anvil cloud detection",
+      "link": "https://doi.org/10.5194/amt-2020-206-rc1",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "kernel"
+      ],
+      "reference": " (2020). A kernel-driven BRDF model to inform satellite-derived visible anvil cloud detection. Retrieved from https://doi.org/10.5194/amt-2020-206-rc1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024reviewforintegrati",
+      "title": "Review for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\"",
+      "link": "https://doi.org/10.1002/cjce.25445/v2/review3",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": " (2024). Review for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\". Retrieved from https://doi.org/10.1002/cjce.25445/v2/review3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024decisionletterfori",
+      "title": "Decision letter for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\"",
+      "link": "https://doi.org/10.1002/cjce.25445/v1/decision1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": " (2024). Decision letter for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\". Retrieved from https://doi.org/10.1002/cjce.25445/v1/decision1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2024authorresponsefori",
+      "title": "Author response for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\"",
+      "link": "https://doi.org/10.1002/cjce.25445/v2/response1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": "Xiaonian Wang, Sheel Ayachi, et al. (2024). Author response for \"Integrating autoencoder with Koopman operator to design a linear data‐driven model predictive controller\". Retrieved from https://doi.org/10.1002/cjce.25445/v2/response1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hara2021gainpreservingdata",
+      "title": "Gain-Preserving Data-Driven Approximation of the Koopman Operator and Its Application in Robust Controller Design",
+      "link": "https://doi.org/10.3390/math9090949",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": "Keita Hara, Masaki Inoue (2021). Gain-Preserving Data-Driven Approximation of the Koopman Operator and Its Application in Robust Controller Design. Retrieved from https://doi.org/10.3390/math9090949",
+      "abstract": "In this paper, we address the data-driven modeling of a nonlinear dynamical system while incorporating a priori information. The nonlinear system is described using the Koopman operator, which is a linear operator defined on a lifted infinite-dimensional state-space. Assuming that the L2 gain of the system is known, the data-driven finite-dimensional approximation of the operator while preserving information about the gain, namely L2 gain-preserving data-driven modeling, is formulated. Then, its computationally efficient solution method is presented. An application of the modeling method to feedback controller design is also presented. Aiming for robust stabilization using data-driven control under a poor training dataset, we address the following two modeling problems: (1) Forward modelin",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ganz2021datadrivenhsubsubo",
+      "title": "Data-driven H<sub>∞</sub> Optimal Controller Design using the Koopman Operator: Case Study",
+      "link": "https://doi.org/10.23919/ecc54610.2021.9654883",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": "Felix Ganz, Adwait Datar, et al. (2021). Data-driven H<sub>∞</sub> Optimal Controller Design using the Koopman Operator: Case Study. Retrieved from https://doi.org/10.23919/ecc54610.2021.9654883",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "defersha2022mathematicalmodela",
+      "title": "Mathematical model and simulated annealing algorithm for setup operator constrained flexible job shop scheduling problem",
+      "link": "https://doi.org/10.1016/j.cie.2022.108487",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": "Fantahun M. Defersha, Dolapo Obimuyiwa, Alebachew D. Yimer (2022). Mathematical model and simulated annealing algorithm for setup operator constrained flexible job shop scheduling problem. Retrieved from https://doi.org/10.1016/j.cie.2022.108487",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kretch2019pawscomputeamazonw",
+      "title": "paws.compute: 'Amazon Web Services' Compute Services",
+      "link": "https://doi.org/10.32614/cran.package.paws.compute",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": "David Kretch, Adam Banker (2019). paws.compute: 'Amazon Web Services' Compute Services. Retrieved from https://doi.org/10.32614/cran.package.paws.compute",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "berti2021enerscapecomputeen",
+      "title": "enerscape: Compute Energy Landscapes",
+      "link": "https://doi.org/10.32614/cran.package.enerscape",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": "Emilio Berti (2021). enerscape: Compute Energy Landscapes. Retrieved from https://doi.org/10.32614/cran.package.enerscape",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023computen",
+      "title": "compute, n.",
+      "link": "https://doi.org/10.1093/oed/2382267300",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": " (2023). compute, n.. Retrieved from https://doi.org/10.1093/oed/2382267300",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023computev",
+      "title": "compute, v.",
+      "link": "https://doi.org/10.1093/oed/7832850572",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": " (2023). compute, v.. Retrieved from https://doi.org/10.1093/oed/7832850572",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2020chncapitalstockcom",
+      "title": "CHNCapitalStock: Compute Chinese Capital Stocks",
+      "link": "https://doi.org/10.32614/cran.package.chncapitalstock",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": "Pu Chen (2020). CHNCapitalStock: Compute Chinese Capital Stocks. Retrieved from https://doi.org/10.32614/cran.package.chncapitalstock",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lyons2022degdaycomputedegre",
+      "title": "degday: Compute Degree Days",
+      "link": "https://doi.org/10.32614/cran.package.degday",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "compute"
+      ],
+      "reference": "Andy Lyons (2022). degday: Compute Degree Days. Retrieved from https://doi.org/10.32614/cran.package.degday",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zou2020conformalfieldsand",
+      "title": "Conformal Fields and Operator Product Expansion in Critical Quantum Spin Chains",
+      "link": "https://doi.org/10.1103/physrevlett.124.040604",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "operator"
+      ],
+      "reference": "Yijian Zou, Ashley Milsted, Guifre Vidal (2020). Conformal Fields and Operator Product Expansion in Critical Quantum Spin Chains. Retrieved from https://doi.org/10.1103/physrevlett.124.040604",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "PagedAttention"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kim2025dataflowdrivenneur",
+      "title": "Dataflow-Driven Neuromorphic Architectures for Edge AI: Theory, Design, and Applications",
+      "link": "https://doi.org/10.1109/icm66518.2025.11321320",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Bokyung Kim, Parshva Mehta, Yiran Chen (2025). Dataflow-Driven Neuromorphic Architectures for Edge AI: Theory, Design, and Applications. Retrieved from https://doi.org/10.1109/icm66518.2025.11321320",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "vidalobiols2019rtlawaredataflowdr",
+      "title": "RTL-Aware Dataflow-Driven Macro Placement",
+      "link": "https://doi.org/10.23919/date.2019.8714812",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Alex Vidal-Obiols, Jordi Cortadella, et al. (2019). RTL-Aware Dataflow-Driven Macro Placement. Retrieved from https://doi.org/10.23919/date.2019.8714812",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhao2025incredflipincremen",
+      "title": "IncreDFlip: Incremental Dataflow-Driven Macro Flipping for Efficient Macro Placement Refinement",
+      "link": "https://doi.org/10.1109/iseda65950.2025.11100996",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Xiaotian Zhao, Jiayin Chen, et al. (2025). IncreDFlip: Incremental Dataflow-Driven Macro Flipping for Efficient Macro Placement Refinement. Retrieved from https://doi.org/10.1109/iseda65950.2025.11100996",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "paller2019dataflowbasedheter",
+      "title": "Dataflow-based Heterogeneous Code Generator for IoT Applications",
+      "link": "https://doi.org/10.5220/0007496804260432",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Gábor Paller, Endri Bezati, et al. (2019). Dataflow-based Heterogeneous Code Generator for IoT Applications. Retrieved from https://doi.org/10.5220/0007496804260432",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cheng2022taleoftwomarketsbe",
+      "title": "Tale of Two Markets Before and After Pandemic: Economy Driven vs Dollar Driven",
+      "link": "https://doi.org/10.58886/jfi.v20i3.3208",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "HIP"
+      ],
+      "reference": "Joseph Cheng, Seena Houman (2022). Tale of Two Markets Before and After Pandemic: Economy Driven vs Dollar Driven. Retrieved from https://doi.org/10.58886/jfi.v20i3.3208",
+      "abstract": "The correlation between the U.S. equity market and the U.S dollar is intriguing yet complex. In this paper, we dissect the correlation into two opposing driving forces: purchasing power versus economic strength. A weak dollar inevitably will have a lower purchasing power, causing prices of all dollar denominated assets to rise creating an inverse relationship between the value of the dollar and the U.S. equity market. On the other hand, increasing strength in the U.S. economy will boost the confidence in the U.S. equity market and in the U.S. dollar, thus creating a positive correlation between the value of the dollar and the U.S. equity market. These two factors pull the correlation between the dollar and the equity market in opposite directions; whether the actual correlation is positive",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 30,
+    "C": 2,
+    "A": 18
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:36.640946"
+}

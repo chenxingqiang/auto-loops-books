@@ -1,0 +1,362 @@
+[
+  {
+    "term": "two kernel design mindsets: operator-driven vs dataflow-driven",
+    "weight": 18
+  },
+  {
+    "term": "two kernel design mindsets",
+    "weight": 17
+  },
+  {
+    "term": "dataflow-driven optimization",
+    "weight": 16
+  },
+  {
+    "term": "operator-driven kernel design",
+    "weight": 16
+  },
+  {
+    "term": "data residency on-chip",
+    "weight": 15
+  },
+  {
+    "term": "MegaKernel fusion LLM",
+    "weight": 15
+  },
+  {
+    "term": "automation path",
+    "weight": 14
+  },
+  {
+    "term": "cross hardware",
+    "weight": 14
+  },
+  {
+    "term": "data residency",
+    "weight": 14
+  },
+  {
+    "term": "dataflow philosophy",
+    "weight": 14
+  },
+  {
+    "term": "iron rules",
+    "weight": 14
+  },
+  {
+    "term": "MegaKernel preview",
+    "weight": 14
+  },
+  {
+    "term": "operator first",
+    "weight": 14
+  },
+  {
+    "term": "static pipeline dataflow",
+    "weight": 14
+  },
+  {
+    "term": "XDNA AIE dataflow accelerator",
+    "weight": 14
+  },
+  {
+    "term": "automation path LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "compiler automated kernel fusion",
+    "weight": 13
+  },
+  {
+    "term": "cross hardware LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "CUDA memory hierarchy optimization",
+    "weight": 13
+  },
+  {
+    "term": "data residency LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "dataflow philosophy LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "iron rules LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "MegaKernel preview LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "operator first LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "dataflow kernel optimization",
+    "weight": 12
+  },
+  {
+    "term": "operator compute",
+    "weight": 12
+  },
+  {
+    "term": "operator fusion kernel",
+    "weight": 12
+  },
+  {
+    "term": "register shared memory global",
+    "weight": 12
+  },
+  {
+    "term": "data residen residency on chip",
+    "weight": 11
+  },
+  {
+    "term": "dataflow static pipeline",
+    "weight": 11
+  },
+  {
+    "term": "global",
+    "weight": 11
+  },
+  {
+    "term": "kernel",
+    "weight": 11
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 11
+  },
+  {
+    "term": "MegaKernel fusion",
+    "weight": 11
+  },
+  {
+    "term": "register",
+    "weight": 11
+  },
+  {
+    "term": "register shared global",
+    "weight": 11
+  },
+  {
+    "term": "shared",
+    "weight": 11
+  },
+  {
+    "term": "vs CPU cache",
+    "weight": 11
+  },
+  {
+    "term": "vs CUDA",
+    "weight": 11
+  },
+  {
+    "term": "XDNA",
+    "weight": 11
+  },
+  {
+    "term": "XDNA CUDA CPU cache",
+    "weight": 11
+  },
+  {
+    "term": "YiRage",
+    "weight": 11
+  },
+  {
+    "term": "YiRage automat compiler",
+    "weight": 11
+  },
+  {
+    "term": "compute",
+    "weight": 10
+  },
+  {
+    "term": "operator",
+    "weight": 10
+  },
+  {
+    "term": "AIE",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "compiler ir view",
+    "weight": 9
+  },
+  {
+    "term": "contrasting schedules on one decoder layer",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "CUDA",
+    "weight": 9
+  },
+  {
+    "term": "dataflow",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "decoder",
+    "weight": 9
+  },
+  {
+    "term": "edges",
+    "weight": 9
+  },
+  {
+    "term": "every",
+    "weight": 9
+  },
+  {
+    "term": "failure modes when mixing mindsets",
+    "weight": 9
+  },
+  {
+    "term": "FlashAttention",
+    "weight": 9
+  },
+  {
+    "term": "fused",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "glossary bridge",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "graph",
+    "weight": 9
+  },
+  {
+    "term": "graphs",
+    "weight": 9
+  },
+  {
+    "term": "HBM",
+    "weight": 9
+  },
+  {
+    "term": "HIP",
+    "weight": 9
+  },
+  {
+    "term": "historical note: why operator-first won (temporarily)",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "launch",
+    "weight": 9
+  },
+  {
+    "term": "layer",
+    "weight": 9
+  },
+  {
+    "term": "migration checklist: operator stack to dataflow ir",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "NUMA",
+    "weight": 9
+  },
+  {
+    "term": "operator-first",
+    "weight": 9
+  },
+  {
+    "term": "organizational incentives",
+    "weight": 9
+  },
+  {
+    "term": "PagedAttention",
+    "weight": 9
+  },
+  {
+    "term": "practice problems (engineering, not exercises)",
+    "weight": 9
+  },
+  {
+    "term": "PyTorch",
+    "weight": 9
+  },
+  {
+    "term": "residency",
+    "weight": 9
+  },
+  {
+    "term": "SIMD",
+    "weight": 9
+  },
+  {
+    "term": "stages",
+    "weight": 9
+  },
+  {
+    "term": "still",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "tier",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "Triton",
+    "weight": 9
+  }
+]

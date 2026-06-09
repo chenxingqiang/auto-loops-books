@@ -1,0 +1,194 @@
+[
+  {
+    "term": "static role assignment and schedule-free kernels",
+    "weight": 18
+  },
+  {
+    "term": "no runtime sched",
+    "weight": 14
+  },
+  {
+    "term": "static roles",
+    "weight": 14
+  },
+  {
+    "term": "thread mapping",
+    "weight": 14
+  },
+  {
+    "term": "YiRage tiling",
+    "weight": 14
+  },
+  {
+    "term": "no runtime sched LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "static roles LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "thread mapping LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage tiling LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "runtime dispatch",
+    "weight": 12
+  },
+  {
+    "term": "static role",
+    "weight": 12
+  },
+  {
+    "term": "thread warp",
+    "weight": 12
+  },
+  {
+    "term": "dispatch",
+    "weight": 10
+  },
+  {
+    "term": "role",
+    "weight": 10
+  },
+  {
+    "term": "runtime",
+    "weight": 10
+  },
+  {
+    "term": "static",
+    "weight": 10
+  },
+  {
+    "term": "thread",
+    "weight": 10
+  },
+  {
+    "term": "tiling",
+    "weight": 10
+  },
+  {
+    "term": "warp",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "assignment",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "schedule-free",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

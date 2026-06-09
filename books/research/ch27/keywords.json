@@ -1,0 +1,242 @@
+[
+  {
+    "term": "future trends in AI compilers",
+    "weight": 18
+  },
+  {
+    "term": "autonomous kernels",
+    "weight": 14
+  },
+  {
+    "term": "codesign",
+    "weight": 14
+  },
+  {
+    "term": "edge cloud",
+    "weight": 14
+  },
+  {
+    "term": "new architectures",
+    "weight": 14
+  },
+  {
+    "term": "autonomous kernels LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "codesign LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "edge cloud LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "new architectures LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "architecture trend",
+    "weight": 12
+  },
+  {
+    "term": "autonomous kernel",
+    "weight": 12
+  },
+  {
+    "term": "co-design hardware",
+    "weight": 12
+  },
+  {
+    "term": "dataflow kernel optimization",
+    "weight": 12
+  },
+  {
+    "term": "api",
+    "weight": 11
+  },
+  {
+    "term": "benchmark",
+    "weight": 11
+  },
+  {
+    "term": "checklist",
+    "weight": 11
+  },
+  {
+    "term": "CUDA/XDNA/CPU/NPU",
+    "weight": 11
+  },
+  {
+    "term": "pythia-2.8b MegaKernel",
+    "weight": 11
+  },
+  {
+    "term": "YiRage",
+    "weight": 11
+  },
+  {
+    "term": "architecture",
+    "weight": 10
+  },
+  {
+    "term": "autonomous",
+    "weight": 10
+  },
+  {
+    "term": "cloud",
+    "weight": 10
+  },
+  {
+    "term": "co-design",
+    "weight": 10
+  },
+  {
+    "term": "edge",
+    "weight": 10
+  },
+  {
+    "term": "hardware",
+    "weight": 10
+  },
+  {
+    "term": "kernel",
+    "weight": 10
+  },
+  {
+    "term": "trend",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "compilers",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "future",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "real",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "trends",
+    "weight": 9
+  }
+]

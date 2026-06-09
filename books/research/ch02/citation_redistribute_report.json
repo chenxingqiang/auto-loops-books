@@ -1,0 +1,129 @@
+{
+  "chapter_id": "ch02",
+  "pool_count": 18,
+  "assigned_count": 18,
+  "unassigned_count": 0,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 17,
+  "pool_path": "books/research/ch02/citation_pool.json",
+  "sections_used": [
+    "Automation Path",
+    "Chapter Summary",
+    "Cross Hardware",
+    "Data Residency",
+    "Operator First",
+    "chapter"
+  ],
+  "cites_applied": 17,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch02_dataflow_mindset.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "patel2025llminference",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "wang2026esup4supcimrramane",
+      "section": "chapter",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "sun2019powerdrivendnndata",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "kim2025dataflowdrivenneur",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "taxbreak2026",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "dao2023flashdecoding",
+      "section": "Operator First",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "fallback": false
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "liu2024deepseekv3",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "nvidia2022hopper",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "amd2024aie",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "semianalysis2024tma",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "dao2022flashattention",
+      "section": "Operator First",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "dlbook",
+      "section": "Operator First",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:37.004534"
+}

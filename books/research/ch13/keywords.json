@@ -1,0 +1,194 @@
+[
+  {
+    "term": "core theory: AI compiler optimization principles",
+    "weight": 18
+  },
+  {
+    "term": "core theory",
+    "weight": 17
+  },
+  {
+    "term": "fusion theory",
+    "weight": 14
+  },
+  {
+    "term": "GPU CPU NPU split",
+    "weight": 14
+  },
+  {
+    "term": "layout theory",
+    "weight": 14
+  },
+  {
+    "term": "parallel scheduling",
+    "weight": 14
+  },
+  {
+    "term": "tiling theory",
+    "weight": 14
+  },
+  {
+    "term": "fusion theory LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "GPU CPU NPU split LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "layout theory LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "parallel scheduling LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "tiling theory LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "GPU CPU",
+    "weight": 12
+  },
+  {
+    "term": "fusion",
+    "weight": 11
+  },
+  {
+    "term": "layout",
+    "weight": 11
+  },
+  {
+    "term": "parallel",
+    "weight": 11
+  },
+  {
+    "term": "tiling",
+    "weight": 11
+  },
+  {
+    "term": "CPU",
+    "weight": 10
+  },
+  {
+    "term": "GPU",
+    "weight": 10
+  },
+  {
+    "term": "NPU",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "core",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "hardware--software",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "real",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "theory",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

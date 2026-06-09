@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch08",
+  "chapter_title": "TMA Double-Buffer Pipelines and Async Movement",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 52,
+  "catalog_tier_a": 29,
+  "binding_count": 204,
+  "quality_binding_count": 204,
+  "sentence_count": 256,
+  "claim_sentence_count": 256,
+  "unbound_claim_sentences": 52,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 50,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

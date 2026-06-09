@@ -1,0 +1,868 @@
+{
+  "chapter_id": "ch06",
+  "timestamp": "2026-06-10T02:45:22.854958",
+  "min_papers": 25,
+  "paper_count": 59,
+  "sentence_count": 256,
+  "binding_count": 205,
+  "papers": [
+    {
+      "bib_key": "huang2026architecturaltrade",
+      "title": "Architectural Trade-Offs in Vision-Only FSD and Sensor-Fusion Chip Design: Memory Bandwidth, Cache Capacity, and Competitive Dynamics in Autonomous Driving Semiconductors",
+      "link": "https://doi.org/10.2139/ssrn.6184459",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "cache",
+        "memory",
+        "data",
+        "design",
+        "fusion",
+        "GPU"
+      ],
+      "reference": "Po-Sung (Sinclair) Huang (2026). Architectural Trade-Offs in Vision-Only FSD and Sensor-Fusion Chip Design: Memory Bandwidth, Cache Capacity, and Competitive Dynamics in Autonomous Driving Semiconductors. Retrieved from https://doi.org/10.2139/ssrn.6184459",
+      "abstract": "This paper examines architectural trade-offs in autonomous driving chip design through the lens of Tesla-style vision-only Full Self-Driving (FSD) systems versus sensor-fusion robotaxi stacks. Focusing on memory hierarchy behavior, cache capacity, and DRAM technology choices (LPDDR versus HBM), the study investigates how end-to-end (E2E) architectures shape both technical performance and competitive dynamics among US, Chinese, and Taiwanese semiconductor suppliers. Using GPU profiling experiments on Tesla T4 hardware, real-world driving data from a BMW X6 equipped with Mobileye EyeQ2, and comparative cost structure analysis, the research addresses two questions: (1) how memory bandwidth requirements differ between sequential and parallel E2E architectures representative of FSD-style stacks",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "bera2026machinelearningdri",
+      "title": "Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage",
+      "link": "https://doi.org/10.1109/mm.2026.3667076",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "cache",
+        "memory",
+        "design",
+        "on-chip"
+      ],
+      "reference": "Rahul Bera, Rakesh Nadig, Onur Mutlu (2026). Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage. Retrieved from https://doi.org/10.1109/mm.2026.3667076",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zuzak2020obfusgemenhancingp",
+      "title": "ObfusGEM: Enhancing Processor Design Obfuscation Through Security-Aware On-Chip Memory and Data Path Design",
+      "link": "https://doi.org/10.1145/3422575.3422798",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "design",
+        "on-chip"
+      ],
+      "reference": "Michael Zuzak, Ankur Srivastava (2020). ObfusGEM: Enhancing Processor Design Obfuscation Through Security-Aware On-Chip Memory and Data Path Design. Retrieved from https://doi.org/10.1145/3422575.3422798",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023reviewformemorybce",
+      "title": "Review for \"Memory B cell diversity: from early generation to tissue residency and reactivation\"",
+      "link": "https://doi.org/10.1002/eji.202250085/v2/review1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "memory",
+        "residen",
+        "residency"
+      ],
+      "reference": " (2023). Review for \"Memory B cell diversity: from early generation to tissue residency and reactivation\". Retrieved from https://doi.org/10.1002/eji.202250085/v2/review1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023decisionletterform",
+      "title": "Decision letter for \"Memory B cell diversity: from early generation to tissue residency and reactivation\"",
+      "link": "https://doi.org/10.1002/eji.202250085/v2/decision1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "memory",
+        "residen",
+        "residency"
+      ],
+      "reference": " (2023). Decision letter for \"Memory B cell diversity: from early generation to tissue residency and reactivation\". Retrieved from https://doi.org/10.1002/eji.202250085/v2/decision1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vourkas2022ubiquitousmemristo",
+      "title": "Ubiquitous memristors on-chip in multi-level memory, in-memory computing, data converters, clock generation and signal transmission",
+      "link": "https://doi.org/10.1016/b978-0-12-814629-3.00013-1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "on-chip"
+      ],
+      "reference": "Ioannis Vourkas, Manuel Escudero, et al. (2022). Ubiquitous memristors on-chip in multi-level memory, in-memory computing, data converters, clock generation and signal transmission. Retrieved from https://doi.org/10.1016/b978-0-12-814629-3.00013-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "haque2024onchipchargepumpde",
+      "title": "On-chip charge pump design for 3D non-volatile flash memory: from industry perspective",
+      "link": "https://doi.org/10.1016/j.vlsi.2023.102093",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "design",
+        "on-chip"
+      ],
+      "reference": "Rezaul Haque, Siraj Fulum Mossa (2024). On-chip charge pump design for 3D non-volatile flash memory: from industry perspective. Retrieved from https://doi.org/10.1016/j.vlsi.2023.102093",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "byeon2024multithreadeddatas",
+      "title": "Multi-Threaded Data-Scrambling Techniques Using Reduced on-Chip Memory for Light-Weight Embedded Systems",
+      "link": "https://doi.org/10.1109/ictc62082.2024.10827600",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "on-chip"
+      ],
+      "reference": "Jongyun Byeon, Daejin Park (2024). Multi-Threaded Data-Scrambling Techniques Using Reduced on-Chip Memory for Light-Weight Embedded Systems. Retrieved from https://doi.org/10.1109/ictc62082.2024.10827600",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "memory",
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "gaadhe2026designofstableande",
+      "title": "Design of stable and efficient novel 13-transistor differential static random access memory cell",
+      "link": "https://doi.org/10.1016/j.chip.2025.100171",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Ajjay S. Gaadhe, Yuvraj V. Parkale (2026). Design of stable and efficient novel 13-transistor differential static random access memory cell. Retrieved from https://doi.org/10.1016/j.chip.2025.100171",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2024searchinmemorysimc",
+      "title": "Search-in-Memory (SiM): Conducting Data-Bound Computations on Flash Chip for Enhanced Efficiency",
+      "link": "https://doi.org/10.23919/date58400.2024.10546690",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "data"
+      ],
+      "reference": "Yun-Chih Chen, Yuan-Hao Chang, Tei-Wei Kuo (2024). Search-in-Memory (SiM): Conducting Data-Bound Computations on Flash Chip for Enhanced Efficiency. Retrieved from https://doi.org/10.23919/date58400.2024.10546690",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2023astandardcellmemor",
+      "title": "A Standard Cell Memory Based on 2T Gain Cell DRAM for Memory-Centric Accelerator Design",
+      "link": "https://doi.org/10.1109/socc58585.2023.10257009",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Tai-Feng Chen, Yutaka Masuda, Tohru Ishihara (2023). A Standard Cell Memory Based on 2T Gain Cell DRAM for Memory-Centric Accelerator Design. Retrieved from https://doi.org/10.1109/socc58585.2023.10257009",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "seo2023advancesandtrendso",
+      "title": "Advances and Trends on On-Chip Compute-in-Memory Macros and Accelerators",
+      "link": "https://doi.org/10.1109/dac56929.2023.10248014",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ],
+      "reference": "Jae-Sun Seo (2023). Advances and Trends on On-Chip Compute-in-Memory Macros and Accelerators. Retrieved from https://doi.org/10.1109/dac56929.2023.10248014",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2018alowperformanceove",
+      "title": "A Low Performance-Overhead ORAM Design for Processor System with Un-trusted Off-chip Memory",
+      "link": "https://doi.org/10.23977/iccsie.2018.1016",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": " (2018). A Low Performance-Overhead ORAM Design for Processor System with Un-trusted Off-chip Memory. Retrieved from https://doi.org/10.23977/iccsie.2018.1016",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2023researchonsimulati",
+      "title": "Research on simulation acceleration method of FPGA design with external memory chip",
+      "link": "https://doi.org/10.1109/phm58589.2023.00033",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Hongwei Wang, Liu Tang, You Li (2023). Research on simulation acceleration method of FPGA design with external memory chip. Retrieved from https://doi.org/10.1109/phm58589.2023.00033",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "purkayastha2021designstudyonimpac",
+      "title": "Design Study on Impact of Memory Access Parallelism for Cloud FPGAs",
+      "link": "https://doi.org/10.1109/socc52499.2021.9739477",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Arnab A Purkayastha, Hamed Tabkhi (2021). Design Study on Impact of Memory Access Parallelism for Cloud FPGAs. Retrieved from https://doi.org/10.1109/socc52499.2021.9739477",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lai2018onchipmemoryoptimi",
+      "title": "On-Chip Memory Optimization of High Efficiency Accelerator for Deep Convolutional Neural Networks",
+      "link": "https://doi.org/10.1109/isocc.2018.8649945",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ],
+      "reference": "Tzu-Yi Lai, Kuan-Hung Chen (2018). On-Chip Memory Optimization of High Efficiency Accelerator for Deep Convolutional Neural Networks. Retrieved from https://doi.org/10.1109/isocc.2018.8649945",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2020anovelschemetomapc",
+      "title": "A Novel Scheme to Map Convolutional Networks to Network-on-Chip with Computing-In-Memory Nodes",
+      "link": "https://doi.org/10.1109/isocc50952.2020.9332940",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ],
+      "reference": "Jiayi Liu, Kejie Huang (2020). A Novel Scheme to Map Convolutional Networks to Network-on-Chip with Computing-In-Memory Nodes. Retrieved from https://doi.org/10.1109/isocc50952.2020.9332940",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "agarwal2024lowpowerestimation",
+      "title": "Low Power Estimation for Multibit Memory Writing and Reading in Hardware Chip Design",
+      "link": "https://doi.org/10.1109/icsd60021.2024.10751135",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Prateek Agarwal, Tanuj Kumar Garg, Adesh Kumar (2024). Low Power Estimation for Multibit Memory Writing and Reading in Hardware Chip Design. Retrieved from https://doi.org/10.1109/icsd60021.2024.10751135",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wu2022designofsystemonch",
+      "title": "Design of System on Chip Based on In-Memory Computing Theory",
+      "link": "https://doi.org/10.1109/icnlp55136.2022.00102",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ],
+      "reference": "Jin Wu, Yu Wang, et al. (2022). Design of System on Chip Based on In-Memory Computing Theory. Retrieved from https://doi.org/10.1109/icnlp55136.2022.00102",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "min2020programrawatandanp",
+      "title": "PROGRAM RAWATAN DAN PEMULIHAN DI CURE &amp; CARE SERVICE CENTRE: MOTIVASI UNTUK RAWATAN DAN EFIKASI DIRI DALAM KALANGAN RESIDEN DAN BUKAN RESIDEN",
+      "link": "https://doi.org/10.24200/jonus.vol5iss1pp27-53",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "residen",
+        "ship",
+        "treat"
+      ],
+      "reference": "Ruhani Mat Min, Madihah Shukri, et al. (2020). PROGRAM RAWATAN DAN PEMULIHAN DI CURE &amp; CARE SERVICE CENTRE: MOTIVASI UNTUK RAWATAN DAN EFIKASI DIRI DALAM KALANGAN RESIDEN DAN BUKAN RESIDEN. Retrieved from https://doi.org/10.24200/jonus.vol5iss1pp27-53",
+      "abstract": "Tujuan dan Latarbelakang: Kajian bertujuan mengkaji program rawatan dan pemulihan di CCSC dalam kalangan residen dan bukan residen.  Residen merupakan penghuni sepenuh masa dan mengikuti program rawatan dan pemulihan yang dikendalikan oleh CCSC.  Bukan residen adalah disebaliknya. Kajian ini juga bertujuan untuk mengenal pasti peramal yang signifikan terhadap motivasi rawatan dan efikasi diri untuk tidak terlibat dari dadah dalam kalangan residen dan bukan residen.\r\n \r\nMetodologi: Empat buat CCSC telah dipilih dalam kajian ini.  Seramai 102 responden iaitu 55 orang residen (53.4 %) dan 47 orang bukan residen (47.6%) daripada empat buah CCSC mengisi soal selidik berkaitan dengan motivasi rawatan dan efikasi diri untuk menjauhi dadah.\r\n \r\nDapatan: Tempoh tamat program rawatan dan pemulihan d",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nuritasari2022pengaruhpeergroups",
+      "title": "Pengaruh Peer Group Support Dalam Pelaksanaan Therapeutic Community Terhadap Peningkatan Motivasi Residen Untuk Menjalani Rehabilitasi",
+      "link": "https://doi.org/10.30651/jkm.v7i4.15383",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "residen",
+        "data",
+        "design"
+      ],
+      "reference": "Rahayu Tri Nuritasari, Septi Viantri Kurdaningsih, M. Ramadhani Firmansyah (2022). Pengaruh Peer Group Support Dalam Pelaksanaan Therapeutic Community Terhadap Peningkatan Motivasi Residen Untuk Menjalani Rehabilitasi. Retrieved from https://doi.org/10.30651/jkm.v7i4.15383",
+      "abstract": "Objective: The purpose of this study was to determine the effect of peer group support in therapeutic community to motivation resident for rehabilitationMethods:  The research uses quantitative methods. This type of research is pre-experimental design with one group pretest-posttest. Sampling technique using total sampling with the number of respondents 80 residence.  Data collecting technique in this study is to distribute questionnares to respondents. The analysis technique in this study uses Wilcoxon signed rank test.Results:  The results of pre-test study 57,5% had low motivation and 27,5% had a moderate motivation, and after getting the intervention in getting resident who has a high motivation to increase to 70%.  Conclusion:  Peer group support in the implementation of the therapeut",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "aminsyah2024familysupportdalam",
+      "title": "Family Support dalam Proses Pemulihan Residen Rehabilitasi Napza",
+      "link": "https://doi.org/10.36420/dawa.v4i1.531",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
+      ],
+      "reference": "Ummi Kalsum Aminsyah, Muhammad Arif Syailendra (2024). Family Support dalam Proses Pemulihan Residen Rehabilitasi Napza. Retrieved from https://doi.org/10.36420/dawa.v4i1.531",
+      "abstract": "Tujuan penelitian ini untuk mengetahui family support dalam proses pemulihan pasien rehabilitasi napza Jenis penelitian ini ialah penelitian kualitatif dengan metode deskriptif. objek yang diteliti melaui informan 2 orang konselor adiksi, 4 orang residen, dan 4 keluarga residen, Pengumpulan data sekunder ini dilakukan sebelum atau bersamaan dengan penelitian lapangan. Pengumpulan data berupa wawancara, observasi dan dokumentasi. Data yang diperoleh dari hasil wawancara, observasi, dan dekomentasi dengan mengorganisasikan data ke dalam kategori, menjabarkan ke dalam unit-unit, Menyusun, memilih data dan membuat Kesimpulan hasil penelitian dan pembahasan yang telah diuraikan maka dapat disimpulkan bahwa adanya dukungan dalam pemulihan korban penyalahgunaan NAPZA di Rehabilitasi dan terjalani",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sudarta2019determinansikapres",
+      "title": "DETERMINAN SIKAP RESIDEN TERHADAP NARKOBA DI KLINIK REHABILITASI BADAN NARKOTIKA NASIONAL PROPINSI SULAWESI SELATAN",
+      "link": "https://doi.org/10.30597/jkmm.v1i2.8708",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
+      ],
+      "reference": "I Made Sudarta, A. Ummu Salamah, Veni Hadju (2019). DETERMINAN SIKAP RESIDEN TERHADAP NARKOBA DI KLINIK REHABILITASI BADAN NARKOTIKA NASIONAL PROPINSI SULAWESI SELATAN. Retrieved from https://doi.org/10.30597/jkmm.v1i2.8708",
+      "abstract": "Hasil survei yang dilakukan oleh Badan Narkotika Nasional dan Pusat Penelitian Kesehatan UI tahun 2008diperoleh angka prevalensi mencapai 1,9% dan pada tahun 2011 meningkat hingga 2,2% atau lebih kurang 4 jutapenduduk Indonesia usia 10 sampai dengan 60 tahun sebagai penyalah guna narkotika. Penelitian ini bertujuanuntuk menganalisis faktor determinan sikap residen terhadap narkoba di Klinik Rehabilitasi BNNP SulawesiSelatan Tahun 2017. Penelitian ini merupakan jenis penelitian observasional dengan rancangan Cross SectionalStudy. Populasi dalam penelitian ini adalah semua residen yang menjalani rehabilitasi di Klinik RehabilitasiBNNP Sulawesi Selatan Tahun 2017 sebanyak 119 orang. Sampel pada penelitian ini adalah semua residen yanghadir pada saat dilakukan penelitian dan bersedia serta lay",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kurniawati2024mohonizinmasmbakwu",
+      "title": "“MOHON IZIN, MAS, MBAK”: WUJUD TUTURAN DAN KESANTUNAN BERBAHASA DALAM INTERAKSI RESIDEN",
+      "link": "https://doi.org/10.22515/msjcs.v5i1.8575",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
+      ],
+      "reference": "Atin Kurniawati, Muchtar Hanafi (2024). “MOHON IZIN, MAS, MBAK”: WUJUD TUTURAN DAN KESANTUNAN BERBAHASA DALAM INTERAKSI RESIDEN. Retrieved from https://doi.org/10.22515/msjcs.v5i1.8575",
+      "abstract": "This article discussed the form of speech acts and language politeness in interaction among residents by focusing on the speeches containing the words \"izin (permission)\" and \"mohon izin (I beg your permission)\". Not only for asking permission, these words are used in various speech acts. The data for this study were taken from written conversations among residents through WhatsApp group application. The data were collected using documentation and interview. Then, the data were analyzed using the pragmatic equivalent method. The results of data analysis showed that the words \"izin\" and \"mohon izin\" were used in various speech acts, namely assertive, directive, commissive, declarative, and expressive. These words were the embodiment of negative politeness strategies by trying as little as p",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "heinig2024memorychiptochipin",
+      "title": "Memory Chip-to-Chip Integration for High Bandwidth Memory Processor Interface",
+      "link": "https://doi.org/10.4071/001c.117018",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "reference": "Andy Heinig, Fabian Hopsch (2024). Memory Chip-to-Chip Integration for High Bandwidth Memory Processor Interface. Retrieved from https://doi.org/10.4071/001c.117018",
+      "abstract": "Abstract not available for Memory Chip-to-Chip Integration for High Bandwidth Memory Processor Interface",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "addisie2020centaurhybridproce",
+      "title": "Centaur: Hybrid Processing in On/Off-chip Memory Architecture for Graph Analytics",
+      "link": "https://doi.org/10.1109/dac18072.2020.9218624",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "reference": "Abraham Addisie, Valeria Bertacco (2020). Centaur: Hybrid Processing in On/Off-chip Memory Architecture for Graph Analytics. Retrieved from https://doi.org/10.1109/dac18072.2020.9218624",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "permana2018peranspiritualitas",
+      "title": "PERAN SPIRITUALITAS DALAM MENINGKATKAN RESILIENSI PADA RESIDEN NARKOBA",
+      "link": "https://doi.org/10.15575/saq.v2i2.2972",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Diky Permana (2018). PERAN SPIRITUALITAS DALAM MENINGKATKAN RESILIENSI PADA RESIDEN NARKOBA. Retrieved from https://doi.org/10.15575/saq.v2i2.2972",
+      "abstract": "This article was written based on research on the Role of Spirituality in Increasing Resilience in Resident Drugs at Pondok Pesantren Inabah XX Tasikmalaya. This study used qualitative descriptive method. The approach is psychological-spiritual. The point of the argument from this study, to know the extent to which the role of spirituality can affect the level of resilience in drug residents in following the spiritual-based rehabilitation. From this study it was found that drug residents were able to increase resilience when attending spiritual-based rehabilitation. ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "isnaini2023studikontribusiwor",
+      "title": "Studi Kontribusi Workplace Telepressure terhadap Burnout pada Dokter Residen",
+      "link": "https://doi.org/10.29313/jrp.v3i1.1905",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Hana Fitria Isnaini, Ali Mubarak (2023). Studi Kontribusi Workplace Telepressure terhadap Burnout pada Dokter Residen. Retrieved from https://doi.org/10.29313/jrp.v3i1.1905",
+      "abstract": "Abstract. Workplace telepressure is defined as the preoccupation and urge to immediately respond to work-related asynchronous messages in the form of ICT during private hours and working hours, (Barber et al., 2019). This demand to promptly respond to messages can hinder resource recovery and lead to poor well-being, such as burnout (Maslach & Leiter, 2008; Sonnentag & Fritz, 2015). Burnout is a feeling of emotional exhaustion, physical exhaustion, and cognitive fatigue resulting from the gradual depletion of an individual's intrinsic energy sources that occur over time due to work (Shirom 2005). This study aims to determine whether or not Workplace Telepressure contributes to Burnout, as well as to see how big this contribution is. This research is a quantitative research with a causality",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "puyol2025lasmadresinmigrant",
+      "title": "Las madres inmigrantes que residen en España cada vez tienen menos hijos",
+      "link": "https://doi.org/10.64628/aao.9uest5mht",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Rafael Puyol (2025). Las madres inmigrantes que residen en España cada vez tienen menos hijos. Retrieved from https://doi.org/10.64628/aao.9uest5mht",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "alamsyah2018identifikasibangun",
+      "title": "Identifikasi Bangunan Cagar Budaya di Jawa Tengah  (Studi  Eks Rumah Dinas  Residen)",
+      "link": "https://doi.org/10.14710/anuva.2.4.399-412",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Alamsyah Alamsyah (2018). Identifikasi Bangunan Cagar Budaya di Jawa Tengah  (Studi  Eks Rumah Dinas  Residen). Retrieved from https://doi.org/10.14710/anuva.2.4.399-412",
+      "abstract": "Bangunan eks  rumah dinas residen yang ada di beberapa daerah  di Jawa Tengah merupakan bangunan yang dapat dikategorikan sebagai bangunan cagar budaya. Bangunan ini merupakan susunan binaan yang terbuat dari benda buatan manusia untuk memenuhi kebutuhan ruang berdinding dan beratap. Bangunan ini merupakan peninggalan sejarah yang berusia lebih dari 50 tahun, mempunyai masa gaya lebih dari 50 tahun, dan mempunyai arti penting bagi sejarah dan ilmu pengetahuan. eks  rumah dinas residen merupakan bangunan peninggalan pemerintah Hindia Belanda yang digunakan sebagai pusat pemerintahan dan kediaman residen beserta keluarganya. Adanya rumah dinas residen merupakan bentuk hadirnya birokrasi binnenlandsch bestuur (birokrasi kolonial), residen,  yang strukturnya berada di bawah gubernur jenderal d",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "aghani2025analisispertanggun",
+      "title": "Analisis Pertanggungjawaban Pidana Dokter Residen dalam Kasus Kekerasan Seksual",
+      "link": "https://doi.org/10.31599/71s35506",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Jhean Rafii Aghani (2025). Analisis Pertanggungjawaban Pidana Dokter Residen dalam Kasus Kekerasan Seksual. Retrieved from https://doi.org/10.31599/71s35506",
+      "abstract": "Penelitian ini bertujuan untuk mengkaji instrumen hukum pidana yang mengatur kasus kekerasan seksual oleh dokter residen terhadap pasien di Indonesia, serta bentuk penerapan pidana yang dijatuhkan kepada pelaku, dalam hal ini dr. PAP. Pendekatan konseptual dilakukan dengan menganalisis landasan hukum dari Undang-Undang TPKS, KUHP, Undang-Undang Kesehatan, dan Kode Etik Kedokteran, serta penerapan teori relasi kuasa dan teori pertanggungjawaban pidana. Hasil penelitian menunjukkan berdasarkan prinsip negara hukum (rechtsstaat) dalam UUD 1945 Pasal 1 ayat (3), studi menemukan bahwa instrumen hukum positif Indonesia meliputi Undang-Undang TPKS, KUHP, Undang-Undang Kesehatan, dan Kode Etik Kedokteran (KODEKI) menyediakan kerangka hukum yang kokoh untuk menjerat pelaku. Pada aspek hukum pidana,",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022konversiresidendip",
+      "title": "Konversi Residen di Pusat Rehabilitas Sibolangit Center Sumatra Utara: Dakwah dan Terapi Islami",
+      "link": "https://doi.org/10.30596/bibliocouns.v5i1.9333",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": " (2022). Konversi Residen di Pusat Rehabilitas Sibolangit Center Sumatra Utara: Dakwah dan Terapi Islami. Retrieved from https://doi.org/10.30596/bibliocouns.v5i1.9333",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "furuhashi2023investigatingtheef",
+      "title": "Investigating the Effects of Parameter Tuning on Machine Learning for Occupant Behavior Analysis in Japanese Residen-tial Buildings",
+      "link": "https://doi.org/10.20944/preprints202305.1277.v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Kaito Furuhashi, Takashi Nakaya (2023). Investigating the Effects of Parameter Tuning on Machine Learning for Occupant Behavior Analysis in Japanese Residen-tial Buildings. Retrieved from https://doi.org/10.20944/preprints202305.1277.v1",
+      "abstract": "In this study, machine learning was used to predict and analyze the behavior of occupants in Gifu City residences during winter. Global warming is currently progressing worldwide, and it is important to control greenhouse gas emissions from the perspective of adaptation and mitigation. Occupant behavior is highly individualized and must be analyzed to accurately determine a building&#039;s energy consumption. The accuracy of heating behavior prediction has been studied using three different methods: logistic regression, support vector machine (SVM), and deep neural network (DNN). The generalization ability of the support vector machine and the deep neural network was improved by parameter tuning. Parameter tuning of the SVM showed that the values of C and gamma affected the prediction accu",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "garcavela2025nostalgiasqueresid",
+      "title": "\"Nostalgias que residen\": identidad en la obra de Khédija Gadhoum y Farah Jerari",
+      "link": "https://doi.org/10.5070/t420940",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Luis García-Vela (2025). \"Nostalgias que residen\": identidad en la obra de Khédija Gadhoum y Farah Jerari. Retrieved from https://doi.org/10.5070/t420940",
+      "abstract": "La poesía de la diáspora de la llamada “literatura hispanomagrebí” está marcada, en especial, por la hibridez. Este artículo se centrará en analizar la articulación de la identidad en la obra poética de dos integrantes de este conjunto: Khédija Gadhoum y Farah Jerari. El cotejo revela que, por un lado, la estadounidense-tunecina basa su proyecto poético en la temática de la migración y en la deconstrucción de la memoria, mientras que el de Jerari propone un viaje para deconstruir su identidad. Tras resaltar los puntos comunes de las obras de dos autoras tan diferentes, se valorará con la posibilidad de vincularlas con el macrocontexto de la poesía de la diáspora.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "saefatu2025sejarahkoepangdiba",
+      "title": "Sejarah Koepang Di Bawah Pemerintahan Residen Jacob Arnoldus Hazaart Pada Tahun 1807-1832",
+      "link": "https://doi.org/10.35508/floresiensis.v2i1.24150",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Fridiater Saefatu, Djakariah Djakariah, Fransina A Ndoen (2025). Sejarah Koepang Di Bawah Pemerintahan Residen Jacob Arnoldus Hazaart Pada Tahun 1807-1832. Retrieved from https://doi.org/10.35508/floresiensis.v2i1.24150",
+      "abstract": "Penelitian ini bertujuan untuk mengetahui (1) Bagaimana sejarah kupang dibawah pemerintahan residen Jacob Arnoldus Hazaart pada tahun 1807-1810,1814,1819-1832,(2) Bagaimana perkembangan Kupang dalam bidang politik, sosial, budaya dan ekonomi dibawah pemerintahan residen Jacob Arnoldus Hazaart pada tahan 1807-1810,1814,1819-1832. Penelitian ini adalah analisis sejarah yang dilakukan dengan langkah penentuan topik, heuristik, kritik sumber, interpretasi dan historiografi. Hasil penelitian menunjukan, (1) Jacob Arnoldus Hazaart memerintah sebagai residen di Kupang selama tiga periode yaitu dari tahun 1807-1810,1814,1819-1832. Pada tahun 1810 Belanda menempatkan Jacob Arnoldus Hazaart sebagai residen di wilayah Kupang, (2) Perkembangan Kupang dalam bidang Politik, selama pendudukan Inggris di ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liljegren2022healthpromotingqua",
+      "title": "Health promoting qualities in outdoor environments at residen-tial care facilities for older adults – a research approach",
+      "link": "https://doi.org/10.24404/6238aa0344f1a88d870a2b38",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Madeleine Liljegren, Anna Bengtsson, et al. (2022). Health promoting qualities in outdoor environments at residen-tial care facilities for older adults – a research approach. Retrieved from https://doi.org/10.24404/6238aa0344f1a88d870a2b38",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sari2023upayameningkatkanm",
+      "title": "Upaya Meningkatkan Motivasi Sembuh melalui Konseling Individu  dengan Menggunakan Teknik Behavior Contract  Pada Rehabilitas Residen",
+      "link": "https://doi.org/10.31004/basicedu.v7i4.5633",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Deffania Indah Sari, Randi Saputra, Barriyati Barriyati (2023). Upaya Meningkatkan Motivasi Sembuh melalui Konseling Individu  dengan Menggunakan Teknik Behavior Contract  Pada Rehabilitas Residen. Retrieved from https://doi.org/10.31004/basicedu.v7i4.5633",
+      "abstract": "Motivasi Sembuh adalah dorongan dalam diri individu untuk menjalani suatu penyembuhan terkhusus dalam menjalani rehabilitasi. Motivasi sembuh memiliki peran penting dalam menjalani rehabilitasi, karena akan berpengaruh pada efektifitas program rehabilitasi tersebut. Tujuan dari penelitian ini untuk mengetahui motivasi sembuh residenÂ  melalui konseling individu dengan teknik behavior contract. Penelitian ini menggunakan metode penelitian tindakan bimbingan konseling (PTBK). Hasil penelitian ini menunjukkan adanya peningkatan motivasi sembuh pada siklus 1 yaitu kedua residen termasuk dalam kategori baik dengan persentase 78% dan 70%. Kemudian pada siklus 2 residen mengalami peningkatan motivasi sembuh menjadi kategori sangat baik dengan persentase 89% dan 96%. Hal ini menunjukkan bahwa kons",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "herwanto2018penurunankapasitas",
+      "title": "PENURUNAN KAPASITAS MEMORI KERJA PADA  RESIDEN PEDIATRI YANG KURANG TIDUR",
+      "link": "https://doi.org/10.24912/jmstkik.v1i2.887",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Herwanto Herwanto, Adrian Umboh (2018). PENURUNAN KAPASITAS MEMORI KERJA PADA  RESIDEN PEDIATRI YANG KURANG TIDUR. Retrieved from https://doi.org/10.24912/jmstkik.v1i2.887",
+      "abstract": "Beberapa penelitian menjelaskan terjadi kesalahan medis seperti kesalahan dokumentasi dan efek yang tidak diinginkan terkait dengan kurang tidur selama pendidikan spesialis. Telah ditemukan bukti penurunan waktu tidur selama bertugas yang akan mempengaruhi suasana hati, hubungan yang terkait stres dan kinerja. Kapasitas memori kerja adalah kemampuan untuk mempertahankan dan memanipulasi informasi atau masukan sensorik untuk melakukan banyak tugas dan kombinasi perhatian, konsentrasi dan memori jangka pendek. Untuk mengukur efek dari tugas jaga malam pada kapasitas memori kerja residen pediatri. Antara Januari dan Februari 2014 residen menyelesaikan pengukuran kapasitas memori kerja dari Wechsler Adult Intelligence Scale saat tidak tugas jaga malam maupun setelah tugas jaga malam dan penguk",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "artezano2020riesgodediabetesen",
+      "title": "RIESGO DE DIABETES EN ANCIANOS QUE RESIDEN EN UNA ZONA VULNERABLE DE LIMA NORTE",
+      "link": "https://doi.org/10.21679/arc.v7i1.140",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Anika Remuzgo Artezano (2020). RIESGO DE DIABETES EN ANCIANOS QUE RESIDEN EN UNA ZONA VULNERABLE DE LIMA NORTE. Retrieved from https://doi.org/10.21679/arc.v7i1.140",
+      "abstract": "Objetivo: Determinar el riesgo de diabetes en ancianos que residen en una zona vulnerable de Lima Norte. Material y Métodos: Se realizó un estudio cuantitativo, descriptivo y transversal. La población estuvo conformada por 82 adultos mayores que acuden al establecimiento de salud de San Martin de Porres - Perú. La técnica que se utilizo fue la encuesta y el instrumento de recolección de datos fue el Findrisc que mide el riesgo de diabetes tipo 2, el cual está compuesto por 8 preguntas. Resultados: En relación al riesgo de diabetes en ancianos predomino el nivel moderado con 47,6% (n=39), seguido del nivel ligeramente elevado con 28% (n=23), riesgo alto con 12,2% (n=10), riesgo bajo con 9,8% (n=8) y riesgo muy alto con 2,4% (n=2). En cuanto a sus dimensiones en edad predomino la edad mayor ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "padia2025analisiskinerjalal",
+      "title": "Analisis Kinerja Lalu Lintas Pada Ruas Jalan Residen Ardiwinangun Kecamatan Mangkubumi Kota Tasikmalaya",
+      "link": "https://doi.org/10.25157/mediailmiahtekniksipil.v2i2.3507",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Nipa Padia, Wahyu Sumarno, Yanti Defiana (2025). Analisis Kinerja Lalu Lintas Pada Ruas Jalan Residen Ardiwinangun Kecamatan Mangkubumi Kota Tasikmalaya. Retrieved from https://doi.org/10.25157/mediailmiahtekniksipil.v2i2.3507",
+      "abstract": "Transportation is a very important and strategic tool in accelerating the wheels of the economy, strengthening unity and integrity and affecting all aspects of national and state life. Ardiwinangun Resident Street, Mangkubumi District, Tasikmalaya City is a road section that has considerable activity due to market activity. Cikurubuk Market activities cause many traffic problems such as congestion that occurs during rush hours. This congestion occurs due to the many vehicles that stop along the shoulder of the market road, the activities of street vendors selling on the side of the road, and pedestrians passing by. The purpose of this study is to determine traffic performance on the Residential road section of Ardiwinangun, Mangkubumi District, Tasikmalaya City. The method used in this stu",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "jyoti2019expressionempowere",
+      "title": "Expression Empowered ResiDen Network for Facial Action Unit Detection",
+      "link": "https://doi.org/10.1109/fg.2019.8756580",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Shreyank Jyoti, Garima Sharma, Abhinav Dhall (2019). Expression Empowered ResiDen Network for Facial Action Unit Detection. Retrieved from https://doi.org/10.1109/fg.2019.8756580",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "cant2021diferenciasenlamot",
+      "title": "Diferencias en la motivación laboral entre personas de las generaciones Baby Boomers, X y Y que residen en Nuevo León",
+      "link": "https://doi.org/10.29105/vtga7.2-30",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Gloria Pedroza Cantú (2021). Diferencias en la motivación laboral entre personas de las generaciones Baby Boomers, X y Y que residen en Nuevo León. Retrieved from https://doi.org/10.29105/vtga7.2-30",
+      "abstract": "La sociedad crea en las personas necesidades psicológicas y los individuos buscan satisfacerlas, surgiendo así la motivación intrínseca y extrínseca. La diversidad generacional en el mercado laboral es un desafío para las organizaciones al generar políticas que permitan atraer y mantener al talento humano (Díaz, López, & Roncallo, 2017). Este estudios tiene por objetivo indagar si pertenecer a determinada Generación impacta en la motivación laboral intrínseca y extrínseca.  Se diseñó y validó una encuesta aplicada a 518 personas residentes en el área metropolitana de Monterrey, México consideradas Generación Baby Boomers, X o Y. Los resultados muestran diferencias significativas en favor de la Generación Y, aceptando las hipótesis de investigación. En conclusión, la Generación Y tiene un m",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "voinova2025maleandfemalenames",
+      "title": "MALE AND FEMALE NAMES OF UMAN RESIDEN TS IN THE EARLY 20TH CENTURY",
+      "link": "https://doi.org/10.32782/2522-4077-2025-213-6",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "M. V. Voinova (2025). MALE AND FEMALE NAMES OF UMAN RESIDEN TS IN THE EARLY 20TH CENTURY. Retrieved from https://doi.org/10.32782/2522-4077-2025-213-6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "muna2021tingkatkualitashid",
+      "title": "Tingkat Kualitas Hidup Residen Narkoba Ditinjau Dari Usia, Status Sosial Ekonomi, Pendidikan Dan Status Pernikahan",
+      "link": "https://doi.org/10.51849/sl.v1i3.49",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Zurratul Muna, Rini Julistia, Yulia Fitri (2021). Tingkat Kualitas Hidup Residen Narkoba Ditinjau Dari Usia, Status Sosial Ekonomi, Pendidikan Dan Status Pernikahan. Retrieved from https://doi.org/10.51849/sl.v1i3.49",
+      "abstract": "Penggunaan narkoba mempengaruhi kualitas hidup individu yang menggunakan narkoba dengan memperburuk status fisik dan mental mereka. Kualitas hidup merupakan penilaian individu terhadap kondisi fisik, psikologis, sosial dan lingkungan dalam kehidupan sehari-hari. Tujuan dari penelitian ini adalah untuk mengetahui kualitas hidup residen narkoba menurut umur, status sosial ekonomi, latar belakang pendidikan, dan status perkawinan. Jenis penelitian yang digunakan dalam penelitian ini adalah penelitian deskriptif melalui pendekatan kuantitatif, dan penelitian deskriptif adalah penelitian yang dilakukan untuk menentukan nilai suatu variabel bebas dengan tidak membandingkan satu atau lebih variabel (bebas) atau mengaitkannya dengan variabel lain. Kriteria sampel penelitian ini adalah Badan Narkot",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kuway2025selfloveuntukpemul",
+      "title": "SELF-LOVE UNTUK PEMULIHAN : PSIKOEDUKASI KEPERCAYAAN DIRI PADA RESIDEN WANITA DALAM PROGRAM REHABILITASI NARKOTIKA",
+      "link": "https://doi.org/10.36728/jpf.v6i2.5056",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ],
+      "reference": "Tirenia Thesalonica Kuway, Dhian Riskiana Putri (2025). SELF-LOVE UNTUK PEMULIHAN : PSIKOEDUKASI KEPERCAYAAN DIRI PADA RESIDEN WANITA DALAM PROGRAM REHABILITASI NARKOTIKA. Retrieved from https://doi.org/10.36728/jpf.v6i2.5056",
+      "abstract": "Kegiatan Pengabdian ini bertujuan untuk meningkatkan kepercayaan diri klien rawat inap wanita yang sedang dalam program rehabilitasi narkotika melalui psikoedukasi bertema self-love. Rendahnya tingkat kepercayaan diri seringkali menjadi faktor penghambat dalam proses pemulihan dari kecanduan. Oleh karena itu, pendekatan psikoedukatif difokuskan pada peningkatan kesadaran diiri, penerimaan tanpa syarat terhadap diri sendiri, serta pengembangan sikap positif terhadap masa depan. Kegiatan dilaksanakan di Balai Besar Rhebilitasi BNN Lido, dengan melibatkan 6 klien wanita yang sedang rawat inap. Metode yang digunakan mencakup pemaparan materi, diskusi terbuka, dan penulisan jurnal syukur. Klien juga menunjukan antusiasme yang tinggi saat sesi diskusi. Hasil yang diperoleh dari observasi selama ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "C": 1,
+    "A": 27,
+    "B": 31
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:38.552046"
+}

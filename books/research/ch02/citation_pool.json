@@ -1,0 +1,190 @@
+{
+  "chapter_id": "ch02",
+  "pool_count": 18,
+  "bib_keys": [
+    "wang2026esup4supcimrramane",
+    "memoryfloor2026",
+    "nvidia2024cudagraphs",
+    "sun2019powerdrivendnndata",
+    "yirage2026",
+    "patel2025llminference",
+    "amd2024xdna",
+    "dao2022flashattention",
+    "dao2023flashdecoding",
+    "kwon2023vllm",
+    "kim2025dataflowdrivenneur",
+    "zhao2025incredflipincremen",
+    "taxbreak2026",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "wang2026esup4supcimrramane",
+      "title": "E\n                    <sup>4</sup>\n                    -CIM RRAM: An Evolvable Operator Framework from Linear to High-Order Compute-in-Memory via Monolithic 3D Integration",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "operator compute",
+        "compute",
+        "operator"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "decode",
+        "GPU",
+        "graph",
+        "graphs"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "graph",
+        "graphs"
+      ]
+    },
+    {
+      "bib_key": "sun2019powerdrivendnndata",
+      "title": "Power-Driven DNN Dataflow Optimization on FPGA",
+      "source_tier": "A",
+      "relevance_score": 50,
+      "matched_keywords": [
+        "dataflow-driven optimization",
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 49,
+      "matched_keywords": [
+        "YiRage",
+        "CPU",
+        "CUDA",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "decode",
+        "tier"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "PagedAttention"
+      ]
+    },
+    {
+      "bib_key": "kim2025dataflowdrivenneur",
+      "title": "Dataflow-Driven Neuromorphic Architectures for Edge AI: Theory, Design, and Applications",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "zhao2025incredflipincremen",
+      "title": "IncreDFlip: Incremental Dataflow-Driven Macro Flipping for Efficient Macro Placement Refinement",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

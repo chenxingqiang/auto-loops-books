@@ -1,0 +1,599 @@
+{
+  "chapter_id": "ch13",
+  "timestamp": "2026-06-10T02:45:51.142230",
+  "min_papers": 25,
+  "paper_count": 41,
+  "sentence_count": 356,
+  "binding_count": 355,
+  "papers": [
+    {
+      "bib_key": "jayawardena2026coreprinciplesofma",
+      "title": "Core Principles of Machine Learning: Theory, Methods, and Practice",
+      "link": "https://doi.org/10.2139/ssrn.6176278",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 113,
+      "matched_keywords": [
+        "core theory",
+        "fusion theory",
+        "fusion",
+        "core",
+        "real",
+        "ship",
+        "theory"
+      ],
+      "reference": "Amal Jayawardena (2026). Core Principles of Machine Learning: Theory, Methods, and Practice. Retrieved from https://doi.org/10.2139/ssrn.6176278",
+      "abstract": "Artificial intelligence has rapidly transitioned from a research topic to a widespread technology that shapes decision making, automation, and human computer interaction across science, engineering, medicine, and industry. Despite this visibility, significant confusion persists regarding what artificial intelligence means in practice, how it differs from machine learning, and why modern systems often appear intelligent without possessing understanding or humanlike reasoning. This paper provides a conceptually grounded introduction to machine learning as the dominant methodological framework underlying contemporary artificial intelligence. It explains why early rule-based approaches struggled in real-world environments and how the convergence of large-scale data, high-performance computing,",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "park2026cpugpuworkloaddist",
+      "title": "CPU-GPU Workload Distribution during Throughput-Oriented LLM Inference on Single-GPU Systems",
+      "link": "https://doi.org/10.1145/3816433",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "GPU CPU",
+        "CPU",
+        "GPU",
+        "NPU",
+        "decode"
+      ],
+      "reference": "DaOn Park, Bernhard Egger (2026). CPU-GPU Workload Distribution during Throughput-Oriented LLM Inference on Single-GPU Systems. Retrieved from https://doi.org/10.1145/3816433",
+      "abstract": "Large language models (LLMs) have recently achieved remarkable performance in text generation, capturing the attention of a broad audience. This success, driven by the rapid growth in model parameters, comes at the expense of significantly higher operational costs and decreased processing speed. These costs, combined with privacy concerns around cloud-based deployments, have motivated research into running LLMs on commodity hardware. For example, researchers have used the memory hierarchy to boost throughput by increasing the number of batches. These studies, however, tend to overlook or inefficiently utilize the additional computational resources provided by the CPU.\nIn this work, we present a dynamic workload allocation technique that efficiently distributes computation across all availa",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "markowitz2023generativeaiaremor",
+      "title": "Generative AI are More Truth-Biased than Humans: A Replication and Extension of Core Truth-Default Theory Principles",
+      "link": "https://doi.org/10.31234/osf.io/hm54g",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 79,
+      "matched_keywords": [
+        "core theory",
+        "core",
+        "independent",
+        "theory"
+      ],
+      "reference": "David Matthew Markowitz, Jeffrey Hancock (2023). Generative AI are More Truth-Biased than Humans: A Replication and Extension of Core Truth-Default Theory Principles. Retrieved from https://doi.org/10.31234/osf.io/hm54g",
+      "abstract": "Human communication requires cooperative partners for it to be effective and efficient. A result of this requirement is the truth-bias, defined as the perception that others are honest independent of actual message veracity. Does the truth-bias extend to technology like generative Artificial Intelligence (AI)? Drawing on truth-default theory (TDT), we had humans and three chatbots running different large language models — ChatGPT (GPT-3.5), Bard (LaMDA), ChatSonic (GPT-4) — make nearly 1,000 veracity judgments across three prompts. Consistent with TDT, human detection accuracies were near chance (50%-53%) with notable truth-biases (59%-64%). Critically, AI had a substantially greater truth-bias than humans (67%-99%), even after providing AI with a genuine lie-truth base-rate. GPT-4 was als",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chowdhury2026marginalizedstakeh",
+      "title": "Marginalized Stakeholder Theory: Origins and Core Principles",
+      "link": "https://doi.org/10.2139/ssrn.6476158",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 79,
+      "matched_keywords": [
+        "core theory",
+        "core",
+        "ship",
+        "theory"
+      ],
+      "reference": "RASHEDUR CHOWDHURY (2026). Marginalized Stakeholder Theory: Origins and Core Principles. Retrieved from https://doi.org/10.2139/ssrn.6476158",
+      "abstract": "Marginalized Stakeholder Theory (MST) illuminates the structural disadvantages constraining the agency and capacity for resistance of marginalized stakeholders (MSs), arguing that traditional stakeholder theory contains foundational normative biases that skew MSs. Firms predominantly rely on powerful stakeholders such as elite NGOs and government agencies as proxies for MSs-enabling firms to avoid direct engagement while producing misrepresentations shaped by neocolonial epistemes. MST highlights how MSs (re)gain selfrepresentation through dynamic processes, actively contest misrepresentations imposed upon them, and influence firms to acknowledge their rights. By reconceptualizing MSs, MST demonstrates that these actors possess the political imagination and capabilities to reshape their re",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "zhuang2023convolutionalneura",
+      "title": "Convolutional Neural Networks Inference Memory Optimization with Receptive Field-Based Input Tiling",
+      "link": "https://doi.org/10.1561/116.00000015",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 42,
+      "matched_keywords": [
+        "tiling",
+        "NPU"
+      ],
+      "reference": "Weihao Zhuang, Tristan Hascoet, et al. (2023). Convolutional Neural Networks Inference Memory Optimization with Receptive Field-Based Input Tiling. Retrieved from https://doi.org/10.1561/116.00000015",
+      "abstract": "Currently, deep learning plays an indispensable role in many fields, including computer vision, natural language processing, and speech recognition. Convolutional Neural Networks (CNNs) have demonstrated excellent performance in computer vision tasks thanks to their powerful feature-extraction capability. However, as the larger models have shown higher accuracy, recent developments have led to state-of-the-art CNN models with increasing resource consumption. This paper investigates a conceptual approach to reduce the memory consumption of CNN inference. Our method consists of processing the input image in a sequence of carefully designed tiles within the lower subnetwork of the CNN, so as to minimize its peak memory consumption, while keeping the end-to-end computation unchanged. This meth",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shao2025thetheoreticalappl",
+      "title": "The Theoretical Application of Computational Complexity Theory in Compiler Optimization",
+      "link": "https://doi.org/10.70767/jcter.v2i3.562",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "theory"
+      ],
+      "reference": "Wuwei Shao (2025). The Theoretical Application of Computational Complexity Theory in Compiler Optimization. Retrieved from https://doi.org/10.70767/jcter.v2i3.562",
+      "abstract": "Computational complexity theory, as an important branch of theoretical computer science, systematically characterizes the consumption of time and space resources in computational tasks, providing a solid foundation for understanding the inherent difficulty of various computational problems. Compiler optimization, as a key aspect of improving program design and execution efficiency, involves numerous complex algorithm designs and resource scheduling issues. The computational complexity characteristics of these tasks directly constrain the feasibility and performance of optimization strategies. Based on the classification system of complexity theory, reduction techniques, and complexity boundary analysis, this paper explores in-depth the complexity modeling and theoretical characterization o",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wu2023pytorch20thejourne",
+      "title": "PyTorch 2.0: The Journey to Bringing Compiler Technologies to the Core of PyTorch (Keynote)",
+      "link": "https://doi.org/10.1145/3579990.3583093",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "core"
+      ],
+      "reference": "Peng Wu (2023). PyTorch 2.0: The Journey to Bringing Compiler Technologies to the Core of PyTorch (Keynote). Retrieved from https://doi.org/10.1145/3579990.3583093",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rjoub2026greendecodingelqco",
+      "title": "Green Decoding: ELQ Co-Optimization and Carbon-Aware Scheduling for Efficient LLM Inference",
+      "link": "https://doi.org/10.21203/rs.3.rs-9252320/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "independent",
+        "miss",
+        "real",
+        "ship"
+      ],
+      "reference": "Gaith Rjoub, Jamal Bentahar, et al. (2026). Green Decoding: ELQ Co-Optimization and Carbon-Aware Scheduling for Efficient LLM Inference. Retrieved from https://doi.org/10.21203/rs.3.rs-9252320/v1",
+      "abstract": "Abstract\n\n                  The large-scale deployment of Large Language Models (LLMs) is constrained by significant energy consumption and operational costs, with inference accounting for up to 90% of the total energy footprint. Existing optimization methods typically address latency or memory independently, frequently overlooking energy efficiency, carbon impact, and their intricate relationship with user-defined Service Level Agreements (SLAs) for quality and response time. This work presents Green Decoding, a novel co-optimization framework for LLM inference. Green Decoding formulates inference as a multi-objective optimization problem, minimizing a weighted function of Energy, Latency, and Quality (ELQ). The framework utilizes a policy engine that, on a per-request basis, jointly tune",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "hwang2022developmentofteach",
+      "title": "Development of Teaching-Learning Contents for AI Core Principles at the Elementary School Level: With a Focus on Convolutional Neural Network",
+      "link": "https://doi.org/10.14704/web/v19i1/web19300",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "NPU",
+        "core"
+      ],
+      "reference": "Yuri Hwang, Eunsun Cho, Namje Park (2022). Development of Teaching-Learning Contents for AI Core Principles at the Elementary School Level: With a Focus on Convolutional Neural Network. Retrieved from https://doi.org/10.14704/web/v19i1/web19300",
+      "abstract": "With the rapid development and multifarious application of artificial intelligence technology, elementary learners are demanded to learn about AI. At the same time, due to the pandemic, classes without face-to-face contact have been increasing. This study aims to develop teaching-learning contents instructing core principles of artificial intelligence, respectively in face-to-face and non-face-to-face learning environments. Proposed teaching-learning contents mainly target elementary learner and provide simplified experience for convolutional neural network(CNN) algorithm. Learners accomplish convolution operation with simple numbers then extract feature map. Students experience CNN process with 5x5 virtual input image consists of numbers. 2x2 filter is given for convolution operation, and",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "jeong2026flowgraphawaretili",
+      "title": "Flow-Graph-Aware Tiling and Rescheduling for Memory-Efficient On-Device Inference",
+      "link": "https://doi.org/10.1109/cgo68049.2026.11395230",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "tiling"
+      ],
+      "reference": "Yeonoh Jeong, Taehyeong Park, Yongjun Park (2026). Flow-Graph-Aware Tiling and Rescheduling for Memory-Efficient On-Device Inference. Retrieved from https://doi.org/10.1109/cgo68049.2026.11395230",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "parallel",
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "pronk2026beyondmodeloptimiz",
+      "title": "Beyond Model Optimization: Practical Energy-Efficient LLM Inference Through Context-Aware Input Reduction",
+      "link": "https://doi.org/10.1109/saner-c67878.2026.00034",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "NPU"
+      ],
+      "reference": "Kalle Pronk, Qin Zhao, Siebren Kazemier (2026). Beyond Model Optimization: Practical Energy-Efficient LLM Inference Through Context-Aware Input Reduction. Retrieved from https://doi.org/10.1109/saner-c67878.2026.00034",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "shen2025efficientllminfere",
+      "title": "Efficient LLM Inference on CPUs",
+      "link": "https://doi.org/10.1007/978-3-031-85747-8_3",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "CPU"
+      ],
+      "reference": "Haihao Shen, Hanwen Chang, et al. (2025). Efficient LLM Inference on CPUs. Retrieved from https://doi.org/10.1007/978-3-031-85747-8_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "khan2026dequantizationpena",
+      "title": "De-quantization Penalties for Interactive LLM Inference on Prosumer GPUs",
+      "link": "https://doi.org/10.36227/techrxiv.177203475.54045626/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "GPU"
+      ],
+      "reference": "JUNAID AHMAD KHAN (2026). De-quantization Penalties for Interactive LLM Inference on Prosumer GPUs. Retrieved from https://doi.org/10.36227/techrxiv.177203475.54045626/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ramachandran2026coreethicalprincip",
+      "title": "Core Ethical Principles in AI",
+      "link": "https://doi.org/10.1007/978-981-95-2909-4_2",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Muthu Ramachandran (2026). Core Ethical Principles in AI. Retrieved from https://doi.org/10.1007/978-981-95-2909-4_2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "charlotte2024aidrivenoptimizati",
+      "title": "AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures",
+      "link": "https://doi.org/10.63282/3117-5481/aijcst-v6i5p102",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Olivia Charlotte (2024). AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures. Retrieved from https://doi.org/10.63282/3117-5481/aijcst-v6i5p102",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "eliot2021coreprinciplesofju",
+      "title": "Core Principles of Justice And Respective AI Impacts",
+      "link": "https://doi.org/10.2139/ssrn.3963426",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Lance Eliot (2021). Core Principles of Justice And Respective AI Impacts. Retrieved from https://doi.org/10.2139/ssrn.3963426",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "thakur2026coreprinciplesandm",
+      "title": "Core Principles and Mechanisms of Agentic AI",
+      "link": "https://doi.org/10.4324/9781003676157-2",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Jay Prakash Thakur, Akshata Kishore Moharir (2026). Core Principles and Mechanisms of Agentic AI. Retrieved from https://doi.org/10.4324/9781003676157-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shankar2025advancementsinaiba",
+      "title": "Advancements in AI-Based Compiler Optimization Techniques for Machine Learning Workloads",
+      "link": "https://doi.org/10.26438/ijcse/v13i3.7077",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Vasuki Shankar (2025). Advancements in AI-Based Compiler Optimization Techniques for Machine Learning Workloads. Retrieved from https://doi.org/10.26438/ijcse/v13i3.7077",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "bate2026aicanslowlyshiftan",
+      "title": "AI can slowly shift an organisation’s core principles. How to spot ‘value drift’ early",
+      "link": "https://doi.org/10.64628/aa.d6yynycta",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Guy Bate, Rhiannon Lloyd (2026). AI can slowly shift an organisation’s core principles. How to spot ‘value drift’ early. Retrieved from https://doi.org/10.64628/aa.d6yynycta",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "malaraju2025aiaugmentedcompile",
+      "title": "AI-Augmented Compiler Optimization for Energyefficient Software Execution on Embedded Systems",
+      "link": "https://doi.org/10.1109/smart66937.2025.11389313",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Satish Kumar Malaraju, Shiva Kumar Madishetty (2025). AI-Augmented Compiler Optimization for Energyefficient Software Execution on Embedded Systems. Retrieved from https://doi.org/10.1109/smart66937.2025.11389313",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon20261chapter1corearchi",
+      "title": "1Chapter 1 Core Architecture, Working Principles, and Applications of DeepSeek",
+      "link": "https://doi.org/10.1515/9783112218181-001",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": " (2026). 1Chapter 1 Core Architecture, Working Principles, and Applications of DeepSeek. Retrieved from https://doi.org/10.1515/9783112218181-001",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cummins2022compilergymrobustp",
+      "title": "CompilerGym: Robust, Performant Compiler Optimization Environments for AI Research",
+      "link": "https://doi.org/10.1109/cgo53902.2022.9741258",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Chris Cummins, Bram Wasti, et al. (2022). CompilerGym: Robust, Performant Compiler Optimization Environments for AI Research. Retrieved from https://doi.org/10.1109/cgo53902.2022.9741258",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "cronin2024coretechnicalconce",
+      "title": "Core Technical Concepts",
+      "link": "https://doi.org/10.1007/979-8-8688-0282-9_2",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Irena Cronin (2024). Core Technical Concepts. Retrieved from https://doi.org/10.1007/979-8-8688-0282-9_2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "geroimenko2026thecoreprincipleso",
+      "title": "The Core Principles of Communicating with Generative AI",
+      "link": "https://doi.org/10.1007/978-3-032-21689-2_3",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "core"
+      ],
+      "reference": "Vladimir Geroimenko (2026). The Core Principles of Communicating with Generative AI. Retrieved from https://doi.org/10.1007/978-3-032-21689-2_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chandra2025reducinglatencyand",
+      "title": "Reducing Latency and Enhancing Accuracy in LLM Inference through Firmware-Level Optimization",
+      "link": "https://doi.org/10.55640/ijvsli-05-02-02",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "constraints",
+        "real"
+      ],
+      "reference": "Reena Chandra (2025). Reducing Latency and Enhancing Accuracy in LLM Inference through Firmware-Level Optimization. Retrieved from https://doi.org/10.55640/ijvsli-05-02-02",
+      "abstract": "Many edge and embedded platforms now rely on Large Language Models (LLMs) to efficiently handle natural language processing with just basic tools. Due to inference running slowly, limits on hardware, and making sacrifices between accuracy and efficiency, performing in real time is still a problem. This research analyzes firmware improvements that address these constraints, with the main goal of improving latency without any loss in the model's accuracy. This study put together a structure that brings together specific firmware actions, scheduled accesses to memory, and instructions that depend on the microarchitecture. We use 4-bit and 8-bit operations, predict memory accesses, and choose a schedule tuned for the ARM NEON and x86 AVX hardware. For confirmation, a special HIL framework proc",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2025llmpoweredautomate",
+      "title": "LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach",
+      "link": "https://doi.org/10.1109/iccvdm66874.2025.11290260",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "bottleneck"
+      ],
+      "reference": "Xiaoying Li (2025). LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach. Retrieved from https://doi.org/10.1109/iccvdm66874.2025.11290260",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wu2024towardsauniversals",
+      "title": "Towards a Universal Scaling Law of LLM Training and Inference",
+      "link": "https://doi.org/10.14293/pr2199.001074.v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "theory"
+      ],
+      "reference": "Chuhan Wu, Ruiming Tang (2024). Towards a Universal Scaling Law of LLM Training and Inference. Retrieved from https://doi.org/10.14293/pr2199.001074.v1",
+      "abstract": "Guided by the prophecy of scaling law, large language models (LLMs) demonstrate higher levels of intelligence with increased sizes and computational power. Meanwhile , the overall outcome of small LLMs seems to show a scaling trend when a higher inference cost is paid in prompting and sampling. However, the inherent relatedness between training and inference in the path of scaling up is less studied. In this article, we present a universal theory on the joint computational scaling of LLM training and inference, which characterizes the general behaviors of LLM in various settings. Based on simple modeling of several key hyperparameters, we give intuitive explanations for the effectiveness of various techniques at both training and inference time. To explain the limitation of the current inf",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "C": 3,
+    "A": 21,
+    "B": 17
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:39.813151"
+}

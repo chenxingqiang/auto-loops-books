@@ -52,7 +52,7 @@ def write_standalone_tex(spec: ChapterSpec) -> Path:
 \\tableofcontents
 \\mainmatter
 
-\\input{{chapters/{spec.filename}}}
+\\input{{build/chapters/{spec.filename}}}
 
 \\small{{
 \\bibliography{{book}}

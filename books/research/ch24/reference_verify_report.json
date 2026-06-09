@@ -1,0 +1,265 @@
+{
+  "chapter_id": "ch24",
+  "chapter_title": "Heterogeneous Compilation and Multi-Hardware Deployment",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch24/keywords.json",
+  "keyword_count": 63,
+  "top_keywords": [
+    {
+      "term": "heterogeneous compilation and multi-hardware deployment",
+      "weight": 18
+    },
+    {
+      "term": "hetero cluster",
+      "weight": 14
+    },
+    {
+      "term": "industrial cases",
+      "weight": 14
+    },
+    {
+      "term": "runtime adapt",
+      "weight": 14
+    },
+    {
+      "term": "unified stack",
+      "weight": 14
+    },
+    {
+      "term": "version regression",
+      "weight": 14
+    },
+    {
+      "term": "YiRage cluster",
+      "weight": 14
+    },
+    {
+      "term": "hetero cluster LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "industrial cases LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "runtime adapt LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "unified stack LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "version regression LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage cluster LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "AI compiler optimization",
+      "weight": 12
+    },
+    {
+      "term": "AI hardware architecture",
+      "weight": 12
+    },
+    {
+      "term": "case production",
+      "weight": 12
+    },
+    {
+      "term": "MLIR unified",
+      "weight": 12
+    },
+    {
+      "term": "runtime detect",
+      "weight": 12
+    },
+    {
+      "term": "GPU+CPU",
+      "weight": 11
+    },
+    {
+      "term": "GPU/CPU/NPU",
+      "weight": 11
+    },
+    {
+      "term": "LLM",
+      "weight": 11
+    },
+    {
+      "term": "MLIR/ir",
+      "weight": 11
+    },
+    {
+      "term": "YiRage clustertopology",
+      "weight": 11
+    },
+    {
+      "term": "case",
+      "weight": 10
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 40,
+      "matched_keywords": [
+        "LLM",
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 49,
+      "matched_keywords": [
+        "LLM",
+        "decode",
+        "GPU"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 11,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

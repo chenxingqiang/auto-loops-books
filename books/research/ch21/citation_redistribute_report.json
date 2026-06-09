@@ -1,0 +1,138 @@
+{
+  "chapter_id": "ch21",
+  "pool_count": 23,
+  "assigned_count": 23,
+  "unassigned_count": 0,
+  "sections_with_cites": 5,
+  "unique_keys_in_tex": 21,
+  "pool_path": "books/research/ch21/citation_pool.json",
+  "sections_used": [
+    "Chapter Summary",
+    "Compile Overhead",
+    "Compiler Ratings",
+    "YiRage Benchmark",
+    "chapter"
+  ],
+  "cites_applied": 21,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch21_compiler_benchmark.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "cummins2025llmcompilerfoundat",
+      "section": "chapter",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "dao2022flashattention",
+      "section": "chapter",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "schmidt2024phdprojectcompiler",
+      "section": "Compiler Ratings",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "yang2025automaticpowerelec",
+      "section": "Compiler Ratings",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "amarasinghe2019thesparsetensoralg",
+      "section": "Compiler Ratings",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "bernardo2025compilerawareaihar",
+      "section": "Compiler Ratings",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "liu2024deepseekv3",
+      "section": "Compiler Ratings",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "nvidia2022hopper",
+      "section": "Compiler Ratings",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "schmalhofer2025nnhcaneuralnetwork",
+      "section": "Compiler Ratings",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "memoryfloor2026",
+      "section": "Compiler Ratings",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "kwon2023vllm",
+      "section": "Compiler Ratings",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "rating"
+      ],
+      "fallback": false
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "amd2024xdna",
+      "section": "Compiler Ratings",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:42.184547"
+}

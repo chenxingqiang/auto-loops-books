@@ -1,0 +1,830 @@
+{
+  "chapter_id": "ch05",
+  "timestamp": "2026-06-10T02:45:18.249653",
+  "min_papers": 25,
+  "paper_count": 57,
+  "sentence_count": 271,
+  "binding_count": 216,
+  "papers": [
+    {
+      "bib_key": "alves2023distributedcheckpo",
+      "title": "Distributed Checkpointing in Dataflow with Static Scheduling",
+      "link": "https://doi.org/10.1109/sbac-padw60351.2023.00021",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static dataflow",
+        "dataflow",
+        "static"
+      ],
+      "reference": "Tiago A. O. Alves (2023). Distributed Checkpointing in Dataflow with Static Scheduling. Retrieved from https://doi.org/10.1109/sbac-padw60351.2023.00021",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "CUDA",
+        "inference",
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "luo2024hadaprototypeofdat",
+      "title": "HAD:A Prototype Of Dataflow Compute Architecture",
+      "link": "https://doi.org/10.21203/rs.3.rs-4254978/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 59,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "dataflow",
+        "architecture",
+        "microbenchmarks"
+      ],
+      "reference": "Qiuming Luo, Wenjie Zhao, et al. (2024). HAD:A Prototype Of Dataflow Compute Architecture. Retrieved from https://doi.org/10.21203/rs.3.rs-4254978/v1",
+      "abstract": "Abstract\nTo investigate the features, implementation, and applications of data flow architecture, a novel dataflow computing system, HAD (Hardware Accelerated Dataflow), is proposed. This system enhances the traditional control flow processor by integrating a dataflow component.HAD introduces two specialized instructions to the RISC ISA and provides OS system calls for applications. Users can execute programs that adhere to the dataflow execution model on the system, enabling synchronization and mutual exclusion between processes through the inherent characteristics of dataflow computing.We further analyze how our dataflow computing can reduce the overhead of OS system calls for synchronization and mutual exclusion between processes.Lastly, we perform simulations using Verilator, implement",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "CUDA",
+        "inference",
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "hentrich2025parallelsortimplem",
+      "title": "Parallel Sort Implementation and Evaluation in a Dataflow-Based Polymorphic Computing Architecture",
+      "link": "https://doi.org/10.3390/computers14050181",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "dataflow",
+        "architecture",
+        "kernels"
+      ],
+      "reference": "David Hentrich, Erdal Oruklu, Jafar Saniie (2025). Parallel Sort Implementation and Evaluation in a Dataflow-Based Polymorphic Computing Architecture. Retrieved from https://doi.org/10.3390/computers14050181",
+      "abstract": "This work presents two variants of an odd–even sort algorithm that are implemented in a dataflow-based polymorphic computing architecture. The two odd–even sort algorithms are the “fully unrolled” variant and the “compact” variant. They are used as test kernels to evaluate the polymorphic computing architecture. Incidentally, these two odd–even sort algorithm variants can be readily adapted to ASIC (Application-Specific Integrated Circuit) and FPGA (Field Programmable Gate Array) designs. Additionally, two methods of placing the sort algorithms’ instructions in different configurations of the polymorphic computing architecture to achieve performance gains are furnished: a genetic-algorithm-based instruction placement method and a deterministic instruction placement method. Finally, a compa",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "XDNA",
+        "architecture"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rico2024amdxdnanpuinryzena",
+      "title": "AMD XDNA NPU in Ryzen AI Processors",
+      "link": "https://doi.org/10.1109/mm.2024.3423692",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "XDNA",
+        "NPU"
+      ],
+      "reference": "Alejandro Rico, Satyaprakash Pareek, et al. (2024). AMD XDNA NPU in Ryzen AI Processors. Retrieved from https://doi.org/10.1109/mm.2024.3423692",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "delaye2022cgra4hpc2022invite",
+      "title": "CGRA4HPC 2022 Invited Speaker: Mapping ML to the AMD/Xilinx AIE-ML architecture",
+      "link": "https://doi.org/10.1109/ipdpsw55747.2022.00109",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "AIE",
+        "architecture"
+      ],
+      "reference": "Elliott Delaye (2022). CGRA4HPC 2022 Invited Speaker: Mapping ML to the AMD/Xilinx AIE-ML architecture. Retrieved from https://doi.org/10.1109/ipdpsw55747.2022.00109",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "vilim2021aurochsanarchitect",
+      "title": "Aurochs: An Architecture for Dataflow Threads",
+      "link": "https://doi.org/10.1109/isca52012.2021.00039",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Matthew Vilim, Alexander Rucker, Kunle Olukotun (2021). Aurochs: An Architecture for Dataflow Threads. Retrieved from https://doi.org/10.1109/isca52012.2021.00039",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "miheli2018experimentalcompar",
+      "title": "EXPERIMENTAL COMPARISON OF MATRIX ALGORITHMS FOR DATAFLOW COMPUTER ARCHITECTURE",
+      "link": "https://doi.org/10.15546/aeei-2018-0025",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Jurij Mihelič, Uroš Čibej (2018). EXPERIMENTAL COMPARISON OF MATRIX ALGORITHMS FOR DATAFLOW COMPUTER ARCHITECTURE. Retrieved from https://doi.org/10.15546/aeei-2018-0025",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gioiosa2023navierdataflowarch",
+      "title": "Navier: Dataflow Architecture for Computation Chemistry",
+      "link": "https://doi.org/10.2172/2203460",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Roberto Gioiosa, Edoardo Apra, et al. (2023). Navier: Dataflow Architecture for Computation Chemistry. Retrieved from https://doi.org/10.2172/2203460",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "miheli2019matrixbasedalgorit",
+      "title": "Matrix-Based Algorithms for DataFlow Computer Architecture: An Overview and Comparison",
+      "link": "https://doi.org/10.1007/978-3-030-13803-5_4",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Jurij Mihelič, Uroš Čibej (2019). Matrix-Based Algorithms for DataFlow Computer Architecture: An Overview and Comparison. Retrieved from https://doi.org/10.1007/978-3-030-13803-5_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "weng2020ahybridsystolicdat",
+      "title": "A Hybrid Systolic-Dataflow Architecture for Inductive Matrix Algorithms",
+      "link": "https://doi.org/10.1109/hpca47549.2020.00063",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Jian Weng, Sihao Liu, et al. (2020). A Hybrid Systolic-Dataflow Architecture for Inductive Matrix Algorithms. Retrieved from https://doi.org/10.1109/hpca47549.2020.00063",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "narayanan2020spinalflowanarchit",
+      "title": "SpinalFlow: An Architecture and Dataflow Tailored for Spiking Neural Networks",
+      "link": "https://doi.org/10.1109/isca45697.2020.00038",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Surya Narayanan, Karl Taht, et al. (2020). SpinalFlow: An Architecture and Dataflow Tailored for Spiking Neural Networks. Retrieved from https://doi.org/10.1109/isca45697.2020.00038",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "krichene2024adataflowarchitect",
+      "title": "A dataflow architecture with distributed control for DNN acceleration",
+      "link": "https://doi.org/10.1109/meco62516.2024.10577802",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Hana Krichene, Rohit Prasad (2024). A dataflow architecture with distributed control for DNN acceleration. Retrieved from https://doi.org/10.1109/meco62516.2024.10577802",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ratto2024adataflowbasedarch",
+      "title": "A Dataflow-Based Architecture and Design Methodology for Multi-Thread Reconfigurable Coprocessors on Fpga Socs",
+      "link": "https://doi.org/10.2139/ssrn.4909890",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Francesco Ratto, Claudio Rubattu, et al. (2024). A Dataflow-Based Architecture and Design Methodology for Multi-Thread Reconfigurable Coprocessors on Fpga Socs. Retrieved from https://doi.org/10.2139/ssrn.4909890",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "hofmann2022multichipdataflowa",
+      "title": "Multi-Chip Dataflow Architecture for Massive Scale Biophyscially Accurate Neuron Simulation",
+      "link": "https://doi.org/10.1201/9781003339205-2",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Jaco Hofmann (2022). Multi-Chip Dataflow Architecture for Massive Scale Biophyscially Accurate Neuron Simulation. Retrieved from https://doi.org/10.1201/9781003339205-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2025ahybridcnngcnarchi",
+      "title": "A Hybrid CNN-GCN Architecture with Sparsity and Dataflow Optimization for Mobile AR",
+      "link": "https://doi.org/10.3390/app15179356",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ],
+      "reference": "Jiazhong Chen, Ziwei Chen (2025). A Hybrid CNN-GCN Architecture with Sparsity and Dataflow Optimization for Mobile AR. Retrieved from https://doi.org/10.3390/app15179356",
+      "abstract": "Mobile augmented reality (AR) applications require high-performance, energy-efficient deep learning solutions to deliver immersive experiences on resource-constrained devices. We propose SAHA-WS, a Sparsity-Aware Hybrid Architecture with Weight-Stationary Dataflow, combining Convolutional Neural Networks (CNNs) and Graph Convolutional Networks (GCNs) to efficiently process grid-like (e.g., images) and graph-structured (e.g., human skeletons) data. SAHA-WS leverages channel-wise sparsity in CNNs and adjacency matrix sparsity in GCNs, paired with weight-stationary dataflow, to minimize computations and memory access. Evaluations on ImageNet, COCO, and NTU RGB+D datasets demonstrate SAHA-WS achieves 87.5% top-1 accuracy, 75.8% mAP, and 92.5% action recognition accuracy at 0% sparsity, with 40",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "steffen20254thgenamdcdnasuptm",
+      "title": "4th Gen AMD CDNA<sup>TM</sup> Generative AI Architecture Powering AMD Instinct M350 Series GPUs and Platforms",
+      "link": "https://doi.org/10.1109/hcs66204.2025.11154415",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "architecture",
+        "GPU"
+      ],
+      "reference": "Michael Steffen, Michael Floyd (2025). 4th Gen AMD CDNA<sup>TM</sup> Generative AI Architecture Powering AMD Instinct M350 Series GPUs and Platforms. Retrieved from https://doi.org/10.1109/hcs66204.2025.11154415",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "inference",
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jia2025responsivexdnaasse",
+      "title": "Responsive XDNA Assembly-Actuated Transient Dissipative Dual-Recycling Circuit for Amplifiable Fluorescence Biosensing",
+      "link": "https://doi.org/10.2139/ssrn.5354600",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "Xinyue Jia, Min Long, et al. (2025). Responsive XDNA Assembly-Actuated Transient Dissipative Dual-Recycling Circuit for Amplifiable Fluorescence Biosensing. Retrieved from https://doi.org/10.2139/ssrn.5354600",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "inference"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bouaziz2025benchmarkingfloati",
+      "title": "Benchmarking Floating Point Performance of Massively Parallel Dataflow Overlays on AMD Versal Compute Primitives",
+      "link": "https://doi.org/10.1109/ipdpsw66978.2025.00023",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Mohamed Bouaziz, Suhaib A. Fahmy (2025). Benchmarking Floating Point Performance of Massively Parallel Dataflow Overlays on AMD Versal Compute Primitives. Retrieved from https://doi.org/10.1109/ipdpsw66978.2025.00023",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bouaziz2025adataflowoverlayfo",
+      "title": "A Dataflow Overlay for Monte Carlo Multi-Asset Option Pricing on AMD Versal AI Engines",
+      "link": "https://doi.org/10.23919/isc.2025.11020612",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Mohamed Bouaziz, Michael Samet, Suhaib A. Fahmy (2025). A Dataflow Overlay for Monte Carlo Multi-Asset Option Pricing on AMD Versal AI Engines. Retrieved from https://doi.org/10.23919/isc.2025.11020612",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "heinz2024tapascoaieanopenso",
+      "title": "TaPaSCo-AIE: An Open-Source Framework for Streaming-Based Heterogeneous Acceleration Using AMD AI Engines",
+      "link": "https://doi.org/10.1109/ipdpsw63119.2024.00041",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Carsten Heinz, Torben Kalkhof, et al. (2024). TaPaSCo-AIE: An Open-Source Framework for Streaming-Based Heterogeneous Acceleration Using AMD AI Engines. Retrieved from https://doi.org/10.1109/ipdpsw63119.2024.00041",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "renaud2024automatedlevelbase",
+      "title": "Automated level-based clustering of dataflow actors for controlled scheduling complexity",
+      "link": "https://doi.org/10.1016/j.sysarc.2024.103217",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Ophélie Renaud, Hugo Miomandre, et al. (2024). Automated level-based clustering of dataflow actors for controlled scheduling complexity. Retrieved from https://doi.org/10.1016/j.sysarc.2024.103217",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "castrillon2022dataflowmodelsofco",
+      "title": "Dataflow Models of Computation for Programming Heterogeneous Multicores",
+      "link": "https://doi.org/10.1007/978-981-15-6401-7_45-1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ],
+      "reference": "Jeronimo Castrillon, Karol Desnos, et al. (2022). Dataflow Models of Computation for Programming Heterogeneous Multicores. Retrieved from https://doi.org/10.1007/978-981-15-6401-7_45-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mehndiratta2024fluidbiomarkersina",
+      "title": "Fluid Biomarkers in Autoimmune Encephalitis (AIE)-Expanding Horizons",
+      "link": "https://doi.org/10.62830/mmj1-3-9a",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Man Mohan Mehndiratta (2024). Fluid Biomarkers in Autoimmune Encephalitis (AIE)-Expanding Horizons. Retrieved from https://doi.org/10.62830/mmj1-3-9a",
+      "abstract": "The emerging field of autoimmune disorders of the central nervous system exhibits heterogeneity in its clinical manifestations. Ongoing studies and research aim to widen the spectrum of its presentation by associating it with autoantibodies, including those that have not yet been identified or discovered. The seronegative entity has a similar incidence as the autoantibody-associated group of autoimmune encephalitis (AIE). Along with the parameters defined in the diagnostic criteria of AIE, the importance of biomarkers for the diagnosis, prognosis and drug efficacy is increasingly being recognised due to the relapsing nature of the disease. In this review, we have summarized the biomarkers that may help in the early detection of the AIE, leading to better prognosis and reduced morbidity.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cametti2022aieactivesupramole",
+      "title": "AIE-active supramolecular gel systems",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00002-7",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Massimo Cametti, Zoran Džolić (2022). AIE-active supramolecular gel systems. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00002-7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pucci2022aieactivematerials",
+      "title": "AIE-active materials for photovoltaics",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00014-3",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Andrea Pucci (2022). AIE-active materials for photovoltaics. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00014-3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shimizu2022aieactiveraremetal",
+      "title": "AIE-active rare-metal-free phosphorescent materials",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00005-2",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Masaki Shimizu (2022). AIE-active rare-metal-free phosphorescent materials. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00005-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liou2022electrofluorochrom",
+      "title": "Electrofluorochromism in AIE luminogens",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00012-x",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Guey-Sheng Liou, Hung-Ju Yen (2022). Electrofluorochromism in AIE luminogens. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00012-x",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gao2022aiebioconjugatesfo",
+      "title": "AIE bio-conjugates for biomedical applications",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00009-x",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Zhiyuan Gao, Dan Ding (2022). AIE bio-conjugates for biomedical applications. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00009-x",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dong2022mechanochromiclumi",
+      "title": "Mechanochromic luminescence in AIE luminogens",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00006-4",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Yong Qiang Dong, Yue Si, Yucong Zhang (2022). Mechanochromic luminescence in AIE luminogens. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00006-4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mei2022photochromicandthe",
+      "title": "Photochromic and thermochromic luminescence in AIE luminogens",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00004-0",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Ju Mei, He Tian (2022). Photochromic and thermochromic luminescence in AIE luminogens. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00004-0",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2022aiebasedchemosenso",
+      "title": "AIE-based chemosensors for vapor sensing",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00003-9",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Meng Li, Dong Wang, Ben Zhong Tang (2022). AIE-based chemosensors for vapor sensing. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00003-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "peng2022computationalmodel",
+      "title": "Computational modeling of AIE luminogens",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00015-5",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Qian Peng, Zhigang Shuai, Qi Ou (2022). Computational modeling of AIE luminogens. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00015-5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "han2022fundamentalprincip",
+      "title": "Fundamental principles of AIE",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00010-6",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Pengbo Han, Jia Wang, et al. (2022). Fundamental principles of AIE. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00010-6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhou2022aieactivepolymersf",
+      "title": "AIE-active polymers for explosive detection",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00013-1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Hui Zhou, Ming Hui Chua, et al. (2022). AIE-active polymers for explosive detection. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00013-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wong2022aiemolecularprobes",
+      "title": "AIE molecular probes for biomedical applications",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00011-8",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Alex Y.H. Wong, Fei Wang, et al. (2022). AIE molecular probes for biomedical applications. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00011-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023aieint",
+      "title": "AIE, int.",
+      "link": "https://doi.org/10.1093/oed/3910558250",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": " (2023). AIE, int.. Retrieved from https://doi.org/10.1093/oed/3910558250",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2025reviewforaiepolyme",
+      "title": "Review for \"AIE Polymers for Biosensing Applications\"",
+      "link": "https://doi.org/10.1039/d5py00051c/v1/review1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": " (2025). Review for \"AIE Polymers for Biosensing Applications\". Retrieved from https://doi.org/10.1039/d5py00051c/v1/review1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022aggregationinduced",
+      "title": "Aggregation-Induced Emission (AIE)",
+      "link": "https://doi.org/10.1016/c2020-0-01478-7",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": " (2022). Aggregation-Induced Emission (AIE). Retrieved from https://doi.org/10.1016/c2020-0-01478-7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "abarca2026aiecanda",
+      "title": "AIE canda",
+      "link": "https://doi.org/10.55277/researchhub.yzbhqj83.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "FRANCIA SOFIA ALVAREZ ABARCA (2026). AIE canda. Retrieved from https://doi.org/10.55277/researchhub.yzbhqj83.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020aieregimen",
+      "title": "AIE Regimen",
+      "link": "https://doi.org/10.32388/58la9j",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": " (2020). AIE Regimen. Retrieved from https://doi.org/10.32388/58la9j",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sabouri2022recentadvancesofag",
+      "title": "Recent advances of aggregation-induced emission nanoparticles (AIE-NPs) in biomedical applications",
+      "link": "https://doi.org/10.1016/b978-0-12-824335-0.00007-6",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": "Soheila Sabouri, Bicheng Yao, Yuning Hong (2022). Recent advances of aggregation-induced emission nanoparticles (AIE-NPs) in biomedical applications. Retrieved from https://doi.org/10.1016/b978-0-12-824335-0.00007-6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018reviewofaieeffects",
+      "title": "Review of AIE effects with preindustrial oxidants",
+      "link": "https://doi.org/10.5194/acp-2017-1211-rc4",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "reference": " (2018). Review of AIE effects with preindustrial oxidants. Retrieved from https://doi.org/10.5194/acp-2017-1211-rc4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "architecture"
+      ],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "smith2024amdinstinctmi300xg",
+      "title": "AMD Instinct MI300X Generative AI Accelerator and Platform Architecture",
+      "link": "https://doi.org/10.1109/hcs61935.2024.10664659",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "architecture"
+      ],
+      "reference": "Alan Smith, Vamsi Alla (2024). AMD Instinct MI300X Generative AI Accelerator and Platform Architecture. Retrieved from https://doi.org/10.1109/hcs61935.2024.10664659",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 25,
+    "B": 30,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:38.188821"
+}

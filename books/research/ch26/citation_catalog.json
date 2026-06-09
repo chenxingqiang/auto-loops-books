@@ -1,0 +1,949 @@
+{
+  "chapter_id": "ch26",
+  "timestamp": "2026-06-10T02:46:51.897245",
+  "min_papers": 25,
+  "paper_count": 62,
+  "sentence_count": 271,
+  "binding_count": 217,
+  "papers": [
+    {
+      "bib_key": "maafri2025successfuldeployme",
+      "title": "Successful Deployment of Stiff Lower Completion Assembly in Harsh Drilling Environment: Engineering Analysis, Best Practices, and Lessons Learned",
+      "link": "https://doi.org/10.2118/224783-ms",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 171,
+      "matched_keywords": [
+        "production deployment and engineering best practices",
+        "operation production",
+        "deploy",
+        "lesson",
+        "operation",
+        "production",
+        "best",
+        "deployment",
+        "engineering",
+        "practices",
+        "treat"
+      ],
+      "reference": "Mbarek Maafri, Mahmoud AlGaiar, Moustafa Farhat (2025). Successful Deployment of Stiff Lower Completion Assembly in Harsh Drilling Environment: Engineering Analysis, Best Practices, and Lessons Learned. Retrieved from https://doi.org/10.2118/224783-ms",
+      "abstract": "Abstract\nThe objective of horizontal and deviated wells is to maximize reservoir contact improve sweep efficiency and well productivity. However, conventionally completed horizontal wells have a high risk of gas upwelling and water cone formation, which can significantly impair well efficiency. Several parameters influence the production profile along the well, including the heterogeneity of reservoir, permeability, and pressure, also the presence of fractures and frictions effects. Inflow Control Devices (ICDs) were developed to regulate the production inflow along the well by delaying gas or water breakthrough; maximize sweeping and reduce or eliminate future well intervention. These devices provide uniform production and flow contribution along a sand face completion in horizontal and i",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "thomas2026bestpracticesforac",
+      "title": "Best Practices for Accelerated Screening and Deployment of Polymer Flooding: Engineering Workflows and Field Learnings",
+      "link": "https://doi.org/10.2118/231481-ms",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 156,
+      "matched_keywords": [
+        "production deployment and engineering best practices",
+        "deploy",
+        "production",
+        "best",
+        "constraints",
+        "deployment",
+        "engineering",
+        "miss",
+        "practices",
+        "surface",
+        "treat"
+      ],
+      "reference": "A. Thomas, R. S. Seright (2026). Best Practices for Accelerated Screening and Deployment of Polymer Flooding: Engineering Workflows and Field Learnings. Retrieved from https://doi.org/10.2118/231481-ms",
+      "abstract": "Global oil production increasingly comes from mature fields where recovery factors remain stubbornly low (typically around 35% of the original oil in place) despite decades of technological progress in petrophysics, reservoir simulation, and seismic imaging (OGA 2018; NPD 2019). At the same time, water production continues to grow: for many assets, 3–7 barrels of water must be handled, treated, and reinjected for every barrel of oil produced. This combination of low ultimate recovery and high water handling erodes project value, stresses surface facilities, and increases energy use and CO2 emissions. When not addressed early, both recovery opportunities and economic windows for Enhanced Oil Recovery (EOR) are progressively lost.\nPolymer flooding is a well-established water-based EOR method",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "piridi2025crossenvironmentde",
+      "title": "Cross-Environment Deployment Strategies for Power Platform Solutions – Investigating best practices for managing multi-environment deployments, from development to production, using managed environments and DevOps",
+      "link": "https://doi.org/10.22161/ijaers.124.8",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 144,
+      "matched_keywords": [
+        "multi HW ops",
+        "operation production",
+        "deploy",
+        "operation",
+        "production",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Sarat Piridi, Satyanarayana Asundi, Dr. James C Hyatt (2025). Cross-Environment Deployment Strategies for Power Platform Solutions – Investigating best practices for managing multi-environment deployments, from development to production, using managed environments and DevOps. Retrieved from https://doi.org/10.22161/ijaers.124.8",
+      "abstract": "The cross-environment deployment strategies for Power Platform solutions which include moving Power Platform solutions from development to production using managed environments and DevOps practices. The paper takes advantage of ten key academic and industry sources to evaluate frameworks, automation tools and governing models to streamline deployment and enhance system reliability. The measurable benefits of such case studies are reduced deployment time and improved accuracy. With this DevOps deployed throughout cloud and hybrid platform and agile methodology, it facilitates scalable and secure deployments. The insights provided from the findings contribute to organizations wanting to improve performance, maintain consistency, and direct development to meet operational goals in dynamic con",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kalimuthu2025integratingdevopsp",
+      "title": "Integrating DevOps Principles into the Deployment Lifecycle of Distributed IoT Systems: Challenges and Best Practices",
+      "link": "https://doi.org/10.55041/isjem02324",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 97,
+      "matched_keywords": [
+        "multi HW ops",
+        "deploy",
+        "best",
+        "deployment",
+        "practices",
+        "surface"
+      ],
+      "reference": "Naresh Kalimuthu (2025). Integrating DevOps Principles into the Deployment Lifecycle of Distributed IoT Systems: Challenges and Best Practices. Retrieved from https://doi.org/10.55041/isjem02324",
+      "abstract": "Abstract—Exploring how DevOps principles can enhance the deployment of distributed Internet of Things (IoT) systems offers a novel perspective, transcending traditional software delivery methodologies. This paper examines some of the primary challenges involved, such as the extensive diversity of physical devices, the unique security concerns related to physically dispersed devices, and the complexities of automated testing for systems integrating hardware and software. We identify three principal challenges: the suitability of CI/CD pipelines across various constrained and diverse hardware platforms, methods to automate end-to-end security (DevSecOps) on exposed surfaces susceptible to attacks, and the development of automated testing frameworks for hybrid systems. To address these challe",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "jayabalan2025endtoend5gnetworkd",
+      "title": "End-to-End 5G network deployment on public cloud challenges and best practices",
+      "link": "https://doi.org/10.30574/wjaets.2025.16.2.1219",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "deploy",
+        "operation",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Jayavelan Jayabalan (2025). End-to-End 5G network deployment on public cloud challenges and best practices. Retrieved from https://doi.org/10.30574/wjaets.2025.16.2.1219",
+      "abstract": "The advent of end-to-end 5G networks into the public cloud opens the door to new ways of thinking and utilizing telecom infrastructure, not only new abilities, but also a whole new set of architectural, operational, and regulatory complexities. Cloud-native abilities from hyperscale providers like AWS, Azure and Google Cloud allow for scalable flexible, and AI leveraged orchestration of network functions. Still, these abilities are making us reconsider some of our previous thinking particularly related to security, latency, compliance, and interoperability. The gamification of cloud-based 5G networks has progressed past the threshold of theory where research and academic deployments have yielded the fruit of tooling and tangible realizations in both the public and private sector. Often tim",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "payyambally2025aiguardrailsandbes",
+      "title": "AI Guardrails and Best Practices for Ethical, Safe, and Effective AI Deployment",
+      "link": "https://doi.org/10.21275/sr25301235922",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Sreenadh Payyambally (2025). AI Guardrails and Best Practices for Ethical, Safe, and Effective AI Deployment. Retrieved from https://doi.org/10.21275/sr25301235922",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "bagai2024bestpracticesforse",
+      "title": "Best Practices for Secure Model Deployment on AWS",
+      "link": "https://doi.org/10.14445/23488387/ijcse-v11i5p102",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Rahul Bagai (2024). Best Practices for Secure Model Deployment on AWS. Retrieved from https://doi.org/10.14445/23488387/ijcse-v11i5p102",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sanni2025multicloudcontaine",
+      "title": "Multi-cloud Container Deployment: An Investigation into Strategies, Challenges and Best Practices",
+      "link": "https://doi.org/10.2139/ssrn.5600492",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Jacob Sanni (2025). Multi-cloud Container Deployment: An Investigation into Strategies, Challenges and Best Practices. Retrieved from https://doi.org/10.2139/ssrn.5600492",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "bhatia2026aiguardrailsbestpr",
+      "title": "AI Guardrails: Best Practices for Ethical, Safe, and Effective Deployment",
+      "link": "https://doi.org/10.53469/jrse.2026.08(03).21",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Panav Bhatia (2026). AI Guardrails: Best Practices for Ethical, Safe, and Effective Deployment. Retrieved from https://doi.org/10.53469/jrse.2026.08(03).21",
+      "abstract": "As artificial intelligence (AI) continues to permeate various sectors, organizations must prioritize ethical, secure, and societally beneficial AI systems. This white paper provides comprehensive guidelines and guardrails across key domains—ranging from transparency and bias mitigation to security hardening and user-centric design. By adopting these recommended practices, organizations can ensure that their AI initiatives are both innovative and aligned with broader societal values.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "varma2025optimizingmachinel",
+      "title": "Optimizing Machine Learning Pipelines: Best Practices for Scalable and Efficient Model Deployment",
+      "link": "https://doi.org/10.2139/ssrn.5226791",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Santhosh Chitraju Gopal Varma (2025). Optimizing Machine Learning Pipelines: Best Practices for Scalable and Efficient Model Deployment. Retrieved from https://doi.org/10.2139/ssrn.5226791",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2019deploymentbestprac",
+      "title": "Deployment Best Practices",
+      "link": "https://doi.org/10.1142/9789814725361_0017",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": " (2019). Deployment Best Practices. Retrieved from https://doi.org/10.1142/9789814725361_0017",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "islavath2021jenkinsforcontinuo",
+      "title": "Jenkins for Continuous Integration and Deployment in DevOps Engineer: A Deep Dive into Features and Best Practices",
+      "link": "https://doi.org/10.21275/sr20216084821",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Nagaraju Islavath (2021). Jenkins for Continuous Integration and Deployment in DevOps Engineer: A Deep Dive into Features and Best Practices. Retrieved from https://doi.org/10.21275/sr20216084821",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2021bestpracticesofclo",
+      "title": "Best Practices of Cloud DCN Deployment",
+      "link": "https://doi.org/10.1201/9781003143185-9",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Lei Zhang, Le Chen (2021). Best Practices of Cloud DCN Deployment. Retrieved from https://doi.org/10.1201/9781003143185-9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "menon2018analogizinghybridr",
+      "title": "Analogizing Hybrid Reservoirs Reservoir Engineering and Production Best Practices",
+      "link": "https://doi.org/10.1306/80662menon2019",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "production",
+        "best",
+        "engineering",
+        "practices"
+      ],
+      "reference": "Hari P. Menon, Robert Hull (2018). Analogizing Hybrid Reservoirs Reservoir Engineering and Production Best Practices. Retrieved from https://doi.org/10.1306/80662menon2019",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yadav2024aisystemsengineeri",
+      "title": "AI Systems Engineering: Infrastructure Design Principles, Serving Optimization, and Production Best Practices",
+      "link": "https://doi.org/10.52783/jisem.v9i3.62",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "production",
+        "best",
+        "engineering",
+        "practices"
+      ],
+      "reference": "Yadav (2024). AI Systems Engineering: Infrastructure Design Principles, Serving Optimization, and Production Best Practices. Retrieved from https://doi.org/10.52783/jisem.v9i3.62",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "kadiyala2023hybridclouddeploym",
+      "title": "Hybrid Cloud Deployment: Best Practices for Application Engineers",
+      "link": "https://doi.org/10.52783/kjcs.281",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "Murali Kadiyala (2023). Hybrid Cloud Deployment: Best Practices for Application Engineers. Retrieved from https://doi.org/10.52783/kjcs.281",
+      "abstract": "This paper highlights the discussion of hybrid cloud deployment and its best practices for application engineers. Hybrid cloud deployment methods have become the new standard for organizations. Hybrid cloud deployment is important for application engineers since it may be utilized to expand on-premises sources within an organization. These days, the hybrid cloud deployment model, or HCDM model, is thought to be the most effective cloud computing paradigm due to its open-source features. Application engineers can maintain computing power based on consumption and fluctuations thanks to hybrid cloud computing. The author also explains how hybrid clouds offer the best resources, security, and scale and cost advantages. Cloud architectures are being improved as the cloud ecosystem develops and ",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2021caribbeannetherlan",
+      "title": "Caribbean Netherlands System Deployment Best Practices",
+      "link": "https://doi.org/10.18356/9789216040147c011",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": " (2021). Caribbean Netherlands System Deployment Best Practices. Retrieved from https://doi.org/10.18356/9789216040147c011",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023analyticalplatform",
+      "title": "Analytical platform PolyAnalyst: architecture, functionality, deployment, best practices",
+      "link": "https://doi.org/10.25780/0008",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ],
+      "reference": "С.М. Ананян, Д.С. Сазонов, et al. (2023). Analytical platform PolyAnalyst: architecture, functionality, deployment, best practices. Retrieved from https://doi.org/10.25780/0008",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "urniaz2024shinywizardaninter",
+      "title": "ShinyWizard: An Interactive Wizard to Design, Build, and Deploy R Packages Demo Presentation",
+      "link": "https://doi.org/10.32614/cran.package.shinywizard",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "deploy packag",
+        "deploy",
+        "packag"
+      ],
+      "reference": "Rafal Urniaz (2024). ShinyWizard: An Interactive Wizard to Design, Build, and Deploy R Packages Demo Presentation. Retrieved from https://doi.org/10.32614/cran.package.shinywizard",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "doe2023sustainabilityinpr",
+      "title": "Sustainability in Production Systems: A Systematic Review of Best Practices",
+      "link": "https://doi.org/10.71465/ajipe.1829",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "production",
+        "best",
+        "practices"
+      ],
+      "reference": "John Doe (2023). Sustainability in Production Systems: A Systematic Review of Best Practices. Retrieved from https://doi.org/10.71465/ajipe.1829",
+      "abstract": "The growing need for sustainable practices in production systems has garnered significant attention in recent years. This systematic review explores the best practices and strategies adopted by industries worldwide to integrate sustainability into their production systems. The paper aims to provide a comprehensive understanding of the various approaches to sustainable manufacturing, such as resource optimization, waste reduction, and the incorporation of renewable energy sources. The review also highlights the challenges faced by industries in implementing these sustainable practices and offers recommendations for overcoming them. By synthesizing insights from numerous studies, this paper contributes to a broader understanding of sustainability in production systems and its potential for f",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wurster2020cloudnativedeploya",
+      "title": "Cloud-native Deploy-ability: An Analysis of Required Features of Deployment Technologies to Deploy Arbitrary Cloud-native Applications",
+      "link": "https://doi.org/10.5220/0009571001710180",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "deploy",
+        "deployment"
+      ],
+      "reference": "Michael Wurster, Uwe Breitenbücher, et al. (2020). Cloud-native Deploy-ability: An Analysis of Required Features of Deployment Technologies to Deploy Arbitrary Cloud-native Applications. Retrieved from https://doi.org/10.5220/0009571001710180",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "modi2021terraformbestpract",
+      "title": "Terraform Best Practices",
+      "link": "https://doi.org/10.1007/978-1-4842-7328-9_9",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
+      "reference": "Ritesh Modi (2021). Terraform Best Practices. Retrieved from https://doi.org/10.1007/978-1-4842-7328-9_9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sabharwal2023tooladministration",
+      "title": "Tool Administration and Best Practices",
+      "link": "https://doi.org/10.1007/978-1-4842-8885-6_13",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
+      "reference": "Navin Sabharwal, Subramani Kasiviswanathan (2023). Tool Administration and Best Practices. Retrieved from https://doi.org/10.1007/978-1-4842-8885-6_13",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "stencel2025bestpracticesinkub",
+      "title": "Best Practices in Kubernetes",
+      "link": "https://doi.org/10.1007/979-8-8688-1325-2_13",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
+      "reference": "Grzegorz Stencel, Luca Berton (2025). Best Practices in Kubernetes. Retrieved from https://doi.org/10.1007/979-8-8688-1325-2_13",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023deployn",
+      "title": "deploy, n.",
+      "link": "https://doi.org/10.1093/oed/4909724644",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": " (2023). deploy, n.. Retrieved from https://doi.org/10.1093/oed/4909724644",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2019deployacontaineriz",
+      "title": "Deploy a Containerized Application with Amazon EKS",
+      "link": "https://doi.org/10.1007/978-1-4842-5101-0_4",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2019). Deploy a Containerized Application with Amazon EKS. Retrieved from https://doi.org/10.1007/978-1-4842-5101-0_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020deploy",
+      "title": "Deploy",
+      "link": "https://doi.org/10.32388/xj9hdn",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": " (2020). Deploy. Retrieved from https://doi.org/10.32388/xj9hdn",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployare",
+      "title": "Design and Deploy a Respond Solution",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_8",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Respond Solution. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mattson2024deploytheenterpris",
+      "title": "Deploy the Enterprise System",
+      "link": "https://doi.org/10.4324/9781003381617-7",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "David Mattson (2024). Deploy the Enterprise System. Retrieved from https://doi.org/10.4324/9781003381617-7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023deployv",
+      "title": "deploy, v.",
+      "link": "https://doi.org/10.1093/oed/1003575993",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": " (2023). deploy, v.. Retrieved from https://doi.org/10.1093/oed/1003575993",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2021deploycontainerize",
+      "title": "Deploy Containerized Applications with Google Kubernetes Engine (GKE)",
+      "link": "https://doi.org/10.1007/978-1-4842-6470-6_4",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2021). Deploy Containerized Applications with Google Kubernetes Engine (GKE). Retrieved from https://doi.org/10.1007/978-1-4842-6470-6_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2020deploydockercontai",
+      "title": "Deploy Docker Container Host on Azure Virtual Machine",
+      "link": "https://doi.org/10.1007/978-1-4842-5753-1_5",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2020). Deploy Docker Container Host on Azure Virtual Machine. Retrieved from https://doi.org/10.1007/978-1-4842-5753-1_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2021deploycontainerswi",
+      "title": "Deploy Containers with Cloud Run",
+      "link": "https://doi.org/10.1007/978-1-4842-6470-6_3",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2021). Deploy Containers with Cloud Run. Retrieved from https://doi.org/10.1007/978-1-4842-6470-6_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2020deploycontainerize",
+      "title": "Deploy Containerized Applications with Azure Kubernetes Service (AKS)",
+      "link": "https://doi.org/10.1007/978-1-4842-5753-1_4",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2020). Deploy Containerized Applications with Azure Kubernetes Service (AKS). Retrieved from https://doi.org/10.1007/978-1-4842-5753-1_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020failuretodeploy",
+      "title": "Failure to Deploy",
+      "link": "https://doi.org/10.32388/kc2n29",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": " (2020). Failure to Deploy. Retrieved from https://doi.org/10.32388/kc2n29",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mattson2024thechallengetodepl",
+      "title": "The Challenge to Deploy Enterprise Systems",
+      "link": "https://doi.org/10.4324/9781003381617-1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "David Mattson (2024). The Challenge to Deploy Enterprise Systems. Retrieved from https://doi.org/10.4324/9781003381617-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2024deploymicrosoftdef",
+      "title": "Deploy Microsoft Defender for IoT",
+      "link": "https://doi.org/10.1007/979-8-8688-0239-3_4",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar, R. Anandan (2024). Deploy Microsoft Defender for IoT. Retrieved from https://doi.org/10.1007/979-8-8688-0239-3_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployade",
+      "title": "Design and Deploy a Detect Solution",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_7",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Detect Solution. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployare_54",
+      "title": "Design and Deploy a Recovery Solution",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_9",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Recovery Solution. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2020deploycontainerize_55",
+      "title": "Deploy Containerized Applications with Azure Container Instances (ACI)",
+      "link": "https://doi.org/10.1007/978-1-4842-5753-1_3",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2020). Deploy Containerized Applications with Azure Container Instances (ACI). Retrieved from https://doi.org/10.1007/978-1-4842-5753-1_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployani",
+      "title": "Design and Deploy an Identify Solution",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_3",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy an Identify Solution. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ifrah2021deploydockercontai",
+      "title": "Deploy Docker Containers on GCP Compute Engine",
+      "link": "https://doi.org/10.1007/978-1-4842-6470-6_5",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Shimon Ifrah (2021). Deploy Docker Containers on GCP Compute Engine. Retrieved from https://doi.org/10.1007/978-1-4842-6470-6_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeploysec",
+      "title": "Design and Deploy Security for Infrastructure, Data, and Applications",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_2",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy Security for Infrastructure, Data, and Applications. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "luraschi2019tfdeploydeploytens",
+      "title": "tfdeploy: Deploy 'TensorFlow' Models",
+      "link": "https://doi.org/10.32614/cran.package.tfdeploy",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Javier Luraschi (2019). tfdeploy: Deploy 'TensorFlow' Models. Retrieved from https://doi.org/10.32614/cran.package.tfdeploy",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr",
+      "title": "Design and Deploy a Protect Solution: Part 2",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_5",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Protect Solution: Part 2. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr_61",
+      "title": "Design and Deploy a Protect Solution: Part 3",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_6",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Protect Solution: Part 3. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr_63",
+      "title": "Design and Deploy a Protect Solution: Part 1",
+      "link": "https://doi.org/10.1007/978-1-4842-9678-3_4",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ],
+      "reference": "Puthiyavan Udayakumar (2023). Design and Deploy a Protect Solution: Part 1. Retrieved from https://doi.org/10.1007/978-1-4842-9678-3_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2024frontmatterforbrid",
+      "title": "Front matter for Bridge Demolition Engineering",
+      "link": "https://doi.org/10.1061/9780784485361.fm",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "engineering"
+      ],
+      "reference": " (2024). Front matter for Bridge Demolition Engineering. Retrieved from https://doi.org/10.1061/9780784485361.fm",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 44,
+    "C": 4,
+    "A": 14
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:42.967606"
+}

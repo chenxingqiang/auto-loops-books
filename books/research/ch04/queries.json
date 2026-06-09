@@ -1,0 +1,18 @@
+[
+  "\"CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds\"",
+  "\"register\" AND \"shared memory\"",
+  "\"TMA\" AND \"tensor memory\"",
+  "\"cluster\" AND \"dsm\"",
+  "\"warp\" AND \"block sync\"",
+  "\"tensor core\" AND \"decode\"",
+  "\"PTX\" AND \"exp2\"",
+  "\"YiRage\" AND \"CUDA\"",
+  "\"CUDA Hopper/Blackwell: hardware properties and optimization bounds\" AND \"CUDA Hopper/Blackwell\"",
+  "\"cluster dsm\" AND \"CUDA memory hierarchy\"",
+  "\"PTX\" AND \"sync mechanisms\"",
+  "\"tensor core bounds\" AND \"TMA\"",
+  "\"YiRage CUDA backend\" AND \"cluster dsm LLM inference compiler\"",
+  "\"CUDA memory hierarchy LLM inference compiler\" AND \"PTX LLM inference compiler\"",
+  "\"sync mechanisms LLM inference compiler\" AND \"tensor core bounds LLM inference compiler\"",
+  "\"TMA LLM inference compiler\" AND \"YiRage CUDA backend LLM inference compiler\""
+]

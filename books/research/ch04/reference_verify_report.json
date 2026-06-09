@@ -1,0 +1,238 @@
+{
+  "chapter_id": "ch04",
+  "chapter_title": "CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch04/keywords.json",
+  "keyword_count": 80,
+  "top_keywords": [
+    {
+      "term": "CUDA Hopper/Blackwell: hardware properties and optimization bounds",
+      "weight": 18
+    },
+    {
+      "term": "CUDA Hopper/Blackwell",
+      "weight": 17
+    },
+    {
+      "term": "cluster dsm",
+      "weight": 14
+    },
+    {
+      "term": "CUDA memory hierarchy",
+      "weight": 14
+    },
+    {
+      "term": "PTX",
+      "weight": 14
+    },
+    {
+      "term": "sync mechanisms",
+      "weight": 14
+    },
+    {
+      "term": "tensor core bounds",
+      "weight": 14
+    },
+    {
+      "term": "TMA",
+      "weight": 14
+    },
+    {
+      "term": "YiRage CUDA backend",
+      "weight": 14
+    },
+    {
+      "term": "cluster dsm LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "CUDA memory hierarchy LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "PTX LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "sync mechanisms LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "tensor core bounds LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "TMA LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage CUDA backend LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "AI compiler optimization",
+      "weight": 12
+    },
+    {
+      "term": "AI hardware architecture",
+      "weight": 12
+    },
+    {
+      "term": "decode latency LLM",
+      "weight": 12
+    },
+    {
+      "term": "memory bandwidth",
+      "weight": 12
+    },
+    {
+      "term": "PTX exp2",
+      "weight": 12
+    },
+    {
+      "term": "register shared memory",
+      "weight": 12
+    },
+    {
+      "term": "tensor core decode",
+      "weight": 12
+    },
+    {
+      "term": "TMA tensor memory",
+      "weight": 12
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 18,
+      "matched_keywords": [
+        "Hopper"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 36,
+      "matched_keywords": [
+        "TMA",
+        "tensor core"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 40,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 84,
+      "matched_keywords": [
+        "memory bandwidth",
+        "CUDA",
+        "decode",
+        "GPU",
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 9,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 9,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

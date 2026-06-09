@@ -1,0 +1,892 @@
+{
+  "chapter_id": "ch09",
+  "timestamp": "2026-06-10T02:45:35.417818",
+  "min_papers": 25,
+  "paper_count": 60,
+  "sentence_count": 271,
+  "binding_count": 216,
+  "papers": [
+    {
+      "bib_key": "zheng2023researchonclocksyn",
+      "title": "Research on clock synchronization technology of metering equipment based on satellite communication and wide area hierarchical aggregation",
+      "link": "https://doi.org/10.1109/acpee56931.2023.10135755",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 110,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "Guoquan Zheng, Enguo Zhu, et al. (2023). Research on clock synchronization technology of metering equipment based on satellite communication and wide area hierarchical aggregation. Retrieved from https://doi.org/10.1109/acpee56931.2023.10135755",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mahgoli2026ahierarchicalaidri",
+      "title": "A Hierarchical AI-Driven Hybrid Communication Framework for Underwater Swarm Coordination: Enabling Nanosecond Synchronization and Robust Cooperative MIMO Performance",
+      "link": "https://doi.org/10.1109/jiot.2026.3678823",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 110,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "Mandana Mahgoli, Ian F. Akyildiz, et al. (2026). A Hierarchical AI-Driven Hybrid Communication Framework for Underwater Swarm Coordination: Enabling Nanosecond Synchronization and Robust Cooperative MIMO Performance. Retrieved from https://doi.org/10.1109/jiot.2026.3678823",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "luo2025multisystemintegra",
+      "title": "Multisystem integration of hierarchical structures underlies individual variability in speech auditory-motor synchronization",
+      "link": "https://doi.org/10.22541/au.176216063.39254960/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "Lu Luo, Xiaoyu Zhang, Lingxi Lu (2025). Multisystem integration of hierarchical structures underlies individual variability in speech auditory-motor synchronization. Retrieved from https://doi.org/10.22541/au.176216063.39254960/v1",
+      "abstract": "Auditory-motor synchronization (AMS) reflects the dynamic coupling\nbetween perception and action. While individual variability in AMS has\nbeen linked to speech and language abilities, how it operates under the\ncomplex temporal structures of natural speech remains unclear. Here, we\nemployed a modified speech-to-speech synchronization paradigm, where\nparticipants synchronized their vocalizations with connected Chinese\nspeech containing syllable-, word-, and sentence-rate rhythms.\nSimultaneous measurements of vocal, ocular, and cardiac activity were\nconducted to capture the multisystem dynamics of speech AMS.\nSynchronization performance exhibited a robust bimodal distribution\namong native Chinese speakers. High synchronizers maintained stable\nsyllable-rate synchronization across conditions, w",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "petkoski2020normalizingthebrai",
+      "title": "Normalizing the brain connectome for communication through synchronization",
+      "link": "https://doi.org/10.1101/2020.12.02.408518",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "miss",
+        "synchronization"
+      ],
+      "reference": "S. Petkoski, V.K. Jirsa (2020). Normalizing the brain connectome for communication through synchronization. Retrieved from https://doi.org/10.1101/2020.12.02.408518",
+      "abstract": "ABSTRACT\nNetworks in neuroscience determine how brain function unfolds, and their perturbations lead to psychiatric disorders and brain disease. Brain networks are characterized by their connectomes, which comprise the totality of all connections, and are commonly described by graph theory. This approach is deeply rooted in a particle view of information processing, based on the quantification of informational bits such as firing rates. Oscillations and brain rhythms demand, however, a wave perspective of information processing based on synchronization. We extend traditional graph theory to a dual particle-wave-perspective, integrate time delays due to finite transmission speeds and derive a normalization of the connectome. When applied to the data base of the Human Connectome project, we ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018securecommunicatio",
+      "title": "Secure Communication Using Chaos Synchronization",
+      "link": "https://doi.org/10.1201/9781315218434-31",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": " (2018). Secure Communication Using Chaos Synchronization. Retrieved from https://doi.org/10.1201/9781315218434-31",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "luo2025hierarchicalsynchr",
+      "title": "Hierarchical Synchronization and Distortion Scaling in Social Media Networks: A Fractal-Like Topology Theory",
+      "link": "https://doi.org/10.2139/ssrn.5393226",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "Kaiming Luo (2025). Hierarchical Synchronization and Distortion Scaling in Social Media Networks: A Fractal-Like Topology Theory. Retrieved from https://doi.org/10.2139/ssrn.5393226",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "hunold2018hierarchicalclocks",
+      "title": "Hierarchical Clock Synchronization in MPI",
+      "link": "https://doi.org/10.1109/cluster.2018.00050",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "Sascha Hunold, Alexandra Carpen-Amarie (2018). Hierarchical Clock Synchronization in MPI. Retrieved from https://doi.org/10.1109/cluster.2018.00050",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "klimov2018featuresofsynchron",
+      "title": "FEATURES OF SYNCHRONIZATION IN WIRELESS COMMUNICATION NETWORKS",
+      "link": "https://doi.org/10.1109/synchroinfo.2018.8457055",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": "D. A. Klimov (2018). FEATURES OF SYNCHRONIZATION IN WIRELESS COMMUNICATION NETWORKS. Retrieved from https://doi.org/10.1109/synchroinfo.2018.8457055",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "argyriou2020secrecyinwirelessc",
+      "title": "Secrecy in wireless communication through closed-loop receiver de-synchronization",
+      "link": "https://doi.org/10.1016/j.phycom.2020.101195",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": "Antonios Argyriou (2020). Secrecy in wireless communication through closed-loop receiver de-synchronization. Retrieved from https://doi.org/10.1016/j.phycom.2020.101195",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wiesner2024timesynchronizatio",
+      "title": "Time Synchronization Extension for the IO-Link Industrial Communication Protocol",
+      "link": "https://doi.org/10.1109/ispcs63021.2024.10747727",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": "András Wiesner, Péter Kaszás, et al. (2024). Time Synchronization Extension for the IO-Link Industrial Communication Protocol. Retrieved from https://doi.org/10.1109/ispcs63021.2024.10747727",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2022synchronizationand",
+      "title": "Synchronization and Communication Primitives",
+      "link": "https://doi.org/10.1017/9781009071314.005",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": " (2022). Synchronization and Communication Primitives. Retrieved from https://doi.org/10.1017/9781009071314.005",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kim2025hierarchicalreinfo",
+      "title": "Hierarchical Reinforcement Learning with Optimal Level Synchronization Based on Flow-Based Deep Generative Model",
+      "link": "https://doi.org/10.2139/ssrn.5171122",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ],
+      "reference": "JaeYoon Kim, Junyu Xuan, et al. (2025). Hierarchical Reinforcement Learning with Optimal Level Synchronization Based on Flow-Based Deep Generative Model. Retrieved from https://doi.org/10.2139/ssrn.5171122",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "he2026physicallayersecur",
+      "title": "Physical layer security strategy for network time synchronization message transmission",
+      "link": "https://doi.org/10.1016/j.phycom.2026.103142",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "miss",
+        "synchronization"
+      ],
+      "reference": "Ting He (2026). Physical layer security strategy for network time synchronization message transmission. Retrieved from https://doi.org/10.1016/j.phycom.2026.103142",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "volgushev2024integratedcommunic",
+      "title": "Integrated Communication, Localization, Sensing and Synchronization in 6G Cognitive Wireless Networks",
+      "link": "https://doi.org/10.1109/synchroinfo61835.2024.10617616",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": "Dmitriy Volgushev, Grigoriy Fokin (2024). Integrated Communication, Localization, Sensing and Synchronization in 6G Cognitive Wireless Networks. Retrieved from https://doi.org/10.1109/synchroinfo61835.2024.10617616",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon20212021ieeeinternatio",
+      "title": "2021 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "link": "https://doi.org/10.1109/ispcs49990.2021",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": " (2021). 2021 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS). Retrieved from https://doi.org/10.1109/ispcs49990.2021",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon20242024ieeeinternatio",
+      "title": "2024 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "link": "https://doi.org/10.1109/ispcs63021.2024",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ],
+      "reference": " (2024). 2024 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS). Retrieved from https://doi.org/10.1109/ispcs63021.2024",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dantas2026subconscioussyncah",
+      "title": "Subconscious  Sync: A  Human–AI Co-Resonance Framework",
+      "link": "https://doi.org/10.22541/au.176790595.54063698/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "NPU",
+        "sync",
+        "surface",
+        "synchronization"
+      ],
+      "reference": "Jairdan Dantas (2026). Subconscious  Sync: A  Human–AI Co-Resonance Framework. Retrieved from https://doi.org/10.22541/au.176790595.54063698/v1",
+      "abstract": "\n                  Current human–AI interaction  paradigms are largely dominated by surface-level prompt engineering,  emphasizing explicit instruction while underutilizing deeper cognitive signal  structures that guide human reasoning. This limitation constrains the emergence  of higher-order insight, particularly in domains requiring intuition, symbolic  interpretation, and strategic synthesis. This paper introduces\n                  Subconscious  Sync\n                  , a human–AI co-resonance framework that models how latent cognitive  intent—expressed through symbolic, emotional, and contextual signals—can be  coherently aligned with large language model inference processes to produce  emergent insight beyond linear prompting.\n                \n\n                  Subconscious Sync pro",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018clocksynchronizati",
+      "title": "Clock Synchronization in Distributed Systems",
+      "link": "https://doi.org/10.1201/9781315218434-26",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": " (2018). Clock Synchronization in Distributed Systems. Retrieved from https://doi.org/10.1201/9781315218434-26",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "blommaert2020commentarychronoto",
+      "title": "Commentary: Chronotopes, synchronization and formats",
+      "link": "https://doi.org/10.1016/j.langcom.2019.04.002",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "Jan Blommaert (2020). Commentary: Chronotopes, synchronization and formats. Retrieved from https://doi.org/10.1016/j.langcom.2019.04.002",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mkacher2018securetimesynchron",
+      "title": "Secure Time Synchronization Protocol",
+      "link": "https://doi.org/10.1109/ispcs.2018.8543077",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "Faten Mkacher, Xavier Bestel, Andrzej Duda (2018). Secure Time Synchronization Protocol. Retrieved from https://doi.org/10.1109/ispcs.2018.8543077",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2019synchronization",
+      "title": "SYNCHRONIZATION",
+      "link": "https://doi.org/10.1002/9781119598138.ch7",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": " (2019). SYNCHRONIZATION. Retrieved from https://doi.org/10.1002/9781119598138.ch7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wiesner2025timesynchronizatio",
+      "title": "Time Synchronization Performance of Single-Pair Ethernet (SPE) Solutions",
+      "link": "https://doi.org/10.1109/ispcs66324.2025.11281755",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "András Wiesner, Tamás Kovácsházy (2025). Time Synchronization Performance of Single-Pair Ethernet (SPE) Solutions. Retrieved from https://doi.org/10.1109/ispcs66324.2025.11281755",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "coleman2021multicoreintraproc",
+      "title": "Multi-Core Intra-Process Clock Synchronization",
+      "link": "https://doi.org/10.1109/ispcs49990.2021.9615343",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "James Coleman, Clark Newman, Yann-Hang Lee (2021). Multi-Core Intra-Process Clock Synchronization. Retrieved from https://doi.org/10.1109/ispcs49990.2021.9615343",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "luo2018ahighreliabilitysu",
+      "title": "A High-Reliability Sub-Nanosecond Network Time Synchronization Method Enabled by Double-Frequency Distributed Time Synchronization",
+      "link": "https://doi.org/10.1364/ofc.2018.m2e.6",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "Ruijie Luo, Nan Hua, et al. (2018). A High-Reliability Sub-Nanosecond Network Time Synchronization Method Enabled by Double-Frequency Distributed Time Synchronization. Retrieved from https://doi.org/10.1364/ofc.2018.m2e.6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "louadj2021howtosynchronizean",
+      "title": "How to synchronize an out of sync system?",
+      "link": "https://doi.org/10.36227/techrxiv.16685629",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "constraints",
+        "synchronization"
+      ],
+      "reference": "Kahina Louadj, Philippe Marthon (2021). How to synchronize an out of sync system?. Retrieved from https://doi.org/10.36227/techrxiv.16685629",
+      "abstract": "Synchronization with other machines is one of those tasks that an intelligent machine should be able to perform. To do so, a general method of synchronization must be defined and that is the ambition of this article. For this purpose, we recall what the main concepts of systemic modelling consist of. Then we define what a Synchronization Problem is and distinguish three types of synchronization problems :  predetermined (PSP), stochastic (SSP) and  asymptotic (ASP). So, to find the best solution, we define three optimized synchronization problems : Optimized Predetermined Synchronization Problems , Optimized Stochastic Synchronization Problems (OSSP) and Optimized Asymptotic Synchronization Problems (OASP). A general method for solving an optimized synchronization problem and thus synchron",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "grunichev2018analysisoftimeforh",
+      "title": "Analysis of time for hierarchical distributed updating of location information of subscribers in next-generation mobile communication networks",
+      "link": "https://doi.org/10.1109/synchroinfo.2018.8457042",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "communication",
+        "hierarchical"
+      ],
+      "reference": "Yu. A. Grunichev, A. V. Kozinets, Yu. A. Vorontsov (2018). Analysis of time for hierarchical distributed updating of location information of subscribers in next-generation mobile communication networks. Retrieved from https://doi.org/10.1109/synchroinfo.2018.8457042",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "francesco2025similsynclinearsyn",
+      "title": "Simil Sync/Linear Sync",
+      "link": "https://doi.org/10.47476/jat.v8i2.2025.360",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ],
+      "reference": "Valentina Di Francesco, Angela Sileo (2025). Simil Sync/Linear Sync. Retrieved from https://doi.org/10.47476/jat.v8i2.2025.360",
+      "abstract": "This paper examines the emergence and evolution of simil sync in the Italian audiovisual sector, which originated in the mid-2000s as a spontaneous adaptation of voiceover techniques for non-scripted genres on thematic channels and OTT platforms. It traces changes in terminology, technical development, and recognition within the industry, also influenced by National Collective Labor Agreements (CCNLs). The study surveys Italian TV genres that shaped adaptation styles and examines the shifting role of non-automated adaptors and dubbing actors amid growing AI integration. Given the status of simil sync as a low-quality adaptation and niche modality, the concluding section explores potential future scenarios, with particular attention to the impact of AI-driven tools. Three video editing plat",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yan2024insyncoroutofsyncu",
+      "title": "In Sync or Out of Sync? Understanding Stress and Learning Performance in Collaborative Healthcare Simulations through Physiological Synchrony and Arousal",
+      "link": "https://doi.org/10.21203/rs.3.rs-4855446/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "sync",
+        "ship"
+      ],
+      "reference": "Lixiang Yan, Dragan Gašević, et al. (2024). In Sync or Out of Sync? Understanding Stress and Learning Performance in Collaborative Healthcare Simulations through Physiological Synchrony and Arousal. Retrieved from https://doi.org/10.21203/rs.3.rs-4855446/v1",
+      "abstract": "Abstract\nPhysiological synchrony and arousal are increasingly utilised to understand students' affective and cognitive states, such as stress, which can influence their learning performance and satisfaction in collaborative settings. However, it remains uncertain whether these physiological indicators can meaningfully reflect students' stress and learning performance during embodied collaborative learning (ECL). With advancements in sensing technologies, AI, and multimodal learning analytics (MMLA), it is now possible to model learners' affective and physiological states in such dynamic and physically active settings. This study investigates the role of physiological synchrony and arousal as indicators of stress and learning performance in ECL using a mixed-method approach. We first develo",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jordheim2022insyncoutofsync",
+      "title": "In sync/Out of sync",
+      "link": "https://doi.org/10.5040/9781350168640.ch-004",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Helge Jordheim (2022). In sync/Out of sync. Retrieved from https://doi.org/10.5040/9781350168640.ch-004",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022syncandswarm",
+      "title": "Sync and Swarm",
+      "link": "https://doi.org/10.5040/9781501368875.ch-006",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2022). Sync and Swarm. Retrieved from https://doi.org/10.5040/9781501368875.ch-006",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023lipsyncv",
+      "title": "lip-sync, v.",
+      "link": "https://doi.org/10.1093/oed/9981775454",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2023). lip-sync, v.. Retrieved from https://doi.org/10.1093/oed/9981775454",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pickett2026pdfdescargarsyncam",
+      "title": "{pdf descargar} SYNC &amp; SAVOR",
+      "link": "https://doi.org/10.55277/researchhub.t7ijuut8.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Donald Pickett (2026). {pdf descargar} SYNC &amp; SAVOR. Retrieved from https://doi.org/10.55277/researchhub.t7ijuut8.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023postsyncv",
+      "title": "post-sync, v.",
+      "link": "https://doi.org/10.1093/oed/5625175798",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2023). post-sync, v.. Retrieved from https://doi.org/10.1093/oed/5625175798",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023lipsyncn",
+      "title": "lip-sync, n.",
+      "link": "https://doi.org/10.1093/oed/1400839165",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2023). lip-sync, n.. Retrieved from https://doi.org/10.1093/oed/1400839165",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023syncnampv",
+      "title": "sync, n. &amp; v.",
+      "link": "https://doi.org/10.1093/oed/1064346832",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2023). sync, n. &amp; v.. Retrieved from https://doi.org/10.1093/oed/1064346832",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hu2021plisyncprefetchlos",
+      "title": "PLI-Sync: Prefetch Loss-Insensitive Sync for NDN Group Streaming",
+      "link": "https://doi.org/10.1109/icc42927.2021.9500452",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Yi Hu, Constantin Serban, et al. (2021). PLI-Sync: Prefetch Loss-Insensitive Sync for NDN Group Streaming. Retrieved from https://doi.org/10.1109/icc42927.2021.9500452",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "delforge2025correctiontoinsync",
+      "title": "Correction to: In sync or out of sync?",
+      "link": "https://doi.org/10.1007/s12471-025-01929-4",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Benoît Delforge, Lukas Spruyt, Becker S. N. Alzand (2025). Correction to: In sync or out of sync?. Retrieved from https://doi.org/10.1007/s12471-025-01929-4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023postsyncnampadj",
+      "title": "post-sync, n. &amp; adj.",
+      "link": "https://doi.org/10.1093/oed/4764826243",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2023). post-sync, n. &amp; adj.. Retrieved from https://doi.org/10.1093/oed/4764826243",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "delforge2025insyncoroutofsync",
+      "title": "In sync or out of sync?",
+      "link": "https://doi.org/10.1007/s12471-024-01918-z",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Benoît Delforge, Lukas Spruyt, Becker S. N. Alzand (2025). In sync or out of sync?. Retrieved from https://doi.org/10.1007/s12471-024-01918-z",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sviridov2018tosyncornottosyncw",
+      "title": "To Sync or Not to Sync: Why Asynchronous Traffic Control Is Good Enough for Your Data Center",
+      "link": "https://doi.org/10.1109/glocom.2018.8647692",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "German Sviridov, Andrea Bianco, Paolo Giaccone (2018). To Sync or Not to Sync: Why Asynchronous Traffic Control Is Good Enough for Your Data Center. Retrieved from https://doi.org/10.1109/glocom.2018.8647692",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rowlands2020syncspeed",
+      "title": "Sync Speed",
+      "link": "https://doi.org/10.1117/3.2542355.ch107",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "D. Andrew Rowlands (2020). Sync Speed. Retrieved from https://doi.org/10.1117/3.2542355.ch107",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "johnshoy2020tosyncornottosynct",
+      "title": "To Sync or Not to Sync, That is the Question: Choosing Between Synchronous and Asynchronous Modes in Remote and Online Language Teaching",
+      "link": "https://doi.org/10.69732/qrhg6110",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Marlene Johnshoy, Shannon Spasova (2020). To Sync or Not to Sync, That is the Question: Choosing Between Synchronous and Asynchronous Modes in Remote and Online Language Teaching. Retrieved from https://doi.org/10.69732/qrhg6110",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "bhagat2025routesyncaunifiede",
+      "title": "Route-Sync: A Unified Experience",
+      "link": "https://doi.org/10.55248/gengpi.6.0125.0653",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Rahul Bhagat, Kanhaiya Verma, et al. (2025). Route-Sync: A Unified Experience. Retrieved from https://doi.org/10.55248/gengpi.6.0125.0653",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2025outgunningmcrpcwit",
+      "title": "Outgunning mCRPC with SYNC-T",
+      "link": "https://doi.org/10.1158/2159-8290.cd-nw2025-0053",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": " (2025). Outgunning mCRPC with SYNC-T. Retrieved from https://doi.org/10.1158/2159-8290.cd-nw2025-0053",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gasparini2022coralpolypsdancens",
+      "title": "Coral Polyps Dance ’n Sync",
+      "link": "https://doi.org/10.1103/physics.15.s112",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Allison Gasparini (2022). Coral Polyps Dance ’n Sync. Retrieved from https://doi.org/10.1103/physics.15.s112",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "nakada2024lipsyncmlmachinele",
+      "title": "Lip-Sync ML: Machine Learning-based Framework to Generate Lip-sync Animations in FINAL FANTASY VII REBIRTH",
+      "link": "https://doi.org/10.1145/3641233.3664723",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ],
+      "reference": "Masato Nakada, Leandro Graciá Gil, et al. (2024). Lip-Sync ML: Machine Learning-based Framework to Generate Lip-sync Animations in FINAL FANTASY VII REBIRTH. Retrieved from https://doi.org/10.1145/3641233.3664723",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 29,
+    "B": 29,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:39.156868"
+}

@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "tvm_hw_matrix",
       "label": "fig:tvm_hw_matrix_pipeline",
-      "caption": "Tvm Hw Matrix optimization pipeline in TVM and Apache TVM Stack.",
+      "caption": "Tvm HW Matrix optimization pipeline in TVM and Apache TVM Stack.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Tvm Hw Matrix"
+          "detail": "Tvm HW Matrix"
         },
         {
           "name": "On-chip",

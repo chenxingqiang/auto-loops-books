@@ -10,8 +10,8 @@
 \usepackage{zref-abspage}
 \setcounter{secnumdepth}{3}
 
-\usepackage[vcentering,dvips]{geometry}
-\geometry{papersize={7in,9in},bottom=3pc,top=5pc,left=5pc,right=5pc,bmargin=4.5pc,footskip=18pt,headsep=25pt}
+\usepackage[vcentering,pdftex]{geometry}
+\geometry{papersize={\bookpaperwidth,\bookpaperheight},bottom=3pc,top=5pc,left=5pc,right=5pc,bmargin=4.5pc,footskip=18pt,headsep=25pt}
 
 \usepackage{epsfig}
 \usepackage{subfigure}
@@ -37,6 +37,8 @@
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}

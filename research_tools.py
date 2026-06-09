@@ -9,10 +9,14 @@ Keywords are derived automatically from:
 
 Results are saved under books/research/<chapter_id>/ with no hard cap on paper count.
 
+Per-chapter citation loop (>=25 papers, sentence bindings): see citation_loop.py
+
 Usage:
     uv run research_tools.py --chapter ch01
     uv run research_tools.py --all
     uv run research_tools.py --chapter ch01 --dry-run
+    uv run research_tools.py --verify-references --all
+    uv run book-loop verify-references --all
 """
 
 from __future__ import annotations
@@ -30,13 +34,14 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-from book_prepare import OUTLINE, ChapterSpec
+from book_prepare import OUTLINE, ChapterSpec, read_chapter_text
 
 ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
-CHAPTERS = BOOKS / "chapters"
 RESEARCH_ROOT = BOOKS / "research"
+BIB_PATH = BOOKS / "book.bib"
 OUTLINE_MD = ROOT / "AI Compiler Performance Engineering.md"
+DEFAULT_MIN_CITATION_SCORE = 8
 
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 CROSSREF_EMAIL = os.environ.get("CROSSREF_EMAIL", "research@autobooks.local")
@@ -316,23 +321,390 @@ def format_reference(paper: dict) -> str:
     return reference
 
 
+def text_matches_keyword(text: str, keyword: str) -> bool:
+    text_l = text.lower()
+    kw_l = keyword.lower().strip()
+    if not kw_l or not text_l:
+        return False
+    if kw_l in text_l:
+        return True
+    parts = [p for p in re.split(r"[\s/+\-|]+", kw_l) if len(p) >= 3]
+    if len(parts) >= 2:
+        return all(p in text_l for p in parts)
+    return False
+
+
 def analyze_relevance(paper: dict, keywords: list[tuple[str, int]]) -> tuple[int, list[str]]:
-    title = paper.get("title", "").lower()
-    abstract = paper.get("abstract", paper.get("snippet", "")).lower()
+    title = paper.get("title", "")
+    abstract = paper.get("abstract", paper.get("snippet", ""))
+    blob = f"{title} {abstract}"
 
     score = 0
     matched: list[str] = []
+    seen: set[str] = set()
 
     for keyword, weight in keywords:
-        kw = keyword.lower()
-        if kw in title:
+        if keyword in seen:
+            continue
+        if text_matches_keyword(title, keyword):
             score += weight * 2
             matched.append(keyword)
-        elif kw in abstract:
+            seen.add(keyword)
+        elif text_matches_keyword(blob, keyword):
             score += weight
             matched.append(keyword)
+            seen.add(keyword)
 
     return score, matched
+
+
+# Source tiers — aligned with program_books.md / FACT_VERIFICATION.md
+TIER_A_URL_RE = re.compile(
+    r"(?:arxiv\.org|openreview\.net|"
+    r"doi\.org/10\.1145|doi\.org/10\.1109|"
+    r"proceedings\.mlr\.press|proceedings\.neurips\.|"
+    r"papers\.nips\.cc|"
+    r"nvidia\.com|amd\.com|intel\.com|"
+    r"usenix\.org|openai\.com|mlsys\.org|"
+    r"dl\.acm\.org|ieeexplore\.ieee\.org)",
+    re.IGNORECASE,
+)
+TIER_B_URL_RE = re.compile(
+    r"(?:github\.com|pytorch\.org|tensorflow\.org|"
+    r"semianalysis\.com|developer\.nvidia\.com/blog|"
+    r"doi\.org/10\.36227|techrxiv)",
+    re.IGNORECASE,
+)
+TIER_C_URL_RE = re.compile(
+    r"(?:ssrn\.com|researchsquare\.com|researchgate\.net|"
+    r"reddit\.com|quora\.com|"
+    r"doi\.org/10\.2139|doi\.org/10\.52783|"
+    r"egusphere-|123mi\.com|jisem\.|"
+    r"researchsquare|figshare\.com/articles)",
+    re.IGNORECASE,
+)
+
+BINDING_GENERIC_KEYWORDS = frozenset(
+    """
+    their because often using based through within other these those which where when
+    also only more such than into over under between among each some very much many
+    about across without with from this that will can may step work make made like
+    just even still well their because
+    """.split()
+)
+
+
+def classify_source_tier(paper: dict, *, bib_key: str | None = None) -> str:
+    """Return A (primary), B (artifact/blog), or C (weak/forum-like)."""
+    if paper.get("source") == "book.bib":
+        return "A"
+    if bib_key and BIB_PATH.exists():
+        if bib_key in parse_bib_entries(BIB_PATH):
+            return "A"
+
+    link = (paper.get("link") or "").strip()
+    title = (paper.get("title") or "").lower()
+    blob = f"{link} {title}".lower()
+
+    if link and TIER_C_URL_RE.search(link):
+        return "C"
+    if link and TIER_A_URL_RE.search(link):
+        return "A"
+    if link and TIER_B_URL_RE.search(link):
+        return "B"
+
+    if "arxiv" in blob or "openreview" in blob:
+        return "A"
+    if "nvidia" in blob or "amd xdna" in blob or "hopper" in title:
+        return "A"
+
+    venue = ""
+    pub = paper.get("publication_info") or {}
+    if isinstance(pub, dict):
+        venue = (pub.get("summary") or pub.get("publisher") or "").lower()
+    if any(v in venue for v in ("neurips", "icml", "iclr", "osdi", "asplos", "sosp", "mlsys")):
+        return "A"
+    if "github" in blob:
+        return "B"
+    if link.startswith("https://doi.org/"):
+        return "B"
+    if not link:
+        return "C"
+    return "B"
+
+
+def effective_binding_keywords(matched: list[str] | None) -> list[str]:
+    if not matched:
+        return []
+    out: list[str] = []
+    for kw in matched:
+        k = kw.lower().strip()
+        if len(k) < 3 or k in BINDING_GENERIC_KEYWORDS:
+            continue
+        out.append(kw)
+    return out
+
+
+def binding_passes_quality(
+    binding: dict,
+    *,
+    min_score: int,
+    min_keywords: int,
+    tier_a_only: bool = False,
+) -> tuple[bool, str]:
+    score = binding.get("relevance_score", 0)
+    if score < min_score:
+        return False, f"score {score} < {min_score}"
+    effective = effective_binding_keywords(binding.get("matched_keywords"))
+    if len(effective) < min_keywords:
+        if len(effective) >= 1 and score >= 16:
+            pass
+        else:
+            return False, f"effective_keywords {len(effective)} < {min_keywords}"
+    tier = binding.get("source_tier", "B")
+    if tier_a_only and tier != "A":
+        return False, f"tier {tier} != A"
+    return True, "ok"
+
+
+def generate_auto_seeds(spec: ChapterSpec) -> list[tuple[str, int]]:
+    """Content-derived Scholar seeds for any chapter (ch04–ch27 and beyond)."""
+    seeds: list[tuple[str, int]] = []
+    title_short = re.sub(r":.*", "", spec.title).strip()
+    if title_short:
+        seeds.append((title_short, 17))
+
+    for section in spec.sections:
+        label = section.label.replace("_", " ")
+        seeds.append((f"{label} LLM inference compiler", 13))
+        pats = [humanize_pattern(p) for p in section.patterns if humanize_pattern(p)]
+        if len(pats) >= 2:
+            seeds.append((f"{pats[0]} {pats[1]}", 12))
+        elif pats:
+            seeds.append((pats[0], 11))
+
+    ch_num = chapter_number(spec.chapter_id)
+    for bullet in extract_outline_bullets(ch_num)[:5]:
+        for eng in re.findall(
+            r"[A-Za-z][A-Za-z0-9./+\-]{1,}(?:\s+[A-Za-z][A-Za-z0-9./+\-]{1,})*",
+            bullet,
+        )[:2]:
+            seeds.append((eng.strip(), 11))
+
+    return seeds
+
+
+def extract_bib_field(block: str, field: str) -> str | None:
+    m = re.search(rf"{field}\s*=\s*\{{", block, flags=re.IGNORECASE)
+    if not m:
+        return None
+    i = m.end()
+    depth = 1
+    start = i
+    while i < len(block) and depth:
+        ch = block[i]
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+        i += 1
+    val = block[start : i - 1]
+    val = re.sub(r"\\url\{([^}]*)\}", r"\1", val)
+    val = re.sub(r"\{([^{}]*)\}", r"\1", val)
+    return val.strip()
+
+
+def parse_bib_entries(path: Path = BIB_PATH) -> dict[str, dict[str, str]]:
+    if not path.exists():
+        return {}
+    text = path.read_text(encoding="utf-8")
+    entries: dict[str, dict[str, str]] = {}
+    for m in re.finditer(r"^@\w+\{([^,\s]+),", text, re.MULTILINE):
+        key = m.group(1)
+        start = m.end()
+        next_m = re.search(r"^@\w+\{", text[start:], re.MULTILINE)
+        block_end = start + next_m.start() if next_m else len(text)
+        block = text[m.start() : block_end]
+        entry: dict[str, str] = {"key": key}
+        for field in (
+            "title",
+            "author",
+            "journal",
+            "booktitle",
+            "year",
+            "note",
+            "howpublished",
+        ):
+            val = extract_bib_field(block, field)
+            if val:
+                entry[field] = val
+        entries[key] = entry
+    return entries
+
+
+def extract_cite_keys(text: str) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for group in re.findall(r"\\cite[tp]?\{([^}]+)\}", text):
+        for key in group.split(","):
+            key = key.strip()
+            if key and key not in seen:
+                seen.add(key)
+                keys.append(key)
+    return keys
+
+
+def bib_entry_text(entry: dict[str, str]) -> str:
+    key = entry.get("key", "")
+    key_tokens = " ".join(re.findall(r"[a-z]{3,}", key.lower()))
+    parts = [
+        key_tokens,
+        entry.get("title", ""),
+        entry.get("author", ""),
+        entry.get("journal", ""),
+        entry.get("booktitle", ""),
+        entry.get("note", ""),
+        entry.get("howpublished", ""),
+    ]
+    return " ".join(p for p in parts if p)
+
+
+def persist_keywords(spec: ChapterSpec, keywords: list[tuple[str, int]]) -> Path:
+    out_dir = RESEARCH_ROOT / spec.chapter_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / "keywords.json"
+    path.write_text(
+        json.dumps([{"term": k, "weight": w} for k, w in keywords], indent=2),
+        encoding="utf-8",
+    )
+    return path
+
+
+def verify_chapter_references(
+    spec: ChapterSpec,
+    *,
+    min_citation_score: int = DEFAULT_MIN_CITATION_SCORE,
+) -> dict:
+    """Score book.bib citations against content-locked keywords (matched_keywords)."""
+    tex = read_chapter_text(spec)
+    keywords = extract_chapter_keywords(spec)
+    queries = generate_chapter_queries(spec, keywords)
+    kw_path = persist_keywords(spec, keywords)
+    (RESEARCH_ROOT / spec.chapter_id / "queries.json").write_text(
+        json.dumps(queries, indent=2), encoding="utf-8"
+    )
+
+    bib = parse_bib_entries()
+    cite_keys = extract_cite_keys(tex)
+    citations: list[dict] = []
+    low_relevance: list[dict] = []
+    missing_bib: list[str] = []
+
+    for key in cite_keys:
+        entry = bib.get(key)
+        if not entry:
+            missing_bib.append(key)
+            citations.append(
+                {
+                    "key": key,
+                    "status": "missing_bib",
+                    "score": 0,
+                    "matched_keywords": [],
+                }
+            )
+            continue
+
+        paper = {
+            "title": entry.get("title", ""),
+            "abstract": bib_entry_text(entry),
+            "snippet": bib_entry_text(entry),
+        }
+        score, matched = analyze_relevance(paper, keywords)
+        status = (
+            "ok"
+            if matched or score >= min_citation_score
+            else "low_relevance"
+        )
+        rec = {
+            "key": key,
+            "title": entry.get("title", ""),
+            "score": score,
+            "matched_keywords": matched,
+            "status": status,
+        }
+        citations.append(rec)
+        if status != "ok":
+            low_relevance.append(rec)
+
+    literature_rescore: list[dict] = []
+    search_path = RESEARCH_ROOT / spec.chapter_id / "search_data.json"
+    if search_path.exists():
+        data = json.loads(search_path.read_text(encoding="utf-8"))
+        for paper in data.get("papers", [])[:25]:
+            score, matched = analyze_relevance(
+                {
+                    "title": paper.get("title", ""),
+                    "abstract": paper.get("abstract", ""),
+                    "snippet": paper.get("abstract", ""),
+                },
+                keywords,
+            )
+            literature_rescore.append(
+                {
+                    "title": paper.get("title"),
+                    "relevance_score": score,
+                    "matched_keywords": matched,
+                    "link": paper.get("link"),
+                }
+            )
+        literature_rescore.sort(key=lambda x: x["relevance_score"], reverse=True)
+
+    status = "ok"
+    if missing_bib or low_relevance:
+        status = "warn"
+
+    report = {
+        "chapter_id": spec.chapter_id,
+        "chapter_title": spec.title,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "keywords_file": str(kw_path.relative_to(ROOT)),
+        "keyword_count": len(keywords),
+        "top_keywords": [{"term": k, "weight": w} for k, w in keywords[:24]],
+        "citation_count": len(cite_keys),
+        "citations": citations,
+        "low_relevance_citations": low_relevance,
+        "missing_bib_keys": missing_bib,
+        "literature_rescore": literature_rescore[:15],
+        "status": status,
+        "min_citation_score": min_citation_score,
+    }
+
+    out_path = RESEARCH_ROOT / spec.chapter_id / "reference_verify_report.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    return report
+
+
+def reference_verify_tasks(chapter_id: str) -> list[str]:
+    path = RESEARCH_ROOT / chapter_id / "reference_verify_report.json"
+    if not path.exists():
+        return [f"Reference verify: run research_tools --verify-references for {chapter_id}"]
+    data = json.loads(path.read_text(encoding="utf-8"))
+    tasks: list[str] = []
+    for rec in data.get("low_relevance_citations", []):
+        mk = ", ".join(rec.get("matched_keywords") or []) or "none"
+        tasks.append(
+            f"Reference weak match `{rec.get('key')}` score={rec.get('score')} "
+            f"matched=[{mk}] — tighten prose or swap citation"
+        )
+    for key in data.get("missing_bib_keys", []):
+        tasks.append(f"Reference missing bib key `{key}` — add to book.bib")
+    if data.get("status") == "ok":
+        tasks.append(
+            f"References OK for {chapter_id}: {data.get('citation_count', 0)} cites "
+            f"vs {data.get('keyword_count', 0)} content keywords"
+        )
+    return tasks
 
 
 def chapter_number(chapter_id: str) -> int:
@@ -421,6 +793,9 @@ def extract_chapter_keywords(spec: ChapterSpec) -> list[tuple[str, int]]:
     for term, weight in CHAPTER_SEEDS.get(spec.chapter_id, []):
         add(term, weight)
 
+    for term, weight in generate_auto_seeds(spec):
+        add(term, weight)
+
     ch_num = chapter_number(spec.chapter_id)
     for bullet in extract_outline_bullets(ch_num):
         for eng in re.findall(
@@ -444,9 +819,8 @@ def extract_chapter_keywords(spec: ChapterSpec) -> list[tuple[str, int]]:
             if zh_term in bullet:
                 add(en_term, 12)
 
-    tex_path = CHAPTERS / spec.filename
-    if tex_path.exists():
-        tex = tex_path.read_text(encoding="utf-8")
+    tex = read_chapter_text(spec)
+    if tex:
         for term in extract_english_terms_from_text(tex):
             add(term, 9)
 
@@ -732,12 +1106,48 @@ def main() -> int:
         default=2.0,
         help="Seconds between paginated query requests",
     )
+    parser.add_argument(
+        "--verify-references",
+        action="store_true",
+        help="Score book.bib citations vs content-derived keywords (no SerpAPI)",
+    )
+    parser.add_argument(
+        "--min-citation-score",
+        type=int,
+        default=DEFAULT_MIN_CITATION_SCORE,
+        help="Min relevance score for a bib cite to pass reference verify",
+    )
     args = parser.parse_args()
 
     if not args.chapter and not args.all:
         parser.error("Specify --chapter <id> or --all")
 
     specs = resolve_specs(args.chapter if not args.all else None)
+
+    if args.verify_references:
+        print(f"Reference verify: {len(specs)} chapter(s)")
+        ok = warn = 0
+        for spec in specs:
+            report = verify_chapter_references(
+                spec, min_citation_score=args.min_citation_score
+            )
+            rel = (
+                RESEARCH_ROOT / spec.chapter_id / "reference_verify_report.json"
+            ).relative_to(ROOT)
+            flag = report["status"]
+            if flag == "ok":
+                ok += 1
+            else:
+                warn += 1
+            low = len(report.get("low_relevance_citations", []))
+            miss = len(report.get("missing_bib_keys", []))
+            print(
+                f"  {spec.chapter_id}: {flag} — {report['citation_count']} cites, "
+                f"{report['keyword_count']} keywords, low={low}, missing_bib={miss} -> {rel}"
+            )
+        print(f"\nSummary: {ok} ok, {warn} warn")
+        return 0 if warn == 0 else 1
+
     results = []
 
     for spec in specs:

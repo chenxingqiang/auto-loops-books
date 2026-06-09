@@ -1,0 +1,673 @@
+{
+  "chapter_id": "ch04",
+  "timestamp": "2026-06-10T02:45:12.587504",
+  "min_papers": 25,
+  "paper_count": 46,
+  "sentence_count": 237,
+  "binding_count": 183,
+  "papers": [
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "YiRage CUDA backend",
+        "YiRage CUDA",
+        "CUDA",
+        "YiRage",
+        "CPU",
+        "LLM"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "memory bandwidth",
+        "CUDA",
+        "decode",
+        "GPU",
+        "LLM"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "titov2026modificationsofthe",
+      "title": "Modifications of the ant colony matrix method for parametric optimization using CUDA-based GPUs",
+      "link": "https://doi.org/10.26089/nummet.v27r104",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 59,
+      "matched_keywords": [
+        "CUDA",
+        "warp",
+        "CPU",
+        "GPU"
+      ],
+      "reference": "Yurii P. Titov (2026). Modifications of the ant colony matrix method for parametric optimization using CUDA-based GPUs. Retrieved from https://doi.org/10.26089/nummet.v27r104",
+      "abstract": "This article focuses on the development and investigation of the matrix-based modifications of the Ant Colony Optimization (ACO) method for solving parametric optimization problems using CUDA-based Graphics Processing Units (GPUs). Unlike most existing studies focusing on the Traveling Salesman Problem (TSP), the proposed method is specialized for finding optimal values of independent parameters, which leads to a different graph structure and requires the development of novel parallelization schemes. Original parallelization strategies are proposed, including a three-stage decomposition of the algorithm and introduction of “parameter-level” parallelism in the problem dimensions. Various strategies for parallelization and memory management were developed and tested: from the basic MatrixACO",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "soyata2018understandinggpuha",
+      "title": "Understanding GPU Hardware Architecture",
+      "link": "https://doi.org/10.1201/9781315368290-8",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 42,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "GPU"
+      ],
+      "reference": "Tolga Soyata (2018). Understanding GPU Hardware Architecture. Retrieved from https://doi.org/10.1201/9781315368290-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lashgar2018teleporthardwareso",
+      "title": "TELEPORT: Hardware/software alternative to CUDA shared memory programming",
+      "link": "https://doi.org/10.1016/j.micpro.2018.09.004",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 42,
+      "matched_keywords": [
+        "CUDA",
+        "shared memory"
+      ],
+      "reference": "Ahmad Lashgar, Ehsan Atoofian, Amirali Baniasadi (2018). TELEPORT: Hardware/software alternative to CUDA shared memory programming. Retrieved from https://doi.org/10.1016/j.micpro.2018.09.004",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jaltare2025gpuprogrammingandh",
+      "title": "GPU Programming and High-Performance Computing Optimization: A CUDA-Based Research Perspective",
+      "link": "https://doi.org/10.36227/techrxiv.175427098.84903580/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "CUDA",
+        "GPU"
+      ],
+      "reference": "Abhas Ajay Jaltare, Anusha Raghavendra Pai (2025). GPU Programming and High-Performance Computing Optimization: A CUDA-Based Research Perspective. Retrieved from https://doi.org/10.36227/techrxiv.175427098.84903580/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "badawi2018highperformancefvs",
+      "title": "High-Performance FV Somewhat Homomorphic Encryption on GPUs: An Implementation using CUDA",
+      "link": "https://doi.org/10.46586/tches.v2018.i2.70-95",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "CUDA",
+        "GPU"
+      ],
+      "reference": "Ahmad Al Badawi, Bharadwaj Veeravalli, et al. (2018). High-Performance FV Somewhat Homomorphic Encryption on GPUs: An Implementation using CUDA. Retrieved from https://doi.org/10.46586/tches.v2018.i2.70-95",
+      "abstract": "Homomorphic encryption (HE) offers great capabilities that can solve a wide range of privacy-preserving computing problems. This tool allows anyone to process encrypted data producing encrypted results that only the decryption key’s owner can decrypt. Although HE has been realized in several public implementations, its performance is quite demanding. The reason for this is attributed to the huge amount of computation required by secure HE schemes. In this work, we present a CUDAbased implementation of the Fan and Vercauteren (FV) Somewhat HomomorphicEncryption (SHE) scheme. We demonstrate several algebraic tools such as the Chinese Remainder Theorem (CRT), Residual Number System (RNS) and Discrete Galois Transform (DGT) to accelerate and facilitate FV computation on GPUs. We also show how ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022introductiontogpuk",
+      "title": "Introduction to GPU Kernels and Hardware",
+      "link": "https://doi.org/10.1017/9781108855273.002",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "GPU",
+        "kernels"
+      ],
+      "reference": " (2022). Introduction to GPU Kernels and Hardware. Retrieved from https://doi.org/10.1017/9781108855273.002",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lyapustin2024realizationofparal",
+      "title": "REALIZATION OF PARALLEL COMPUTING ON THE BASIS OF THE CUDA HARDWARE-SOFTWARE STACK",
+      "link": "https://doi.org/10.36629/2686-7788-2024-1-47-55",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "CUDA"
+      ],
+      "reference": "Vyacheslav Lyapustin, Maksim Viktorovich Krivov (2024). REALIZATION OF PARALLEL COMPUTING ON THE BASIS OF THE CUDA HARDWARE-SOFTWARE STACK. Retrieved from https://doi.org/10.36629/2686-7788-2024-1-47-55",
+      "abstract": "This paper describes in detail the problems of implementing parallel computing based on the CUDA hardware and software stack. It provides a comprehensive analysis of the key aspects of using CUDA for parallel programming and data processing. The paper examines in detail the structure of the CUDA architecture, describes the programming model and the optimization process",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "capozzoli2020cudabasedparticles",
+      "title": "CUDA-Based Particle Swarm Optimization in Reflectarray Antenna Synthesis",
+      "link": "https://doi.org/10.7716/aem.v9i2.1389",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 31,
+      "matched_keywords": [
+        "CUDA",
+        "GPU"
+      ],
+      "reference": "A. Capozzoli, C. Curcio, A. Liseno (2020). CUDA-Based Particle Swarm Optimization in Reflectarray Antenna Synthesis. Retrieved from https://doi.org/10.7716/aem.v9i2.1389",
+      "abstract": "We show how reflectarray antenna synthesis can take profit from parallel computing on Graphics Processing Units (GPUs). The presented approach uses an implementation of Particle Swarm Optimization in CUDA language and accelerates the computation of the field radiated by the reflectarray using a GPU- mplemented Non-Uniform FFT routine. Numerical results show how computing time can be kept convenient for the application at hand.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ambrus2022sharedneuralcodeso",
+      "title": "Shared neural codes of recognition memory",
+      "link": "https://doi.org/10.1101/2022.12.20.520854",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "shared memory",
+        "here"
+      ],
+      "reference": "Géza Gergely Ambrus (2022). Shared neural codes of recognition memory. Retrieved from https://doi.org/10.1101/2022.12.20.520854",
+      "abstract": "Abstract\nRecognition memory research has identified several electrophysiological indicators of successful memory retrieval, known as old-new effects. These effects have been observed in different sensory domains using various stimulus types, but little attention has been given to their similarity or distinctiveness and the underlying processes they may share. Here, a data-driven approach was taken to investigate the temporal evolution of shared information content between different memory conditions using openly available EEG data from healthy human participants of both sexes, taken from six experiments. A test dataset involving personally highly familiar and unfamiliar faces was used. The results show that neural signals of recognition memory for face stimuli were highly generalized start",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "huang2024sharedstructurefac",
+      "title": "Shared structure facilitates working memory of multiple sequences",
+      "link": "https://doi.org/10.7554/elife.93158.2",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "shared memory",
+        "here"
+      ],
+      "reference": "Qiaoli Huang, Huan Luo (2024). Shared structure facilitates working memory of multiple sequences. Retrieved from https://doi.org/10.7554/elife.93158.2",
+      "abstract": "Abstract\nDaily experiences often involve the processing of multiple sequences, yet storing them challenges the limited capacity of working memory (WM). To achieve efficient memory storage, relational structures shared by sequences would be leveraged to reorganize and compress information. Here, participants memorized a sequence of items with different colors and spatial locations and later reproduced the full color and location sequences one after another. Crucially, we manipulated the consistency between location and color sequence trajectories. First, sequences with consistent trajectories demonstrate improved memory performance and a trajectory correlation between reproduced color and location sequences. Second, sequences with consistent trajectories show neural reactivation of common t",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "tensor core"
+      ],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kim2019translatingcudatoo",
+      "title": "Translating CUDA to OpenCL for Hardware Generation using Neural Machine Translation",
+      "link": "https://doi.org/10.1109/cgo.2019.8661172",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Yonghae Kim, Hyesoon Kim (2019). Translating CUDA to OpenCL for Hardware Generation using Neural Machine Translation. Retrieved from https://doi.org/10.1109/cgo.2019.8661172",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "oikawa2023basicsofcuda",
+      "title": "Basics of CUDA",
+      "link": "https://doi.org/10.1007/978-981-99-1938-3_5",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Minoru Oikawa (2023). Basics of CUDA. Retrieved from https://doi.org/10.1007/978-981-99-1938-3_5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "park2021sourceleveltransla",
+      "title": "Source-level Translation of OpenMP Device Constructs to CUDA and Runtime Optimization Methods",
+      "link": "https://doi.org/10.5626/ktcp.2021.27.2.110",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Daeyoung Park, Jaejin Lee (2021). Source-level Translation of OpenMP Device Constructs to CUDA and Runtime Optimization Methods. Retrieved from https://doi.org/10.5626/ktcp.2021.27.2.110",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "breyer2022acomparisonofsyclo",
+      "title": "A Comparison of SYCL, OpenCL, CUDA, and OpenMP for Massively Parallel Support Vector Machine Classification on Multi-Vendor Hardware",
+      "link": "https://doi.org/10.1145/3529538.3529980",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Marcel Breyer, Alexander Van Craen, Dirk Pflüger (2022). A Comparison of SYCL, OpenCL, CUDA, and OpenMP for Massively Parallel Support Vector Machine Classification on Multi-Vendor Hardware. Retrieved from https://doi.org/10.1145/3529538.3529980",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ma2018aparallelmultiswar",
+      "title": "A Parallel Multi-swarm Particle Swarm Optimization Algorithm Based on CUDA Streams",
+      "link": "https://doi.org/10.1109/cac.2018.8623595",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Xuan Ma, Wencheng Han (2018). A Parallel Multi-swarm Particle Swarm Optimization Algorithm Based on CUDA Streams. Retrieved from https://doi.org/10.1109/cac.2018.8623595",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ruetsch2024interfacingwithcud",
+      "title": "Interfacing with CUDA C code and CUDA libraries",
+      "link": "https://doi.org/10.1016/b978-0-44-321977-1.00016-4",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "Gregory Ruetsch, Massimiliano Fatica (2024). Interfacing with CUDA C code and CUDA libraries. Retrieved from https://doi.org/10.1016/b978-0-44-321977-1.00016-4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018understandingshare",
+      "title": "Understanding Shared‐Bus and Shared‐Memory Switch Fabrics",
+      "link": "https://doi.org/10.1002/9781119486220.ch2",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": " (2018). Understanding Shared‐Bus and Shared‐Memory Switch Fabrics. Retrieved from https://doi.org/10.1002/9781119486220.ch2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018sharedbusandshared",
+      "title": "Shared‐Bus and Shared‐Memory‐Based Switch/Router Architectures",
+      "link": "https://doi.org/10.1002/9781119486220.ch3",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": " (2018). Shared‐Bus and Shared‐Memory‐Based Switch/Router Architectures. Retrieved from https://doi.org/10.1002/9781119486220.ch3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018architectureswiths",
+      "title": "Architectures With Shared‐Memory‐Based Switch Fabrics: Case Study—Cisco Catalyst 3550 Series Switches",
+      "link": "https://doi.org/10.1002/9781119486220.ch8",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": " (2018). Architectures With Shared‐Memory‐Based Switch Fabrics: Case Study—Cisco Catalyst 3550 Series Switches. Retrieved from https://doi.org/10.1002/9781119486220.ch8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018architectureswiths_41",
+      "title": "Architectures with Shared‐Memory‐Based Switch Fabrics: Case Study—Cisco Catalyst 8500\n            <scp>CSR</scp>\n            Series",
+      "link": "https://doi.org/10.1002/9781119486220.ch10",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": " (2018). Architectures with Shared‐Memory‐Based Switch Fabrics: Case Study—Cisco Catalyst 8500\n            <scp>CSR</scp>\n            Series. Retrieved from https://doi.org/10.1002/9781119486220.ch10",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "scott2024correctiontoshared",
+      "title": "Correction to: Shared-Memory Synchronization",
+      "link": "https://doi.org/10.1007/978-3-031-38684-8_10",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "Michael L. Scott, Trevor Brown (2024). Correction to: Shared-Memory Synchronization. Retrieved from https://doi.org/10.1007/978-3-031-38684-8_10",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "burke2022reducingmemorycons",
+      "title": "Reducing Memory Consumption in Calico with Shared Memory",
+      "link": "https://doi.org/10.2172/1888196",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "Timothy Burke, Henry Stam, Joseph Pate (2022). Reducing Memory Consumption in Calico with Shared Memory. Retrieved from https://doi.org/10.2172/1888196",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zein2022thecovenantsasasha",
+      "title": "The covenants as a shared historical memory",
+      "link": "https://doi.org/10.4324/9781003008989-2",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "Ibrahim Mohamed Zein, Ahmed El-Wakil (2022). The covenants as a shared historical memory. Retrieved from https://doi.org/10.4324/9781003008989-2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gao2026morisharedmemoryfo",
+      "title": "mori: Shared Memory for R Objects",
+      "link": "https://doi.org/10.32614/cran.package.mori",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "Charlie Gao (2026). mori: Shared Memory for R Objects. Retrieved from https://doi.org/10.32614/cran.package.mori",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tiwari2025memoryfabricforcon",
+      "title": "Memory Fabric for Conversational AI Agents: Enabling Shared and Persistent Memory Across Users",
+      "link": "https://doi.org/10.36227/techrxiv.176523350.08289935/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "Anjikya Tiwari, Vibhuti Gupta (2025). Memory Fabric for Conversational AI Agents: Enabling Shared and Persistent Memory Across Users. Retrieved from https://doi.org/10.36227/techrxiv.176523350.08289935/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hirst2022memoryforsalientsh",
+      "title": "Memory for Salient Shared Events: A Top-down Approach to Collective Memory",
+      "link": "https://doi.org/10.31234/osf.io/82rge",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": "William Hirst, Clinton Merck (2022). Memory for Salient Shared Events: A Top-down Approach to Collective Memory. Retrieved from https://doi.org/10.31234/osf.io/82rge",
+      "abstract": "Reviews psychological approaches to collective memory",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hall2020playassharedpsycho",
+      "title": "Play as Shared Psychological Register: Paidiá, Laughter and Aristophanes",
+      "link": "https://doi.org/10.5040/9781350101555.ch-003",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "register"
+      ],
+      "reference": "Edith Hall (2020). Play as Shared Psychological Register: Paidiá, Laughter and Aristophanes. Retrieved from https://doi.org/10.5040/9781350101555.ch-003",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024reviewer1publicrev",
+      "title": "Reviewer #1 (Public Review): Shared structure facilitates working memory of multiple sequences",
+      "link": "https://doi.org/10.7554/elife.93158.3.sa1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "shared memory"
+      ],
+      "reference": " (2024). Reviewer #1 (Public Review): Shared structure facilitates working memory of multiple sequences. Retrieved from https://doi.org/10.7554/elife.93158.3.sa1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Hopper"
+      ],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "blackwell2025prepostnonparametr",
+      "title": "prepost: Non-Parametric Bounds and Gibbs Sampler for Assessing Priming and Post-Treatment Bias",
+      "link": "https://doi.org/10.32614/cran.package.prepost",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "treat"
+      ],
+      "reference": "Matthew Blackwell, Jacob Brown, et al. (2025). prepost: Non-Parametric Bounds and Gibbs Sampler for Assessing Priming and Post-Treatment Bias. Retrieved from https://doi.org/10.32614/cran.package.prepost",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yasmin2020legendregouldhoppe",
+      "title": "Legendre-Gould Hopper Based Sheffer Polynomials: Properties and Applications",
+      "link": "https://doi.org/10.20944/preprints202010.0204.v1",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Hopper"
+      ],
+      "reference": "Ghazala Yasmin, Abdulghani Muhyi (2020). Legendre-Gould Hopper Based Sheffer Polynomials: Properties and Applications. Retrieved from https://doi.org/10.20944/preprints202010.0204.v1",
+      "abstract": "In this article, the Legendre-Gould Hopper polynomials are combined with Sheffer sequences to introduce certain mixed type special polynomials. Generating functions, differential equations and certain other properties of Legendre-Gould Hopper based Sheffer polynomials are derived. Further, operational and integral representations providing connections between these polynomials and known special polynomials are established. Certain identities and results for some members of these new mixed polynomials are also obtained. Finally, the determinantal definitions of Legendre-Gould Hopper based Sheffer polynomials are also given.",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 11,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ghaseminajm2022risaidedmobileloca",
+      "title": "RIS-Aided Mobile Localization Error Bounds Under Hardware Impairments",
+      "link": "https://doi.org/10.36227/techrxiv.20431968.v1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "same"
+      ],
+      "reference": "Fariba Ghaseminajm, Malek Alsmadi, et al. (2022). RIS-Aided Mobile Localization Error Bounds Under Hardware Impairments. Retrieved from https://doi.org/10.36227/techrxiv.20431968.v1",
+      "abstract": "Reconfigurable intelligent surfaces (RISs) are a recent yet\nrevolutionary development in communications systems. Particularly\napplicable to millileter wave (mmWave) systems, these surfaces can\nincrease localization performance and decrease vulnerability to\nenvironmental influences, all by  adjusting the incoming signals’ phase.\nAt the same time, manufacturing ideal hardware to be deployed at the\ntransceivers is not feasible nor practical. These non-linearities in\nhardware, collectively known hardware impairments (HWIs), cause signal\ndegradation and adversely affect localization. In this paper, the effect\nof HWIs on RIS-aided localization is examined. Towards that, the mean\nsquared error (MSE) of the user’s position is found through a maximum\nlikelihood estimator (MLE) and its functionality",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "blackwell2026boundsoncausaleffe",
+      "title": "Bounds on causal effects in $ 2^{K} $ factorial experiments with noncompliance",
+      "link": "https://doi.org/10.1093/biomet/asaf084",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "treat"
+      ],
+      "reference": "M Blackwell, N E Pashley (2026). Bounds on causal effects in $ 2^{K} $ factorial experiments with noncompliance. Retrieved from https://doi.org/10.1093/biomet/asaf084",
+      "abstract": "Summary\nFactorial experiments are ubiquitous in the social and biomedical sciences, but when units fail to comply with each assigned factor, identification and estimation of the average treatment effects become impossible without strong assumptions. Leveraging an instrumental variables approach, previous studies have shown how to define and estimate the causal effect of treatment uptake among respondents who comply with treatment. A major caveat is that these results rely on strong assumptions on the effect of randomization on treatment uptake. This work shows how to bound these complier average treatment effects for bounded outcomes under milder assumptions on noncompliance.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 18,
+    "B": 28
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:38.047027"
+}

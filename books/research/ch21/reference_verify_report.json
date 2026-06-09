@@ -1,0 +1,258 @@
+{
+  "chapter_id": "ch21",
+  "chapter_title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch21/keywords.json",
+  "keyword_count": 52,
+  "top_keywords": [
+    {
+      "term": "unified AI compiler analysis and cross-hardware benchmark",
+      "weight": 18
+    },
+    {
+      "term": "compile overhead",
+      "weight": 14
+    },
+    {
+      "term": "compiler ratings",
+      "weight": 14
+    },
+    {
+      "term": "HW binding",
+      "weight": 14
+    },
+    {
+      "term": "search space",
+      "weight": 14
+    },
+    {
+      "term": "YiRage benchmark",
+      "weight": 14
+    },
+    {
+      "term": "compile overhead LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "compiler ratings LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "HW binding LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "search space LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage benchmark LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "compiler rating",
+      "weight": 12
+    },
+    {
+      "term": "hardware binding",
+      "weight": 12
+    },
+    {
+      "term": "search autotun",
+      "weight": 12
+    },
+    {
+      "term": "autotun",
+      "weight": 10
+    },
+    {
+      "term": "benchmark",
+      "weight": 10
+    },
+    {
+      "term": "binding",
+      "weight": 10
+    },
+    {
+      "term": "compile",
+      "weight": 10
+    },
+    {
+      "term": "compiler",
+      "weight": 10
+    },
+    {
+      "term": "hardware",
+      "weight": 10
+    },
+    {
+      "term": "overhead",
+      "weight": 10
+    },
+    {
+      "term": "rating",
+      "weight": 10
+    },
+    {
+      "term": "search",
+      "weight": 10
+    },
+    {
+      "term": "YiRage",
+      "weight": 10
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 20,
+      "matched_keywords": [
+        "overhead"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 9,
+      "matched_keywords": [
+        "analysis"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 10,
+      "matched_keywords": [
+        "rating"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

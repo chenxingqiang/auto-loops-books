@@ -1,0 +1,262 @@
+{
+  "chapter_id": "ch01",
+  "chapter_title": "LLM Inference Performance Bottlenecks: From Symptoms to Root Causes",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch01/keywords.json",
+  "keyword_count": 130,
+  "top_keywords": [
+    {
+      "term": "LLM inference performance bottlenecks: from symptoms to root causes",
+      "weight": 18
+    },
+    {
+      "term": "LLM inference prefill decode",
+      "weight": 18
+    },
+    {
+      "term": "LLM inference performance bottlenecks",
+      "weight": 17
+    },
+    {
+      "term": "single token decode latency",
+      "weight": 16
+    },
+    {
+      "term": "kernel launch overhead GPU",
+      "weight": 15
+    },
+    {
+      "term": "memory bandwidth bound decode",
+      "weight": 15
+    },
+    {
+      "term": "benchmark gap",
+      "weight": 14
+    },
+    {
+      "term": "decode pain",
+      "weight": 14
+    },
+    {
+      "term": "FlashAttention flash-decoding",
+      "weight": 14
+    },
+    {
+      "term": "framework issues",
+      "weight": 14
+    },
+    {
+      "term": "memory not compute",
+      "weight": 14
+    },
+    {
+      "term": "multi hardware",
+      "weight": 14
+    },
+    {
+      "term": "operator fusion MegaKernel",
+      "weight": 14
+    },
+    {
+      "term": "overhead quant",
+      "weight": 14
+    },
+    {
+      "term": "PagedAttention vLLM",
+      "weight": 14
+    },
+    {
+      "term": "prefill decode",
+      "weight": 14
+    },
+    {
+      "term": "PyTorch Hugging Face inference",
+      "weight": 14
+    },
+    {
+      "term": "YiRage preview",
+      "weight": 14
+    },
+    {
+      "term": "benchmark gap LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "decode pain LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "framework issues LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "kv cache optimization",
+      "weight": 13
+    },
+    {
+      "term": "memory not compute LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "multi hardware LLM inference compiler",
+      "weight": 13
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 218,
+      "matched_keywords": [
+        "memory bandwidth bound decode",
+        "CUDA Graphs inference",
+        "batch",
+        "decode",
+        "LLM",
+        "memory bandwidth",
+        "batch-1",
+        "CUDA",
+        "GPU",
+        "graphs",
+        "h100",
+        "LLM inference",
+        "memory"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 108,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill",
+        "LLM inference"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 106,
+      "matched_keywords": [
+        "PagedAttention vLLM",
+        "LLM",
+        "attention",
+        "memory",
+        "model",
+        "PagedAttention",
+        "vLLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 54,
+      "matched_keywords": [
+        "attention",
+        "FlashAttention",
+        "memory"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 29,
+      "matched_keywords": [
+        "decode",
+        "attention",
+        "PyTorch"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 36,
+      "matched_keywords": [
+        "CUDA",
+        "graphs"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 9,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 18,
+      "matched_keywords": [
+        "tensor"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

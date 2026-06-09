@@ -1,0 +1,194 @@
+[
+  {
+    "term": "attention online softmax optimization",
+    "weight": 18
+  },
+  {
+    "term": "cross hardware",
+    "weight": 14
+  },
+  {
+    "term": "fusion boundary",
+    "weight": 14
+  },
+  {
+    "term": "numerical stability",
+    "weight": 14
+  },
+  {
+    "term": "online softmax",
+    "weight": 14
+  },
+  {
+    "term": "cross hardware LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "fusion boundary LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "numerical stability LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "online softmax LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "fuse MegaKernel",
+    "weight": 12
+  },
+  {
+    "term": "GPU XDNA",
+    "weight": 12
+  },
+  {
+    "term": "stable exp",
+    "weight": 12
+  },
+  {
+    "term": "exp",
+    "weight": 10
+  },
+  {
+    "term": "fuse",
+    "weight": 10
+  },
+  {
+    "term": "GPU",
+    "weight": 10
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 10
+  },
+  {
+    "term": "online",
+    "weight": 10
+  },
+  {
+    "term": "softmax",
+    "weight": 10
+  },
+  {
+    "term": "stable",
+    "weight": 10
+  },
+  {
+    "term": "XDNA",
+    "weight": 10
+  },
+  {
+    "term": "attention",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "optimization",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

@@ -1,0 +1,501 @@
+{
+  "chapter_id": "ch14",
+  "pool_count": 46,
+  "bib_keys": [
+    "suo2025desildetectingsile",
+    "sommer2022spncanopensourceml",
+    "yirage2026",
+    "shen2022hardwaredevelopmen",
+    "liang2025findingbugsinmlirc",
+    "li2024anmlirbasedcompile",
+    "zheng2026combrewriterenabli",
+    "nozaki2024mlirbasedhomomorph",
+    "koblah2022hardwaremovingtarg",
+    "agarwal2023hardwarebasedimple",
+    "li2025nearfieldtargetloc",
+    "kern2024virtuallyaugmented",
+    "urbanski2025hardwarebasedcalcu",
+    "du2023sarnasahardwareawa",
+    "roy2019hardwaresoftwareco",
+    "peng2023lagradstaticallyop",
+    "tian2021ahighperformancesp",
+    "huang2024paddlemliracompile",
+    "yu2024mlirtocgraaversati",
+    "lattner2021mlirscalingcompile",
+    "wang2023mlirsmithrandompro",
+    "brown2024fullyintegratingth",
+    "suo2024fuzzingmlircompile",
+    "katel2022mlirbasedcodegener",
+    "guo2022towardssupportings",
+    "chen2024vcnnacompilerofcnn",
+    "zhao2025polymorphousanmlir",
+    "tiotto2024experiencesbuildin",
+    "drescher2024fasttemplatebasedc",
+    "lcke2021integratingafuncti",
+    "memoryfloor2026",
+    "zhang2018fpgaorientedmoving",
+    "jiang2021trrscopeunderstand",
+    "patel2025llminference",
+    "anon2018proceedingsofllvmh",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "suo2025desildetectingsile",
+      "title": "DESIL: Detecting Silent Bugs in MLIR Compiler Infrastructure",
+      "source_tier": "A",
+      "relevance_score": 113,
+      "matched_keywords": [
+        "MLIR",
+        "pass lower",
+        "dialect",
+        "lower",
+        "optim",
+        "pass",
+        "compiler",
+        "NPU"
+      ]
+    },
+    {
+      "bib_key": "sommer2022spncanopensourceml",
+      "title": "SPNC: An Open-Source MLIR-Based Compiler for Fast Sum-Product Network Inference on CPUs and GPUs",
+      "source_tier": "A",
+      "relevance_score": 88,
+      "matched_keywords": [
+        "MLIR",
+        "compiler",
+        "CPU",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "MLIR",
+        "backend",
+        "optim",
+        "YiRage",
+        "CPU"
+      ]
+    },
+    {
+      "bib_key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "source_tier": "A",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "liang2025findingbugsinmlirc",
+      "title": "Finding Bugs in MLIR Compiler Infrastructure via Lowering Space Exploration",
+      "source_tier": "A",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "MLIR",
+        "lower",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "li2024anmlirbasedcompile",
+      "title": "An MLIR-Based Compiler for Hardware Acceleration with Recursion Support: (PhD Forum Paper)",
+      "source_tier": "A",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "MLIR",
+        "hardware",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "zheng2026combrewriterenabli",
+      "title": "CombRewriter: Enabling Combinational Logic Simplification in MLIR-Based Hardware Compiler",
+      "source_tier": "A",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "MLIR",
+        "hardware",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "nozaki2024mlirbasedhomomorph",
+      "title": "MLIR-Based Homomorphic Encryption Compiler for GPU",
+      "source_tier": "A",
+      "relevance_score": 70,
+      "matched_keywords": [
+        "MLIR",
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "peng2023lagradstaticallyop",
+      "title": "LAGrad: Statically Optimized Differentiable Programming in MLIR",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "MLIR",
+        "optim"
+      ]
+    },
+    {
+      "bib_key": "tian2021ahighperformancesp",
+      "title": "A High Performance Sparse Tensor Algebra Compiler in MLIR",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "huang2024paddlemliracompile",
+      "title": "Paddle-MLIR: A Compiler Based on MLIR for Accelerating PaddlePaddle on Edge Intelligence Devices",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "yu2024mlirtocgraaversati",
+      "title": "MLIR-to-CGRA: A Versatile MLIR-Based Compiler Framework for CGRAs",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "lattner2021mlirscalingcompile",
+      "title": "MLIR: Scaling Compiler Infrastructure for Domain Specific Computation",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "wang2023mlirsmithrandompro",
+      "title": "MLIRSmith: Random Program Generation for Fuzzing MLIR Compiler Infrastructure",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "brown2024fullyintegratingth",
+      "title": "Fully integrating the Flang Fortran compiler with standard MLIR",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "suo2024fuzzingmlircompile",
+      "title": "Fuzzing MLIR Compiler Infrastructure via Operation Dependency Analysis",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "katel2022mlirbasedcodegener",
+      "title": "MLIR-based code generation for GPU tensor cores",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "guo2022towardssupportings",
+      "title": "Towards Supporting Semiring in MLIR-Based COMET Compiler",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "chen2024vcnnacompilerofcnn",
+      "title": "VCNN: A compiler of CNNs based on MLIR for multi-core vector accelerators",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "zhao2025polymorphousanmlir",
+      "title": "PolyMorphous: An MLIR-Based Polyhedral Compiler with Loop Transformation Primitives",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "tiotto2024experiencesbuildin",
+      "title": "Experiences Building an MLIR-Based SYCL Compiler",
+      "source_tier": "A",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "MLIR",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "drescher2024fasttemplatebasedc",
+      "title": "Fast Template-Based Code Generation for MLIR",
+      "source_tier": "A",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "MLIR"
+      ]
+    },
+    {
+      "bib_key": "lcke2021integratingafuncti",
+      "title": "Integrating a functional pattern-based IR into MLIR",
+      "source_tier": "A",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "MLIR"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2018proceedingsofllvmh",
+      "title": "Proceedings of LLVM-HPC 2018: 5th Workshop on the LLVM Compiler Infrastructure in HPC",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

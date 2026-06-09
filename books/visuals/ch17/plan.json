@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "triton_hw_matrix",
       "label": "fig:triton_hw_matrix_pipeline",
-      "caption": "Triton Hw Matrix optimization pipeline in OpenAI Triton: Pythonic GPU Kernel Compiler.",
+      "caption": "Triton HW Matrix optimization pipeline in OpenAI Triton: Pythonic GPU Kernel Compiler.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Triton Hw Matrix"
+          "detail": "Triton HW Matrix"
         },
         {
           "name": "On-chip",

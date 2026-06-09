@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "mirage_hw_matrix",
       "label": "fig:mirage_hw_matrix_pipeline",
-      "caption": "Mirage Hw Matrix optimization pipeline in Mirage and Emerging AI Compilers.",
+      "caption": "Mirage HW Matrix optimization pipeline in Mirage and Emerging AI Compilers.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Mirage Hw Matrix"
+          "detail": "Mirage HW Matrix"
         },
         {
           "name": "On-chip",

@@ -1,0 +1,15 @@
+{
+  "chapter_id": "ch27",
+  "timestamp": "2026-06-10T03:02:56.492230",
+  "min_binding_score": 12,
+  "min_matched_keywords": 2,
+  "tier_a_only": true,
+  "bindings_before": 82,
+  "bindings_after": 225,
+  "rejected_from_previous": 0,
+  "tier_counts_in_bindings": {
+    "A": 225
+  },
+  "catalog_tier_a": 25,
+  "catalog_total": 63
+}

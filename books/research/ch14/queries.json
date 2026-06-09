@@ -1,0 +1,16 @@
+[
+  "\"MLIR: Modern Compiler Infrastructure\"",
+  "\"hardware\" AND \"target\"",
+  "\"pass\" AND \"lower\"",
+  "\"codegen\" AND \"backend\"",
+  "\"tun\" AND \"profile\"",
+  "\"case\" AND \"benchmark\"",
+  "\"MLIR: modern compiler infrastructure\" AND \"MLIR\"",
+  "\"MLIR arch passes\" AND \"MLIR case study\"",
+  "\"MLIR codegen\" AND \"MLIR HW matrix\"",
+  "\"MLIR tuning\" AND \"MLIR arch passes LLM inference compiler\"",
+  "\"MLIR case study LLM inference compiler\" AND \"MLIR codegen LLM inference compiler\"",
+  "\"MLIR HW matrix LLM inference compiler\" AND \"MLIR tuning LLM inference compiler\"",
+  "\"case benchmark\" AND \"codegen backend\"",
+  "\"hardware target\" AND \"pass lower\""
+]

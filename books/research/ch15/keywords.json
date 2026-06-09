@@ -1,0 +1,254 @@
+[
+  {
+    "term": "XLA: production-grade AI compiler",
+    "weight": 18
+  },
+  {
+    "term": "XLA",
+    "weight": 17
+  },
+  {
+    "term": "XLA arch passes",
+    "weight": 14
+  },
+  {
+    "term": "XLA case study",
+    "weight": 14
+  },
+  {
+    "term": "XLA codegen",
+    "weight": 14
+  },
+  {
+    "term": "XLA HW matrix",
+    "weight": 14
+  },
+  {
+    "term": "XLA tuning",
+    "weight": 14
+  },
+  {
+    "term": "XLA arch passes LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "XLA case study LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "XLA codegen LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "XLA HW matrix LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "XLA tuning LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "case benchmark",
+    "weight": 12
+  },
+  {
+    "term": "codegen backend",
+    "weight": 12
+  },
+  {
+    "term": "hardware target",
+    "weight": 12
+  },
+  {
+    "term": "pass lower",
+    "weight": 12
+  },
+  {
+    "term": "tun profile",
+    "weight": 12
+  },
+  {
+    "term": "backend",
+    "weight": 10
+  },
+  {
+    "term": "benchmark",
+    "weight": 10
+  },
+  {
+    "term": "case",
+    "weight": 10
+  },
+  {
+    "term": "codegen",
+    "weight": 10
+  },
+  {
+    "term": "cross-hardware",
+    "weight": 10
+  },
+  {
+    "term": "dialect",
+    "weight": 10
+  },
+  {
+    "term": "emit",
+    "weight": 10
+  },
+  {
+    "term": "GPU CPU NPU",
+    "weight": 10
+  },
+  {
+    "term": "hardware",
+    "weight": 10
+  },
+  {
+    "term": "lower",
+    "weight": 10
+  },
+  {
+    "term": "matrix",
+    "weight": 10
+  },
+  {
+    "term": "optim",
+    "weight": 10
+  },
+  {
+    "term": "pass",
+    "weight": 10
+  },
+  {
+    "term": "pitfall",
+    "weight": 10
+  },
+  {
+    "term": "platform",
+    "weight": 10
+  },
+  {
+    "term": "profile",
+    "weight": 10
+  },
+  {
+    "term": "target",
+    "weight": 10
+  },
+  {
+    "term": "tun",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

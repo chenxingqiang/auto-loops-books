@@ -1,0 +1,281 @@
+{
+  "chapter_id": "ch06",
+  "pool_count": 27,
+  "bib_keys": [
+    "bera2026machinelearningdri",
+    "zuzak2020obfusgemenhancingp",
+    "byeon2024multithreadeddatas",
+    "memoryfloor2026",
+    "chen2023astandardcellmemor",
+    "seo2023advancesandtrendso",
+    "wang2023researchonsimulati",
+    "purkayastha2021designstudyonimpac",
+    "lai2018onchipmemoryoptimi",
+    "liu2020anovelschemetomapc",
+    "agarwal2024lowpowerestimation",
+    "wu2022designofsystemonch",
+    "yirage2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "addisie2020centaurhybridproce",
+    "jyoti2019expressionempowere",
+    "patel2025llminference",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "bera2026machinelearningdri",
+      "title": "Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage",
+      "source_tier": "A",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "cache",
+        "memory",
+        "design",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "zuzak2020obfusgemenhancingp",
+      "title": "ObfusGEM: Enhancing Processor Design Obfuscation Through Security-Aware On-Chip Memory and Data Path Design",
+      "source_tier": "A",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "design",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "byeon2024multithreadeddatas",
+      "title": "Multi-Threaded Data-Scrambling Techniques Using Reduced on-Chip Memory for Light-Weight Embedded Systems",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "memory",
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "chen2023astandardcellmemor",
+      "title": "A Standard Cell Memory Based on 2T Gain Cell DRAM for Memory-Centric Accelerator Design",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "seo2023advancesandtrendso",
+      "title": "Advances and Trends on On-Chip Compute-in-Memory Macros and Accelerators",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "wang2023researchonsimulati",
+      "title": "Research on simulation acceleration method of FPGA design with external memory chip",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "purkayastha2021designstudyonimpac",
+      "title": "Design Study on Impact of Memory Access Parallelism for Cloud FPGAs",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "lai2018onchipmemoryoptimi",
+      "title": "On-Chip Memory Optimization of High Efficiency Accelerator for Deep Convolutional Neural Networks",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "liu2020anovelschemetomapc",
+      "title": "A Novel Scheme to Map Convolutional Networks to Network-on-Chip with Computing-In-Memory Nodes",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "agarwal2024lowpowerestimation",
+      "title": "Low Power Estimation for Multibit Memory Writing and Reading in Hardware Chip Design",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "wu2022designofsystemonch",
+      "title": "Design of System on Chip Based on In-Memory Computing Theory",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "YiRage",
+        "CPU"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "addisie2020centaurhybridproce",
+      "title": "Centaur: Hybrid Processing in On/Off-chip Memory Architecture for Graph Analytics",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "jyoti2019expressionempowere",
+      "title": "Expression Empowered ResiDen Network for Facial Action Unit Detection",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

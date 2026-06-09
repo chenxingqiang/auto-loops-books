@@ -1,0 +1,15 @@
+[
+  "\"Compiler-Driven End-to-End Performance Tuning\"",
+  "\"profil\" AND \"bandwidth\"",
+  "\"bottleneck\" LLM inference optimization",
+  "\"workflow\" AND \"tun\"",
+  "\"regression\" AND \"gate\"",
+  "\"compiler-driven end-to-end performance tuning\" AND \"bottleneck locating\"",
+  "\"HW aware profiling\" AND \"regression gates\"",
+  "\"tuning workflow\" AND \"bottleneck locating LLM inference compiler\"",
+  "\"HW aware profiling LLM inference compiler\" AND \"regression gates LLM inference compiler\"",
+  "\"tuning workflow LLM inference compiler\" AND \"profil bandwidth\"",
+  "\"regression gate\" AND \"workflow tun\"",
+  "\"bottleneck\" AND \"bandwidth\"",
+  "\"gate\" AND \"profil\""
+]

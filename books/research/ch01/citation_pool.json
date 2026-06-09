@@ -1,0 +1,373 @@
+{
+  "chapter_id": "ch01",
+  "pool_count": 30,
+  "bib_keys": [
+    "memoryfloor2026",
+    "fan2025ellieenergyefficie",
+    "kamath2025podascpttentionscp",
+    "wang2025pdacca541tokenssll",
+    "qiao2026tellmeanefficiente",
+    "chen2026towardshighgoodput",
+    "tang2026tplatensorparallel",
+    "recasens2025mindthememorygapun",
+    "wang2025decoupledanalysiso",
+    "patel2025llminference",
+    "yirage2026",
+    "nakai2025efficientbatchproc",
+    "kwon2023vllm",
+    "dao2022flashattention",
+    "taxbreak2026",
+    "li2025llmpoweredautomate",
+    "lazuka2024llmpilotcharacteri",
+    "arya2024apreliminaryperfor",
+    "pichlmeier2024performancecharact",
+    "li2024llminferenceservin",
+    "nvidia2024cudagraphs",
+    "dao2023flashdecoding",
+    "eto2025llmperformancebott",
+    "yu2026precisionbottlenec",
+    "amd2024xdna",
+    "semianalysis2024tma",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024aie",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 218,
+      "matched_keywords": [
+        "memory bandwidth bound decode",
+        "CUDA Graphs inference",
+        "batch",
+        "decode",
+        "LLM",
+        "memory bandwidth",
+        "batch-1",
+        "CUDA",
+        "GPU",
+        "graphs",
+        "h100",
+        "LLM inference",
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "fan2025ellieenergyefficie",
+      "title": "ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting",
+      "source_tier": "A",
+      "relevance_score": 172,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "kamath2025podascpttentionscp",
+      "title": "POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 172,
+      "matched_keywords": [
+        "LLM inference prefill decode",
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "wang2025pdacca541tokenssll",
+      "title": "PDAcc: A 541 Tokens/s@Llama-1.2B Effective Throughput Prefill-Decode Disaggregated MCM-based Accelerator for Multi-task Large Language Model Applications",
+      "source_tier": "A",
+      "relevance_score": 130,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "token",
+        "model",
+        "throughput"
+      ]
+    },
+    {
+      "bib_key": "qiao2026tellmeanefficiente",
+      "title": "TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs",
+      "source_tier": "A",
+      "relevance_score": 118,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ]
+    },
+    {
+      "bib_key": "chen2026towardshighgoodput",
+      "title": "Towards High-Goodput LLM Serving with Prefill-decode Multiplexing",
+      "source_tier": "A",
+      "relevance_score": 118,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ]
+    },
+    {
+      "bib_key": "tang2026tplatensorparallel",
+      "title": "TPLA: Tensor Parallel Latent Attention for Efficient Disaggregated Prefill &amp; Decode Inference",
+      "source_tier": "A",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "attention",
+        "tensor"
+      ]
+    },
+    {
+      "bib_key": "recasens2025mindthememorygapun",
+      "title": "Mind the Memory Gap: Unveiling GPU Bottlenecks in Large-Batch LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 98,
+      "matched_keywords": [
+        "batch",
+        "LLM",
+        "GPU",
+        "LLM inference",
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "wang2025decoupledanalysiso",
+      "title": "Decoupled Analysis of DVFS Effects in Prefill and Decode Stages of Large Language Model Inference",
+      "source_tier": "A",
+      "relevance_score": 90,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "model"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 81,
+      "matched_keywords": [
+        "prefill decode",
+        "prefill decode LLM",
+        "decode",
+        "LLM",
+        "prefill"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "LLM",
+        "YiRage",
+        "CPU",
+        "CUDA",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "nakai2025efficientbatchproc",
+      "title": "Efficient Batch Processing for Private Cloud LLM Inference: Modeling and Performance Comparison",
+      "source_tier": "A",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "batch",
+        "LLM",
+        "LLM inference",
+        "model"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "attention",
+        "memory",
+        "model",
+        "PagedAttention"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "attention",
+        "FlashAttention",
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "li2025llmpoweredautomate",
+      "title": "LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "lazuka2024llmpilotcharacteri",
+      "title": "LLM-Pilot: Characterize and Optimize Performance of your LLM Inference Services",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "arya2024apreliminaryperfor",
+      "title": "A Preliminary Performance Analysis of LLM Inference on Edge Accelerators",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "pichlmeier2024performancecharact",
+      "title": "Performance Characterization of Expert Router for Scalable LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "li2024llminferenceservin",
+      "title": "LLM Inference Serving: Survey of Recent Advances and Opportunities",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "CUDA",
+        "graphs"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "decode",
+        "attention",
+        "PyTorch"
+      ]
+    },
+    {
+      "bib_key": "eto2025llmperformancebott",
+      "title": "LLM Performance Bottlenecks on CGLA",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "yu2026precisionbottlenec",
+      "title": "Precision Bottlenecks and Sensitivity Analysis in LLM QuantizationLLM QUANTIZATION BOTTLENECKS",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "tensor"
+      ]
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

@@ -1,0 +1,785 @@
+{
+  "chapter_id": "ch15",
+  "timestamp": "2026-06-10T02:45:59.451979",
+  "min_papers": 25,
+  "paper_count": 52,
+  "sentence_count": 301,
+  "binding_count": 277,
+  "papers": [
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "link": "https://doi.org/10.3390/mi16020193",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ],
+      "reference": "Yue Zhang, Yunshan Tang, et al. (2025). A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks. Retrieved from https://doi.org/10.3390/mi16020193",
+      "abstract": "The deep learning object detection algorithm has been widely applied in the field of synthetic aperture radar (SAR). By utilizing deep convolutional neural networks (CNNs) and other techniques, these algorithms can effectively identify and locate targets in SAR images, thereby improving the accuracy and efficiency of detection. In recent years, achieving real-time monitoring of regions has become a pressing need, leading to the direct completion of real-time SAR image target detection on airborne or satellite-borne real-time processing platforms. However, current GPU-based real-time processing platforms struggle to meet the power consumption requirements of airborne or satellite applications. To address this issue, a low-power, low-latency deep learning SAR object detection algorithm accel",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "astuti2023optimizationofprod",
+      "title": "Optimization of production planning using integer linear programming method (case study of bakpia menik)",
+      "link": "https://doi.org/10.28989/compiler.v12i2.1919",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "case",
+        "optim",
+        "tun",
+        "constraints",
+        "production",
+        "ship"
+      ],
+      "reference": "Marni Astuti, Ardian Prabowo, et al. (2023). Optimization of production planning using integer linear programming method (case study of bakpia menik). Retrieved from https://doi.org/10.28989/compiler.v12i2.1919",
+      "abstract": "Bakpia Menik is a Small and Medium Enterprise (UKM) which operates in the field of bakpia production. Bakpia is one of the local cakes which is the main souvenir from Yogyakarta, so there is a big potential for increasing production. However, SMEs still lack production management planning to optimize resource use. So it is difficult to capture this big opportunity to maximize profits for SMEs. Seeing these problems, this research designed an integer linear programming mathematical model to optimize profits by using existing resources. Integer Linear Programming (ILP) is a mathematical model for maximizing profit and minimizing cost based on a mathematical model involving integer variables represented in a linear relationship. This research produces an integer linear programming model that ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "link": "https://doi.org/10.1109/aero53065.2022.9843789",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "fusion"
+      ],
+      "reference": "Dan Shen, Mengquing Guo, et al. (2022). Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation. Retrieved from https://doi.org/10.1109/aero53065.2022.9843789",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "link": "https://doi.org/10.52202/078372-0119",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "miss"
+      ],
+      "reference": "Stefano Silvestrini, Andrea Colagrossi, et al. (2024). Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection. Retrieved from https://doi.org/10.52202/078372-0119",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "link": "https://doi.org/10.20944/preprints202308.1360.v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ],
+      "reference": "Yulu Wang, Yi Han, et al. (2023). An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System. Retrieved from https://doi.org/10.20944/preprints202308.1360.v1",
+      "abstract": "In autonomous driving systems, high-speed and real-time image processing, along with object recognition, are crucial technologies. This paper builds upon the research achievements in in-dustrial item sorting systems and proposes an object recognition and sorting system for auton-omous driving. In industrial sorting lines, goods sorting robots often need to work at high speeds to efficiently sort large volumes of items. This poses a challenge to the robot&#039;s real-time vision and sorting capabilities, making it both practical and economically viable to implement a real-time and low-cost sorting system in a real-world industrial sorting line. Existing sorting systems have limitations such as high cost, high computing resource consumption, and high power consump-tion. These issues lead to ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 69,
+      "matched_keywords": [
+        "backend",
+        "optim",
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "link": "https://doi.org/10.25144/15942",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "RO LANE, WJ HOLMES, T LAMONT-SMITH (2023). TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE. Retrieved from https://doi.org/10.25144/15942",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "link": "https://doi.org/10.22541/au.177153748.85426739/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Heiko Grimberg (2026). STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm. Retrieved from https://doi.org/10.22541/au.177153748.85426739/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "link": "https://doi.org/10.1145/3560828.3564010",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "David S. Koblah, Fatemeh Ganji, et al. (2022). Hardware Moving Target Defenses against Physical Attacks. Retrieved from https://doi.org/10.1145/3560828.3564010",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "link": "https://doi.org/10.1117/12.2519497",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Naeem Akbar, Sara Tehsin, et al. (2019). Hardware design of correlation filters for target detection. Retrieved from https://doi.org/10.1117/12.2519497",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "link": "https://doi.org/10.23977/acss.2026.100209",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": " (2026). Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies. Retrieved from https://doi.org/10.23977/acss.2026.100209",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "link": "https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jyotiranjan Panda, Pradipta Kumar Nanda, Tuhinansu Pradhan (2023). Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi. Retrieved from https://doi.org/10.21203/rs.3.rs-3158848/v1",
+      "abstract": "AbstractVideo object tracking in real-world scenarios is one of the challenging problems of computer vision. The issue is compounded in the presence of varying illumination conditions, dynamic entities of the background, and bad weather conditions. In this research, a particle filter based new video object tracking scheme is developed with the proposed notions of target remodeling and reinitialization. During the tracking phase, the target is remodeled in each frame to take care of the changing scene dynamics over frames. The target is remodeled by fused feature distributions chosen from the created bank of fused feature distributions having discriminating potential to differentiate the target and the background in a given frame. The fused feature bank is created by fusing two features fro",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "link": "https://doi.org/10.1109/lsens.2024.3359693",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Nicolai Kern, Pirmin Schoeder, Christian Waldschmidt (2024). Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications. Retrieved from https://doi.org/10.1109/lsens.2024.3359693",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "link": "https://doi.org/10.23919/eurad54643.2022.9924830",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pirmin Schoeder, Arne Martin, et al. (2022). A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities. Retrieved from https://doi.org/10.23919/eurad54643.2022.9924830",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "link": "https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Rishi Agarwal, Sathwik Gundala, G S S Chalapathi (2023). Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs). Retrieved from https://doi.org/10.1109/elexcom58812.2023.10370061",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "link": "https://doi.org/10.1109/globecom59602.2025.11432143",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Jiapeng Li, Changsheng You, Chao Zhou (2025). Near-field Target Localization under Hardware Impairments. Retrieved from https://doi.org/10.1109/globecom59602.2025.11432143",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "link": "https://doi.org/10.1109/access.2025.3565674",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Lucas Urbanski, Gustavo Farhat Araujo, et al. (2025). Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images. Retrieved from https://doi.org/10.1109/access.2025.3565674",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "link": "https://doi.org/10.1109/igarss52108.2023.10283237",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Wentian Du, Jie Chen, Zhixiang Huang (2023). SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search. Retrieved from https://doi.org/10.1109/igarss52108.2023.10283237",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "link": "https://doi.org/10.1109/icort46471.2019.9069610",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Pradipta Roy, Dipak Das, et al. (2019). Hardware Software Co-Design for Real Time Detection of Small Target in IR Video. Retrieved from https://doi.org/10.1109/icort46471.2019.9069610",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "link": "https://doi.org/10.25729/2413-0133-2018-1-11",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Давлиева А.С., Гвоздев В.Е., Гузаиров М.Б. (2018). ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET. Retrieved from https://doi.org/10.25729/2413-0133-2018-1-11",
+      "abstract": "В настоящей работе рассматривается подход к исследованию свойства живучести аппаратно-программных комплексов (АПК) по показателю целевой эффективности с учетом интервальной неопределенности компонентов структуры состояний. Описывается задача оценки влияния вариативности показателей эффективности АПК в разных режимах функционирования на оценку живучести по среднему значению показателя целевой эффективности. Приводятся результаты исследований, соответствующие различным структурам состояний АПК.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "link": "https://doi.org/10.1051/itmconf/20193015029",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Tatiana A. Lepekhina, Vadim I. Nikolaev (2019). Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests. Retrieved from https://doi.org/10.1051/itmconf/20193015029",
+      "abstract": "Methods of hardware-software simulation of test scenes of varying complexity are proposed for synthetic aperture space radar (SAR) ground tests and testing its components, as well as for checking its end-to- end characteristics and calibration during flight tests. The principles of designing and features of the hardware implementation of an active simulator of radar targets are described. Some methods for solving problems associated with the synchronization of received and generated signals are proposed.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "link": "https://doi.org/10.1201/9781003196938-8",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Mattia Rossi, Nicola Toscani, et al. (2021). Basic Settings: Serial Communication COM and Hardware Target. Retrieved from https://doi.org/10.1201/9781003196938-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "link": "https://doi.org/10.1615/telecomradeng.v78.i12.50",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ],
+      "reference": "Subhankar Shome, A. K. Singh, et al. (2019). PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION. Retrieved from https://doi.org/10.1615/telecomradeng.v78.i12.50",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "an2022memorysafecomputat",
+      "title": "Memory Safe Computations with XLA Compiler",
+      "link": "https://doi.org/10.52202/068431-1378",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "XLA",
+        "compiler"
+      ],
+      "reference": "Yuze An, Artem Artemev, et al. (2022). Memory Safe Computations with XLA Compiler. Retrieved from https://doi.org/10.52202/068431-1378",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "schardl2019tapirxlaembeddingf",
+      "title": "TapirXLA: Embedding Fork-Join Parallelism into the XLA Compiler in TensorFlow Using Tapir",
+      "link": "https://doi.org/10.1109/hpec.2019.8916312",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "XLA",
+        "compiler"
+      ],
+      "reference": "Tao B. Schardl, Siddharth Samsi (2019). TapirXLA: Embedding Fork-Join Parallelism into the XLA Compiler in TensorFlow Using Tapir. Retrieved from https://doi.org/10.1109/hpec.2019.8916312",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "asriningtias2023minimizationimplem",
+      "title": "Minimization Implementation of Fuzzy Logic to Optimize a Cashew Nut Production using Simpleks-Duality Theory",
+      "link": "https://doi.org/10.28989/compiler.v12i2.1836",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "case",
+        "optim",
+        "production"
+      ],
+      "reference": "Yuli Asriningtias, Wahyu Sri Utami (2023). Minimization Implementation of Fuzzy Logic to Optimize a Cashew Nut Production using Simpleks-Duality Theory. Retrieved from https://doi.org/10.28989/compiler.v12i2.1836",
+      "abstract": "Production control of cashew nuts greatly affects the profits earned by the company. When cashew nut raw materials exceed production needs, it results in storing cashews for an extended period, causing the cashew products to lose freshness, and the quality of processed cashews deteriorates. If the raw materials are damaged, the manufacturer must acquire additional costs to procure raw materials again. Another issue is that cashew nut raw materials are seasonal products and are not always available.To solve these problems, a calculation method is needed to control optimal production inventory to minimize the company's expenditures. The method used is to formulate the problem into a Fuzzy Linear Programming mathematical model using a combination of methods: the Simplex algorithm and Duality ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "charlotte2024aidrivenoptimizati",
+      "title": "AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures",
+      "link": "https://doi.org/10.63282/3117-5481/aijcst-v6i5p102",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "optim",
+        "compiler"
+      ],
+      "reference": "Olivia Charlotte (2024). AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures. Retrieved from https://doi.org/10.63282/3117-5481/aijcst-v6i5p102",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ganguly2025llmevaluationandop",
+      "title": "LLM Evaluation and Optimization",
+      "link": "https://doi.org/10.1007/979-8-8688-1154-8_6",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "optim"
+      ],
+      "reference": "Arindam Ganguly (2025). LLM Evaluation and Optimization. Retrieved from https://doi.org/10.1007/979-8-8688-1154-8_6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "link": "https://doi.org/10.1016/j.vrih.2023.12.001",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Xiaofei Ren, Jian He, et al. (2024). Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR. Retrieved from https://doi.org/10.1016/j.vrih.2023.12.001",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "link": "https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Hao ZHANG, Jin HUANG, et al. (2019). Trajectory prediction model for crossing-based target selection. Retrieved from https://doi.org/10.3724/sp.j.2096-5796.2019.0017",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "link": "https://doi.org/10.1109/hst.2018.8383907",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Zhiming Zhang, Qiaoyan Yu, et al. (2018). FPGA-oriented moving target defense against security threats from malicious FPGA tools. Retrieved from https://doi.org/10.1109/hst.2018.8383907",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "link": "https://doi.org/10.1109/host49136.2021.9702274",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ],
+      "reference": "Yichen Jiang, Huifeng Zhu, et al. (2021). TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection. Retrieved from https://doi.org/10.1109/host49136.2021.9702274",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2025retrievalaugmented",
+      "title": "Retrieval-Augmented Generation (RAG) Systems in Production: Software Architecture Strategies for Enterprise-Grade AI Applications",
+      "link": "https://doi.org/10.64388/irev9i5-1716623",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ],
+      "reference": " (2025). Retrieval-Augmented Generation (RAG) Systems in Production: Software Architecture Strategies for Enterprise-Grade AI Applications. Retrieved from https://doi.org/10.64388/irev9i5-1716623",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "leong2025assuringcorrectnes",
+      "title": "Assuring Correctness in AI-Assisted Development with LLM Diversity and Compiler Techniques",
+      "link": "https://doi.org/10.2139/ssrn.5242953",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Iat Tou Leong, Raul Barbosa (2025). Assuring Correctness in AI-Assisted Development with LLM Diversity and Compiler Techniques. Retrieved from https://doi.org/10.2139/ssrn.5242953",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "bhatnagar2025mitigatingaillmpro",
+      "title": "Mitigating AI LLM Prompt Injection, Hallucination, and Security Risks using Semantically Encoded Compiler Stage Watermarks",
+      "link": "https://doi.org/10.2139/ssrn.5460154",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Ashutosh Bhatnagar, Ganesh Pokhariyal (2025). Mitigating AI LLM Prompt Injection, Hallucination, and Security Risks using Semantically Encoded Compiler Stage Watermarks. Retrieved from https://doi.org/10.2139/ssrn.5460154",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "gurram2024theendofgenerative",
+      "title": "The End of Generative AI Experiments Designing Production‑Grade Data Architectures for LLM Systems",
+      "link": "https://doi.org/10.15680/ijctece.2024.0701009",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ],
+      "reference": "Samanth Gurram (2024). The End of Generative AI Experiments Designing Production‑Grade Data Architectures for LLM Systems. Retrieved from https://doi.org/10.15680/ijctece.2024.0701009",
+      "abstract": "The paper explains the causes of AI pilots’ failures, which are often due to flaws in the model or volatile data. Using a quantitative experimental design, the paper compares and contrasts the big parameter models and the specific models with and without Retrieval Augmentation Generation (RAG). The results showed that data volatility, delay in indexing, and low ingestion pipelines were the primary sources of significant performance loss. AI pilots that operate in Generative AI worked well in the controlled tests, but when they were to perform in the actual production setting, several of them collapsed. The smaller models with strong pipelines were beneficial because of their cost-adjusted value. Risks are governance and security, which began escalating as systems were introduced in the pro",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "perikala2025designingproductio",
+      "title": "DESIGNING PRODUCTION-GRADE GENERATIVE AI WITH MODULAR PROMPT SYSTEMS",
+      "link": "https://doi.org/10.34218/ijitmis_16_02_111",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ],
+      "reference": "Karthik Perikala (2025). DESIGNING PRODUCTION-GRADE GENERATIVE AI WITH MODULAR PROMPT SYSTEMS. Retrieved from https://doi.org/10.34218/ijitmis_16_02_111",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kozhevin2026protobufdeepdivefr",
+      "title": "Protobuf Deep Dive: From Simple to Production-Grade",
+      "link": "https://doi.org/10.1007/979-8-8688-2498-2_7",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ],
+      "reference": "Dmytro Kozhevin (2026). Protobuf Deep Dive: From Simple to Production-Grade. Retrieved from https://doi.org/10.1007/979-8-8688-2498-2_7",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kamadi2025machinelearningand",
+      "title": "Machine Learning and AI Architecture: A Comprehensive Framework for Production-Grade Intelligent Systems",
+      "link": "https://doi.org/10.30574/wjarr.2025.27.1.2654",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ],
+      "reference": "Sandeep Kamadi (2025). Machine Learning and AI Architecture: A Comprehensive Framework for Production-Grade Intelligent Systems. Retrieved from https://doi.org/10.30574/wjarr.2025.27.1.2654",
+      "abstract": "This research proposes a modular, scalable end-to-end machine learning architecture to solve the persistent gap between experimental model development and production deployment. Traditional implementations often omit systematic data ingestion, feature engineering, monitoring, and automated retraining, leading to model degradation and high maintenance costs. The proposed six-layer framework—data ingestion, processing and storage, model development and training, deployment and serving, monitoring and drift detection, and security and governance—integrates technologies such as Apache Kafka, feature stores, MLOps pipelines, and automated drift detection for quality assurance. Experimental results show a ~60% reduction in deployment time, 92% accuracy in real-time drift detection, and automated",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 25,
+    "A": 25,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:40.339157"
+}

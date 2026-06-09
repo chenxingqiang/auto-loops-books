@@ -1,0 +1,202 @@
+[
+  {
+    "term": "compiler-driven end-to-end performance tuning",
+    "weight": 18
+  },
+  {
+    "term": "bottleneck locating",
+    "weight": 14
+  },
+  {
+    "term": "HW aware profiling",
+    "weight": 14
+  },
+  {
+    "term": "regression gates",
+    "weight": 14
+  },
+  {
+    "term": "tuning workflow",
+    "weight": 14
+  },
+  {
+    "term": "bottleneck locating LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "HW aware profiling LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "regression gates LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "tuning workflow LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "profil bandwidth",
+    "weight": 12
+  },
+  {
+    "term": "regression gate",
+    "weight": 12
+  },
+  {
+    "term": "workflow tun",
+    "weight": 12
+  },
+  {
+    "term": "bottleneck",
+    "weight": 11
+  },
+  {
+    "term": "bandwidth",
+    "weight": 10
+  },
+  {
+    "term": "gate",
+    "weight": 10
+  },
+  {
+    "term": "profil",
+    "weight": 10
+  },
+  {
+    "term": "regression",
+    "weight": 10
+  },
+  {
+    "term": "tun",
+    "weight": 10
+  },
+  {
+    "term": "workflow",
+    "weight": 10
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "compiler-driven",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "end-to-end",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "performance",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "tuning",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

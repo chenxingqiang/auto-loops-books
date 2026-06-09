@@ -1,0 +1,990 @@
+{
+  "chapter_id": "ch23",
+  "timestamp": "2026-06-10T02:46:37.914884",
+  "min_papers": 25,
+  "paper_count": 64,
+  "sentence_count": 316,
+  "binding_count": 316,
+  "papers": [
+    {
+      "bib_key": "zhang2025duoservemoedualpha",
+      "title": "DuoServe-MoE: Dual-Phase Expert Prefetch and Cache Scheduling for Efficient MoE LLM Inference",
+      "link": "https://doi.org/10.2139/ssrn.5551142",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 132,
+      "matched_keywords": [
+        "moe scheduling",
+        "moe expert",
+        "cache",
+        "expert",
+        "LLM",
+        "moe"
+      ],
+      "reference": "Yuning Zhang, Grant Pinkert, et al. (2025). DuoServe-MoE: Dual-Phase Expert Prefetch and Cache Scheduling for Efficient MoE LLM Inference. Retrieved from https://doi.org/10.2139/ssrn.5551142",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "chandroth2026alfmoeanattentionb",
+      "title": "ALF-MoE: An Attention-Based Learnable Fusion of Specialized Expert Networks for Accurate Traffic Classification",
+      "link": "https://doi.org/10.3390/math14030525",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 124,
+      "matched_keywords": [
+        "hetero moe",
+        "moe expert",
+        "expert",
+        "hetero",
+        "moe",
+        "fusion",
+        "specialized"
+      ],
+      "reference": "Jisi Chandroth, Gabriel Stoian, Daniela Danciulescu (2026). ALF-MoE: An Attention-Based Learnable Fusion of Specialized Expert Networks for Accurate Traffic Classification. Retrieved from https://doi.org/10.3390/math14030525",
+      "abstract": "Traffic classification remains a critical challenge in the Internet of Things (IoT), particularly for enhancing security and ensuring Quality of Service (QoS). Although deep learning methods have shown strong performance in traffic classification, learning diverse and complementary representations across heterogeneous network traffic patterns remains difficult. To address this issue, this study proposes a novel Mixture of Experts (MoE) architecture for multiclass traffic classification in IoT environments. The proposed model integrates five specialized expert networks, each targeting a distinct feature category in network traffic. Specifically, it employs a Dense Neural Network for general features, a Convolutional Neural Network (CNN) for spatial patterns, a Gated Recurrent Unit (GRU)-bas",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2026costefficientdeplo",
+      "title": "Cost-Efficient Deployment of MoE Inference in Edge Networks under Expert-Level Security Constraints",
+      "link": "https://doi.org/10.2139/ssrn.6590313",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 115,
+      "matched_keywords": [
+        "hetero moe",
+        "moe expert",
+        "expert",
+        "hetero",
+        "moe",
+        "constraints",
+        "token"
+      ],
+      "reference": "Chao Wang, Danyang Zheng, et al. (2026). Cost-Efficient Deployment of MoE Inference in Edge Networks under Expert-Level Security Constraints. Retrieved from https://doi.org/10.2139/ssrn.6590313",
+      "abstract": "​Mixture-of-Experts (MoE) inference differs from conventional centralized models by activating only a small subset of experts for each token and allowing expert models (EMs) to be distributed across edge servers. This sparse activation paradigm makes MoE attractive for edge inference, but also creates a new deployment challenge because expert placement must jointly optimize computation, memory, bandwidth, and security under heterogeneous expert-level security constraints. In this paper, we study the cost-efficient deployment of MoE inference in edge networks under expert-level security requirements. We formulate the Expert-level Security-aware MoE Deployment (ESMD) problem by jointly modeling inner-service resource sharing (ISRS), server-level security enhancement (SLSE), and edge resource",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "zhou2025dsmoedynamicexpert",
+      "title": "DS-MoE: Dynamic Expert Scheduling for Efficient MoE-based LLM Inference",
+      "link": "https://doi.org/10.1109/icites66466.2025.11274315",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 112,
+      "matched_keywords": [
+        "moe scheduling",
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ],
+      "reference": "You Zhou, Qi Sun, Yu Li (2025). DS-MoE: Dynamic Expert Scheduling for Efficient MoE-based LLM Inference. Retrieved from https://doi.org/10.1109/icites66466.2025.11274315",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ju2026empiricalresourcea",
+      "title": "Empirical Resource Analysis of MoE Architectures and an Expert Selection Optimization System for LLM-based Session Recommendation",
+      "link": "https://doi.org/10.36237/koedus.8.2.21",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ],
+      "reference": "Yu-jin Ju, Sung-Shin Kawk, So-Hyun Park (2026). Empirical Resource Analysis of MoE Architectures and an Expert Selection Optimization System for LLM-based Session Recommendation. Retrieved from https://doi.org/10.36237/koedus.8.2.21",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2026submoeefficientmix",
+      "title": "Sub-MoE: Efficient Mixture-of-Expert LLMs Compression via Subspace Expert Merging",
+      "link": "https://doi.org/10.1609/aaai.v40i27.39464",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ],
+      "reference": "Lujun Li, Qiyuan Zhu, et al. (2026). Sub-MoE: Efficient Mixture-of-Expert LLMs Compression via Subspace Expert Merging. Retrieved from https://doi.org/10.1609/aaai.v40i27.39464",
+      "abstract": "Mixture of Experts (MoE) LLMs face significant obstacles due to their massive parameter scale, which imposes memory, storage, and deployment challenges. Although recent expert merging methods aim to achieve greater efficiency by consolidating several experts, they are fundamentally hindered by parameter conflicts arising from expert specialization. In this paper, we present Sub-MoE, a novel MoE compression framework via Subspace Expert Merging. Our key insight is to perform joint Singular Value Decomposition (SVD) on concatenated expert weights, reducing conflicting parameters by extracting shared U-matrices while enabling effective merging of the expert-specific V components.  Specifically, Sub-MoE consists of two innovative stages: (1) Adaptive Expert Clustering, which groups functionall",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lai2026rsmoecoupledexpert",
+      "title": "RS-MoE: Coupled Expert Compression via Activation-Peak Guided Collaborative Decomposition",
+      "link": "https://doi.org/10.2139/ssrn.6462272",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe",
+        "specialized"
+      ],
+      "reference": "Jiajun Lai, Shijie Li, et al. (2026). RS-MoE: Coupled Expert Compression via Activation-Peak Guided Collaborative Decomposition. Retrieved from https://doi.org/10.2139/ssrn.6462272",
+      "abstract": "Mixture-of-Experts (MoE) based Large Language Models (LLMs), despite their computational efficiency, face significant storage and memory challenges, which hinder their deployment on edge devices. However, existing methods primarily focus on compressing at the granularity of experts, resulting in the loss of specialized knowledge. To address these challenges, we propose a new framework termed RS-MoE, which reduces the storage and memory footprint while preserving precision by collaboratively splitting the weights of each expert into (i) a sparse set of high-importance dimensions kept in full precision to retain expert-specific knowledge and (ii) a low-rank factorization for the remaining dimensions to remove redundancy. Building on this, we developed a comprehensive importance score based o",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "zhai2026pipemoenermoelorae",
+      "title": "PipeMoE-NER: MoE-LoRA Expert Adaptation and Three-Stage Chain-of-Thought for Pipeline Safety NER",
+      "link": "https://doi.org/10.21203/rs.3.rs-9148456/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "constraints",
+        "specialized"
+      ],
+      "reference": "Jiannan Zhai, Xiang Mao, et al. (2026). PipeMoE-NER: MoE-LoRA Expert Adaptation and Three-Stage Chain-of-Thought for Pipeline Safety NER. Retrieved from https://doi.org/10.21203/rs.3.rs-9148456/v1",
+      "abstract": "Abstract\nAccurately identifying key entities such as units, risks, consequences, and measures within unstructured texts—including incident reports, inspection records, and management documents—in enterprise pipeline safety scenarios is a critical foundation for risk assessment and emergency decision-making. However, texts in this domain often suffer from dense terminology, drifting semantic boundaries of entities, and long-tailed category distributions. These issues lead to insufficient recall in traditional sequence labeling models and unstable structured outputs or boundary overruns when using end-to-end extraction with large models. To address these challenges, this paper proposes PipeMoE-NER, a specialized adaptation method based on MoE-LoRA and a three-stage Chain-of-Thought (CoT) rea",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bernhardt2023mantleofexpertmoei",
+      "title": "Mantle of Expert (MoE)’ in Kindergarten Education",
+      "link": "https://doi.org/10.35765/eetp.2023.1868.07",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "ship"
+      ],
+      "reference": "Renáta Bernhardt, Ágnes Magyar (2023). Mantle of Expert (MoE)’ in Kindergarten Education. Retrieved from https://doi.org/10.35765/eetp.2023.1868.07",
+      "abstract": "In our study, the complexity of skill development of preschool children is presented through the Mantle of the Expert (MoE) method which is a specific type of education approach based on drama pedagogy. The adaptation of the method was developed by Dorothy Heathcote (Heathcote&Bolton, 1995) and the development potential of the game in kindergarten is exemplified by the expert game of playing library in the ’Central Kindergarten’ in Jászberény, Hungary. The ‘Librarian MoE’ will be demonstrated with the help of the theoretical background of MoE and our empirical research based on a qualitative, structured interview method with parents (N=11). Our preliminary research focuses on the experience of the parents of those children who were actively participating in the ‘Librarian MoE’ during the i",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "souza2021aprendizagemativap",
+      "title": "APRENDIZAGEM ATIVA PAUTADA NA DRAMATIZAÇÃO: MOE (MANTLE OF THE EXPERT)",
+      "link": "https://doi.org/10.14210/cotb.v12.p634-640",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "miss"
+      ],
+      "reference": "Benta Cristina Souza, Priscila Flores da Luz, Rodrigo Levi Rufca (2021). APRENDIZAGEM ATIVA PAUTADA NA DRAMATIZAÇÃO: MOE (MANTLE OF THE EXPERT). Retrieved from https://doi.org/10.14210/cotb.v12.p634-640",
+      "abstract": "Teaching is a challenging and complex process, using an effective, creative and playful teaching practice is necessary in schools. The aim of this study is to characterize the pedagogical approach MoE (Mantle of the Expert) and its aspects for the development of learning. This approach is an active methodology that converges to the new challenges of teaching, as the MoE is based on the experience, dramatization, reflection and problem solving, in which this method has three central elements: the team of specialists, the client and their task . In this imaginary context, students simulate and immerse themselves in their mission as a specialist in a certain area and need to deliver a final product to their client. This article will take a theoretical approach to MoE, in addition to establish",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "harikumar2026plancompileradeter",
+      "title": "PlanCompiler: A Deterministic Compilation Architecture for Structured Multi-Step LLM Pipelines",
+      "link": "https://doi.org/10.21203/rs.3.rs-9186427/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "LLM",
+        "compilation",
+        "compiler",
+        "constraints"
+      ],
+      "reference": "Pranav Harikumar (2026). PlanCompiler: A Deterministic Compilation Architecture for Structured Multi-Step LLM Pipelines. Retrieved from https://doi.org/10.21203/rs.3.rs-9186427/v1",
+      "abstract": "Abstract\nLarge language models (LLMs) are brittle in multi-step structured workflows, where errors compound across sequential transformations, validation stages, and stateful operations such as SQL persistence. We present PlanCompiler, a deterministic compilation architecture for structured LLM pipelines that separates planning from execution through typed node registries, static graph validation, and topological compilation. Rather than relying on autoregressive chaining at runtime, the system executes a prevalidated workflow graph with explicit parameter and schema constraints.\nWe evaluate the approach on 300 tasks across six benchmark sets spanning increasing workflow depth, SQL roundtrip persistence, and schema-drift stress tests. On depth-stratified benchmarks, the compiled system ach",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "fan2025ellieenergyefficie",
+      "title": "ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting",
+      "link": "https://doi.org/10.1109/asap65064.2025.00031",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ],
+      "reference": "Haoyang Fan, Yi-Chien Lin, Viktor Prasanna (2025). ELLIE: Energy-Efficient LLM Inference at the Edge Via Prefill-Decode Splitting. Retrieved from https://doi.org/10.1109/asap65064.2025.00031",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "qiao2026tellmeanefficiente",
+      "title": "TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs",
+      "link": "https://doi.org/10.1145/3748173.3779191",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ],
+      "reference": "Ye Qiao, Zhiheng Chen, et al. (2026). TeLLMe: An Efficient End-to-End Ternary LLM Prefill and Decode Accelerator with Table-Lookup Matmul on Edge FPGAs. Retrieved from https://doi.org/10.1145/3748173.3779191",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kamath2025podascpttentionscp",
+      "title": "POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference",
+      "link": "https://doi.org/10.1145/3676641.3715996",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ],
+      "reference": "Aditya K. Kamath, Ramya Prabhu, et al. (2025). POD-A\n            <scp>ttention</scp>\n            : Unlocking Full Prefill-Decode Overlap for Faster LLM Inference. Retrieved from https://doi.org/10.1145/3676641.3715996",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "fadlon2025decodelikeaclinici",
+      "title": "Decode Like a Clinician: Enhancing LLM Fine-Tuning with Temporal Structured Data Representation",
+      "link": "https://doi.org/10.18653/v1/2025.ijcnlp-long.103",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ],
+      "reference": "Daniel Fadlon, David Dov, et al. (2025). Decode Like a Clinician: Enhancing LLM Fine-Tuning with Temporal Structured Data Representation. Retrieved from https://doi.org/10.18653/v1/2025.ijcnlp-long.103",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2026lifecyclemixtureof",
+      "title": "Lifecycle Mixture of Experts: Staggered Death Prevents Expert Collapse in Mutual Activation MoE",
+      "link": "https://doi.org/10.21203/rs.3.rs-9841016/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Qingjun Zhang (2026). Lifecycle Mixture of Experts: Staggered Death Prevents Expert Collapse in Mutual Activation MoE. Retrieved from https://doi.org/10.21203/rs.3.rs-9841016/v1",
+      "abstract": "Abstract\nre of Experts (MoE) architectures su er from expert collapse, where experts converge to homogeneous representations during training, nullifying the bene ts of conditional computation. We study the mutual activation MoE a router-free architecture where experts activate each other through sigmoid-gated cross-connections and show that collapse\nis inevitable under standard training (mean pairwise cosine similarity > 0.93). We propose Lifecycle MoE, a mechanism that detects collapse via similarity and cross-activation metrics, then kills and rebirths experts to restore di erentiation. Our key nding is that staggered death killing only one expert at a time with a cooldown period preserves system stability while breaking collapse, achieving T2 accuracy within 0.5pp of baseline (vs. 48pp ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "fang2025expertfuseahuffman",
+      "title": "Expertfuse: A Huffman Tree-Based Gradual Expert Integration Framework for Moe Models",
+      "link": "https://doi.org/10.2139/ssrn.5342330",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Yi-Zeng Fang, Juinn-dar Huang (2025). Expertfuse: A Huffman Tree-Based Gradual Expert Integration Framework for Moe Models. Retrieved from https://doi.org/10.2139/ssrn.5342330",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "lu2025moeopuanfpgaoverla",
+      "title": "MoE-OPU: An FPGA Overlay Processor Leveraging Expert Parallelism for MoE-based Large Language Models",
+      "link": "https://doi.org/10.1109/iccad66269.2025.11240807",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Shaoqiang Lu, Yangbo Wei, et al. (2025). MoE-OPU: An FPGA Overlay Processor Leveraging Expert Parallelism for MoE-based Large Language Models. Retrieved from https://doi.org/10.1109/iccad66269.2025.11240807",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lidn2021expertreliabilityi",
+      "title": "Expert Reliability in Legal Proceedings: “Eeny, Meeny, Miny, Moe, With Which Expert Should We Go?”",
+      "link": "https://doi.org/10.1016/j.scijus.2020.09.006",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Moa Lidén, Itiel E. Dror (2021). Expert Reliability in Legal Proceedings: “Eeny, Meeny, Miny, Moe, With Which Expert Should We Go?”. Retrieved from https://doi.org/10.1016/j.scijus.2020.09.006",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hu2025communicationeffic",
+      "title": "Communication-Efficient MoE Fine-Tuning with Locality-Aware Expert Placement",
+      "link": "https://doi.org/10.1109/icdcs63083.2025.00025",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Chenghao Hu, Yufei Kang, Baochun Li (2025). Communication-Efficient MoE Fine-Tuning with Locality-Aware Expert Placement. Retrieved from https://doi.org/10.1109/icdcs63083.2025.00025",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "chen2022tamoetopologyaware",
+      "title": "TA-MoE: Topology-Aware Large Scale Mixture-Of-Expert Training",
+      "link": "https://doi.org/10.52202/068431-1611",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Chang Chen, Min Li, et al. (2022). TA-MoE: Topology-Aware Large Scale Mixture-Of-Expert Training. Retrieved from https://doi.org/10.52202/068431-1611",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "shi2026socialmoemultiagen",
+      "title": "SOCIAL-MOE: Multi-Agent Expert Architecture with Social Reasoning and Normative Autonomy",
+      "link": "https://doi.org/10.1109/etai68332.2026.11485366",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Fan Shi, Dongji Zhang (2026). SOCIAL-MOE: Multi-Agent Expert Architecture with Social Reasoning and Normative Autonomy. Retrieved from https://doi.org/10.1109/etai68332.2026.11485366",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ma2025taskorientedmoelor",
+      "title": "Task-Oriented MoE-LoRA: Expert Specialization and Routing for Remote Sensing Image Segmentation",
+      "link": "https://doi.org/10.1109/icsess67729.2025.11380510",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Kai Ma, Lichen Zhang (2025). Task-Oriented MoE-LoRA: Expert Specialization and Routing for Remote Sensing Image Segmentation. Retrieved from https://doi.org/10.1109/icsess67729.2025.11380510",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "boschi2019mantleoftheexpertm",
+      "title": "Mantle of the Expert (MoE) e o uso das Tecnologias Digitais na escola - uma experiência inglesa",
+      "link": "https://doi.org/10.36704/sciaseducomtec.v1i1.3507",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Roberta Luchini Boschi (2019). Mantle of the Expert (MoE) e o uso das Tecnologias Digitais na escola - uma experiência inglesa. Retrieved from https://doi.org/10.36704/sciaseducomtec.v1i1.3507",
+      "abstract": "O artigo apresenta o Mantle of the Expert (Manto do Especialista), MoE, uma prática pedagógica inglesa que cria realidades simuladas para desenvolver o currículo. A técnica, que faz o uso do teatro ou drama em sua acepção inglesa, ressalta também como as tecnologias atuam como aliadas na escola, como é possível verificar NUMA escola pública em Redditch, no município de Worcestershire, Inglaterra. Computadores, câmeras, iPads e outros gadgets assessoram o ensino e possibilitam aos alunos maior liberdade no processo de aprendizado e acesso ao currículo, além de um contato igualitário com relação às mídias. Em entrevista com o diretor da escola é possível notar que, com apoio governamental, professores e equipe dispostos a criar e a experimentar, as mídias e tecnologias tornam-se aliadas no u",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yang2024moei2compressingmi",
+      "title": "MoE-I2: Compressing Mixture of Experts Models through Inter-Expert Pruning and Intra-Expert Low-Rank Decomposition",
+      "link": "https://doi.org/10.18653/v1/2024.findings-emnlp.612",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Cheng Yang, Yang Sui, et al. (2024). MoE-I2: Compressing Mixture of Experts Models through Inter-Expert Pruning and Intra-Expert Low-Rank Decomposition. Retrieved from https://doi.org/10.18653/v1/2024.findings-emnlp.612",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2025dynamicexpertspeci",
+      "title": "Dynamic Expert Specialization: Towards Catastrophic Forgetting-Free Multi-Domain MoE Adaptation",
+      "link": "https://doi.org/10.18653/v1/2025.emnlp-main.932",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ],
+      "reference": "Junzhuo Li, Bo Wang, et al. (2025). Dynamic Expert Specialization: Towards Catastrophic Forgetting-Free Multi-Domain MoE Adaptation. Retrieved from https://doi.org/10.18653/v1/2025.emnlp-main.932",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "LLM",
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "albuquerque2024investigatingllmca",
+      "title": "Investigating LLM Capabilities in the Identification of Compilation Errors in Configurable Systems",
+      "link": "https://doi.org/10.5753/cbsoft_estendido.2024.4055",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "LLM",
+        "compilation",
+        "compiler"
+      ],
+      "reference": "Lucas Albuquerque, Rohit Gheyi (2024). Investigating LLM Capabilities in the Identification of Compilation Errors in Configurable Systems. Retrieved from https://doi.org/10.5753/cbsoft_estendido.2024.4055",
+      "abstract": "Compilation is an important process in developing configurable systems, such as Linux. However, identifying compilation errors in configurable systems is not straightforward because traditional compilers are not variability-aware. Previous approaches that detect some of these compilation errors often rely on advanced techniques that require significant effort from programmers. This study evaluates the efficacy of Large Language Models (LLMs), specifically CHATGPT4, GEMINI ADVANCED 1.5, LE CHAT MISTRAL, and Llama 3, in identifying compilation errors in configurable systems. We evaluate them in 30 small configurable systems in C, covering 17 different types of compilation errors. CHATGPT4 successfully identified 28 out of 30 compilation errors. LE CHAT MISTRAL, Llama 3 and GEMINI ADVANCED 1.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hong2024llmaidedcompilatio",
+      "title": "LLM-Aided Compilation for Tensor Accelerators",
+      "link": "https://doi.org/10.1109/lad62341.2024.10691720",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "compilation"
+      ],
+      "reference": "Charles Hong, Sahil Bhatia, et al. (2024). LLM-Aided Compilation for Tensor Accelerators. Retrieved from https://doi.org/10.1109/lad62341.2024.10691720",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "tahmid2024biollmnetenhancing",
+      "title": "BioLLMNet: Enhancing RNA-Interaction Prediction with a Specialized Cross-LLM Transformation Network",
+      "link": "https://doi.org/10.1101/2024.10.02.616044",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Md Toki Tahmid, Abrar Rahman Abir, Md. Shamsuzzoha Bayzid (2024). BioLLMNet: Enhancing RNA-Interaction Prediction with a Specialized Cross-LLM Transformation Network. Retrieved from https://doi.org/10.1101/2024.10.02.616044",
+      "abstract": "Abstract\nExisting computational methods for the prediction of RNA related interactions often rely heavily on manually crafted features. Language model features for bio-sequences has gain significant popularity in proteomics and genomics. However, during interaction prediction, how language model features from different modalities should be combined to extract the most representative features is yet to be explored. We introduce BioLLMNet, a novel framework that introduces an effective combination approach for multi-modal bio-sequences. BioLLMNet provides a way to transform feature space of different molecule’s language model features and uses learnable gating mechanism to effectively fuse features. Rigorous evaluations show that BioLLMNet achieves state-of-the-art performance in RNA-protein",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "jeong2024domainspecializedl",
+      "title": "Domain-specialized LLM: Financial fine-tuning and utilization method using Mistral 7B",
+      "link": "https://doi.org/10.13088/jiis.2024.30.1.093",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Cheonsu Jeong (2024). Domain-specialized LLM: Financial fine-tuning and utilization method using Mistral 7B. Retrieved from https://doi.org/10.13088/jiis.2024.30.1.093",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "maj2026amultiagentensembl",
+      "title": "A multi-agent ensemble framework for enhancing task performance using specialized LLM",
+      "link": "https://doi.org/10.15199/48.2026.3.13",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Michał MAJ (2026). A multi-agent ensemble framework for enhancing task performance using specialized LLM. Retrieved from https://doi.org/10.15199/48.2026.3.13",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "faldu2019posterdomainspecia",
+      "title": "POSTER: Domain-Specialized Cache Management for Graph Analytics",
+      "link": "https://doi.org/10.1109/pact.2019.00051",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "cache",
+        "specialized"
+      ],
+      "reference": "Priyank Faldu, Jeff Diamond, Boris Grot (2019). POSTER: Domain-Specialized Cache Management for Graph Analytics. Retrieved from https://doi.org/10.1109/pact.2019.00051",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "barrak2025traceabilityandacc",
+      "title": "Traceability and Accountability in Role-Specialized Multi-Agent LLM Pipelines",
+      "link": "https://doi.org/10.1109/asew67777.2025.00064",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Amine Barrak (2025). Traceability and Accountability in Role-Specialized Multi-Agent LLM Pipelines. Retrieved from https://doi.org/10.1109/asew67777.2025.00064",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zarb2025programsynthesiswi",
+      "title": "Program Synthesis with LLM-Predicted Minimal Specialized Grammars",
+      "link": "https://doi.org/10.1145/3712256.3726430",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "David Vella Zarb, Geoff Parks, Timoleon Kipouros (2025). Program Synthesis with LLM-Predicted Minimal Specialized Grammars. Retrieved from https://doi.org/10.1145/3712256.3726430",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ahammad2025magisterllmbasedte",
+      "title": "MAGISTER: LLM-Based Test Generation with Role-Specialized Agents",
+      "link": "https://doi.org/10.1109/sita67914.2025.11273637",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Abdellatif Ahammad, Manal El Bajta, Maryam Radgui (2025). MAGISTER: LLM-Based Test Generation with Role-Specialized Agents. Retrieved from https://doi.org/10.1109/sita67914.2025.11273637",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "chen2025llmreasoningengine",
+      "title": "LLM Reasoning Engine: Specialized Training for Enhanced Mathematical Reasoning",
+      "link": "https://doi.org/10.18653/v1/2025.knowledgenlp-1.9",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Shuguang Chen, Guang Lin (2025). LLM Reasoning Engine: Specialized Training for Enhanced Mathematical Reasoning. Retrieved from https://doi.org/10.18653/v1/2025.knowledgenlp-1.9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "robotin2025specializedinforma",
+      "title": "Specialized Information Retrieval with Improved Reliability via LLM Finetuning",
+      "link": "https://doi.org/10.1109/iccp68926.2025.11427155",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "George Catalin Robotin, Radu Razvan Slavescu (2025). Specialized Information Retrieval with Improved Reliability via LLM Finetuning. Retrieved from https://doi.org/10.1109/iccp68926.2025.11427155",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "more2026macvaspecializedmu",
+      "title": "MACV: A Specialized Multi-Agent and Consensus Framework for Reliable LLM Outputs",
+      "link": "https://doi.org/10.1109/icmcsi67283.2026.11412804",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ],
+      "reference": "Rakesh More, Sudarshan Varma, Nilay Varma (2026). MACV: A Specialized Multi-Agent and Consensus Framework for Reliable LLM Outputs. Retrieved from https://doi.org/10.1109/icmcsi67283.2026.11412804",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "viana2021specializedcorpusc",
+      "title": "Specialized corpus compilation for EAP",
+      "link": "https://doi.org/10.4324/9781003245988-5",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compilation",
+        "specialized"
+      ],
+      "reference": "Vander Viana, Aisling O’Boyle (2021). Specialized corpus compilation for EAP. Retrieved from https://doi.org/10.4324/9781003245988-5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhou2023researchonthecompi",
+      "title": "Research on the Compilation of Idiom Entries in Specialized Chinese Textbooks",
+      "link": "https://doi.org/10.54097/ijeh.v9i1.9363",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compilation",
+        "specialized"
+      ],
+      "reference": "Qi Zhou, Yanqing Yang, Xin Qian (2023). Research on the Compilation of Idiom Entries in Specialized Chinese Textbooks. Retrieved from https://doi.org/10.54097/ijeh.v9i1.9363",
+      "abstract": "Since the \"the Belt and Road\" initiative was put forward, various connections between China and the world have increased, and the value of Chinese language teaching in specialized fields has rapidly increased. As an important part of Chinese as a foreign language, the importance of Chinese idiom teaching cannot be ignored. However, at present, the academic community does not attach enough importance to the compilation of idiom entries in specialized Chinese textbooks. This article focuses on business, medicine, and art textbooks for teaching Chinese as a foreign language. It compares the inclusion of idioms in the textbooks with general and specialized outlines, and studies the degree of correlation. It analyzes the writing of idioms in specialized Chinese textbooks, summarizes the shortco",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kyaw2026repoaiautomatedcod",
+      "title": "RepoAI: Automated Code Refactoring through Multi-Agent LLM Orchestration and Retrieval-Augmented Generation",
+      "link": "https://doi.org/10.2139/ssrn.6235282",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Moe  Pyae Pyae Kyaw, Soe  Moe Ko, et al. (2026). RepoAI: Automated Code Refactoring through Multi-Agent LLM Orchestration and Retrieval-Augmented Generation. Retrieved from https://doi.org/10.2139/ssrn.6235282",
+      "abstract": "While Large Language Models have demonstrated strong code generation ca-pabilities, existing approaches operate at single-file level without repository-wide context or systematic validation. This paper presents RepoAI, a multi-agent system that automates repository-level code refactoring through co-ordinated LLM orchestration. Our approach employs specialised agents forintent classification, code generation, and validation, working collaborativelyto handle complex multi-file modifications. The system combines Retrieval-Augmented Generation for context-aware code understanding with a com-prehensive validation pipeline ensuring correctness before automated GitHubdeployment. Experimental evaluation demonstrates that multi-agent coordi-nation significantly improves refactoring accuracy for loc",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "kyaw2024epicensembledpoiso",
+      "title": "EPIC: Ensembled Poisoning Identification and Classification for LLM Backdoor Defense",
+      "link": "https://doi.org/10.1109/swc62898.2024.00142",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Moe Thu Kyaw, Zhongmin Dai, Vrizlynn L. L. Thing (2024). EPIC: Ensembled Poisoning Identification and Classification for LLM Backdoor Defense. Retrieved from https://doi.org/10.1109/swc62898.2024.00142",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "merouani2025agenticautoschedul",
+      "title": "Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization",
+      "link": "https://doi.org/10.1109/pact65351.2025.00027",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Massinissa Merouani, Islem Kara Bernou, Riyadh Baghdadi (2025). Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization. Retrieved from https://doi.org/10.1109/pact65351.2025.00027",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "malik2025perancanganstruktu",
+      "title": "Perancangan Struktur Fitur Aplikasi Warung Kopi Menggunakan LLM",
+      "link": "https://doi.org/10.51454/decode.v5i3.1442",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Moh. Ahsan Malik, Wahyu Andhyka Kusuma (2025). Perancangan Struktur Fitur Aplikasi Warung Kopi Menggunakan LLM. Retrieved from https://doi.org/10.51454/decode.v5i3.1442",
+      "abstract": "Warung kopi sekarang sudah lebih modern dan bisa berfungsi sebagai tempat sosial sekaligus produktif yang digemari anak-anak muda. Namun, kebanyakan warung kopi lokal masih menghadapi kendala dalam penggunaan otomasi teknologi untuk mempermudah servis, yang membuat pelayanan serta kepuasan pelanggan menjadi rendah. Penelitian ini ditujukan untuk mengeksplorasi dan menemukan fitur penting untuk aplikasi warung kopi berbasis user experience (UX) dengan menggunakan Prompt Engineering dan LLM. Tiga aplikasi kopi digital—Starbucks Indonesia, Fore Coffee, dan TOMORO Coffee—menjadi sumber data untuk analisis deskripsi dan ulasan mereka untuk fitur-fitur yang relevan. Hasil yang diperoleh ditambahkan ke dalam kuisioner untuk dievaluasi dari sudut IPCA. Pemetaan yang diperoleh menunjukkan bahwa fit",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023decodev",
+      "title": "decode, v.",
+      "link": "https://doi.org/10.1093/oed/1327118759",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": " (2023). decode, v.. Retrieved from https://doi.org/10.1093/oed/1327118759",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020decodemap",
+      "title": "DeCODE Map",
+      "link": "https://doi.org/10.32388/enauou",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": " (2020). DeCODE Map. Retrieved from https://doi.org/10.32388/enauou",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cai2026apmoenetfourieramp",
+      "title": "APMoE-Net: Fourier amplitude-phase joint enhancement and MoE compensation for low-light image enhancement",
+      "link": "https://doi.org/10.1016/j.eswa.2025.129664",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "moe"
+      ],
+      "reference": "Mengen Cai, Tongshun Zhang, et al. (2026). APMoE-Net: Fourier amplitude-phase joint enhancement and MoE compensation for low-light image enhancement. Retrieved from https://doi.org/10.1016/j.eswa.2025.129664",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "asheim2022aspecializedbtborg",
+      "title": "A Specialized BTB Organization for Servers",
+      "link": "https://doi.org/10.1145/3559009.3569692",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "specialized"
+      ],
+      "reference": "Truls Asheim, Boris Grot, Rakesh Kumar (2022). A Specialized BTB Organization for Servers. Retrieved from https://doi.org/10.1145/3559009.3569692",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 10,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "subandi2023preprocessingpadak",
+      "title": "Pre-Processing Pada Klasifikasi Citra Medis Pneumonia",
+      "link": "https://doi.org/10.51454/decode.v4i1.198",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "NPU"
+      ],
+      "reference": "Rio Subandi, Herman, Anton Yudhana (2023). Pre-Processing Pada Klasifikasi Citra Medis Pneumonia. Retrieved from https://doi.org/10.51454/decode.v4i1.198",
+      "abstract": "Pemrosesan citra merupakan teknik pengolahan citra yang mengubah suatu citra input menjadi citra yang berbeda sehingga keluarannya memiliki keunggulan lebih tinggi daripada citra input. Pemrosesan citra berguna untuk tingkat mutu citra, membuang cacat citra, mengenali objek, dan menggabungkannya dengan bagian lain dari suatu citra. Kemajuan teknologi pengolahan citra digital (digital image processing) yang semakin pesat, dapat mempermudah kehidupan manusia. Salah satu contoh penerapan dalam bidang kesehatan yaitu klasifikasi penyakit pneumonia, klasifikasi data penyakit pneumonia berbentuk dataset citra yang akan diklasifikasikan menggunakan sebuah metode. Saat ini banyak aplikasi yang dapat diterapkan dalam melakukan pre-processing terhadap berbagai citra baik citra medis maupun non medis",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "huang2024analisisperanatlet",
+      "title": "Analisis Peran Atlet Dota 2 Dengan Algoritma Random Forest",
+      "link": "https://doi.org/10.51454/decode.v4i1.216",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "fusion"
+      ],
+      "reference": "Dicky Huang, Ito Wasito (2024). Analisis Peran Atlet Dota 2 Dengan Algoritma Random Forest. Retrieved from https://doi.org/10.51454/decode.v4i1.216",
+      "abstract": "Dota 2 merupakan permainan action real time yang tergolong dalam game dengan genre strategi. Dalam Dota 2, para pemain dibagi menjadi 2 tim, yaitu, radiant dan dire untuk melawan satu sama lain. Setiap tim terdiri dari lima pemain, dengan peran masing-masing yang telah dipilih sebelumnya, salah satu cara dalam mengidentifikasi pemain berdasarkan keahliannya adalah dengan melakukan prediksi peran berdasarkan hasil statistik permainan sebelumnya. Untuk memprediksi kesesuaian pemain terhadap perannya, kami menggunakan Random Forest sebagai classifier dalam algoritma. Penelitian ini bertujuan menyortir pemain terhadap peran yang sesuai dengan permainannya. Metode random forest digunakan sebagai model prediksi yang meraih hasil akurasi sebesar 86,89%. Adapun penggunaan Confusion Matrix yang ber",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "C": 5,
+    "B": 27,
+    "A": 32
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:42.378634"
+}

@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch10",
+  "chapter_title": "Attention Online Softmax Optimization",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 55,
+  "catalog_tier_a": 26,
+  "binding_count": 239,
+  "quality_binding_count": 239,
+  "sentence_count": 316,
+  "claim_sentence_count": 316,
+  "unbound_claim_sentences": 77,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 48,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

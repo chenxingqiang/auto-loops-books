@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch17",
+  "chapter_title": "OpenAI Triton: Pythonic GPU Kernel Compiler",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 62,
+  "catalog_tier_a": 36,
+  "binding_count": 300,
+  "quality_binding_count": 300,
+  "sentence_count": 301,
+  "claim_sentence_count": 301,
+  "unbound_claim_sentences": 1,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 64,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

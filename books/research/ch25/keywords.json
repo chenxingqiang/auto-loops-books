@@ -1,0 +1,178 @@
+[
+  {
+    "term": "auto-optimization and AI-assisted compilation",
+    "weight": 18
+  },
+  {
+    "term": "HW reward",
+    "weight": 14
+  },
+  {
+    "term": "rl autotune",
+    "weight": 14
+  },
+  {
+    "term": "YiRage auto",
+    "weight": 14
+  },
+  {
+    "term": "HW reward LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "rl autotune LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage auto LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "reward hardware",
+    "weight": 12
+  },
+  {
+    "term": "rl autotun",
+    "weight": 12
+  },
+  {
+    "term": "auto",
+    "weight": 10
+  },
+  {
+    "term": "autotun",
+    "weight": 10
+  },
+  {
+    "term": "hardware",
+    "weight": 10
+  },
+  {
+    "term": "reward",
+    "weight": 10
+  },
+  {
+    "term": "YiRage",
+    "weight": 10
+  },
+  {
+    "term": "AI-assisted",
+    "weight": 9
+  },
+  {
+    "term": "auto-optimization",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compilation",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "slos",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  }
+]

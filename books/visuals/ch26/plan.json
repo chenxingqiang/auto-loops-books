@@ -34,7 +34,7 @@
       "kind": "architecture_figure",
       "section": "multi_hw_ops",
       "label": "fig:multi_hw_ops_architecture",
-      "caption": "Multi Hw Ops block diagram for Production Deployment and Engineering Best Practices.",
+      "caption": "Multi HW Ops block diagram for Production Deployment and Engineering Best Practices.",
       "status": "done",
       "placement": "t",
       "blocks": [

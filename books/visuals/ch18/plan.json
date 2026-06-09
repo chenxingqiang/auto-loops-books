@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "iree_hw_matrix",
       "label": "fig:iree_hw_matrix_pipeline",
-      "caption": "Iree Hw Matrix optimization pipeline in IREE: MLIR-Native Runtime and Compilation.",
+      "caption": "Iree HW Matrix optimization pipeline in IREE: MLIR-Native Runtime and Compilation.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Iree Hw Matrix"
+          "detail": "Iree HW Matrix"
         },
         {
           "name": "On-chip",

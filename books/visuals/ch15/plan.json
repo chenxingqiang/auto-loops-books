@@ -7,13 +7,13 @@
       "kind": "pipeline_figure",
       "section": "xla_hw_matrix",
       "label": "fig:xla_hw_matrix_pipeline",
-      "caption": "Xla Hw Matrix optimization pipeline in XLA: Production-Grade AI Compiler.",
+      "caption": "Xla HW Matrix optimization pipeline in XLA: Production-Grade AI Compiler.",
       "status": "done",
       "placement": "t",
       "stages": [
         {
           "name": "Input",
-          "detail": "Xla Hw Matrix"
+          "detail": "Xla HW Matrix"
         },
         {
           "name": "On-chip",

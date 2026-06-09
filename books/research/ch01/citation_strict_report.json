@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch01",
+  "chapter_title": "LLM Inference Performance Bottlenecks: From Symptoms to Root Causes",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 48,
+  "catalog_tier_a": 30,
+  "binding_count": 131,
+  "quality_binding_count": 131,
+  "sentence_count": 155,
+  "claim_sentence_count": 148,
+  "unbound_claim_sentences": 17,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 130,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

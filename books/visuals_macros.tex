@@ -1,10 +1,24 @@
 % Shared figure/table helpers for autobooks generated visuals.
 \input{visuals_style.tex}
 
+% Scale figures and wide tables to the current text block width.
+\newcommand{\autowidthfigure}[1]{%
+  \begin{adjustbox}{max width=\linewidth,center}%
+  #1%
+  \end{adjustbox}%
+}
+\newenvironment{autowidthtable}{%
+  \begin{adjustbox}{max width=\linewidth,center}%
+}{%
+  \end{adjustbox}%
+}
+
 \newcommand{\vispending}[1]{%
-  \begin{tikzpicture}
-    \node[vis placeholder box, text width=0.82\linewidth, align=center] {%
-      \textbf{[Placeholder]} #1%
-    };
-  \end{tikzpicture}%
+  \autowidthfigure{%
+    \begin{tikzpicture}
+      \node[vis placeholder box, text width=0.82\linewidth, align=center] {%
+        \textbf{[Placeholder]} #1%
+      };
+    \end{tikzpicture}%
+  }%
 }

@@ -1,0 +1,15 @@
+[
+  "\"Static Role Assignment and Schedule-Free Kernels\"",
+  "\"static\" AND \"role\"",
+  "\"thread\" AND \"warp\"",
+  "\"runtime\" AND \"dispatch\"",
+  "\"YiRage\" AND \"tiling\"",
+  "\"static role assignment and schedule-free kernels\" AND \"no runtime sched\"",
+  "\"static roles\" AND \"thread mapping\"",
+  "\"YiRage tiling\" AND \"no runtime sched LLM inference compiler\"",
+  "\"static roles LLM inference compiler\" AND \"thread mapping LLM inference compiler\"",
+  "\"YiRage tiling LLM inference compiler\" AND \"runtime dispatch\"",
+  "\"static role\" AND \"thread warp\"",
+  "\"dispatch\" AND \"role\"",
+  "\"runtime\" AND \"static\""
+]

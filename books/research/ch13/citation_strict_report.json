@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch13",
+  "chapter_title": "Core Theory: AI Compiler Optimization Principles",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 41,
+  "catalog_tier_a": 21,
+  "binding_count": 355,
+  "quality_binding_count": 355,
+  "sentence_count": 356,
+  "claim_sentence_count": 356,
+  "unbound_claim_sentences": 1,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 48,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

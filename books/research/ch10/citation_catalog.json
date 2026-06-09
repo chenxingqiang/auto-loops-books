@@ -1,0 +1,822 @@
+{
+  "chapter_id": "ch10",
+  "timestamp": "2026-06-10T02:45:39.273994",
+  "min_papers": 25,
+  "paper_count": 55,
+  "sentence_count": 316,
+  "binding_count": 253,
+  "papers": [
+    {
+      "bib_key": "lee2021gatedrecurrentcont",
+      "title": "Gated Recurrent Context: Softmax-Free Attention for Online Encoder-Decoder Speech Recognition",
+      "link": "https://doi.org/10.1109/taslp.2021.3049344",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 104,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "attention",
+        "decode"
+      ],
+      "reference": "Hyeonseung Lee, Woo Hyun Kang, et al. (2021). Gated Recurrent Context: Softmax-Free Attention for Online Encoder-Decoder Speech Recognition. Retrieved from https://doi.org/10.1109/taslp.2021.3049344",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kim2019personalizedonline",
+      "title": "Personalized Online Live Video Streaming Using Softmax-Based Multinomial Classification",
+      "link": "https://doi.org/10.3390/app9112297",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "online softmax",
+        "exp",
+        "online",
+        "softmax"
+      ],
+      "reference": "Kyeongseon Kim, Dohyun Kwon, et al. (2019). Personalized Online Live Video Streaming Using Softmax-Based Multinomial Classification. Retrieved from https://doi.org/10.3390/app9112297",
+      "abstract": "As the demand for over-the-top and online streaming services exponentially increases, many techniques for Quality of Experience (QoE) provisioning have been studied. Users can take actions (e.g., skipping) while streaming a video. Therefore, we should consider the viewing pattern of users rather than the network condition or video quality. In this context, we propose a proactive content-loading algorithm for improving per-user personalized preferences using multinomial softmax classification. Based on experimental results, the proposed algorithm has a personalized per-user content waiting time that is significantly lower than that of competing algorithms.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "jha2024aerosoftmaxonlyllm",
+      "title": "AERO: Softmax-Only LLMs for Efficient Private Inference",
+      "link": "https://doi.org/10.32388/wwlt24",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 71,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "decode",
+        "NPU",
+        "optimization"
+      ],
+      "reference": "Nandan Kumar Jha, Brandon Reagen (2024). AERO: Softmax-Only LLMs for Efficient Private Inference. Retrieved from https://doi.org/10.32388/wwlt24",
+      "abstract": "The pervasiveness of proprietary language models has raised privacy concerns for users’ sensitive data, emphasizing the need for private inference (PI), where inference is performed directly on encrypted inputs. However, current PI methods face prohibitively higher communication and latency overheads, primarily due to nonlinear operations. In this paper, we present a comprehensive analysis to understand the role of nonlinearities in transformer-based decoder-only language models. We introduce AERO, a four-step architectural optimization framework that refines the existing LLM architecture for efficient PI by systematically removing nonlinearities such as LayerNorm and GELU and reducing FLOPs counts. For the first time, we propose a Softmax-only architecture with significantly fewer FLOPs t",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hirayae2025hardwareorientedan",
+      "title": "Hardware-Oriented and Precisely Approximated Online Softmax for Deep Learning Models",
+      "link": "https://doi.org/10.1109/icecs66544.2025.11270517",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax"
+      ],
+      "reference": "Soshi Hirayae, Kanta Yoshioka, et al. (2025). Hardware-Oriented and Precisely Approximated Online Softmax for Deep Learning Models. Retrieved from https://doi.org/10.1109/icecs66544.2025.11270517",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "deng2024zerothorderalgorit",
+      "title": "Zero-th Order Algorithm for Softmax Attention Optimization",
+      "link": "https://doi.org/10.1109/bigdata62323.2024.10825630",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "optimization"
+      ],
+      "reference": "Yichuan Deng, Zhihang Li, et al. (2024). Zero-th Order Algorithm for Softmax Attention Optimization. Retrieved from https://doi.org/10.1109/bigdata62323.2024.10825630",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "curry2025diffusionattention",
+      "title": "Diffusion Attention: Replacing Softmax with Heat Kernel Dynamics",
+      "link": "https://doi.org/10.2139/ssrn.5953096",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "fusion"
+      ],
+      "reference": "Joshua Curry (2025). Diffusion Attention: Replacing Softmax with Heat Kernel Dynamics. Retrieved from https://doi.org/10.2139/ssrn.5953096",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "jyothi2026fuzzyattentionsegn",
+      "title": "Fuzzy Attention SegNet Model with Serval Ablation Optimization and Log-Cosh Softmax Loss for Effective Brain Tumor Segmentation Using MRI Imaging",
+      "link": "https://doi.org/10.1007/s44174-025-00628-3",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "optimization"
+      ],
+      "reference": "C. K. Jyothi, Anupama S. Awati, Dattaprasad A. Torse (2026). Fuzzy Attention SegNet Model with Serval Ablation Optimization and Log-Cosh Softmax Loss for Effective Brain Tumor Segmentation Using MRI Imaging. Retrieved from https://doi.org/10.1007/s44174-025-00628-3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2020gumbelsoftmaxbased",
+      "title": "Gumbel-softmax-based Optimization: A Simple General Framework for Optimization Problems on Graphs",
+      "link": "https://doi.org/10.21203/rs.3.rs-22822/v2",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "constraints",
+        "independent",
+        "optimization"
+      ],
+      "reference": "Yaoxin Li, Jing Liu, et al. (2020). Gumbel-softmax-based Optimization: A Simple General Framework for Optimization Problems on Graphs. Retrieved from https://doi.org/10.21203/rs.3.rs-22822/v2",
+      "abstract": "Abstract\nIn computer science, there exist a large number of optimization problems defined on graphs, that is to find a best node state configuration or a network structure such that the designed objective function is optimized under some constraints. However, these problems are notorious for their hardness to solve because most of them are NP-hard or NP-complete. Although traditional general methods such as simulated annealing (SA), genetic algorithms (GA) and so forth have been devised to these hard problems, their accuracy and time consumption are not satisfying in practice. In this work, we proposed a simple, fast, and general algorithm framework based on advanced automatic differentiation technique empowered by deep learning frameworks. By introducing Gumbel-softmax technique, we can o",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "CPU",
+        "optimization",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "banerjee2021exploringalternati",
+      "title": "Exploring Alternatives to Softmax Function",
+      "link": "https://doi.org/10.5220/0010502000002996",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "exp",
+        "softmax"
+      ],
+      "reference": "Kunal Banerjee, Vishak C., et al. (2021). Exploring Alternatives to Softmax Function. Retrieved from https://doi.org/10.5220/0010502000002996",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "franke2023thesoftmaxfunction",
+      "title": "The softmax function: Properties, motivation, and interpretation",
+      "link": "https://doi.org/10.31234/osf.io/vsw47",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 39,
+      "matched_keywords": [
+        "exp",
+        "softmax",
+        "NPU"
+      ],
+      "reference": "Michael Franke, Judith Degen (2023). The softmax function: Properties, motivation, and interpretation. Retrieved from https://doi.org/10.31234/osf.io/vsw47",
+      "abstract": "The softmax function is a ubiquitous helper function, frequently used as a probabilistic link function for unordered categorical data, in different kinds of models, such as regression, artificial neural networks, or probabilistic cognitive models. To fully understand the models in which the softmax function occurs, different levels of understanding of the softmax function itself are necessary. For input-output oriented models, like regression or neural network models, mathematical properties are crucial. For models with interpretable and meaningful internal representations like probabilistic cognitive models, we also require a thorough conceptual understanding of the motivation for using the softmax function (instead of something else). This tutorial provides an in- depth exposition of the",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "exp",
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "deng2025whysoftmaxattentio",
+      "title": "Why Softmax Attention Outperforms Linear Attention",
+      "link": "https://doi.org/10.1109/bigdata66926.2025.11400978",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Yichuan Deng, Zhao Song, et al. (2025). Why Softmax Attention Outperforms Linear Attention. Retrieved from https://doi.org/10.1109/bigdata66926.2025.11400978",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "cho2021filterpruningviaso",
+      "title": "Filter Pruning Via Softmax Attention",
+      "link": "https://doi.org/10.1109/icip42928.2021.9506724",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Sungmin Cho, Hyeseong Kim, Junseok Kwon (2021). Filter Pruning Via Softmax Attention. Retrieved from https://doi.org/10.1109/icip42928.2021.9506724",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kim2025improvingattention",
+      "title": "Improving Attention Parallelism via Delayed Value Generation and Softmax Offloading",
+      "link": "https://doi.org/10.5573/ieie.2025.62.8.10",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Junsung Kim, Cheolhwan Kim, Won-Woo Ro (2025). Improving Attention Parallelism via Delayed Value Generation and Softmax Offloading. Retrieved from https://doi.org/10.5573/ieie.2025.62.8.10",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2022partialdisastercla",
+      "title": "Partial Disaster Classification Based on Attention Mechanism and Balanced Softmax Loss Function",
+      "link": "https://doi.org/10.2139/ssrn.4292723",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "haoyu chen, guang zhang, et al. (2022). Partial Disaster Classification Based on Attention Mechanism and Balanced Softmax Loss Function. Retrieved from https://doi.org/10.2139/ssrn.4292723",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "koohpayegani2024simasimplesoftmaxf",
+      "title": "SimA: Simple Softmax-free Attention for Vision Transformers",
+      "link": "https://doi.org/10.1109/wacv57701.2024.00259",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Soroush Abbasi Koohpayegani, Hamed Pirsiavash (2024). SimA: Simple Softmax-free Attention for Vision Transformers. Retrieved from https://doi.org/10.1109/wacv57701.2024.00259",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patil2023streamingbilingual",
+      "title": "Streaming Bilingual End-to-End ASR Model Using Attention Over Multiple Softmax",
+      "link": "https://doi.org/10.1109/slt54892.2023.10022475",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Aditya Patil, Vikas Joshi, et al. (2023). Streaming Bilingual End-to-End ASR Model Using Attention Over Multiple Softmax. Retrieved from https://doi.org/10.1109/slt54892.2023.10022475",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lee2023softmaxoutputappro",
+      "title": "Softmax Output Approximation for Activation Memory-Efficient Training of Attention-based Networks",
+      "link": "https://doi.org/10.52202/075280-0664",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Changhyeon Lee, Seulki Lee (2023). Softmax Output Approximation for Activation Memory-Efficient Training of Attention-based Networks. Retrieved from https://doi.org/10.52202/075280-0664",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2021escapingthegradien",
+      "title": "Escaping the Gradient Vanishing: Periodic Alternatives of Softmax in Attention Mechanism",
+      "link": "https://doi.org/10.1109/access.2021.3138201",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Shulun Wang, Feng Liu, Bin Liu (2021). Escaping the Gradient Vanishing: Periodic Alternatives of Softmax in Attention Mechanism. Retrieved from https://doi.org/10.1109/access.2021.3138201",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bhola2024securingindustrial",
+      "title": "Securing Industrial IoT Networks Using Conv2D-Attention Approach with Softmax Classifier",
+      "link": "https://doi.org/10.1109/space63117.2024.10668089",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Bhavya Bhola, Ayan Raza, Rajeev Kumar (2024). Securing Industrial IoT Networks Using Conv2D-Attention Approach with Softmax Classifier. Retrieved from https://doi.org/10.1109/space63117.2024.10668089",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "koca2023hardwareefficients",
+      "title": "Hardware-efficient Softmax Approximation for Self-Attention Networks",
+      "link": "https://doi.org/10.1109/iscas46773.2023.10181465",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Nazim Altar Koca, Anh Tuan Do, Chip-Hong Chang (2023). Hardware-efficient Softmax Approximation for Self-Attention Networks. Retrieved from https://doi.org/10.1109/iscas46773.2023.10181465",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "collins2024incontextlearningw",
+      "title": "In-Context Learning with Transformers: Softmax Attention Adapts to Function Lipschitzness",
+      "link": "https://doi.org/10.52202/079017-2942",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Liam Collins, Aryan Mokhtari, et al. (2024). In-Context Learning with Transformers: Softmax Attention Adapts to Function Lipschitzness. Retrieved from https://doi.org/10.52202/079017-2942",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kim2024alowpowerattention",
+      "title": "A Low Power Attention and Softmax Accelerator for Large Language Models Inference",
+      "link": "https://doi.org/10.1109/icce-asia63397.2024.10773935",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Jeong-Hyun Kim, Chan-Hoon Kim, et al. (2024). A Low Power Attention and Softmax Accelerator for Large Language Models Inference. Retrieved from https://doi.org/10.1109/icce-asia63397.2024.10773935",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "han2024bridgingthedivider",
+      "title": "Bridging the Divide: Reconsidering Softmax and Linear Attention",
+      "link": "https://doi.org/10.52202/079017-2515",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ],
+      "reference": "Dongchen Han, Yizeng Han, et al. (2024). Bridging the Divide: Reconsidering Softmax and Linear Attention. Retrieved from https://doi.org/10.52202/079017-2515",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2026softmax",
+      "title": "Модель рейтинговых оценок с латентными параметрами на базе функции softmax",
+      "link": "https://doi.org/10.26102/2310-6018/2026.54.3.002",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "exp",
+        "softmax"
+      ],
+      "reference": "В.В. Братищенко (2026). Модель рейтинговых оценок с латентными параметрами на базе функции softmax. Retrieved from https://doi.org/10.26102/2310-6018/2026.54.3.002",
+      "abstract": "Актуальность работы обусловлена широким распространением рекомендательных систем, использующих рейтинговые оценки. По результатам обзора методов рекомендаций делается вывод о возможности и целесообразности построения вероятностной модели рейтинговых оценок, аналогичной моделям Item Response Theory. Предлагается для каждого субъекта использовать латентные параметры интереса, характеризующие его склонность выставлять определенную рейтинговую оценку, а для каждого объекта – латентные параметры соответствия, характеризующие частоты получения определенной рейтинговой оценки. Вероятности оценок определяются функцией softmax c параметрами интереса и соответствия. Методом максимального правдоподобия получены уравнения, связывающие наблюдения и латентные параметры. Разработана итерационная процедур",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "menegaux2025phylohsaphylogenet",
+      "title": "Phylo-HS: A phylogenetic hierarchical softmax for taxonomic classification",
+      "link": "https://doi.org/10.1101/2025.01.27.634943",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "softmax",
+        "bottleneck"
+      ],
+      "reference": "Romain Menegaux (2025). Phylo-HS: A phylogenetic hierarchical softmax for taxonomic classification. Retrieved from https://doi.org/10.1101/2025.01.27.634943",
+      "abstract": "Abstract\n\n                  Taxonomic binning –assigning taxonomic labels to DNA sequencing reads – is a core component of metagenomics data analysis. While machine learning approaches offer competitive speed and accuracy, their scalability is hindered by the growing number of referenced genomes and species. A major bottleneck lies in the final softmax layer of neural network models, which computes probabilities and gradients for all outcome classes. To address this, we propose\n                  Phylo-HS\n                  , a hierarchical softmax method that leverages the taxonomic tree to group classes into meaningful clusters. Phylo-HS achieves an order of magnitude speed improvement on a dataset with 5,000 classes and improves classification accuracy compared to frequency-based hierarch",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ganeri2018orientingattention",
+      "title": "Orienting Attention",
+      "link": "https://doi.org/10.1093/oso/9780198757405.003.0007",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ],
+      "reference": "Jonardon Ganeri (2018). Orienting Attention. Retrieved from https://doi.org/10.1093/oso/9780198757405.003.0007",
+      "abstract": "A puzzle about attention with a long history is addressed, the puzzle that attention can be captured by events and in such cases does not appear to be required for conscious experience. One might argue that there is still conscious attention in such cases, though of a global sort; but the view this chapter defends is rather that attention has a subliminal as well as a conscious form. Subliminally attention is the mode of activity of cognitive modules which are responsible for the orienting towards and processing of stimuli and their deliverance into awareness, as well as their crossmodal interconnections.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ganeri2018perceptualattentio",
+      "title": "Perceptual Attention",
+      "link": "https://doi.org/10.1093/oso/9780198757405.003.0005",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ],
+      "reference": "Jonardon Ganeri (2018). Perceptual Attention. Retrieved from https://doi.org/10.1093/oso/9780198757405.003.0005",
+      "abstract": "Conscious attention performs two distinct roles in experience, a role of placing and a role of focusing, roles which match a distinction between selection and access endorsed in recent theories of attention. The intentionality of conscious experience consists in two sorts of attentional action, a focusing at and a placing on, the first lending to experience a perspectival categorical content and the second structuring its phenomenal character. Placing should be thought of more like opening a window for consciousness than as shining a spotlight, and focusing has to do with accessing the properties of whatever the window opens onto. A window is an aperture whose boundaries are defined by what is excluded—in this case, distractors.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ganeri2018empatheticattentio",
+      "title": "Empathetic Attention",
+      "link": "https://doi.org/10.1093/oso/9780198757405.003.0013",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ],
+      "reference": "Jonardon Ganeri (2018). Empathetic Attention. Retrieved from https://doi.org/10.1093/oso/9780198757405.003.0013",
+      "abstract": "Attention can be placed on others. Now it is you on whom one’s attention is placed, and what one accesses in focusing on you are your mental states. One does not experience them directly; rather, your movements provide focal attention with a causal channel: they ‘intimate’ your thoughts to one. Empathy is analogous to listening to another, itself a kind of attention. So empathy, one’s awareness of another in their otherness, is an attentional state. While phenomenologists have claimed that empathy, the ability to apprehend the beliefs and emotions of others, is a perceptual skill, this chapter will argue instead that empathy is a distinct kind of attention, attention through embodied comportment to the feelings, commitments, and wishes of others.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ganeri2018narrativeattention",
+      "title": "Narrative Attention",
+      "link": "https://doi.org/10.1093/oso/9780198757405.003.0012",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ],
+      "reference": "Jonardon Ganeri (2018). Narrative Attention. Retrieved from https://doi.org/10.1093/oso/9780198757405.003.0012",
+      "abstract": "This chapter argues that attention is that in virtue of which one does not merely live in the present, but is also aware of the past and is situated in a social world with others. So a basic kind of attention is past-directed and autonoetic: it is placed on past events whose properties are retrieved in an act of simulated reliving. In episodic memory, the reliving of experience from one’s personal past, one attends to the past in a particular way but there is no reduction of the phenomenology of temporal experience to the representation of oneself as in the past.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kartal2025csoftmaxcontextual",
+      "title": "C-Softmax: Contextual Softmax Operator Incorporating Row and Column Priorities",
+      "link": "https://doi.org/10.36227/techrxiv.175647872.27401306/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Hakan Emre Kartal (2025). C-Softmax: Contextual Softmax Operator Incorporating Row and Column Priorities. Retrieved from https://doi.org/10.36227/techrxiv.175647872.27401306/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kong2019idsoftmaxasoftmaxl",
+      "title": "ID-Softmax: A Softmax-like Loss for ID Face Recognition",
+      "link": "https://doi.org/10.5220/0007370904120419",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Yan Kong, Fuzhang Wu, et al. (2019). ID-Softmax: A Softmax-like Loss for ID Face Recognition. Retrieved from https://doi.org/10.5220/0007370904120419",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yang2023learningdifferenti",
+      "title": "Learning Differentiable Categorical Regions with Gumbel-Softmax for Person Re-Identification",
+      "link": "https://doi.org/10.2139/ssrn.4670344",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "wenjie yang (2023). Learning Differentiable Categorical Regions with Gumbel-Softmax for Person Re-Identification. Retrieved from https://doi.org/10.2139/ssrn.4670344",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "choi2020f2softmaxdiversify",
+      "title": "Fˆ2-Softmax: Diversifying Neural Text Generation via Frequency Factorized Softmax",
+      "link": "https://doi.org/10.18653/v1/2020.emnlp-main.737",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Byung-Ju Choi, Jimin Hong, et al. (2020). Fˆ2-Softmax: Diversifying Neural Text Generation via Frequency Factorized Softmax. Retrieved from https://doi.org/10.18653/v1/2020.emnlp-main.737",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ko2024reviewofaerosoftma",
+      "title": "Review of: \"AERO: Softmax-Only LLMs for Efficient Private Inference\"",
+      "link": "https://doi.org/10.32388/3hf46s",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Hanseok Ko (2024). Review of: \"AERO: Softmax-Only LLMs for Efficient Private Inference\". Retrieved from https://doi.org/10.32388/3hf46s",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zakamulin2025entropyregularized",
+      "title": "Entropy-Regularized Portfolio Selection via Softmax Sharpe Allocation",
+      "link": "https://doi.org/10.2139/ssrn.5539560",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Valeriy Zakamulin (2025). Entropy-Regularized Portfolio Selection via Softmax Sharpe Allocation. Retrieved from https://doi.org/10.2139/ssrn.5539560",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2025logisticandsoftmax",
+      "title": "Logistic and Softmax Regression",
+      "link": "https://doi.org/10.1017/9781009023870.010",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": " (2025). Logistic and Softmax Regression. Retrieved from https://doi.org/10.1017/9781009023870.010",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "luo2024causalsoftmaxforou",
+      "title": "Causal Softmax for Out-of-Distribution Generalization",
+      "link": "https://doi.org/10.2139/ssrn.4937412",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Jing Luo, Wanqing Zhao, Jinye Peng (2024). Causal Softmax for Out-of-Distribution Generalization. Retrieved from https://doi.org/10.2139/ssrn.4937412",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2021speakerverificatio",
+      "title": "Speaker Verification Analysis Based on Cosine Softmax Loss",
+      "link": "https://doi.org/10.12677/aam.2021.1011412",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "旗旺 谢 (2021). Speaker Verification Analysis Based on Cosine Softmax Loss. Retrieved from https://doi.org/10.12677/aam.2021.1011412",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kim2025designoftensorcore",
+      "title": "Design of Tensor Core Archiecture for Softmax Acceleration",
+      "link": "https://doi.org/10.5573/ieie.2025.62.8.3",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Sungwoo Kim, Won-Woo Ro (2025). Design of Tensor Core Archiecture for Softmax Acceleration. Retrieved from https://doi.org/10.5573/ieie.2025.62.8.3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "s2022digitalimplementat",
+      "title": "Digital Implementation of the Softmax Activation Function and the Inverse Softmax Function",
+      "link": "https://doi.org/10.1109/i4c57141.2022.10057747",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "Raghuram S, Anirudh S Bharadwaj, et al. (2022). Digital Implementation of the Softmax Activation Function and the Inverse Softmax Function. Retrieved from https://doi.org/10.1109/i4c57141.2022.10057747",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bratischenko2025alatentparametermo",
+      "title": "A LATENT PARAMETER MODEL OF EXAMINATION GRADES BASED ON THE SOFTMAX FUNCTION",
+      "link": "https://doi.org/10.17513/snt.40481",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ],
+      "reference": "V.V. Bratischenko (2025). A LATENT PARAMETER MODEL OF EXAMINATION GRADES BASED ON THE SOFTMAX FUNCTION. Retrieved from https://doi.org/10.17513/snt.40481",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention",
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "attention"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 26,
+    "B": 24,
+    "C": 5
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:39.339985"
+}

@@ -21,7 +21,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
-CHAPTERS = BOOKS / "chapters"
+CHAPTER_INPUT_DIR = "build/chapters"
+_build_chapters = BOOKS / "build" / "chapters"
+_legacy_chapters = BOOKS / "chapters"
+CHAPTERS = (
+    _build_chapters
+    if _build_chapters.is_dir()
+    else _legacy_chapters
+)
 
 
 @dataclass(frozen=True)
@@ -195,7 +202,9 @@ def sync_main_tex_inputs() -> list[str]:
     specs = [s for s in OUTLINE if (CHAPTERS / s.filename).exists()]
     if not specs:
         return []
-    block = "\n\n".join(f"\\input{{chapters/{s.filename}}}" for s in specs) + "\n\n"
+    block = "\n\n".join(
+        f"\\input{{{CHAPTER_INPUT_DIR}/{s.filename}}}" for s in specs
+    ) + "\n\n"
     pattern = re.compile(
         r"(\\mainmatter\s*\n)(.*?)(\n\\small\{\s*\n\\typeout\{START_CHAPTER \"bib\")",
         re.DOTALL,

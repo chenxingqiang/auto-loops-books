@@ -1,0 +1,198 @@
+[
+  {
+    "term": "three kernel execution modes",
+    "weight": 18
+  },
+  {
+    "term": "eager mode",
+    "weight": 14
+  },
+  {
+    "term": "graph mode",
+    "weight": 14
+  },
+  {
+    "term": "MegaKernel mode",
+    "weight": 14
+  },
+  {
+    "term": "mode selection",
+    "weight": 14
+  },
+  {
+    "term": "eager mode LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "graph mode LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "MegaKernel mode LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "mode selection LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "eager PyTorch",
+    "weight": 12
+  },
+  {
+    "term": "hardware trade",
+    "weight": 12
+  },
+  {
+    "term": "CUDA Graphs",
+    "weight": 11
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 11
+  },
+  {
+    "term": "eager",
+    "weight": 10
+  },
+  {
+    "term": "hardware",
+    "weight": 10
+  },
+  {
+    "term": "PyTorch",
+    "weight": 10
+  },
+  {
+    "term": "trade",
+    "weight": 10
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "CUDA",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "execution",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernel",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "mode",
+    "weight": 9
+  },
+  {
+    "term": "modes",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "production",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "three",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

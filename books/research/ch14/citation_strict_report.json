@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch14",
+  "chapter_title": "MLIR: Modern Compiler Infrastructure",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 64,
+  "catalog_tier_a": 46,
+  "binding_count": 277,
+  "quality_binding_count": 277,
+  "sentence_count": 301,
+  "claim_sentence_count": 278,
+  "unbound_claim_sentences": 1,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 63,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

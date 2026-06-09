@@ -1,0 +1,18 @@
+[
+  "\"AMD XDNA/AIE Dataflow Architecture\"",
+  "\"XDNA\" AND \"AIE\"",
+  "\"static\" AND \"dataflow\"",
+  "\"buffer descriptor\" AND \"TMA\"",
+  "\"softmax\" AND \"carrier\"",
+  "\"CUDA\" AND \"XDNA\"",
+  "\"dataflow\" AND \"inference\"",
+  "\"YiRage\" AND \"XDNA\"",
+  "\"AMD XDNA/AIE dataflow architecture\" AND \"architecture tradeoffs\"",
+  "\"CUDA XDNA mapping\" AND \"dataflow conclusion\"",
+  "\"online softmax HW\" AND \"static dataflow rules\"",
+  "\"XDNA tiles\" AND \"YiRage XDNA backend\"",
+  "\"architecture tradeoffs LLM inference compiler\" AND \"CUDA XDNA mapping LLM inference compiler\"",
+  "\"dataflow conclusion LLM inference compiler\" AND \"online softmax HW LLM inference compiler\"",
+  "\"static dataflow rules LLM inference compiler\" AND \"XDNA tiles LLM inference compiler\"",
+  "\"YiRage XDNA backend LLM inference compiler\" AND \"AI compiler optimization\""
+]

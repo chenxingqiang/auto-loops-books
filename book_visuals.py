@@ -291,7 +291,9 @@ SECTION_VISUAL_RECIPES: dict[str, dict[str, list[dict[str, Any]]]] = {
 
 
 def _humanize_section(label: str) -> str:
-    return label.replace("_", " ").title()
+    from book_proper_nouns import canonicalize_prose
+
+    return canonicalize_prose(label.replace("_", " "))
 
 
 def default_figure_recipe(spec: ChapterSpec, section: SectionSpec, kind_idx: int) -> dict[str, Any]:
@@ -453,6 +455,14 @@ def _format_table_header(cols: list[str]) -> str:
     return " & ".join(cells)
 
 
+def _autowidth_open() -> str:
+    return "\\begin{adjustbox}{max width=\\linewidth,center}"
+
+
+def _autowidth_close() -> str:
+    return "\\end{adjustbox}"
+
+
 def render_comparison_table(vis: VisualSpec) -> str:
     cols = vis.extra.get("columns", [])
     rows = vis.extra.get("rows", [])
@@ -462,6 +472,7 @@ def render_comparison_table(vis: VisualSpec) -> str:
         "\\centering",
         f"\\caption{{{vis.caption}}}",
         f"\\label{{{vis.label}}}",
+        _autowidth_open(),
         f"\\begin{{tabular}}{{{col_spec}}}",
         "\\toprule",
         VISUAL_STYLE["table_header"],
@@ -470,7 +481,12 @@ def render_comparison_table(vis: VisualSpec) -> str:
     ]
     for row in rows:
         lines.append(" & ".join(row) + " \\\\")
-    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}"]
+    lines += [
+        "\\bottomrule",
+        "\\end{tabular}",
+        _autowidth_close(),
+        "\\end{table}",
+    ]
     return "\n".join(lines)
 
 
@@ -518,10 +534,12 @@ def render_pipeline_figure(vis: VisualSpec, *, node_style: str = "pipeline_node"
         [
             f"\\begin{{figure}}[{vis.placement}]",
             "\\centering",
+            _autowidth_open(),
             figure_tikz_opening("pipeline"),
             *nodes,
             *arrows,
             "\\end{tikzpicture}",
+            _autowidth_close(),
             f"\\caption{{{vis.caption}}}",
             f"\\label{{{vis.label}}}",
             "\\end{figure}",
@@ -549,6 +567,7 @@ def render_roofline_figure(vis: VisualSpec) -> str:
         [
             f"\\begin{{figure}}[{vis.placement}]",
             "\\centering",
+            _autowidth_open(),
             figure_tikz_opening("roofline"),
             f"    \\draw[{VISUAL_STYLE['axis']}] (0,0) -- (8,0) node[right] {{\\footnotesize Arithmetic intensity}};",
             f"    \\draw[{VISUAL_STYLE['axis']}] (0,0) -- (0,6) node[above] {{\\footnotesize GFLOP/s}};",
@@ -556,6 +575,7 @@ def render_roofline_figure(vis: VisualSpec) -> str:
             f"    \\draw[{VISUAL_STYLE['roof_compute']}] ({ridge_x:.2f},{ridge_y:.2f}) -- (8,{ridge_y:.2f});",
             *pts,
             "\\end{tikzpicture}",
+            _autowidth_close(),
             f"\\caption{{{vis.caption}}}",
             f"\\label{{{vis.label}}}",
             "\\end{figure}",
@@ -570,6 +590,7 @@ def render_bar_figure(vis: VisualSpec) -> str:
     lines = [
         f"\\begin{{figure}}[{vis.placement}]",
         "\\centering",
+        _autowidth_open(),
         figure_tikz_opening("bar"),
         f"    \\draw[{VISUAL_STYLE['axis']}] (0,0) -- (0,4.5) node[above] {{\\footnotesize {y_label}}};",
         f"    \\draw[{VISUAL_STYLE['axis']}] (0,0) -- (6.5,0);",
@@ -583,6 +604,7 @@ def render_bar_figure(vis: VisualSpec) -> str:
         )
     lines += [
         "\\end{tikzpicture}",
+        _autowidth_close(),
         f"\\caption{{{vis.caption}}}",
         f"\\label{{{vis.label}}}",
         "\\end{figure}",

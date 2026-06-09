@@ -1,18 +1,24 @@
 {
   "chapter_id": "ch01",
-  "timestamp": "2026-06-09T17:13:26.138704+00:00",
-  "entry_count": 3,
-  "verified_ok_count": 0,
+  "timestamp": "2026-06-09T17:52:54.754513+00:00",
+  "entry_count": 4,
+  "verified_ok_count": 3,
   "entries": [
     {
       "claim": "847.5 kernels/token Llama-3.2-1B H100 BS4 SL2048 m=10",
       "bib_key": "taxbreak2026",
       "source_url": "https://arxiv.org/abs/2603.12465",
       "corroboration_url": "https://arxiv.org/abs/2603.12465",
-      "source_fetch_ok": false,
+      "source_fetch_ok": true,
       "source_content_match": false,
       "source_missing_tokens": [
-        "empty content"
+        "847.5",
+        "3.2",
+        "2048",
+        "kernels/token",
+        "Llama-3.2-1b",
+        "bs4",
+        "sl2048"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
@@ -26,15 +32,16 @@
       "bib_key": "memoryfloor2026",
       "source_url": "https://arxiv.org/abs/2605.30571",
       "corroboration_url": "https://arxiv.org/abs/2605.30571",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "speedup",
+        "ctx2048"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
       "corroboration_missing_tokens": [],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/cf0029c11de6d2a0.json"
     },
@@ -43,19 +50,46 @@
       "bib_key": "liu2024deepseekv3",
       "source_url": "https://arxiv.org/abs/2412.19437",
       "corroboration_url": "https://arxiv.org/abs/2507.14397",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "10x",
+        "decode",
+        "prefill",
+        "deployment"
       ],
-      "corroboration_fetch_ok": false,
-      "corroboration_content_match": false,
+      "corroboration_fetch_ok": true,
+      "corroboration_content_match": true,
       "corroboration_missing_tokens": [
-        "empty content"
+        "10x",
+        "DeepSeek-v3",
+        "ratio"
       ],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/de539966b9f54c2c.json"
+    },
+    {
+      "claim": "YiRage is a multi-backend LLM inference optimization compiler (CUDA, CPU, MPS, Triton, NKI, MLIR)",
+      "bib_key": "yirage2026",
+      "source_url": "https://github.com/chenxingqiang/YiRage",
+      "corroboration_url": "https://github.com/chenxingqiang/YiRage/blob/main/docs/architecture.md",
+      "source_fetch_ok": true,
+      "source_content_match": true,
+      "source_missing_tokens": [],
+      "corroboration_fetch_ok": true,
+      "corroboration_content_match": true,
+      "corroboration_missing_tokens": [
+        "compiler",
+        "CUDA",
+        "CPU",
+        "Triton",
+        "nki",
+        "MLIR"
+      ],
+      "verified_ok": true,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/a2a2a677f3414530.json"
     }
   ],
   "status": "issues"

@@ -1,0 +1,304 @@
+{
+  "chapter_id": "ch09",
+  "pool_count": 29,
+  "bib_keys": [
+    "zheng2023researchonclocksyn",
+    "mahgoli2026ahierarchicalaidri",
+    "hunold2018hierarchicalclocks",
+    "klimov2018featuresofsynchron",
+    "wiesner2024timesynchronizatio",
+    "volgushev2024integratedcommunic",
+    "anon20212021ieeeinternatio",
+    "anon20242024ieeeinternatio",
+    "mkacher2018securetimesynchron",
+    "wiesner2025timesynchronizatio",
+    "coleman2021multicoreintraproc",
+    "grunichev2018analysisoftimeforh",
+    "yirage2026",
+    "memoryfloor2026",
+    "hu2021plisyncprefetchlos",
+    "sviridov2018tosyncornottosyncw",
+    "nakada2024lipsyncmlmachinele",
+    "patel2025llminference",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "zheng2023researchonclocksyn",
+      "title": "Research on clock synchronization technology of metering equipment based on satellite communication and wide area hierarchical aggregation",
+      "source_tier": "A",
+      "relevance_score": 110,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "mahgoli2026ahierarchicalaidri",
+      "title": "A Hierarchical AI-Driven Hybrid Communication Framework for Underwater Swarm Coordination: Enabling Nanosecond Synchronization and Robust Cooperative MIMO Performance",
+      "source_tier": "A",
+      "relevance_score": 110,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "hunold2018hierarchicalclocks",
+      "title": "Hierarchical Clock Synchronization in MPI",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "klimov2018featuresofsynchron",
+      "title": "FEATURES OF SYNCHRONIZATION IN WIRELESS COMMUNICATION NETWORKS",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "wiesner2024timesynchronizatio",
+      "title": "Time Synchronization Extension for the IO-Link Industrial Communication Protocol",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "volgushev2024integratedcommunic",
+      "title": "Integrated Communication, Localization, Sensing and Synchronization in 6G Cognitive Wireless Networks",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon20212021ieeeinternatio",
+      "title": "2021 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon20242024ieeeinternatio",
+      "title": "2024 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "mkacher2018securetimesynchron",
+      "title": "Secure Time Synchronization Protocol",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "wiesner2025timesynchronizatio",
+      "title": "Time Synchronization Performance of Single-Pair Ethernet (SPE) Solutions",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "coleman2021multicoreintraproc",
+      "title": "Multi-Core Intra-Process Clock Synchronization",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "grunichev2018analysisoftimeforh",
+      "title": "Analysis of time for hierarchical distributed updating of location information of subscribers in next-generation mobile communication networks",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "communication",
+        "hierarchical"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "GPU",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "hu2021plisyncprefetchlos",
+      "title": "PLI-Sync: Prefetch Loss-Insensitive Sync for NDN Group Streaming",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "sviridov2018tosyncornottosyncw",
+      "title": "To Sync or Not to Sync: Why Asynchronous Traffic Control Is Good Enough for Your Data Center",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "nakada2024lipsyncmlmachinele",
+      "title": "Lip-Sync ML: Machine Learning-based Framework to Generate Lip-sync Animations in FINAL FANTASY VII REBIRTH",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

@@ -1,0 +1,960 @@
+{
+  "chapter_id": "ch11",
+  "timestamp": "2026-06-10T02:45:43.840669",
+  "min_papers": 25,
+  "paper_count": 61,
+  "sentence_count": 406,
+  "binding_count": 324,
+  "papers": [
+    {
+      "bib_key": "vijayalakshm2023polardecoderbasedf",
+      "title": "Polar Decoder-Based Full Adders: Implementation and Comparative Analysis Using 180 nm and 90 nm Technologies in Cadence",
+      "link": "https://doi.org/10.1007/978-981-19-7753-4_62",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ],
+      "reference": "T. Vijayalakshmi, J. Selvakumar (2023). Polar Decoder-Based Full Adders: Implementation and Comparative Analysis Using 180 nm and 90 nm Technologies in Cadence. Retrieved from https://doi.org/10.1007/978-981-19-7753-4_62",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018sampleveriloghdlco_25",
+      "title": "Sample Verilog HDL codes for implementation of fully-parallel LDPC decoder architecture",
+      "link": "https://doi.org/10.1016/b978-0-12-811255-7.00020-4",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ],
+      "reference": " (2018). Sample Verilog HDL codes for implementation of fully-parallel LDPC decoder architecture. Retrieved from https://doi.org/10.1016/b978-0-12-811255-7.00020-4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "vordonis2021hardwareimplementa",
+      "title": "Hardware Implementation and Performance Analysis of Improved Sphere Decoder in Spatially Correlated Massive MIMO Channels",
+      "link": "https://doi.org/10.36227/techrxiv.15042759.v2",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 85,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation",
+        "NPU"
+      ],
+      "reference": "Dimitris Vordonis, Vassilis Paliouras (2021). Hardware Implementation and Performance Analysis of Improved Sphere Decoder in Spatially Correlated Massive MIMO Channels. Retrieved from https://doi.org/10.36227/techrxiv.15042759.v2",
+      "abstract": "Detection for high-dimensional multiple-input multiple-output (MIMO) and\nmassive MIMO (MMIMO) systems is an active field of research in wireless\ncommunications. While most works consider spatially uncorrelated\nchannels, practical MMIMO channels are correlated. This paper\ninvestigates the impact of correlation on Sphere Decoder (SD), for both\nsingle-user (SU) and multi-user (MU) scenarios. The complexity of SD is\nmainly determined by the initial radius (IR) method and the number of\nvisited nodes during detection. This paper employs an efficient IR and\nproposes a new metric constraint in the tree searching algorithm, that\nsignificantly decrease the number of visited nodes and render SD\nfeasible for large-scale systems. In addition, an introduced hardware\nimplementation featured with a one-no",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kozorez2026hardwareimplementa",
+      "title": "Hardware implementation of first-order Reed-Muller decoder with soft output",
+      "link": "https://doi.org/10.18127/j00338486-202603-12",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 85,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation",
+        "NPU"
+      ],
+      "reference": "K.S. Kozorez, A.V. Rashich (2026). Hardware implementation of first-order Reed-Muller decoder with soft output. Retrieved from https://doi.org/10.18127/j00338486-202603-12",
+      "abstract": "In this paper, an approach to implementing a pipelined first-or der soft-output Reed-Muller decoder based on sign-magnitude com putations and modified comparators is presented. The complexity o f the proposed decoders based on the fast Hadamard transform (FHT) is analyzed and compared w ith the complexity of recursive decoders based on the discrepancy and correlation metrics. It is shown that the proposed component decoder provides reduced complexity and high performance, reaching 350 MHz for code lengths up to 32. The dependences of the hardware complexity of the Ree d-Muller decoder for various code lengths and input log-likelih ood ratio bit-widths are obtained.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chaudhary2026benchmarkingencode",
+      "title": "Benchmarking Encoder–Decoder and Decoder-Only Models for Extremely Low-Resource English to Myaamia Translation",
+      "link": "https://doi.org/10.1109/syscon66367.2026.11503586",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "benchmark",
+        "decoder",
+        "source",
+        "decode"
+      ],
+      "reference": "Yogesh Chaudhary, Suman Bhunia, et al. (2026). Benchmarking Encoder–Decoder and Decoder-Only Models for Extremely Low-Resource English to Myaamia Translation. Retrieved from https://doi.org/10.1109/syscon66367.2026.11503586",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "j2019designandimplement",
+      "title": "Design and Implementation of High Speed Viterbi Decoder and Convolution Encoder for SDR",
+      "link": "https://doi.org/10.17485/ijst/2019/v12i36/147574",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Reshmi R. J., Raji C (2019). Design and Implementation of High Speed Viterbi Decoder and Convolution Encoder for SDR. Retrieved from https://doi.org/10.17485/ijst/2019/v12i36/147574",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020peerreview1ofavite",
+      "title": "Peer Review #1 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "link": "https://doi.org/10.7287/peerj-cs.250v0.1/reviews/1",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2020). Peer Review #1 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\". Retrieved from https://doi.org/10.7287/peerj-cs.250v0.1/reviews/1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020peerreview4ofavite",
+      "title": "Peer Review #4 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\"",
+      "link": "https://doi.org/10.7287/peerj-cs.250v0.2/reviews/4",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2020). Peer Review #4 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\". Retrieved from https://doi.org/10.7287/peerj-cs.250v0.2/reviews/4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020peerreview3ofavite",
+      "title": "Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\"",
+      "link": "https://doi.org/10.7287/peerj-cs.250v0.2/reviews/3",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2020). Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\". Retrieved from https://doi.org/10.7287/peerj-cs.250v0.2/reviews/3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "middya2023designandimplement",
+      "title": "Design and Implementation of Virtual-Single-Length Turbo Decoder for Multi-User Parallel Decoding",
+      "link": "https://doi.org/10.2139/ssrn.4496502",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Amitava Middya, Terng-Yin Hsu (2023). Design and Implementation of Virtual-Single-Length Turbo Decoder for Multi-User Parallel Decoding. Retrieved from https://doi.org/10.2139/ssrn.4496502",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2020peerreview3ofavite_21",
+      "title": "Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "link": "https://doi.org/10.7287/peerj-cs.250v0.1/reviews/3",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2020). Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\". Retrieved from https://doi.org/10.7287/peerj-cs.250v0.1/reviews/3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020peerreview2ofavite",
+      "title": "Peer Review #2 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "link": "https://doi.org/10.7287/peerj-cs.250v0.1/reviews/2",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2020). Peer Review #2 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\". Retrieved from https://doi.org/10.7287/peerj-cs.250v0.1/reviews/2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2018sampleveriloghdlco",
+      "title": "Sample Verilog HDL codes for implementation of partially-parallel LDPC decoder architecture",
+      "link": "https://doi.org/10.1016/b978-0-12-811255-7.00021-6",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": " (2018). Sample Verilog HDL codes for implementation of partially-parallel LDPC decoder architecture. Retrieved from https://doi.org/10.1016/b978-0-12-811255-7.00021-6",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "badar2022successivecancella",
+      "title": "Successive Cancellation Polar Decoder Implementation using Processing Elements",
+      "link": "https://doi.org/10.1109/tensymp54529.2022.9864529",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Swapnil P. Badar, Kamalesh Khanchandani (2022). Successive Cancellation Polar Decoder Implementation using Processing Elements. Retrieved from https://doi.org/10.1109/tensymp54529.2022.9864529",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "cyriac2018polarcodeencoderan",
+      "title": "Polar Code Encoder and Decoder Implementation",
+      "link": "https://doi.org/10.1109/cesys.2018.8723895",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Ajith Cyriac, Gayathri Narayanan (2018). Polar Code Encoder and Decoder Implementation. Retrieved from https://doi.org/10.1109/cesys.2018.8723895",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "badar2021implementationofco",
+      "title": "Implementation of Combinational Logic for Polar Decoder",
+      "link": "https://doi.org/10.1109/icort52730.2021.9581844",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Swapnil P. Badar, Kamalesh Khanchandani (2021). Implementation of Combinational Logic for Polar Decoder. Retrieved from https://doi.org/10.1109/icort52730.2021.9581844",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "krylov2021priorityqueuearchi",
+      "title": "Priority queue architecture for sequential decoder of polar codes for implementation in hardware",
+      "link": "https://doi.org/10.18127/j00338486-202112-12",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "A.E. Krylov, A.V. Rashich (2021). Priority queue architecture for sequential decoder of polar codes for implementation in hardware. Retrieved from https://doi.org/10.18127/j00338486-202112-12",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gerken2023a43conceptofaselfx",
+      "title": "A4.3 - Concept of a Self-X Sensory System and its first implementation on an XMR-based Angular Decoder Demonstrator",
+      "link": "https://doi.org/10.5162/smsi2023/a4.3",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "E. Gerken, A. König (2023). A4.3 - Concept of a Self-X Sensory System and its first implementation on an XMR-based Angular Decoder Demonstrator. Retrieved from https://doi.org/10.5162/smsi2023/a4.3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "s2019efficientimplement",
+      "title": "Efficient Implementation of Complex Matrix Inversion for LMMSE Decoder",
+      "link": "https://doi.org/10.5120/ijca2019918991",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Vijaykumar S., Mahesh S. (2019). Efficient Implementation of Complex Matrix Inversion for LMMSE Decoder. Retrieved from https://doi.org/10.5120/ijca2019918991",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "delomier2018frommulticoreldpcd",
+      "title": "From multicore LDPC decoder implementations to FPGA decoder architectures: a case study",
+      "link": "https://doi.org/10.1109/icecs.2018.8617957",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ],
+      "reference": "Yann Delomier, Bertrand Le Gal, et al. (2018). From multicore LDPC decoder implementations to FPGA decoder architectures: a case study. Retrieved from https://doi.org/10.1109/icecs.2018.8617957",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "slade2026invariantstructure",
+      "title": "Invariant Structure in Deterministic Decoder Transformation Pipelines",
+      "link": "https://doi.org/10.22541/au.177402835.57989995/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 66,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ],
+      "reference": "Trent Slade (2026). Invariant Structure in Deterministic Decoder Transformation Pipelines. Retrieved from https://doi.org/10.22541/au.177402835.57989995/v1",
+      "abstract": "We present a deterministic framework for discovering, validating, and falsifying structural invariants in decoder transformation pipelines. Rather than optimizing convergence speed or heuristic performance, this work focuses on identifying algebraic and dynamical properties that remain invariant under repeated application of transformation operators. Using a fully deterministic experimental pipeline, we demonstrate that several non-trivial invariants-such as ternary closure, idempotence classes, and dark-state cascade behavior-can be formally proven against the actual implementation. Crucially, we complement positive results with adversarial counterexamples, showing that commonly assumed properties (e.g., universal absorbing states, global idempotence under damping) do not hold in general.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hameed2022designandimplement",
+      "title": "Design and Implementation of Half Adder, Full Adder and CMOS Full Adder",
+      "link": "https://doi.org/10.31219/osf.io/uqa9m",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "implement",
+        "full",
+        "implementation",
+        "miss"
+      ],
+      "reference": "Furqan Hameed (2022). Design and Implementation of Half Adder, Full Adder and CMOS Full Adder. Retrieved from https://doi.org/10.31219/osf.io/uqa9m",
+      "abstract": "In this paper, 1 bit full adder is designed in Microwind and DSCH. It is analysed using different implementation methods like AOI logic and using transmission gates. It is converted into an equivalent RC model to make the model simpler but less accurate for calculations. However, accurate results are obtained and verified using DSCH, Verilog code and Mircrowind.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ghourchian2021securesourcecoding",
+      "title": "Secure Source Coding with Side-information at Decoder and Shared Key at Encoder and Decoder",
+      "link": "https://doi.org/10.1109/itw48936.2021.9611508",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "decoder",
+        "source",
+        "decode"
+      ],
+      "reference": "Hamid Ghourchian, Photios A. Stavrou, et al. (2021). Secure Source Coding with Side-information at Decoder and Shared Key at Encoder and Decoder. Retrieved from https://doi.org/10.1109/itw48936.2021.9611508",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yavits2018enablingfullassoci",
+      "title": "Enabling Full Associativity with Memristive Address Decoder",
+      "link": "https://doi.org/10.1109/mm.2018.053631139",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ],
+      "reference": "Leonid Yavits, Roman Kaplan, Ran Ginosar (2018). Enabling Full Associativity with Memristive Address Decoder. Retrieved from https://doi.org/10.1109/mm.2018.053631139",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kumar2026fcmfidafullcoverag",
+      "title": "FCMFID: A Full Coverage Multi-bit Fault-Tolerant Instruction Decoder for RISC-V based softcore",
+      "link": "https://doi.org/10.1016/j.vlsi.2026.102679",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ],
+      "reference": "Sujeet Kumar, Kailash Chandra Ray (2026). FCMFID: A Full Coverage Multi-bit Fault-Tolerant Instruction Decoder for RISC-V based softcore. Retrieved from https://doi.org/10.1016/j.vlsi.2026.102679",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li2024lclfdalocalcontext",
+      "title": "Lcl_Fda: Local Context Learning and Full-Level Decoder Aggregation Network for Large-Scale Point Cloud Semantic Segmentation",
+      "link": "https://doi.org/10.2139/ssrn.5009232",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ],
+      "reference": "Yong Li, Zhenqin Ye, et al. (2024). Lcl_Fda: Local Context Learning and Full-Level Decoder Aggregation Network for Large-Scale Point Cloud Semantic Segmentation. Retrieved from https://doi.org/10.2139/ssrn.5009232",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "anon2024chapter8fullstacki",
+      "title": "Chapter 8: Full-Stack Implementation",
+      "link": "https://doi.org/10.1515/9781501519208-011",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "implement",
+        "full",
+        "implementation"
+      ],
+      "reference": " (2024). Chapter 8: Full-Stack Implementation. Retrieved from https://doi.org/10.1515/9781501519208-011",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "erol2024plutonetanefficien",
+      "title": "PlutoNet: An Efficient Polyp Segmentation Network with Modified Partial Decoder and Decoder Consistency Training",
+      "link": "https://doi.org/10.22541/au.173139326.64378195/v1",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ],
+      "reference": "Tugberk Erol, Duygu Sarikaya (2024). PlutoNet: An Efficient Polyp Segmentation Network with Modified Partial Decoder and Decoder Consistency Training. Retrieved from https://doi.org/10.22541/au.173139326.64378195/v1",
+      "abstract": "not-yet-known\n      not-yet-known\n    \n    \n      not-yet-known\n      \n      \n        unknown\n      \n    \n  \n  \n    Deep learning models are used to minimize the number of polyps that goes\nunnoticed by the experts and to accurately segment the detected polyps\nduring interventions. Although state-of-the-art models are proposed, it\nremains a challenge to define representations that are able to\ngeneralize well and that mediate between capturing low-level features\nand higher-level semantic details without being redundant. Another\nchallenge with these models is that they are computation and memory\nintensive, which can pose a problem with real-time applications. To\naddress these problems, we propose PlutoNet for polyp segmentation which\nrequires only 9 FLOPs and 2,626,537 parameters, less than 1",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2024comparativeanalysi",
+      "title": "Comparative Analysis of Encoder-Only, Decoder-Only, and Encoder- Decoder Language Models",
+      "link": "https://doi.org/10.5220/0012829800004547",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Boyu Liu (2024). Comparative Analysis of Encoder-Only, Decoder-Only, and Encoder- Decoder Language Models. Retrieved from https://doi.org/10.5220/0012829800004547",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hu2022ageneraltwobranchd",
+      "title": "A General Two-branch Decoder Architecture for Improving Encoder-decoder Image Segmentation Models",
+      "link": "https://doi.org/10.5220/0010818800003124",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Sijie Hu, Fabien Bonardi, et al. (2022). A General Two-branch Decoder Architecture for Improving Encoder-decoder Image Segmentation Models. Retrieved from https://doi.org/10.5220/0010818800003124",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kasparaviit2019onlineencoderdecod",
+      "title": "Online Encoder-decoder Anomaly Detection using Encoder-decoder Architecture with Novel Self-configuring Neural Networks &amp; Pure Linear Genetic Programming for Embedded Systems",
+      "link": "https://doi.org/10.5220/0008064401630171",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Gabrielė Kasparavičiūtė, Malin Thelin, et al. (2019). Online Encoder-decoder Anomaly Detection using Encoder-decoder Architecture with Novel Self-configuring Neural Networks &amp; Pure Linear Genetic Programming for Embedded Systems. Retrieved from https://doi.org/10.5220/0008064401630171",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2020decoderdevice",
+      "title": "Decoder Device",
+      "link": "https://doi.org/10.32388/yos0ft",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": " (2020). Decoder Device. Retrieved from https://doi.org/10.32388/yos0ft",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhong2019molecularpolarbeli",
+      "title": "Molecular Polar Belief Propagation Decoder and Successive Cancellation Decoder",
+      "link": "https://doi.org/10.1109/sips47522.2019.9020499",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Zhiwei Zhong, Lulu Ge, et al. (2019). Molecular Polar Belief Propagation Decoder and Successive Cancellation Decoder. Retrieved from https://doi.org/10.1109/sips47522.2019.9020499",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "gallego2019onminingconditions",
+      "title": "On Mining Conditions using Encoder-decoder Networks",
+      "link": "https://doi.org/10.5220/0007379506240630",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Fernando Gallego, Rafael Corchuelo (2019). On Mining Conditions using Encoder-decoder Networks. Retrieved from https://doi.org/10.5220/0007379506240630",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "krnzler2023estimatingsoftware",
+      "title": "Estimating Software and Hardware Video Decoder Energy Using Software Decoder Profiling",
+      "link": "https://doi.org/10.1109/sbcci60457.2023.10261662",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Matthias Kränzler, André Kaup, Christian Herglotz (2023). Estimating Software and Hardware Video Decoder Energy Using Software Decoder Profiling. Retrieved from https://doi.org/10.1109/sbcci60457.2023.10261662",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "proddutoori2024robustdecoderhardw",
+      "title": "Robust Decoder Hardware System Improvements for Tuned Predictions",
+      "link": "https://doi.org/10.21275/sr241023062322",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Apoorva Reddy Proddutoori (2024). Robust Decoder Hardware System Improvements for Tuned Predictions. Retrieved from https://doi.org/10.21275/sr241023062322",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rahman2022asymmetricdecoderd",
+      "title": "Asymmetric decoder design for efficient convolutional encoder-decoder architectures in medical image reconstruction",
+      "link": "https://doi.org/10.1117/12.2610084",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Tahsin Rahman, Ali Bilgin, Sergio D. Cabrera (2022). Asymmetric decoder design for efficient convolutional encoder-decoder architectures in medical image reconstruction. Retrieved from https://doi.org/10.1117/12.2610084",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "singh2025dosedecoder",
+      "title": "DOSE DECODER",
+      "link": "https://doi.org/10.55248/gengpi.6.sp525.1956",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Rohit Kumar Singh, Anamta Khaleel, et al. (2025). DOSE DECODER. Retrieved from https://doi.org/10.55248/gengpi.6.sp525.1956",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "putten2020efficientdecoderre",
+      "title": "Efficient Decoder Reduction for a Variety of Encoder-Decoder Problems",
+      "link": "https://doi.org/10.1109/access.2020.3020360",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Joost Van Der Putten, Fons Van Der Sommen, Peter H. N. De with (2020). Efficient Decoder Reduction for a Variety of Encoder-Decoder Problems. Retrieved from https://doi.org/10.1109/access.2020.3020360",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "satyanarayan2025oilspillsegmentati",
+      "title": "Oil Spill Segmentation Using Deep Encoder-Decoder Models",
+      "link": "https://doi.org/10.5220/0013259600003905",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Abhishek Satyanarayana, Maruf Dhali (2025). Oil Spill Segmentation Using Deep Encoder-Decoder Models. Retrieved from https://doi.org/10.5220/0013259600003905",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "johnson2022heatmaprouteranenc",
+      "title": "Heatmap Router: An encoder-decoder approach to PCB routing",
+      "link": "https://doi.org/10.31274/cc-20240624-819",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Zachary Johnson (2022). Heatmap Router: An encoder-decoder approach to PCB routing. Retrieved from https://doi.org/10.31274/cc-20240624-819",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "deng2019reducedcomplexityd",
+      "title": "Reduced-complexity Deep Neural Network-aided Channel Code Decoder: A Case Study for BCH Decoder",
+      "link": "https://doi.org/10.1109/icassp.2019.8682871",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Chunhua Deng, Siyu Liao Bo Yuan (2019). Reduced-complexity Deep Neural Network-aided Channel Code Decoder: A Case Study for BCH Decoder. Retrieved from https://doi.org/10.1109/icassp.2019.8682871",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "tang2024deeddynamicearlyex",
+      "title": "DEED: Dynamic Early Exit on Decoder for Accelerating Encoder-Decoder Transformer Models",
+      "link": "https://doi.org/10.18653/v1/2024.findings-naacl.9",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Peng Tang, Pengkai Zhu, et al. (2024). DEED: Dynamic Early Exit on Decoder for Accelerating Encoder-Decoder Transformer Models. Retrieved from https://doi.org/10.18653/v1/2024.findings-naacl.9",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "ali2020designanalysisoftu",
+      "title": "Design Analysis of Turbo Decoder Based on One MAP Decoder Using High Level Synthesis Tool",
+      "link": "https://doi.org/10.33899/rengj.2020.126801.1022",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Amer T. Ali, Dhafir Abdul Fatah Alneema (2020). Design Analysis of Turbo Decoder Based on One MAP Decoder Using High Level Synthesis Tool. Retrieved from https://doi.org/10.33899/rengj.2020.126801.1022",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lyu2023ureapricepredictio",
+      "title": "Urea price prediction based on encoder-decoder network: Improving encoder-decoder networks for urea price prediction",
+      "link": "https://doi.org/10.1145/3650215.3650329",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Hongwei Lyu, Xiumei Wang, Shaomin Mu (2023). Urea price prediction based on encoder-decoder network: Improving encoder-decoder networks for urea price prediction. Retrieved from https://doi.org/10.1145/3650215.3650329",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "polok2025decreddecodercentr",
+      "title": "DeCRED: Decoder-Centric Regularization for Encoder-Decoder Based Speech Recognition",
+      "link": "https://doi.org/10.1109/asru65441.2025.11434661",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Alexander Polok, Santosh Kesiraju, et al. (2025). DeCRED: Decoder-Centric Regularization for Encoder-Decoder Based Speech Recognition. Retrieved from https://doi.org/10.1109/asru65441.2025.11434661",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zechin2022previsodevelocidad",
+      "title": "Previsão de velocidades de tráfego com rede neural LSTM encoder-decoder Forecast of traffic speeds with neural network LSTM encoder-decoder",
+      "link": "https://doi.org/10.14295/transportes.v30i3.2660",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ],
+      "reference": "Douglas Zechin, Matheus Basso do Amaral, Helena Beatriz Bettella Cybis (2022). Previsão de velocidades de tráfego com rede neural LSTM encoder-decoder Forecast of traffic speeds with neural network LSTM encoder-decoder. Retrieved from https://doi.org/10.14295/transportes.v30i3.2660",
+      "abstract": "Este artigo tem como objetivo propor uma modelo de previsão de velocidades para um trecho de rodovia na cidade de Porto Alegre, que apresenta congestionamentos diariamente por conta de gargalos. Para realizar as previsões foram utilizados dados de tráfego e variáveis ambientais, como intensidade de chuva, acidentes e eventos atípicos. Propôs-se então um modelo de rede neural com arquitetura encoder-decoder e camadas long short-term memory (LSTM), que possuem a característica de estabelecer relações de longa dependência temporal entre as variáveis de entrada, sendo pertinentes para aplicações na área de Transportes. Como contribuições adicionais, avaliou-se a qualidade das previsões para diferentes horizontes de predição e regimes de tráfego, e comparou-se a capacidade e as curvas de probab",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "attention",
+        "speedup",
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "CPU",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "attention"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "attention"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 32,
+    "A": 27,
+    "C": 2
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:39.503855"
+}

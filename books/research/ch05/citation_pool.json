@@ -1,0 +1,263 @@
+{
+  "chapter_id": "ch05",
+  "pool_count": 25,
+  "bib_keys": [
+    "alves2023distributedcheckpo",
+    "yirage2026",
+    "memoryfloor2026",
+    "amd2024xdna",
+    "rico2024amdxdnanpuinryzena",
+    "delaye2022cgra4hpc2022invite",
+    "vilim2021aurochsanarchitect",
+    "weng2020ahybridsystolicdat",
+    "narayanan2020spinalflowanarchit",
+    "krichene2024adataflowarchitect",
+    "steffen20254thgenamdcdnasuptm",
+    "dao2023flashdecoding",
+    "nvidia2024cudagraphs",
+    "taxbreak2026",
+    "bouaziz2025benchmarkingfloati",
+    "heinz2024tapascoaieanopenso",
+    "patel2025llminference",
+    "nvidia2022hopper",
+    "smith2024amdinstinctmi300xg",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "alves2023distributedcheckpo",
+      "title": "Distributed Checkpointing in Dataflow with Static Scheduling",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static dataflow",
+        "dataflow",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "CUDA",
+        "inference",
+        "YiRage",
+        "CPU"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "CUDA",
+        "inference",
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "XDNA",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "rico2024amdxdnanpuinryzena",
+      "title": "AMD XDNA NPU in Ryzen AI Processors",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "XDNA",
+        "NPU"
+      ]
+    },
+    {
+      "bib_key": "delaye2022cgra4hpc2022invite",
+      "title": "CGRA4HPC 2022 Invited Speaker: Mapping ML to the AMD/Xilinx AIE-ML architecture",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "AIE",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "vilim2021aurochsanarchitect",
+      "title": "Aurochs: An Architecture for Dataflow Threads",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "weng2020ahybridsystolicdat",
+      "title": "A Hybrid Systolic-Dataflow Architecture for Inductive Matrix Algorithms",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "narayanan2020spinalflowanarchit",
+      "title": "SpinalFlow: An Architecture and Dataflow Tailored for Spiking Neural Networks",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "krichene2024adataflowarchitect",
+      "title": "A dataflow architecture with distributed control for DNN acceleration",
+      "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "steffen20254thgenamdcdnasuptm",
+      "title": "4th Gen AMD CDNA<sup>TM</sup> Generative AI Architecture Powering AMD Instinct M350 Series GPUs and Platforms",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "architecture",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "inference",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "inference"
+      ]
+    },
+    {
+      "bib_key": "bouaziz2025benchmarkingfloati",
+      "title": "Benchmarking Floating Point Performance of Massively Parallel Dataflow Overlays on AMD Versal Compute Primitives",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "heinz2024tapascoaieanopenso",
+      "title": "TaPaSCo-AIE: An Open-Source Framework for Streaming-Based Heterogeneous Acceleration Using AMD AI Engines",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "smith2024amdinstinctmi300xg",
+      "title": "AMD Instinct MI300X Generative AI Accelerator and Platform Architecture",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

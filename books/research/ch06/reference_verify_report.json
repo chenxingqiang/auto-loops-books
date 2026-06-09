@@ -1,0 +1,264 @@
+{
+  "chapter_id": "ch06",
+  "chapter_title": "Data Residency and On-Chip Memory Design",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch06/keywords.json",
+  "keyword_count": 54,
+  "top_keywords": [
+    {
+      "term": "data residency and on-chip memory design",
+      "weight": 18
+    },
+    {
+      "term": "CPU residency",
+      "weight": 14
+    },
+    {
+      "term": "GPU residency",
+      "weight": 14
+    },
+    {
+      "term": "lifetime planning",
+      "weight": 14
+    },
+    {
+      "term": "NPU residency",
+      "weight": 14
+    },
+    {
+      "term": "YiRage memory pass",
+      "weight": 14
+    },
+    {
+      "term": "CPU residency LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "GPU residency LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "lifetime planning LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "NPU residency LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage memory pass LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "cache NUMA",
+      "weight": 12
+    },
+    {
+      "term": "lifetime residen",
+      "weight": 12
+    },
+    {
+      "term": "NPU sram",
+      "weight": 12
+    },
+    {
+      "term": "shared register",
+      "weight": 12
+    },
+    {
+      "term": "YiRage memory",
+      "weight": 12
+    },
+    {
+      "term": "cache",
+      "weight": 10
+    },
+    {
+      "term": "lifetime",
+      "weight": 10
+    },
+    {
+      "term": "memory",
+      "weight": 10
+    },
+    {
+      "term": "NPU",
+      "weight": 10
+    },
+    {
+      "term": "NUMA",
+      "weight": 10
+    },
+    {
+      "term": "register",
+      "weight": 10
+    },
+    {
+      "term": "residen",
+      "weight": 10
+    },
+    {
+      "term": "shared",
+      "weight": 10
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 47,
+      "matched_keywords": [
+        "memory",
+        "decode",
+        "GPU"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 20,
+      "matched_keywords": [
+        "memory"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

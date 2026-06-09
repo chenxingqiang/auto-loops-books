@@ -1,0 +1,242 @@
+{
+  "chapter_id": "ch03",
+  "chapter_title": "AI Hardware Architecture and Compiler Constraints",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch03/keywords.json",
+  "keyword_count": 115,
+  "top_keywords": [
+    {
+      "term": "AI hardware architecture and compiler constraints",
+      "weight": 18
+    },
+    {
+      "term": "AI hardware architecture GPU CPU NPU",
+      "weight": 16
+    },
+    {
+      "term": "memory hierarchy bandwidth roofline",
+      "weight": 15
+    },
+    {
+      "term": "benchmark method",
+      "weight": 14
+    },
+    {
+      "term": "constraint matrix",
+      "weight": 14
+    },
+    {
+      "term": "CPU constraints",
+      "weight": 14
+    },
+    {
+      "term": "GPU constraints",
+      "weight": 14
+    },
+    {
+      "term": "hardware aware compile",
+      "weight": 14
+    },
+    {
+      "term": "hardware landscape",
+      "weight": 14
+    },
+    {
+      "term": "hardware-aware tiling compiler",
+      "weight": 14
+    },
+    {
+      "term": "NPU constraints",
+      "weight": 14
+    },
+    {
+      "term": "warp scheduling shared memory tensor core",
+      "weight": 14
+    },
+    {
+      "term": "YiRage modeling",
+      "weight": 14
+    },
+    {
+      "term": "benchmark method LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "constraint matrix LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "CPU cache SIMD NUMA",
+      "weight": 13
+    },
+    {
+      "term": "CPU constraints LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "cross-platform code generation MLIR",
+      "weight": 13
+    },
+    {
+      "term": "edge NPU static scheduling",
+      "weight": 13
+    },
+    {
+      "term": "GPU constraints LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "hardware aware compile LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "hardware landscape LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "NPU constraints LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage modeling LLM inference compiler",
+      "weight": 13
+    }
+  ],
+  "citation_count": 11,
+  "citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 36,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 18,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 9,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 116,
+      "matched_keywords": [
+        "memory bandwidth",
+        "GPU",
+        "bandwidth",
+        "CUDA",
+        "decode",
+        "LLM",
+        "memory"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 45,
+      "matched_keywords": [
+        "LLM",
+        "memory",
+        "model"
+      ],
+      "status": "ok"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

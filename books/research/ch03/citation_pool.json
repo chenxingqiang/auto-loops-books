@@ -1,0 +1,384 @@
+{
+  "chapter_id": "ch03",
+  "pool_count": 34,
+  "bib_keys": [
+    "carmona2025characterizationof",
+    "memoryfloor2026",
+    "moon2025hybegpunpuhybridsy",
+    "malbaa2024modelinferenceusin",
+    "yirage2026",
+    "bernardo2025compilerawareaihar",
+    "balazs2020neuralarchitecture",
+    "kumar2026hardwareawareneura",
+    "raha2025llmnputowardseffic",
+    "chen2020compilerbasedhardw",
+    "kim2025cppclusterednpupim",
+    "peng2025secnpusecuringllmi",
+    "le2026edgellmbenchcharac",
+    "jeong2025activationswapping",
+    "patel2025llminference",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "ludmir2024parallaxacompilerf",
+    "yang2025automaticpowerelec",
+    "taxbreak2026",
+    "dao2023flashdecoding",
+    "amd2024xdna",
+    "nvidia2024cudagraphs",
+    "li2022compilerdrivensimu",
+    "schmidt2024phdprojectcompiler",
+    "brauckmann2025dfanetacompilerspe",
+    "wang2023amultithreadedfast",
+    "surez2025energyefficientinf",
+    "bathusha2026llmtunahyperparame",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "carmona2025characterizationof",
+      "title": "Characterization of Machine Learning Compilers for LLM inference on NVIDIA GPUs",
+      "source_tier": "A",
+      "relevance_score": 163,
+      "matched_keywords": [
+        "benchmark method",
+        "benchmark method LLM inference compiler",
+        "AI compiler optimization",
+        "benchmark methodology LLM inference",
+        "GPU",
+        "compiler",
+        "gpus",
+        "LLM",
+        "model",
+        "models",
+        "PyTorch",
+        "XLA"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 116,
+      "matched_keywords": [
+        "memory bandwidth",
+        "GPU",
+        "bandwidth",
+        "CUDA",
+        "decode",
+        "LLM",
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "moon2025hybegpunpuhybridsy",
+      "title": "Hybe: GPU-NPU Hybrid System for Efficient LLM Inference with Million-Token Context Window",
+      "source_tier": "A",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "GPU",
+        "NPU",
+        "LLM",
+        "token"
+      ]
+    },
+    {
+      "bib_key": "malbaa2024modelinferenceusin",
+      "title": "Model Inference Using TVM on AMD GPU: Image Classification and LLM Case Studies",
+      "source_tier": "A",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "GPU",
+        "LLM",
+        "model",
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 69,
+      "matched_keywords": [
+        "CPU",
+        "YiRage",
+        "CUDA",
+        "LLM",
+        "MLIR"
+      ]
+    },
+    {
+      "bib_key": "bernardo2025compilerawareaihar",
+      "title": "Compiler-aware AI Hardware Design for Edge Devices",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware aware compile",
+        "compiler",
+        "hardware-aware"
+      ]
+    },
+    {
+      "bib_key": "balazs2020neuralarchitecture",
+      "title": "Neural Architecture Search for Automotive Grid Fusion Networks Under Embedded Hardware Constraints",
+      "source_tier": "A",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "kumar2026hardwareawareneura",
+      "title": "Hardware-Aware Neural Architecture Search (NAS) with Area, Power, and Latency Constraints for ASIC Implementation",
+      "source_tier": "A",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "hardware-aware"
+      ]
+    },
+    {
+      "bib_key": "raha2025llmnputowardseffic",
+      "title": "LLM-NPU: Towards Efficient Foundation Model Inference on Low-Power Neural Processing Units",
+      "source_tier": "A",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "NPU",
+        "LLM",
+        "model"
+      ]
+    },
+    {
+      "bib_key": "chen2020compilerbasedhardw",
+      "title": "Compiler-based Hardware Profiling for Software-Defined Architecture",
+      "source_tier": "A",
+      "relevance_score": 42,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "kim2025cppclusterednpupim",
+      "title": "CPP: Clustered NPU-PIM Heterogeneous Computing Topology for LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "peng2025secnpusecuringllmi",
+      "title": "SecNPU: Securing LLM Inference on NPU",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "le2026edgellmbenchcharac",
+      "title": "Edge-LLM-Bench: Characterising LLM Inference on Raspberry Pi 5 with Hailo-10H NPU Acceleration",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "jeong2025activationswapping",
+      "title": "Activation Swapping for Feed Forward Networks in Batched LLM Inference on NPU",
+      "source_tier": "A",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "FlashAttention",
+        "memory"
+      ]
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "memory",
+        "model"
+      ]
+    },
+    {
+      "bib_key": "ludmir2024parallaxacompilerf",
+      "title": "PARALLAX: A Compiler for Neutral Atom Quantum Computers under Hardware Constraints",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "constraint"
+      ]
+    },
+    {
+      "bib_key": "yang2025automaticpowerelec",
+      "title": "Automatic Power Electronic PCB Layout Design Based on Generative AI: The Pathway Towards Next-Generation Hardware Compiler",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "layout"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ]
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "CUDA"
+      ]
+    },
+    {
+      "bib_key": "li2022compilerdrivensimu",
+      "title": "Compiler-Driven Simulation of Reconfigurable Hardware Accelerators",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "schmidt2024phdprojectcompiler",
+      "title": "Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "brauckmann2025dfanetacompilerspe",
+      "title": "DFA-Net: A Compiler-Specific Neural Architecture for Robust Generalization in Data Flow Analyses",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "wang2023amultithreadedfast",
+      "title": "A Multi-threaded Fast Hardware Compiler for HDLs",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "surez2025energyefficientinf",
+      "title": "Energy-Efficient Inference on RNN and LLM networks: A Quantized Evaluation on RISC-V, ARM, and x86 Devices",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "bathusha2026llmtunahyperparame",
+      "title": "LLM-tuna - Hyperparameter Optimization for LLM Inference",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

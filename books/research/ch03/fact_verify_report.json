@@ -1,23 +1,23 @@
 {
   "chapter_id": "ch03",
-  "timestamp": "2026-06-09T17:13:39.420035+00:00",
-  "entry_count": 3,
-  "verified_ok_count": 0,
+  "timestamp": "2026-06-09T17:46:34.255008+00:00",
+  "entry_count": 4,
+  "verified_ok_count": 3,
   "entries": [
     {
       "claim": "Hopper shared memory capacity is configuration-dependent per SM",
       "bib_key": "nvidia2022hopper",
-      "source_url": "https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/",
-      "corroboration_url": "https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_url": "https://developer.NVIDIA.com/blog/NVIDIA-Hopper-architecture-in-depth/",
+      "corroboration_url": "https://developer.NVIDIA.com/blog/NVIDIA-Hopper-architecture-in-depth/",
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "configuration-dependent"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
       "corroboration_missing_tokens": [],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/6e62ecdeb2756288.json"
     },
@@ -26,36 +26,69 @@
       "bib_key": "taxbreak2026",
       "source_url": "https://arxiv.org/abs/2603.12465",
       "corroboration_url": "https://arxiv.org/abs/2603.12465",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "4.578",
+        "null-kernel",
+        "floor",
+        "median"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
       "corroboration_missing_tokens": [],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/31fc9912722dff42.json"
     },
     {
       "claim": "AMD XDNA uses static spatial dataflow with tile-local SRAM",
       "bib_key": "amd2024xdna",
-      "source_url": "https://www.amd.com/en/technologies/xdna.html",
-      "corroboration_url": "https://www.amd.com/en/products/adaptive-socs-and-fpgas/technologies/ai-engine.html",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_url": "https://www.AMD.com/en/technologies/XDNA.html",
+      "corroboration_url": "https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "static",
+        "tile-local",
+        "sram"
       ],
-      "corroboration_fetch_ok": false,
+      "corroboration_fetch_ok": true,
       "corroboration_content_match": false,
       "corroboration_missing_tokens": [
-        "empty content"
+        "XDNA",
+        "uses",
+        "static",
+        "spatial",
+        "dataflow",
+        "tile-local",
+        "sram"
       ],
       "verified_ok": false,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/de712a8e1710c3f1.json"
+    },
+    {
+      "claim": "YiRage is a multi-backend LLM inference optimization compiler (CUDA, CPU, MPS, Triton, NKI, MLIR)",
+      "bib_key": "yirage2026",
+      "source_url": "https://github.com/chenxingqiang/YiRage",
+      "corroboration_url": "https://github.com/chenxingqiang/YiRage/blob/main/docs/architecture.md",
+      "source_fetch_ok": true,
+      "source_content_match": true,
+      "source_missing_tokens": [],
+      "corroboration_fetch_ok": true,
+      "corroboration_content_match": true,
+      "corroboration_missing_tokens": [
+        "compiler",
+        "CUDA",
+        "CPU",
+        "Triton",
+        "nki",
+        "MLIR"
+      ],
+      "verified_ok": true,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/a2a2a677f3414530.json"
     }
   ],
   "status": "issues"

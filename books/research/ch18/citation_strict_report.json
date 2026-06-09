@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch18",
+  "chapter_title": "IREE: MLIR-Native Runtime and Compilation",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 55,
+  "catalog_tier_a": 35,
+  "binding_count": 205,
+  "quality_binding_count": 205,
+  "sentence_count": 256,
+  "claim_sentence_count": 237,
+  "unbound_claim_sentences": 32,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 64,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

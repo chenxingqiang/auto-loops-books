@@ -15,8 +15,9 @@
 \usepackage{zref-abspage}
 \setcounter{secnumdepth}{3}
 
-\usepackage[vcentering,dvips]{geometry}
-\geometry{papersize={7in,9in},bottom=3pc,top=5pc,left=5pc,right=5pc,bmargin=4.5pc,footskip=18pt,headsep=25pt}
+\usepackage[vcentering,pdftex]{geometry}
+\geometry{papersize={\bookpaperwidth,\bookpaperheight},bottom=3pc,top=5pc,left=5pc,right=5pc,bmargin=4.5pc,footskip=18pt,headsep=25pt}
+\setlength{\headheight}{21.04839pt}
 
 \usepackage{epsfig}
 \usepackage{subfigure}
@@ -42,6 +43,9 @@
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{pdfpages}
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
@@ -70,79 +74,81 @@ plainpages=false]{hyperref}
 
 \begin{document}
 
+\setlength{\emergencystretch}{2em}
 \setlength{\parskip}{0.25 \baselineskip}
 \newlength{\figwidth}
-\setlength{\figwidth}{26pc}
+\setlength{\figwidth}{\linewidth}
 \newlength{\notationgap}
 \setlength{\notationgap}{1pc}
 
 \typeout{START_CHAPTER "TOC" \theabspage}
 \frontmatter
-\maketitle
+\includepdf[pages=-,pagecommand={\thispagestyle{empty}}]{cover.pdf}
+\cleardoublepage
 \tableofcontents
 \typeout{END_CHAPTER "TOC" \theabspage}
 
 \input{notation.tex}
 \mainmatter
 
-\input{chapters/ch01_llm_decode_bottlenecks.tex}
+\input{build/chapters/ch01_llm_decode_bottlenecks.tex}
 
-\input{chapters/ch02_dataflow_mindset.tex}
+\input{build/chapters/ch02_dataflow_mindset.tex}
 
-\input{chapters/ch03_hardware_constraints.tex}
+\input{build/chapters/ch03_hardware_constraints.tex}
 
-\input{chapters/ch04_cuda_hopper_blackwell.tex}
+\input{build/chapters/ch04_cuda_hopper_blackwell.tex}
 
-\input{chapters/ch05_xdna_aie_architecture.tex}
+\input{build/chapters/ch05_xdna_aie_architecture.tex}
 
-\input{chapters/ch06_onchip_residency_design.tex}
+\input{build/chapters/ch06_onchip_residency_design.tex}
 
-\input{chapters/ch07_static_role_assignment.tex}
+\input{build/chapters/ch07_static_role_assignment.tex}
 
-\input{chapters/ch08_tma_double_buffer.tex}
+\input{build/chapters/ch08_tma_double_buffer.tex}
 
-\input{chapters/ch09_sync_hierarchy.tex}
+\input{build/chapters/ch09_sync_hierarchy.tex}
 
-\input{chapters/ch10_online_softmax.tex}
+\input{build/chapters/ch10_online_softmax.tex}
 
-\input{chapters/ch11_decoder_megakernel.tex}
+\input{build/chapters/ch11_decoder_megakernel.tex}
 
-\input{chapters/ch12_execution_modes.tex}
+\input{build/chapters/ch12_execution_modes.tex}
 
-\input{chapters/ch13_compiler_theory.tex}
+\input{build/chapters/ch13_compiler_theory.tex}
 
-\input{chapters/ch14_mlir.tex}
+\input{build/chapters/ch14_mlir.tex}
 
-\input{chapters/ch15_xla.tex}
+\input{build/chapters/ch15_xla.tex}
 
-\input{chapters/ch16_tvm.tex}
+\input{build/chapters/ch16_tvm.tex}
 
-\input{chapters/ch17_triton.tex}
+\input{build/chapters/ch17_triton.tex}
 
-\input{chapters/ch18_iree.tex}
+\input{build/chapters/ch18_iree.tex}
 
-\input{chapters/ch19_glow.tex}
+\input{build/chapters/ch19_glow.tex}
 
-\input{chapters/ch20_mirage_emerging.tex}
+\input{build/chapters/ch20_mirage_emerging.tex}
 
-\input{chapters/ch21_compiler_benchmark.tex}
+\input{build/chapters/ch21_compiler_benchmark.tex}
 
-\input{chapters/ch22_e2e_tuning_workflow.tex}
+\input{build/chapters/ch22_e2e_tuning_workflow.tex}
 
-\input{chapters/ch23_llm_moe_compilation.tex}
+\input{build/chapters/ch23_llm_moe_compilation.tex}
 
-\input{chapters/ch24_heterogeneous_deployment.tex}
+\input{build/chapters/ch24_heterogeneous_deployment.tex}
 
-\input{chapters/ch25_auto_optimization.tex}
+\input{build/chapters/ch25_auto_optimization.tex}
 
-\input{chapters/ch26_production_practices.tex}
+\input{build/chapters/ch26_production_practices.tex}
 
-\input{chapters/ch27_future_trends.tex}
+\input{build/chapters/ch27_future_trends.tex}
 
 
 \small{
 \typeout{START_CHAPTER "bib" \theabspage}
-\bibliography{book}
+\bibliography{book,citations_merged}
 \bibliographystyle{natbib}
 \clearpage
 \typeout{END_CHAPTER "bib" \theabspage}

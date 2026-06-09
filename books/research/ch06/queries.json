@@ -1,0 +1,16 @@
+[
+  "\"Data Residency and On-Chip Memory Design\"",
+  "\"lifetime\" AND \"residen\"",
+  "\"shared\" AND \"register\"",
+  "\"cache\" AND \"NUMA\"",
+  "\"NPU\" AND \"sram\"",
+  "\"YiRage\" AND \"memory\"",
+  "\"data residency and on-chip memory design\" AND \"CPU residency\"",
+  "\"GPU residency\" AND \"lifetime planning\"",
+  "\"NPU residency\" AND \"YiRage memory pass\"",
+  "\"CPU residency LLM inference compiler\" AND \"GPU residency LLM inference compiler\"",
+  "\"lifetime planning LLM inference compiler\" AND \"NPU residency LLM inference compiler\"",
+  "\"YiRage memory pass LLM inference compiler\" AND \"cache NUMA\"",
+  "\"lifetime residen\" AND \"NPU sram\"",
+  "\"shared register\" AND \"YiRage memory\""
+]

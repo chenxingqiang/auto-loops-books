@@ -1,0 +1,17 @@
+[
+  "\"Heterogeneous Compilation and Multi-Hardware Deployment\"",
+  "\"hetero\" AND \"cluster\"",
+  "\"MLIR\" AND \"unified\"",
+  "\"runtime\" AND \"detect\"",
+  "\"version\" AND \"regression\"",
+  "\"case\" AND \"production\"",
+  "\"YiRage\" AND \"cluster\"",
+  "\"heterogeneous compilation and multi-hardware deployment\" AND \"hetero cluster\"",
+  "\"industrial cases\" AND \"runtime adapt\"",
+  "\"unified stack\" AND \"version regression\"",
+  "\"YiRage cluster\" AND \"hetero cluster LLM inference compiler\"",
+  "\"industrial cases LLM inference compiler\" AND \"runtime adapt LLM inference compiler\"",
+  "\"unified stack LLM inference compiler\" AND \"version regression LLM inference compiler\"",
+  "\"YiRage cluster LLM inference compiler\" AND \"AI compiler optimization\"",
+  "\"AI hardware architecture\" AND \"case production\""
+]

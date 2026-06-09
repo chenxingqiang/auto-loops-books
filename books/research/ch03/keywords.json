@@ -1,0 +1,462 @@
+[
+  {
+    "term": "AI hardware architecture and compiler constraints",
+    "weight": 18
+  },
+  {
+    "term": "AI hardware architecture GPU CPU NPU",
+    "weight": 16
+  },
+  {
+    "term": "memory hierarchy bandwidth roofline",
+    "weight": 15
+  },
+  {
+    "term": "benchmark method",
+    "weight": 14
+  },
+  {
+    "term": "constraint matrix",
+    "weight": 14
+  },
+  {
+    "term": "CPU constraints",
+    "weight": 14
+  },
+  {
+    "term": "GPU constraints",
+    "weight": 14
+  },
+  {
+    "term": "hardware aware compile",
+    "weight": 14
+  },
+  {
+    "term": "hardware landscape",
+    "weight": 14
+  },
+  {
+    "term": "hardware-aware tiling compiler",
+    "weight": 14
+  },
+  {
+    "term": "NPU constraints",
+    "weight": 14
+  },
+  {
+    "term": "warp scheduling shared memory tensor core",
+    "weight": 14
+  },
+  {
+    "term": "YiRage modeling",
+    "weight": 14
+  },
+  {
+    "term": "benchmark method LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "constraint matrix LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "CPU cache SIMD NUMA",
+    "weight": 13
+  },
+  {
+    "term": "CPU constraints LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "cross-platform code generation MLIR",
+    "weight": 13
+  },
+  {
+    "term": "edge NPU static scheduling",
+    "weight": 13
+  },
+  {
+    "term": "GPU constraints LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "hardware aware compile LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "hardware landscape LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "NPU constraints LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "YiRage modeling LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "AI compiler optimization",
+    "weight": 12
+  },
+  {
+    "term": "AI hardware architecture",
+    "weight": 12
+  },
+  {
+    "term": "benchmark methodology LLM inference",
+    "weight": 12
+  },
+  {
+    "term": "chip architecture modeling compiler",
+    "weight": 12
+  },
+  {
+    "term": "memory bandwidth",
+    "weight": 12
+  },
+  {
+    "term": "operator fusion kernel",
+    "weight": 12
+  },
+  {
+    "term": "bandwidth memory hierarchy parallel",
+    "weight": 11
+  },
+  {
+    "term": "benchmark metric methodology",
+    "weight": 11
+  },
+  {
+    "term": "cache",
+    "weight": 11
+  },
+  {
+    "term": "cache SIMD NUMA",
+    "weight": 11
+  },
+  {
+    "term": "chiparchitecture",
+    "weight": 11
+  },
+  {
+    "term": "CPU",
+    "weight": 11
+  },
+  {
+    "term": "CUDA/HIP",
+    "weight": 11
+  },
+  {
+    "term": "GPU",
+    "weight": 11
+  },
+  {
+    "term": "NPU",
+    "weight": 11
+  },
+  {
+    "term": "NPU/XDNA/AIE",
+    "weight": 11
+  },
+  {
+    "term": "NUMA",
+    "weight": 11
+  },
+  {
+    "term": "NVIDIA AMD x86 arm NPU",
+    "weight": 11
+  },
+  {
+    "term": "NVIDIA GPU/AMD GPU/x86 CPU/arm CPU/",
+    "weight": 11
+  },
+  {
+    "term": "SIMD/avx",
+    "weight": 11
+  },
+  {
+    "term": "static NPU edge",
+    "weight": 11
+  },
+  {
+    "term": "tiling",
+    "weight": 11
+  },
+  {
+    "term": "tiling layout pass",
+    "weight": 11
+  },
+  {
+    "term": "warp shared memory tensor core",
+    "weight": 11
+  },
+  {
+    "term": "warp/sp",
+    "weight": 11
+  },
+  {
+    "term": "YiRage",
+    "weight": 11
+  },
+  {
+    "term": "YiRage chip arch model",
+    "weight": 11
+  },
+  {
+    "term": "AIE",
+    "weight": 9
+  },
+  {
+    "term": "anti-patterns in cross-hardware ports",
+    "weight": 9
+  },
+  {
+    "term": "bandwidth",
+    "weight": 9
+  },
+  {
+    "term": "bandwidth floors and decode",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "chip",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "connecting constraints to later chapters",
+    "weight": 9
+  },
+  {
+    "term": "constraint",
+    "weight": 9
+  },
+  {
+    "term": "CPU roofline sanity check",
+    "weight": 9
+  },
+  {
+    "term": "CUDA",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "dynamic shapes and specialization",
+    "weight": 9
+  },
+  {
+    "term": "energy and power as first-class constraints",
+    "weight": 9
+  },
+  {
+    "term": "final integration with chapter~2 mindset",
+    "weight": 9
+  },
+  {
+    "term": "FlashAttention",
+    "weight": 9
+  },
+  {
+    "term": "fleet operations: versioning chip models",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GEMM",
+    "weight": 9
+  },
+  {
+    "term": "glossary hooks for cross-chapter indexing",
+    "weight": 9
+  },
+  {
+    "term": "gpus",
+    "weight": 9
+  },
+  {
+    "term": "handoff to chapter~4",
+    "weight": 9
+  },
+  {
+    "term": "hardware-aware",
+    "weight": 9
+  },
+  {
+    "term": "HBM",
+    "weight": 9
+  },
+  {
+    "term": "HIP",
+    "weight": 9
+  },
+  {
+    "term": "industrial case patterns",
+    "weight": 9
+  },
+  {
+    "term": "layout",
+    "weight": 9
+  },
+  {
+    "term": "legality",
+    "weight": 9
+  },
+  {
+    "term": "LLM",
+    "weight": 9
+  },
+  {
+    "term": "matrix",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "memory",
+    "weight": 9
+  },
+  {
+    "term": "memory hierarchy as a compiler ir problem",
+    "weight": 9
+  },
+  {
+    "term": "MLIR",
+    "weight": 9
+  },
+  {
+    "term": "model",
+    "weight": 9
+  },
+  {
+    "term": "models",
+    "weight": 9
+  },
+  {
+    "term": "NPU legality gates",
+    "weight": 9
+  },
+  {
+    "term": "npus",
+    "weight": 9
+  },
+  {
+    "term": "parallelism grain and occupancy",
+    "weight": 9
+  },
+  {
+    "term": "pass",
+    "weight": 9
+  },
+  {
+    "term": "pass ordering template",
+    "weight": 9
+  },
+  {
+    "term": "passes",
+    "weight": 9
+  },
+  {
+    "term": "pedagogical summary for compiler engineers",
+    "weight": 9
+  },
+  {
+    "term": "practice audits (hardware)",
+    "weight": 9
+  },
+  {
+    "term": "PyTorch",
+    "weight": 9
+  },
+  {
+    "term": "quantitative constraint checklist",
+    "weight": 9
+  },
+  {
+    "term": "reading vendor documentation critically",
+    "weight": 9
+  },
+  {
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "security and multi-tenant interactions",
+    "weight": 9
+  },
+  {
+    "term": "shapes",
+    "weight": 9
+  },
+  {
+    "term": "shared",
+    "weight": 9
+  },
+  {
+    "term": "silicon",
+    "weight": 9
+  },
+  {
+    "term": "SIMD",
+    "weight": 9
+  },
+  {
+    "term": "sram",
+    "weight": 9
+  },
+  {
+    "term": "synchronization cost in constraint planning",
+    "weight": 9
+  },
+  {
+    "term": "tensor cores vs memory: when MMA helps decode",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "tooling interfaces for chip models",
+    "weight": 9
+  },
+  {
+    "term": "TVM",
+    "weight": 9
+  },
+  {
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "worked example: layer footprint on Hopper",
+    "weight": 9
+  },
+  {
+    "term": "XDNA",
+    "weight": 9
+  },
+  {
+    "term": "XLA",
+    "weight": 9
+  }
+]

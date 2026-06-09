@@ -1,11 +1,11 @@
 {
-  "url": "https://www.amd.com/en/technologies/xdna.html",
-  "fetched_at": "2026-06-09T17:13:39.844568+00:00",
-  "success": false,
+  "url": "https://www.AMD.com/en/technologies/XDNA.html",
+  "fetched_at": "2026-06-09T17:46:44.565004+00:00",
+  "success": true,
   "method": "craw4ai",
-  "status_code": null,
-  "title": "",
-  "content_excerpt": "",
-  "content_chars": 0,
-  "error": "BrowserType.launch: Executable doesn't exist at /Users/xingqiangchen/Library/Caches/ms-playwright/chromium-1223/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+  "status_code": 200,
+  "title": "AMD XDNA™ Architecture",
+  "content_excerpt": "* [AMD Advantage Premium](https://www.AMD.com/en/gaming/desktops/advantage-premium.html)\n* [AMD Software: Adrenalin Edition](https://www.AMD.com/en/products/software/adrenalin.html)\n* [AMD Software: PRO Edition](https://www.AMD.com/en/products/software/pro-edition.html)\n* [AMD Silo AI](https://www.AMD.com/en/solutions/AI/silo-AI.html)\n* [Gaming with AMD](https://www.AMD.com/en/gaming.html)\n* [AMD FSR](https://www.AMD.com/en/products/graphics/technologies/fidelityfx/super-resolution.html)\n* [AMD Gaming Community](https://www.amdgaming.com/)\n###### Radeon Graphics & AMD Chipsets\n* [AMD Partner Network](https://www.AMD.com/en/partner/partner-network.html)\n* [AMD Instinct](https://www.AMD.com/en/partner/browse-by-product/instinct-resources.html)\n* [AMD Arena Training](https://www.AMD.com/en/partner/browse-by-resource/AMD-arena-training.html)\n###### AMD Global Support\nShop AMD\n[Shop AMD](https://www.AMD.com/en/technologies/XDNA.html#headerMenu-23c6ff2c31-item-de1bf49851-collapse)\n###### Get AMD Fan Gear\n* XDNA\n# AMD XDNA™ Architecture\n* [XDNA 2](https://www.AMD.com/en/technologies/XDNA.html#xdna2)\n## AMD XDNA - AI Engine\nAMD XDNA is a spatial dataflow NPU architecture consisting of a tiled array of AI Engine processors. Each AI Engine tile includes a vector processor, a scalar processor, and local data and program memories. Unlike traditional architectures that require repeatedly fetching data from caches (which consumes energy), AI Engine uses on-chip memories and custom dataflow, to enable efficient, low power computing for AI and signal processing.\n## AMD XDNA 2\nNext-Generation AMD XDNA 2 is built for Generative AI experiences in PCs, delivering exceptional compute performance, bandwidth, and energy efficiency.\nThe AMD NPU includes dedicated instruction and data memories, as well as dedicated connectivity paired with DMA engines for scheduled data movement using connectivity between AI Engine tiles.\n### AMD Ryzen™ Processors\nAMD Ryzen 7040 and 8040 Series processors are built on AMD XDNA NPUs and AMD “Zen” cores to deliver leadership AI acceleration on PCs.\n### AMD Versal™ Adaptive SoCs\n[Subscribe to the latest news from AMD](https://www.AMD.com/en/preferences/sign-up.html)\n* [AMD](https://x.com/AMD)\n* [About AMD](https://www.AMD.com/en/corporate.html)\n* [AMD Partner Hub](https://www.AMD.com/en/partner.html)\n* [AMD University Program](https://www.AMD.com/en/corporate/university-program.html)\n",
+  "content_chars": 2433,
+  "error": null
 }

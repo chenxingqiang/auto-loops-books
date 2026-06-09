@@ -1,0 +1,206 @@
+[
+  {
+    "term": "production deployment and engineering best practices",
+    "weight": 18
+  },
+  {
+    "term": "env packaging",
+    "weight": 14
+  },
+  {
+    "term": "multi HW ops",
+    "weight": 14
+  },
+  {
+    "term": "pitfalls",
+    "weight": 14
+  },
+  {
+    "term": "scheduling",
+    "weight": 14
+  },
+  {
+    "term": "env packaging LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "multi HW ops LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "pitfalls LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "scheduling LLM inference compiler",
+    "weight": 13
+  },
+  {
+    "term": "deploy packag",
+    "weight": 12
+  },
+  {
+    "term": "operation production",
+    "weight": 12
+  },
+  {
+    "term": "pitfall lesson",
+    "weight": 12
+  },
+  {
+    "term": "schedul fleet",
+    "weight": 12
+  },
+  {
+    "term": "deploy",
+    "weight": 10
+  },
+  {
+    "term": "fleet",
+    "weight": 10
+  },
+  {
+    "term": "lesson",
+    "weight": 10
+  },
+  {
+    "term": "operation",
+    "weight": 10
+  },
+  {
+    "term": "packag",
+    "weight": 10
+  },
+  {
+    "term": "pitfall",
+    "weight": 10
+  },
+  {
+    "term": "production",
+    "weight": 10
+  },
+  {
+    "term": "schedul",
+    "weight": 10
+  },
+  {
+    "term": "best",
+    "weight": 9
+  },
+  {
+    "term": "bottleneck",
+    "weight": 9
+  },
+  {
+    "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "chapter summary",
+    "weight": 9
+  },
+  {
+    "term": "compiler",
+    "weight": 9
+  },
+  {
+    "term": "constraints",
+    "weight": 9
+  },
+  {
+    "term": "CPU",
+    "weight": 9
+  },
+  {
+    "term": "decode",
+    "weight": 9
+  },
+  {
+    "term": "deployment",
+    "weight": 9
+  },
+  {
+    "term": "engineering",
+    "weight": 9
+  },
+  {
+    "term": "engineering deep dive",
+    "weight": 9
+  },
+  {
+    "term": "fleets",
+    "weight": 9
+  },
+  {
+    "term": "fusion",
+    "weight": 9
+  },
+  {
+    "term": "GPU",
+    "weight": 9
+  },
+  {
+    "term": "independent",
+    "weight": 9
+  },
+  {
+    "term": "kernels",
+    "weight": 9
+  },
+  {
+    "term": "knobs",
+    "weight": 9
+  },
+  {
+    "term": "launches",
+    "weight": 9
+  },
+  {
+    "term": "MegaKernel",
+    "weight": 9
+  },
+  {
+    "term": "microbenchmarks",
+    "weight": 9
+  },
+  {
+    "term": "miss",
+    "weight": 9
+  },
+  {
+    "term": "NPU",
+    "weight": 9
+  },
+  {
+    "term": "practices",
+    "weight": 9
+  },
+  {
+    "term": "routinely",
+    "weight": 9
+  },
+  {
+    "term": "ship",
+    "weight": 9
+  },
+  {
+    "term": "surface",
+    "weight": 9
+  },
+  {
+    "term": "teams",
+    "weight": 9
+  },
+  {
+    "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "treat",
+    "weight": 9
+  },
+  {
+    "term": "YiRage",
+    "weight": 9
+  }
+]

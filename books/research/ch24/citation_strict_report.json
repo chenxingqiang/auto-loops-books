@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch24",
+  "chapter_title": "Heterogeneous Compilation and Multi-Hardware Deployment",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 58,
+  "catalog_tier_a": 23,
+  "binding_count": 238,
+  "quality_binding_count": 238,
+  "sentence_count": 336,
+  "claim_sentence_count": 336,
+  "unbound_claim_sentences": 98,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 63,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

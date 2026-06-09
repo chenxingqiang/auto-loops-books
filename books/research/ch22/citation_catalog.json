@@ -1,0 +1,914 @@
+{
+  "chapter_id": "ch22",
+  "timestamp": "2026-06-10T02:46:29.679475",
+  "min_papers": 25,
+  "paper_count": 62,
+  "sentence_count": 316,
+  "binding_count": 315,
+  "papers": [
+    {
+      "bib_key": "kanchumarthi2026endtoendlinuxadmin",
+      "title": "End-to-End Linux Administration Support: A Comprehensive Study of Installation, Configuration, Performance Tuning, and Production Reliability Across Heterogeneous Platforms",
+      "link": "https://doi.org/10.30574/wjarr.2026.30.1.1022",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 92,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "performance",
+        "production",
+        "tuning"
+      ],
+      "reference": "Satya Nanda Vara Prasad Kanchumarthi (2026). End-to-End Linux Administration Support: A Comprehensive Study of Installation, Configuration, Performance Tuning, and Production Reliability Across Heterogeneous Platforms. Retrieved from https://doi.org/10.30574/wjarr.2026.30.1.1022",
+      "abstract": "Purpose: The purpose of this study is to explore end-to-end Linux administration practices, focusing on installation, configuration, performance tuning, and production reliability in heterogeneous computing environments. With the increasing complexity of distributed systems, Linux administrators must manage diverse infrastructures efficiently while ensuring system stability and scalability.\nDesign/methodology/approach: This research adopts a qualitative and analytical approach by reviewing existing literature, system administration frameworks, and real-world case studies. It evaluates Linux system lifecycle stages, including deployment, configuration management, performance optimization, and reliability engineering across heterogeneous platforms such as cloud, edge, and enterprise systems.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2026performancedrivene",
+      "title": "Performance-Driven End-to-End Optimization for UAV-Assisted Satellite Downlink with Hybrid NOMA/OMA Transmission",
+      "link": "https://doi.org/10.3390/electronics15020471",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "bandwidth",
+        "gate",
+        "decode",
+        "end-to-end",
+        "miss",
+        "performance"
+      ],
+      "reference": "Tie Liu, Chenhua Sun, et al. (2026). Performance-Driven End-to-End Optimization for UAV-Assisted Satellite Downlink with Hybrid NOMA/OMA Transmission. Retrieved from https://doi.org/10.3390/electronics15020471",
+      "abstract": "Unmanned aerial vehicle (UAV)-assisted satellite downlink transmission is a promising solution for improving coverage and throughput under challenging propagation conditions. However, the achievable performance gains are fundamentally constrained by the coupling between access transmission and the satellite–UAV backhaul, especially when decode-and-forward (DF) relaying and hybrid multiple access are employed. In this paper, we investigate the problem of end-to-end downlink sum-rate maximization in a UAV-assisted satellite network with hybrid non-orthogonal multiple access (NOMA)/orthogonal multiple access (OMA) transmission. We propose a performance-driven end-to-end optimization framework, in which UAV placement is optimized as an outer-layer control variable through an iterative procedur",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mai2025cimwiseanireebased",
+      "title": "CIMWise: An IREE-based End-To-End AI Compiler with Auto-Tuning for CIM Processors",
+      "link": "https://doi.org/10.1109/iccad66269.2025.11240989",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "tun",
+        "compiler",
+        "end-to-end",
+        "tuning"
+      ],
+      "reference": "Bo Mai, Jin Wang, et al. (2025). CIMWise: An IREE-based End-To-End AI Compiler with Auto-Tuning for CIM Processors. Retrieved from https://doi.org/10.1109/iccad66269.2025.11240989",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "avantika2025endtoendsystemperf",
+      "title": "End-to-End System Performance Tuning through Real-Time Monitoring and Analysis",
+      "link": "https://doi.org/10.1109/cises66934.2025.11265337",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "performance",
+        "tuning"
+      ],
+      "reference": "Avantika, Pooja T S (2025). End-to-End System Performance Tuning through Real-Time Monitoring and Analysis. Retrieved from https://doi.org/10.1109/cises66934.2025.11265337",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wen2026querymarftquerygui",
+      "title": "Query-MARFT: Query-Guided Multi-Agent Reinforcement Fine-Tuning for End-to-End Multi-Object Tracking",
+      "link": "https://doi.org/10.2139/ssrn.6731126",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "bottleneck",
+        "tun",
+        "end-to-end",
+        "tuning"
+      ],
+      "reference": "Jiazheng Wen, Yuheng Su, et al. (2026). Query-MARFT: Query-Guided Multi-Agent Reinforcement Fine-Tuning for End-to-End Multi-Object Tracking. Retrieved from https://doi.org/10.2139/ssrn.6731126",
+      "abstract": "Current end-to-end multi-object tracking (MOT) methods face three primary bottlenecks: the intrinsic mismatch between local supervised signals and global trajectory metrics, rigid predefined module coordination, and the stability-plasticity dilemma caused by traditional full-parameter fine-tuning. To address these limitations, we propose Query-MARFT, a novel Query-Guided Multi-Agent Reinforcement Fine-Tuning framework. We reconceptualize the evolution of track queries as a Flexible Markov Game, decoupling the trajectory lifecycle into four role-specific agents: Detection Focus, Association Modulation, Temporal Update, and Trajectory Correction. To accommodate diverse visual dynamics, these agents collaborate dynamically via a scene-adaptive Directed Acyclic Graph topology. Furthermore, to ",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "mustofa2019analisaprofilbandw",
+      "title": "ANALISA PROFIL BANDWIDTH  JARINGAN COPPER, FIBER OPTIK DAN MIGRASI SERTA LOSS LINK BUDGET DI PT TELKOM KEDIRI",
+      "link": "https://doi.org/10.29407/gj.v3i2.13342",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "profil bandwidth",
+        "bandwidth",
+        "profil"
+      ],
+      "reference": "INDRA HADI MUSTOFA (2019). ANALISA PROFIL BANDWIDTH  JARINGAN COPPER, FIBER OPTIK DAN MIGRASI SERTA LOSS LINK BUDGET DI PT TELKOM KEDIRI. Retrieved from https://doi.org/10.29407/gj.v3i2.13342",
+      "abstract": "Dalam hal layanan indihome 3P jaringan copper tidak mampu mengirim data internet yang maksimal </= 3 Mbps maka dari itu dimigrasikan ke jaringan fiber optik yang mengirimkan bandwidth sampai >100 Mbps. Rata-rata bandwidth jaringan copper upload 0,62 dan download 3,28 Mbps , serta jaringan fiber optik untuk upload 2,57 Mbps dan upload 11,62 Mbps, serta migrasi upload 7,01Mbps dan download 10,73 Mbps\r\nAttenuation atau redaman jaringan copper upload 16,82 dBm dan download 33,77 dBm serta jaringan fiiber optik atau migrasi redaman upload 2,44dBm dan download -20,34 dBm. Kabel fiber optik dalam pengiriman data melalui gelombang upload 1310 nm , download 1490 nm, streaming 1550 nm dengan loss link budget  </= -28 dBm .\r\n \r\nKata Kunci : Copper, Fiber Optik, Migrasi,  Bandwidth,  Loss Link Budget.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kobayashi2025pretrainedmodelsan",
+      "title": "Pre-Trained Models and Fine-Tuning for Negotiation Strategies with End-to-End Reinforcement Learning",
+      "link": "https://doi.org/10.5220/0013161500003890",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "tuning"
+      ],
+      "reference": "Yuji Kobayashi, Katsuhide Fujita (2025). Pre-Trained Models and Fine-Tuning for Negotiation Strategies with End-to-End Reinforcement Learning. Retrieved from https://doi.org/10.5220/0013161500003890",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rolland2024introductiontopart",
+      "title": "Introduction To Partial Fine-tuning: A Comprehensive Evaluation Of End-to-end Children’s Automatic Speech Recognition Adaptation",
+      "link": "https://doi.org/10.21437/interspeech.2024-1102",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "tuning"
+      ],
+      "reference": "Thomas Rolland, Alberto Abad (2024). Introduction To Partial Fine-tuning: A Comprehensive Evaluation Of End-to-end Children’s Automatic Speech Recognition Adaptation. Retrieved from https://doi.org/10.21437/interspeech.2024-1102",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "alexopoulou2026investigatinglaser",
+      "title": "Investigating laser-driven pair-production with a fast, end-to-end, analytical model",
+      "link": "https://doi.org/10.2139/ssrn.6664663",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "end-to-end",
+        "miss",
+        "production",
+        "treat"
+      ],
+      "reference": "Vasiliki  E. Alexopoulou (2026). Investigating laser-driven pair-production with a fast, end-to-end, analytical model. Retrieved from https://doi.org/10.2139/ssrn.6664663",
+      "abstract": "Laser-driven positron sources, generated through ultra-intense laser–matter interactions, have attracted significant interest due to their relevance in fundamental physics, laboratory astrophysics, and advanced applications. However, their modeling remains challenging, as the generation of electron–positron pairs involves a complex chain of strongly coupled physical processes, including preplasma formation, relativistic electron acceleration, transport, photon emission, and pair-production. Existing approaches typically rely either on simplified analytical models or on computationally intensive numerical simulations, both of which treat individual mechanisms in isolation, limiting rapid optimization and full-process understanding. In this work, a fast, end-to-end analytical model is develo",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "bandwidth",
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mijalkovic2025anendtoendmodeltra",
+      "title": "An End-to-End Model Traceability Framework for Process-Driven Software Development",
+      "link": "https://doi.org/10.32920/29873819",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 46,
+      "matched_keywords": [
+        "workflow",
+        "end-to-end",
+        "independent",
+        "NPU"
+      ],
+      "reference": "Marko Mijalkovic (2025). An End-to-End Model Traceability Framework for Process-Driven Software Development. Retrieved from https://doi.org/10.32920/29873819",
+      "abstract": "<p dir=\"ltr\">Model-Driven Engineering (MDE) is a methodology in software development which emphasizes the use of models throughout the development process. Key aspects of MDE include process modelling and enactment, which provide a systemic approach to developing software. Traceability is currently gaining prominence within MDE, since it facilitates the tracking of artefacts through the development and management process, from inception to final output.</p><p dir=\"ltr\">We propose an approach that integrates end-to-end traceability with process modelling. In our research, process models represent MDE workflows that span platform-independent modelling, platform-specific modelling, and code generation phases. Process execution is automated using megamodels and model transformation chains. The",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "CPU",
+        "end-to-end",
+        "YiRage"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2021rancanganprofillul",
+      "title": "RANCANGAN PROFIL LULUSAN MASA DEPAN BAGI PENDIDIDIKAN TINGGI AGROINDUSTRI",
+      "link": "https://doi.org/10.24961/j.tek.ind.pert.2021.31.2.211",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ],
+      "reference": " (2021). RANCANGAN PROFIL LULUSAN MASA DEPAN BAGI PENDIDIDIKAN TINGGI AGROINDUSTRI. Retrieved from https://doi.org/10.24961/j.tek.ind.pert.2021.31.2.211",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dudov2019profiliakavovzahuk",
+      "title": "Profil žiaka vo vzťahu k učiteľovi Pupil’s Profile and Pupil — Teacher Relationship",
+      "link": "https://doi.org/10.31261/pil.2019.01.10",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "profil",
+        "ship"
+      ],
+      "reference": "Katarína Dudová (2019). Profil žiaka vo vzťahu k učiteľovi Pupil’s Profile and Pupil — Teacher Relationship. Retrieved from https://doi.org/10.31261/pil.2019.01.10",
+      "abstract": "The aim of this paper is to bring a set of specific semantic features which profile both a pupil and a pupil’s perception of a teacher. This issue is manifested at several levels and in various aspects of the concept of SEEING in Slovak linguistic world view. The study seeks to examine this subject in view of the statements collected in the questionnaire survey conducted on 10—14‑year‑old high school students. Therefore, the author focuses on the adolescent pupil, his or her perception of the school environment, and the selection of perceived object properties.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "decode",
+        "performance"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "sliwa2019towardsdatadrivens",
+      "title": "Towards Data-Driven Simulation of End-to-End Network Performance Indicators",
+      "link": "https://doi.org/10.1109/vtcfall.2019.8891513",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ],
+      "reference": "Benjamin Sliwa, Christian Wietfeld (2019). Towards Data-Driven Simulation of End-to-End Network Performance Indicators. Retrieved from https://doi.org/10.1109/vtcfall.2019.8891513",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "turner2026aardvarkweatherend",
+      "title": "Aardvark weather: end-to-end data-driven weather forecasting",
+      "link": "https://doi.org/10.5194/egusphere-egu26-4536",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "NPU",
+        "performance"
+      ],
+      "reference": "Richard Turner (2026). Aardvark weather: end-to-end data-driven weather forecasting. Retrieved from https://doi.org/10.5194/egusphere-egu26-4536",
+      "abstract": "Weather forecasting is critical for a range of human activities including transportation, agriculture, industry, as well as the safety of the general public. Over the last two years, machine learning models have shown that they have the potential to transform the complex weather prediction pipeline, but current approaches still rely on numerical weather prediction (NWP) systems, limiting forecast speed and accuracy. In this talk, I will give some of the background on these developments. I will then introduce a machine learning model which can replace the entire operational NWP pipeline. Aardvark Weather, an end-to-end data-driven weather prediction system, ingests raw observations and outputs global gridded forecasts and local station forecasts. Further, it can be optimised end-to-end to m",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "yang2023cimaxcompileranend",
+      "title": "CIMAX-Compiler: An End-to-End ANN Compiler for Heterogeneous Computing-in-Memory Platform",
+      "link": "https://doi.org/10.1109/wccct56755.2023.10052488",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "end-to-end"
+      ],
+      "reference": "Chen Yang, Yawei Wang, et al. (2023). CIMAX-Compiler: An End-to-End ANN Compiler for Heterogeneous Computing-in-Memory Platform. Retrieved from https://doi.org/10.1109/wccct56755.2023.10052488",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "chen2020ahecendtoendcompil",
+      "title": "AHEC: End-to-end Compiler Framework for Privacy-preserving Machine Learning Acceleration",
+      "link": "https://doi.org/10.1109/dac18072.2020.9218508",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "end-to-end"
+      ],
+      "reference": "Huili Chen, Rosario Cammarota, et al. (2020). AHEC: End-to-end Compiler Framework for Privacy-preserving Machine Learning Acceleration. Retrieved from https://doi.org/10.1109/dac18072.2020.9218508",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "r2026aidrivenendtoendre",
+      "title": "AI-Driven End-to-End Recruitment and Training Framework using Multi-Modal Performance Analytics",
+      "link": "https://doi.org/10.1109/icsadl67539.2026.11451839",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ],
+      "reference": "Mukhil R, Monishkumar V, S. M. Keerthana (2026). AI-Driven End-to-End Recruitment and Training Framework using Multi-Modal Performance Analytics. Retrieved from https://doi.org/10.1109/icsadl67539.2026.11451839",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2019theendorendofvirtu",
+      "title": "The End or “End” of Virtuosic Performance",
+      "link": "https://doi.org/10.5040/9781501350719.0049",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ],
+      "reference": " (2019). The End or “End” of Virtuosic Performance. Retrieved from https://doi.org/10.5040/9781501350719.0049",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "sen2024dnndasheracompiler",
+      "title": "DNNDaSher: A Compiler Framework for Dataflow Compatible End-to-End Acceleration on IBM AIU",
+      "link": "https://doi.org/10.1109/mm.2024.3423750",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "end-to-end"
+      ],
+      "reference": "Sanchari Sen, Shubham Jain, et al. (2024). DNNDaSher: A Compiler Framework for Dataflow Compatible End-to-End Acceleration on IBM AIU. Retrieved from https://doi.org/10.1109/mm.2024.3423750",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "behara2022movingbeyondtradit",
+      "title": "Moving beyond traditional KPIs: an end-to-end data driven approach for improved system understanding and performance",
+      "link": "https://doi.org/10.1117/12.2628948",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ],
+      "reference": "Natalie Behara, Christian Stephan (2022). Moving beyond traditional KPIs: an end-to-end data driven approach for improved system understanding and performance. Retrieved from https://doi.org/10.1117/12.2628948",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lou2025adoracompilerendto",
+      "title": "Adora Compiler: End-to-End Optimization for High-Efficiency Dataflow Acceleration and Task Pipelining on CGRAs",
+      "link": "https://doi.org/10.1109/dac63849.2025.11132391",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "end-to-end"
+      ],
+      "reference": "Jiahang Lou, Qilong Zhu, et al. (2025). Adora Compiler: End-to-End Optimization for High-Efficiency Dataflow Acceleration and Task Pipelining on CGRAs. Retrieved from https://doi.org/10.1109/dac63849.2025.11132391",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "purwakarta2022kompostanamanandal",
+      "title": "Kompos Tanamanan Dalam Implementasi Proyek Penguatan Profil Pelajar Pancasila Dan Profil Pelajar Rahmatan Lil’alamin",
+      "link": "https://doi.org/10.58344/jmi.v1i3.95",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ],
+      "reference": "Tim Proyek Profil Pelajar Pancasila MTSN 2 Purwakarta (2022). Kompos Tanamanan Dalam Implementasi Proyek Penguatan Profil Pelajar Pancasila Dan Profil Pelajar Rahmatan Lil’alamin. Retrieved from https://doi.org/10.58344/jmi.v1i3.95",
+      "abstract": "Karakteristik Profil Pelajar Pancasila adalah Pelajar Indonesia yang beriman, bertakwa kepada Tuhan Yang Maha Esa, dan berakhlak mulia adalah pelajar yang berakhlak dalam hubungannya dengan Tuhan Yang Maha Esa. Pelajar yang bernalar kritis mampu secara objektif memproses informasi baik kualitatif maupun kuantitatif, membangun keterkaitan antara berbagai informasi, menganalisis informasi, mengevaluasi dan menyimpulkannya. Pada semester ganjil tahun pelajaran 2022/2023 data siswa kelas VII di MTsN 2 Purwakarta terdapat 182 siswa terdiri 91 laki-laki dan 91 perempuan, yang tebagi dalam 6 rombel. Dalam pembelajaran Proyek Profil Pancasila mengambil tema Gaya Hidup Berkelanjutan dengan titik fokus pembelajarannya adalah membuat compos caira dab menanam tanaman. Metodologi yang digunakan dalam k",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "meiarti2021profilprofilketera",
+      "title": "Profil Profil Keterampilan Berpikir Kreatif Peserta Didik SMK",
+      "link": "https://doi.org/10.30599/jipfri.v5i2.684",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ],
+      "reference": "Devi Meiarti (2021). Profil Profil Keterampilan Berpikir Kreatif Peserta Didik SMK. Retrieved from https://doi.org/10.30599/jipfri.v5i2.684",
+      "abstract": "The aim of this research is to analyze the initial profile of creative thinking skills in Vocational School students on physics learning. This research was a quantitative descriptive research using test method. The population used in this study were all students of class XII at SMK Islam Nurul Hadi in Demak Regency. The sample used was 30 student’s selected by random sampling. The instrument used is a open-ended test with four items each representing an indicator of creative thinking. The indicators used are indicators that had been developed by an expert. The result of students’ creative thinking skills in physic subject showed 56,67% which was categorized as sufficient. It was shown from the creative thinking skills indicators that fluency 61,11%, flexibility and originality 57,78%, and ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "milli2025designinganendtoen",
+      "title": "Designing an End-to-End Urban Air Pollution Forecasting Framework: A Data-Driven Pipeline Approach",
+      "link": "https://doi.org/10.21203/rs.3.rs-7537438/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "end-to-end",
+        "miss"
+      ],
+      "reference": "Musa Milli (2025). Designing an End-to-End Urban Air Pollution Forecasting Framework: A Data-Driven Pipeline Approach. Retrieved from https://doi.org/10.21203/rs.3.rs-7537438/v1",
+      "abstract": "Abstract\nAir pollution forecasting plays a vital role in mitigating the adverse impacts of deteriorating air quality on public health and urban sustainability. This study presents a data-driven framework for urban air quality forecasting, focusing on the accurate prediction of PM 2.5 concentrations. To ensure reliable model training, the Beijing Air Quality dataset was carefully preprocessed, including handling of missing values, removal of outliers, and feature selection based on correlation analysis. The proposed model introduces a residual-enhanced hybrid forecasting framework that integrates the statistical interpretability of Prophet with the nonlinear learning capacity of Long Short-Term Memory (LSTM) networks. Prophet is first employed to capture long-term trend and seasonality comp",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022nigerprofilduproje",
+      "title": "Niger | Profil du projet",
+      "link": "https://doi.org/10.4060/cb9913fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Niger | Profil du projet. Retrieved from https://doi.org/10.4060/cb9913fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Niger",
+      "link": "https://doi.org/10.4060/cc6331fr",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2023). Profil des systèmes alimentaires - Niger. Retrieved from https://doi.org/10.4060/cc6331fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Sénégal",
+      "link": "https://doi.org/10.4060/cb8318fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Sénégal. Retrieved from https://doi.org/10.4060/cb8318fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_44",
+      "title": "Profil des systèmes alimentaires - Haïti",
+      "link": "https://doi.org/10.4060/cc2295fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Haïti. Retrieved from https://doi.org/10.4060/cc2295fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023profildessystmesal_45",
+      "title": "Profil des systèmes alimentaires - Mauritanie",
+      "link": "https://doi.org/10.4060/cc4048fr",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2023). Profil des systèmes alimentaires - Mauritanie. Retrieved from https://doi.org/10.4060/cc4048fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_46",
+      "title": "Profil des systèmes alimentaires – Burundi",
+      "link": "https://doi.org/10.4060/cb8671fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires – Burundi. Retrieved from https://doi.org/10.4060/cb8671fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023profildessystmesal_47",
+      "title": "Profil des systèmes alimentaires - Bénin",
+      "link": "https://doi.org/10.4060/cc3787fr",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2023). Profil des systèmes alimentaires - Bénin. Retrieved from https://doi.org/10.4060/cc3787fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023profilperdun",
+      "title": "profil perdu, n.",
+      "link": "https://doi.org/10.1093/oed/4152178336",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2023). profil perdu, n.. Retrieved from https://doi.org/10.1093/oed/4152178336",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_49",
+      "title": "Profil des systèmes alimentaires - Cameroun",
+      "link": "https://doi.org/10.4060/cb9864fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Cameroun. Retrieved from https://doi.org/10.4060/cb9864fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mukti2025pembuatanstoryboar",
+      "title": "Pembuatan storyboard dalam perancangan Video Profil Komunitas Pena Hitam Malang Pembuatan Storyboard dalam Perancangan Video Profil Komunitas Pena Hitam Malang",
+      "link": "https://doi.org/10.32815/jeskovsia.v9i2.1068",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": "Haydar Mukti, Aris Sutejo, Widyasari Widyasari (2025). Pembuatan storyboard dalam perancangan Video Profil Komunitas Pena Hitam Malang Pembuatan Storyboard dalam Perancangan Video Profil Komunitas Pena Hitam Malang. Retrieved from https://doi.org/10.32815/jeskovsia.v9i2.1068",
+      "abstract": "Komunitas Pena Hitam Malang masih belum dikenali oleh sebagian besar masyarakat, hanya dikenal oleh para ilustrator atau seniman lokal saja. Masih banyak remaja Malang yang baru terjun dalam bidang seni yang hanya mengetahui nama Pena Hitam saja, tetapi tidak mengetahui yang sebenarnya bahwa Pena Hitam adalah sebuah komunitas ilustrasi asal Malang yang masih aktif hingga sekarang. Komunitas Pena Hitam belum mempunyai media yang berbentuk gambar bergerak atau bisa disebut dengan video profil. Dengan adanya video profil ini untuk memberikan informasi kepada remaja Malang khususnya illustrator dan juga seniman pemula yang ada di Malang dan sekitarnya untuk mengenal lebih dalam apa itu Komunitas Pena Hitam Malang. Video profil ini juga memberikan informasi kepada remaja Malang serta illustrato",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2021profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Madagascar",
+      "link": "https://doi.org/10.4060/cb6861fr",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2021). Profil des systèmes alimentaires - Madagascar. Retrieved from https://doi.org/10.4060/cb6861fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "safitri2023profiloftheinclusi",
+      "title": "Profil of The Inclusive Education Program at Sedati Agung Sidoarjo Elementary School",
+      "link": "https://doi.org/10.21070/ups.2480",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": "Wilujeng Dwi Safitri, Vanda Rezania (2023). Profil of The Inclusive Education Program at Sedati Agung Sidoarjo Elementary School. Retrieved from https://doi.org/10.21070/ups.2480",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_53",
+      "title": "Profil des systèmes alimentaires - Mali",
+      "link": "https://doi.org/10.4060/cb9945fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Mali. Retrieved from https://doi.org/10.4060/cb9945fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "official2025profil",
+      "title": "Profil",
+      "link": "https://doi.org/10.31219/osf.io/bre8u_v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": "Bang Atuez Official (2025). Profil. Retrieved from https://doi.org/10.31219/osf.io/bre8u_v1",
+      "abstract": "Profil ini dibuat untuk mengertahui Riwayat Diri atau Data Diri ,sehingga memudahkan Pembaca / Audiens untuk mengenal saya lebih dekat",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pabst2021ergebnisjuliansthe",
+      "title": "Ergebnis: Julians theologisches Profil",
+      "link": "https://doi.org/10.1163/9789004445444_014",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": "Stefan Pabst (2021). Ergebnis: Julians theologisches Profil. Retrieved from https://doi.org/10.1163/9789004445444_014",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023bandwidth",
+      "title": "Bandwidth",
+      "link": "https://doi.org/10.1142/9789811237881_0008",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "bandwidth"
+      ],
+      "reference": " (2023). Bandwidth. Retrieved from https://doi.org/10.1142/9789811237881_0008",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_58",
+      "title": "Profil des systèmes alimentaires - Guinée-Bissau",
+      "link": "https://doi.org/10.4060/cc1266fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Guinée-Bissau. Retrieved from https://doi.org/10.4060/cc1266fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023profildelapchecont",
+      "title": "Profil de la pêche continentale en Guinée",
+      "link": "https://doi.org/10.4060/cc5061fr",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2023). Profil de la pêche continentale en Guinée. Retrieved from https://doi.org/10.4060/cc5061fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_61",
+      "title": "Profil des systèmes alimentaires - Côte d'Ivoire",
+      "link": "https://doi.org/10.4060/cc1267fr",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ],
+      "reference": " (2022). Profil des systèmes alimentaires - Côte d'Ivoire. Retrieved from https://doi.org/10.4060/cc1267fr",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "desai2026aidrivencustomeran",
+      "title": "AI-Driven Customer Analytics for End-to-End Operational Optimization in Retail and Logistics",
+      "link": "https://doi.org/10.2139/ssrn.6002054",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ],
+      "reference": "Abhi Desai (2026). AI-Driven Customer Analytics for End-to-End Operational Optimization in Retail and Logistics. Retrieved from https://doi.org/10.2139/ssrn.6002054",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "wang2025locomambavisiondri",
+      "title": "LocoMamba: Vision-Driven Locomotion via End-to-End Deep Reinforcement Learning with Mamba",
+      "link": "https://doi.org/10.2139/ssrn.5414855",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ],
+      "reference": "Yinuo Wang, Xiaowen Tao (2025). LocoMamba: Vision-Driven Locomotion via End-to-End Deep Reinforcement Learning with Mamba. Retrieved from https://doi.org/10.2139/ssrn.5414855",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "wizenty2024modeldrivenendtoen",
+      "title": "Model-Driven End-to-End Resolution of Security Smells in Microservice Architectures",
+      "link": "https://doi.org/10.5220/0012671700003711",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ],
+      "reference": "Philip Wizenty, Francisco Ponce, et al. (2024). Model-Driven End-to-End Resolution of Security Smells in Microservice Architectures. Retrieved from https://doi.org/10.5220/0012671700003711",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chen2024endtoendmicrogridp",
+      "title": "End-to-End Microgrid Protection Using Distributed Data-Driven Methods",
+      "link": "https://doi.org/10.2139/ssrn.4934154",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ],
+      "reference": "Yue Chen, Soham Chakraborty, et al. (2024). End-to-End Microgrid Protection Using Distributed Data-Driven Methods. Retrieved from https://doi.org/10.2139/ssrn.4934154",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "venkatesan2026emtaendtoendmultit",
+      "title": "EMTA: End-to-End Multi-Task Audio-Driven Talking-Head Animation",
+      "link": "https://doi.org/10.5220/0014414600004084",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ],
+      "reference": "Laxmi Venkatesan, Divyam Choudhary, et al. (2026). EMTA: End-to-End Multi-Task Audio-Driven Talking-Head Animation. Retrieved from https://doi.org/10.5220/0014414600004084",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "B": 34,
+    "A": 22,
+    "C": 6
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:42.208274"
+}

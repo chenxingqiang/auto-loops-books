@@ -17,11 +17,11 @@
       "corroboration_content_match": true,
       "corroboration_missing_tokens": [
         "compiler",
-        "cuda",
-        "cpu",
-        "triton",
+        "CUDA",
+        "CPU",
+        "Triton",
         "nki",
-        "mlir"
+        "MLIR"
       ],
       "verified_ok": true,
       "source_method": "craw4ai",

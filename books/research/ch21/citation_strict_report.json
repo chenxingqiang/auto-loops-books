@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch21",
+  "chapter_title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 48,
+  "catalog_tier_a": 23,
+  "binding_count": 345,
+  "quality_binding_count": 345,
+  "sentence_count": 346,
+  "claim_sentence_count": 346,
+  "unbound_claim_sentences": 1,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 52,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

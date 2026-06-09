@@ -48,7 +48,9 @@ def cite_pair(i: int) -> str:
 
 
 def section_title(label: str) -> str:
-    return label.replace("_", " ").title()
+    from book_proper_nouns import canonicalize_prose
+
+    return canonicalize_prose(label.replace("_", " "))
 
 
 def paragraph_for_section(spec: ChapterSpec, section: SectionSpec, idx: int) -> str:
@@ -120,7 +122,7 @@ def build_chapter_body(spec: ChapterSpec) -> str:
     parts = [intro]
     for i, sec in enumerate(spec.sections):
         parts.append(f"\\section{{{section_title(sec.label)}}}\n")
-        parts.append(f"\\label{{sec:{sec.label}}}\n\n")
+        parts.append(f"\\label{{sec:{spec.chapter_id}_{sec.label}}}\\n\\n")
         parts.append(paragraph_for_section(spec, sec, i))
         parts.append("\n\n")
         parts.append(expansion_block(spec, 8, start_idx=i + 10))

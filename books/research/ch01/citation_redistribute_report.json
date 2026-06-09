@@ -1,0 +1,154 @@
+{
+  "chapter_id": "ch01",
+  "pool_count": 30,
+  "assigned_count": 30,
+  "unassigned_count": 0,
+  "sections_with_cites": 9,
+  "unique_keys_in_tex": 27,
+  "pool_path": "books/research/ch01/citation_pool.json",
+  "sections_used": [
+    "Chapter Summary",
+    "Industry Benchmarks: Native Frameworks vs.\\ Fused Kernels",
+    "Limits of Mainstream PyTorch and Hugging Face Inference",
+    "Opening Case Study: YiRage Cross-Hardware Compilation Preview",
+    "Prefill and Decode: Two Performance Regimes",
+    "Quantifying Overheads: Launches, Memory, and Scheduling",
+    "Roofline Intuition for Decoder Layers",
+    "The Decode Pain Point: Single-Token, Low-Batch Latency",
+    "chapter"
+  ],
+  "cites_applied": 27,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch01_llm_decode_bottlenecks.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0002",
+      "bib_key": "recasens2025mindthememorygapun",
+      "section": "chapter",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "LLM",
+        "GPU",
+        "memory"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "fan2025ellieenergyefficie",
+      "section": "chapter",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "dao2022flashattention",
+      "section": "chapter",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "attention",
+        "FlashAttention"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "dao2023flashdecoding",
+      "section": "chapter",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "kamath2025podascpttentionscp",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "pichlmeier2024performancecharact",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "semianalysis2024tma",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "tensor"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "li2024llminferenceservin",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM",
+        "LLM inference"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "kwon2023vllm",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "attention",
+        "memory"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "eto2025llmperformancebott",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "tang2026tplatensorparallel",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 108,
+      "matched_keywords": [
+        "prefill decode",
+        "decode",
+        "prefill",
+        "attention",
+        "tensor"
+      ]
+    },
+    {
+      "sentence_id": "s0014",
+      "bib_key": "yu2026precisionbottlenec",
+      "section": "Prefill and Decode: Two Performance Regimes",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:36.623245"
+}

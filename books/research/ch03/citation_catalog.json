@@ -1,0 +1,869 @@
+{
+  "chapter_id": "ch03",
+  "timestamp": "2026-06-10T02:45:07.995571",
+  "min_papers": 25,
+  "paper_count": 55,
+  "sentence_count": 195,
+  "binding_count": 177,
+  "papers": [
+    {
+      "bib_key": "carmona2025characterizationof",
+      "title": "Characterization of Machine Learning Compilers for LLM inference on NVIDIA GPUs",
+      "link": "https://doi.org/10.21203/rs.3.rs-7652970/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 163,
+      "matched_keywords": [
+        "benchmark method",
+        "benchmark method LLM inference compiler",
+        "AI compiler optimization",
+        "benchmark methodology LLM inference",
+        "GPU",
+        "compiler",
+        "gpus",
+        "LLM",
+        "model",
+        "models",
+        "PyTorch",
+        "XLA"
+      ],
+      "reference": "Alejandro Carmona, Gregorio Bernabé, José M. García (2025). Characterization of Machine Learning Compilers for LLM inference on NVIDIA GPUs. Retrieved from https://doi.org/10.21203/rs.3.rs-7652970/v1",
+      "abstract": "Abstract\nAI inference is conflicted between Performance, developer Productivity, and device Portability—the P3 problem. Machine Learning Compilers (MLCs) aim to resolve this, but their ecosystem is fragmented, with tools each prioritizing one issue. This paper evaluates deploying trade-offs of PyTorch-based LLMs on NVIDIA GPUs using four intertwined prominent MLC tools: torch.compile, TensorRT, XLA, and ONNX Runtime. A dual methodology is used, leveraging synthetic PyTorch models to isolate optimizations and end-to-end benchmarks with State-of-The-Art (SoTA) models (TinyLlama-1.1B, Llama-2-7B) to measure real-world performance. Findings reveal that Ahead-Of-Time (AOT) compilation's peak performance requires architecture-specific tools like TensorRT-LLM, necessary for SoTA LLMs but unusable",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "rasatavohary2026crossplatforminfer",
+      "title": "Cross-Platform Inference of 1.58-bit State Space Models: ARM NEON vs x86 AVX-512 vs GPU CUD",
+      "link": "https://doi.org/10.31224/6686",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 148,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "cache",
+        "CPU",
+        "GPU",
+        "SIMD/avx",
+        "CUDA",
+        "memory",
+        "model",
+        "models",
+        "same",
+        "SIMD",
+        "token"
+      ],
+      "reference": "Gabriel Zo-Hasina Rasatavohary (2026). Cross-Platform Inference of 1.58-bit State Space Models: ARM NEON vs x86 AVX-512 vs GPU CUD. Retrieved from https://doi.org/10.31224/6686",
+      "abstract": "Large language model inference remains predominantly GPU-dependent, limiting deployment on edge devices and cost-sensitiveenvironments. We investigate whether State Space Models (SSMs) with extreme quantization can achieve practical inference speeds on CPU architectures without GPU acceleration. We benchmark BitMamba-2, a 1.58-bit ternary-quantized Mamba model, across five hardware configurations spanning three instruction set architectures: ARM NEON (Apple M1), x86 AVX-512 (Intel Xeon Silver 4210R), x86 AVX2 (Intel i9-10980HK), and GPU CUDA (NVIDIA RTX 2070 Super). Our C++ implementation features hand-written SIMD kernels for both ARM NEON and x86 AVX-512, enabling direct architectural comparison on the same model weights. On the 255M-parameter model, the Xeon AVX-512 configuration achiev",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 116,
+      "matched_keywords": [
+        "memory bandwidth",
+        "GPU",
+        "bandwidth",
+        "CUDA",
+        "decode",
+        "LLM",
+        "memory"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zhang2026weightonlyquantiza",
+      "title": "Weight-Only Quantization Does Not Always Save Energy: An Empirical Study of LLM Inference Across NVIDIA GPU Platforms",
+      "link": "https://doi.org/10.2139/ssrn.6854700",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 106,
+      "matched_keywords": [
+        "memory bandwidth",
+        "GPU",
+        "bandwidth",
+        "bytes",
+        "decode",
+        "LLM",
+        "memory",
+        "model",
+        "models"
+      ],
+      "reference": "Hongping Zhang (2026). Weight-Only Quantization Does Not Always Save Energy: An Empirical Study of LLM Inference Across NVIDIA GPU Platforms. Retrieved from https://doi.org/10.2139/ssrn.6854700",
+      "abstract": "Low-precision weight-only quantization, such as NF4 and mixed-precision INT8, is widely used to reduce the memory footprint of large language model (LLM) inference, and it is often assumed to reduce energy consumption as well. This assumption does not always hold because runtime quantization can introduce dequantization and mixed-precision overheads whose energy cost depends on model scale and hardware platform. We measure quantized LLM inference energy using direct NVIDIA Management Library (NVML) power sampling across 270 configurations, excluding supplementary Tesla T4 runs, covering six decoder-only model families, three precision formats including the FP16 baseline (FP16, NF4, INT8), three directly measured NVIDIA GPU platforms (RTX 4090D, RTX 5090, and A800), and five batch sizes. Th",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "moon2025hybegpunpuhybridsy",
+      "title": "Hybe: GPU-NPU Hybrid System for Efficient LLM Inference with Million-Token Context Window",
+      "link": "https://doi.org/10.1145/3695053.3731051",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "GPU",
+        "NPU",
+        "LLM",
+        "token"
+      ],
+      "reference": "Seungjae Moon, Junseo Cha, et al. (2025). Hybe: GPU-NPU Hybrid System for Efficient LLM Inference with Million-Token Context Window. Retrieved from https://doi.org/10.1145/3695053.3731051",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "malbaa2024modelinferenceusin",
+      "title": "Model Inference Using TVM on AMD GPU: Image Classification and LLM Case Studies",
+      "link": "https://doi.org/10.1109/icetran62308.2024.10645084",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "GPU",
+        "LLM",
+        "model",
+        "TVM"
+      ],
+      "reference": "Andrija Malbaša, Nenad Petrović, Branko Arsić (2024). Model Inference Using TVM on AMD GPU: Image Classification and LLM Case Studies. Retrieved from https://doi.org/10.1109/icetran62308.2024.10645084",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 69,
+      "matched_keywords": [
+        "CPU",
+        "YiRage",
+        "CUDA",
+        "LLM",
+        "MLIR"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2026millimetrewaverada",
+      "title": "MILLIMETREWAVE RADARCOMMUNICATION CO-DESIGN FOR AUTONOMOUS VEHICLES: LOW RATE ISAC ARCHITECTURE WITH ROADSIDE UNIT INTEGRATION AND HARDWARE CONSTRAINTS",
+      "link": "https://doi.org/10.52152/d11563",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 69,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "hardware-aware",
+        "model",
+        "models"
+      ],
+      "reference": "Ruikang Wang, YONG MEI (2026). MILLIMETREWAVE RADARCOMMUNICATION CO-DESIGN FOR AUTONOMOUS VEHICLES: LOW RATE ISAC ARCHITECTURE WITH ROADSIDE UNIT INTEGRATION AND HARDWARE CONSTRAINTS. Retrieved from https://doi.org/10.52152/d11563",
+      "abstract": "Autonomous vehicles must sense their surroundings and exchange data reliably in dense traffic and poor visibility. Many millimetre-wave ISAC proposals assume high-rate converters, near-ideal RF chains, and large compute budgets that do not match production constraints. This paper presents a low-rate ISAC design that co-designs waveform, baseband processing, and scheduling around converter and ECU limits, while using roadside units (RSUs) as cooperative illuminators and relays. The design combines a hybrid FMCW–OFDM frame with impairment-aware estimation that explicitly accounts for phase noise, beam squint, mutual coupling, quantisation, and calibration drift. A cross-layer scheduler enforces an explicit ADC bit-budget per frame while meeting safety-critical latency and reliability targets",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "chandra2025reducinglatencyand",
+      "title": "Reducing Latency and Enhancing Accuracy in LLM Inference through Firmware-Level Optimization",
+      "link": "https://doi.org/10.55640/ijvsli-05-02-02",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 66,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "LLM",
+        "memory",
+        "model",
+        "models"
+      ],
+      "reference": "Reena Chandra (2025). Reducing Latency and Enhancing Accuracy in LLM Inference through Firmware-Level Optimization. Retrieved from https://doi.org/10.55640/ijvsli-05-02-02",
+      "abstract": "Many edge and embedded platforms now rely on Large Language Models (LLMs) to efficiently handle natural language processing with just basic tools. Due to inference running slowly, limits on hardware, and making sacrifices between accuracy and efficiency, performing in real time is still a problem. This research analyzes firmware improvements that address these constraints, with the main goal of improving latency without any loss in the model's accuracy. This study put together a structure that brings together specific firmware actions, scheduled accesses to memory, and instructions that depend on the microarchitecture. We use 4-bit and 8-bit operations, predict memory accesses, and choose a schedule tuned for the ARM NEON and x86 AVX hardware. For confirmation, a special HIL framework proc",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "rjoub2026greendecodingelqco",
+      "title": "Green Decoding: ELQ Co-Optimization and Carbon-Aware Scheduling for Efficient LLM Inference",
+      "link": "https://doi.org/10.21203/rs.3.rs-9252320/v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "cache",
+        "HIP",
+        "LLM",
+        "memory",
+        "model",
+        "models"
+      ],
+      "reference": "Gaith Rjoub, Jamal Bentahar, et al. (2026). Green Decoding: ELQ Co-Optimization and Carbon-Aware Scheduling for Efficient LLM Inference. Retrieved from https://doi.org/10.21203/rs.3.rs-9252320/v1",
+      "abstract": "Abstract\n\n                  The large-scale deployment of Large Language Models (LLMs) is constrained by significant energy consumption and operational costs, with inference accounting for up to 90% of the total energy footprint. Existing optimization methods typically address latency or memory independently, frequently overlooking energy efficiency, carbon impact, and their intricate relationship with user-defined Service Level Agreements (SLAs) for quality and response time. This work presents Green Decoding, a novel co-optimization framework for LLM inference. Green Decoding formulates inference as a multi-objective optimization problem, minimizing a weighted function of Energy, Latency, and Quality (ELQ). The framework utilizes a policy engine that, on a per-request basis, jointly tune",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "bernardo2025compilerawareaihar",
+      "title": "Compiler-aware AI Hardware Design for Edge Devices",
+      "link": "https://doi.org/10.1145/3721888.3722095",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware aware compile",
+        "compiler",
+        "hardware-aware"
+      ],
+      "reference": "Paul Palomero Bernardo, Patrick Schmid, et al. (2025). Compiler-aware AI Hardware Design for Edge Devices. Retrieved from https://doi.org/10.1145/3721888.3722095",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "balazs2020neuralarchitecture",
+      "title": "Neural Architecture Search for Automotive Grid Fusion Networks Under Embedded Hardware Constraints",
+      "link": "https://doi.org/10.1109/icmla51294.2020.00022",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "fusion"
+      ],
+      "reference": "Gabor Balazs, Walter Stechele (2020). Neural Architecture Search for Automotive Grid Fusion Networks Under Embedded Hardware Constraints. Retrieved from https://doi.org/10.1109/icmla51294.2020.00022",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kumar2026hardwareawareneura",
+      "title": "Hardware-Aware Neural Architecture Search (NAS) with Area, Power, and Latency Constraints for ASIC Implementation",
+      "link": "https://doi.org/10.1109/icoei68323.2026.11542183",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "hardware-aware"
+      ],
+      "reference": "Abhishek Kumar, Rajeevan Chandel (2026). Hardware-Aware Neural Architecture Search (NAS) with Area, Power, and Latency Constraints for ASIC Implementation. Retrieved from https://doi.org/10.1109/icoei68323.2026.11542183",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "raha2025llmnputowardseffic",
+      "title": "LLM-NPU: Towards Efficient Foundation Model Inference on Low-Power Neural Processing Units",
+      "link": "https://doi.org/10.1109/coins65080.2025.11125797",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "NPU",
+        "LLM",
+        "model"
+      ],
+      "reference": "Arnab Raha, Souvik Kundu, et al. (2025). LLM-NPU: Towards Efficient Foundation Model Inference on Low-Power Neural Processing Units. Retrieved from https://doi.org/10.1109/coins65080.2025.11125797",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "sudhakar2026amygdalicdecisiona",
+      "title": "Amygdalic Decision Architecture for Embedded AI Systems",
+      "link": "https://doi.org/10.31224/6620",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 55,
+      "matched_keywords": [
+        "NPU constraints",
+        "AI hardware architecture",
+        "NPU",
+        "constraint",
+        "model"
+      ],
+      "reference": "Shivam Sudhakar (2026). Amygdalic Decision Architecture for Embedded AI Systems. Retrieved from https://doi.org/10.31224/6620",
+      "abstract": "This paper describes a hardware architecture that moves AI safety constraints out of software and into circuit topology — and analyzes the cost inversion that makes this viable on sub-$15 NPU hardware. A distilled vision model, structured as N parallel narrow classifiers, replaces the vision-detectable subset of conventional discrete sensor arrays at significantly lower bill-of-materials cost. Classifier outputs are routed to a dedicated hardware node — the amygdala circuit — implemented as a sparse FPGA-based lookup table that maps perception state to one element of a pre-wired actuator option set O. The resulting guarantee is precisely stated: the actuator command space is deterministically bounded by circuit topology regardless of inference-layer behavior, under the assumption that the ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lee2026caishardwarearchit",
+      "title": "CAIS Hardware Architecture v1.0 Consciousness-Aptamer Interface System (CAIS) Hardware Architecture Specification",
+      "link": "https://doi.org/10.2139/ssrn.6179259",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 51,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "constraint",
+        "model",
+        "models"
+      ],
+      "reference": "Jinho Lee (2026). CAIS Hardware Architecture v1.0 Consciousness-Aptamer Interface System (CAIS) Hardware Architecture Specification. Retrieved from https://doi.org/10.2139/ssrn.6179259",
+      "abstract": "<p>CAIS Hardware Architecture v1.0 defines the official prior-art hardware standard for the Consciousness–Aptamer Interface System (CAIS). This document specifies the physical sensing architecture required for reproducible CAIS-compatible devices, including aptamer–iodine multi-oxidation sensing arrays, redox and photonic sensing modules, analog front-end and ADC pipelines, grounding and electrical isolation requirements, and mandatory microfluidic and optical interface structures.</p>\n<p>The Standard establishes fixed architectural constraints for consciousness-state biosensing hardware, ensuring interoperability, reproducibility, and auditability across independent implementations. By formally declaring a global prior-art boundary, this specification prevents proprietary monopolization, ",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "sun2026principledinferenc",
+      "title": "Principled Inference-Time Scaling: A Unified Framework for LLM-Based Optimization Modeling",
+      "link": "https://doi.org/10.2139/ssrn.6562298",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "LLM",
+        "model",
+        "models"
+      ],
+      "reference": "Yiqi Sun, Youhua Li, et al. (2026). Principled Inference-Time Scaling: A Unified Framework for LLM-Based Optimization Modeling. Retrieved from https://doi.org/10.2139/ssrn.6562298",
+      "abstract": "Large language models (LLMs) have emerged as a promising tool for automated optimization modeling. To provide a flexible and easy-to-deploy approach to LLM-based optimization modeling, we propose Exploration-Correction Optimization (ECO), a zero-shot framework that leverages hybrid inference-time scaling without requiring model fine-tuning. We develop a unified mathematical framework that formulates the LLM generation-evaluation pipeline as a stochastic process. This framework enables quantitative analysis of LLM behavior and informs the design of ECO. In a pilot study, we identify systematic behavioral differences across base LLMs, suggesting that effective inference-time scaling strategies depend on both model type and task characteristics. Guided by this analysis, we evaluate ECO on six",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "chen2020compilerbasedhardw",
+      "title": "Compiler-based Hardware Profiling for Software-Defined Architecture",
+      "link": "https://doi.org/10.1109/southeastcon44009.2020.9249733",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 42,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "compiler"
+      ],
+      "reference": "Yi-Chung Chen, Micheal Floyd, et al. (2020). Compiler-based Hardware Profiling for Software-Defined Architecture. Retrieved from https://doi.org/10.1109/southeastcon44009.2020.9249733",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2025unioptlargemodeltr",
+      "title": "UniOpt: Large Model Training and Inference Optimization Based on ARM and NPU",
+      "link": "https://doi.org/10.36227/techrxiv.176171093.30943761/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "model"
+      ],
+      "reference": "Jingyi Wang, Jia Wang, et al. (2025). UniOpt: Large Model Training and Inference Optimization Based on ARM and NPU. Retrieved from https://doi.org/10.36227/techrxiv.176171093.30943761/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "kim2025cppclusterednpupim",
+      "title": "CPP: Clustered NPU-PIM Heterogeneous Computing Topology for LLM Inference",
+      "link": "https://doi.org/10.1109/itc-cscc66376.2025.11137596",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ],
+      "reference": "Dongwook Kim, Dohyun Kim, Eui-Young Chung (2025). CPP: Clustered NPU-PIM Heterogeneous Computing Topology for LLM Inference. Retrieved from https://doi.org/10.1109/itc-cscc66376.2025.11137596",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "peng2025secnpusecuringllmi",
+      "title": "SecNPU: Securing LLM Inference on NPU",
+      "link": "https://doi.org/10.1109/iccd65941.2025.00011",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ],
+      "reference": "Xuanyao Peng, Yinghao Yang, et al. (2025). SecNPU: Securing LLM Inference on NPU. Retrieved from https://doi.org/10.1109/iccd65941.2025.00011",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "le2026edgellmbenchcharac",
+      "title": "Edge-LLM-Bench: Characterising LLM Inference on Raspberry Pi 5 with Hailo-10H NPU Acceleration",
+      "link": "https://doi.org/10.1145/3812836.3814998",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ],
+      "reference": "Viet Duc Le, Ozlem Durmaz Incel (2026). Edge-LLM-Bench: Characterising LLM Inference on Raspberry Pi 5 with Hailo-10H NPU Acceleration. Retrieved from https://doi.org/10.1145/3812836.3814998",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "jeong2025activationswapping",
+      "title": "Activation Swapping for Feed Forward Networks in Batched LLM Inference on NPU",
+      "link": "https://doi.org/10.1109/aicas64808.2025.11173158",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "NPU",
+        "LLM"
+      ],
+      "reference": "Seongho Jeong, Minseok Seo, et al. (2025). Activation Swapping for Feed Forward Networks in Batched LLM Inference on NPU. Retrieved from https://doi.org/10.1109/aicas64808.2025.11173158",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "anon2023exploringinstructi",
+      "title": "Exploring Instruction Set Architectural Variations: x86, ARM, and RISC-V in Compute-Intensive Applications",
+      "link": "https://doi.org/10.33140/eoa.01.03.04",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 39,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "model",
+        "pass",
+        "passes"
+      ],
+      "reference": " (2023). Exploring Instruction Set Architectural Variations: x86, ARM, and RISC-V in Compute-Intensive Applications. Retrieved from https://doi.org/10.33140/eoa.01.03.04",
+      "abstract": "As computational demands continue to evolve in the modern era, the choice of hardware architecture plays a pivotal role in optimizing the performance of compute-intensive applications. This research paper delves into the exploration and comparison of three prominent hardware architectures: x86, ARM, and RISC-V, within the context of compute-intensive applications. The study begins with a comprehensive overview of these architectures, highlighting their distinctive features, and strengths. Subsequently, we investigate their suitability and adaptability in diverse compute-intensive workloads. Our analysis encompasses a wide spectrum of parameters, including computational throughput, power efficiency, scalability, and architectural flexibility. We scrutinize the architectural intricacies that",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "decode",
+        "LLM"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "FlashAttention",
+        "memory"
+      ],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "memory",
+        "model"
+      ],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ludmir2024parallaxacompilerf",
+      "title": "PARALLAX: A Compiler for Neutral Atom Quantum Computers under Hardware Constraints",
+      "link": "https://doi.org/10.1109/sc41406.2024.00079",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "constraint"
+      ],
+      "reference": "Jason Ludmir, Tirthak Patel (2024). PARALLAX: A Compiler for Neutral Atom Quantum Computers under Hardware Constraints. Retrieved from https://doi.org/10.1109/sc41406.2024.00079",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "yang2025automaticpowerelec",
+      "title": "Automatic Power Electronic PCB Layout Design Based on Generative AI: The Pathway Towards Next-Generation Hardware Compiler",
+      "link": "https://doi.org/10.1109/ecce-europe62795.2025.11238791",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "layout"
+      ],
+      "reference": "Xiao Yang, Yu Xiao, et al. (2025). Automatic Power Electronic PCB Layout Design Based on Generative AI: The Pathway Towards Next-Generation Hardware Compiler. Retrieved from https://doi.org/10.1109/ecce-europe62795.2025.11238791",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zhang2026realtimeprediction",
+      "title": "Real-Time Prediction System for Biological Fermentation Parameters Based on an AI Electronic Nose: Universal Software and Hardware Architecture and Verification",
+      "link": "https://doi.org/10.20944/preprints202602.0283.v1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 33,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "model"
+      ],
+      "reference": "Xiaoqin Zhang, Daqi Gao (2026). Real-Time Prediction System for Biological Fermentation Parameters Based on an AI Electronic Nose: Universal Software and Hardware Architecture and Verification. Retrieved from https://doi.org/10.20944/preprints202602.0283.v1",
+      "abstract": "Real-time monitoring of key parameters (e.g., substrate) is crucial for the precise control of biological fermentation processes. To address the technical bottlenecks of significant lag in offline analysis and the limitations of traditional online sensors, this study de-signed and implemented a universal AI-enabled electronic nose system. The system features a modular hardware architecture integrating a high-sensitivity MOS gas sensor array, a precision constant-temperature chamber, and low-noise signal acquisition circuits to ensure signal stability. On the software side, a software architecture was designed based on the RUP 4+1 view model, employing multi-threaded technology for parallel data processing. An innovative five-stage sampling period was designed to match the dynamic response ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liang2020hardwarearchitectu",
+      "title": "Hardware architecture",
+      "link": "https://doi.org/10.1016/b978-0-12-823488-4.00003-5",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 24,
+      "matched_keywords": [
+        "AI hardware architecture"
+      ],
+      "reference": "Xiaoyao Liang (2020). Hardware architecture. Retrieved from https://doi.org/10.1016/b978-0-12-823488-4.00003-5",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cha2023cnnhardwareacceler",
+      "title": "CNN Hardware Accelerator Architecture Design for Energy-Efficient AI",
+      "link": "https://doi.org/10.1007/978-3-031-22170-5_10",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 24,
+      "matched_keywords": [
+        "AI hardware architecture"
+      ],
+      "reference": "Jaekwang Cha, Shiho Kim (2023). CNN Hardware Accelerator Architecture Design for Energy-Efficient AI. Retrieved from https://doi.org/10.1007/978-3-031-22170-5_10",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lechner2026citaiainativehardw",
+      "title": "Cit-AI: AI-Native Hardware Autonomy via a Dynamic, Self-Evolving Instruction Set Architecture",
+      "link": "https://doi.org/10.2139/ssrn.6479302",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 24,
+      "matched_keywords": [
+        "AI hardware architecture"
+      ],
+      "reference": "Henricus Andreas Elisabeth Lechner (2026). Cit-AI: AI-Native Hardware Autonomy via a Dynamic, Self-Evolving Instruction Set Architecture. Retrieved from https://doi.org/10.2139/ssrn.6479302",
+      "abstract": "AI systems deployed as operational agents in high-stakes environments do not reach their full potential when bound to instruction set architectures originally designed for human programmers. The central thesis of this paper is that AI should be able to determine, through measured operational experience, how to use its underlying hardware most effectively. This requires a dynamic ISA: one that evolves at runtime in response to what the AI system actually computes, encoding native primitives for frequently occurring operation patterns without human specification and without hardware revision.",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "wang2024aidrivenhardwarete",
+      "title": "AI-Driven Hardware Testing: Overcoming the Challenges of Modern Hardware Architecture and Power Management",
+      "link": "https://doi.org/10.54097/2wxmdf34",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 24,
+      "matched_keywords": [
+        "AI hardware architecture"
+      ],
+      "reference": "Xiaoyin Wang (2024). AI-Driven Hardware Testing: Overcoming the Challenges of Modern Hardware Architecture and Power Management. Retrieved from https://doi.org/10.54097/2wxmdf34",
+      "abstract": " With the rapid development of hardware technology, the diversity of architectures, the complexity of hardware modules, and the growing demand for real-time capabilities, enhanced power management, adaptability, and flexibility all present new challenges. These challenges include managing the complexity of hardware architecture, performance, and energy efficiency, which traditional testing methods struggle to address effectively. To solve these problems, this paper proposes a new standard for integrating Artificial intelligence with hardware test systems. The system can automatically identify key performance indicators according to the hardware characteristics, dynamically adjust the test strategy, optimize the test process, improve efficiency, and ultimately shorten the time to market.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "CUDA"
+      ],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "li2022compilerdrivensimu",
+      "title": "Compiler-Driven Simulation of Reconfigurable Hardware Accelerators",
+      "link": "https://doi.org/10.1109/hpca53966.2022.00052",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Zhijing Li, Yuwei Ye, et al. (2022). Compiler-Driven Simulation of Reconfigurable Hardware Accelerators. Retrieved from https://doi.org/10.1109/hpca53966.2022.00052",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schmidt2024phdprojectcompiler",
+      "title": "Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI",
+      "link": "https://doi.org/10.1109/fccm60383.2024.00055",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Patrick Schmidt, Jürgen Becker (2024). Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI. Retrieved from https://doi.org/10.1109/fccm60383.2024.00055",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "khandelwal2022offloadingcompiler",
+      "title": "Offloading compiler to reduce pipeline dependencies through hardware interlocking by rebuilding MIPS",
+      "link": "https://doi.org/10.21203/rs.3.rs-2026609/v1",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Rajat Khandelwal (2022). Offloading compiler to reduce pipeline dependencies through hardware interlocking by rebuilding MIPS. Retrieved from https://doi.org/10.21203/rs.3.rs-2026609/v1",
+      "abstract": "Abstract\nMIPS is a family of reduced instruction set computer (RISC) ISAs, developed by Prof. John Hennessey at the Stanford University in the early 80s. The goal was to develop a simple processor with hardware equipped to perform traditional five stage pipelining making a large room for general purpose registers. MIPS has a processor along with a coprocessor designed for floating point arithmetic and logic. \nHowever, MIPS uses software methods to avoid dependencies in its pipeline, hence the complete overload to generate NOPs in case of dependencies is done by the compiler. \nRISC aims for a simple processor with pipelining, if possible, making compiler development complex and tricky. The logic to avoid dependencies in the pipeline adds an additional layer of complexity to the compiler whi",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hincu2023businessinvariants",
+      "title": "Business invariants as non-negotiable constraints in enterprise architecture",
+      "link": "https://doi.org/10.51635/AI-41-171_4zspc",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "constraint"
+      ],
+      "reference": "Vladislav Hincu (2023). Business invariants as non-negotiable constraints in enterprise architecture. Retrieved from https://doi.org/10.51635/AI-41-171_4zspc",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "cassady2025thearchitectureofa",
+      "title": "The Architecture of Alignment: Structured Frameworks for High-Performance Human-AI Systems Cognitive Evidence on How Context, Objectives, and Constraints Drive Strategic Execution and AI Reliability",
+      "link": "https://doi.org/10.2139/ssrn.5988934",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "constraint"
+      ],
+      "reference": "Bryan Cassady (2025). The Architecture of Alignment: Structured Frameworks for High-Performance Human-AI Systems Cognitive Evidence on How Context, Objectives, and Constraints Drive Strategic Execution and AI Reliability. Retrieved from https://doi.org/10.2139/ssrn.5988934",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "lenkefi2022connectionsbetween",
+      "title": "Connections between Language Semantics and the Query-based Compiler Architecture",
+      "link": "https://doi.org/10.5220/0011260400003266",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Peter Lenkefi, Gergely Mezei (2022). Connections between Language Semantics and the Query-based Compiler Architecture. Retrieved from https://doi.org/10.5220/0011260400003266",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "brauckmann2025dfanetacompilerspe",
+      "title": "DFA-Net: A Compiler-Specific Neural Architecture for Robust Generalization in Data Flow Analyses",
+      "link": "https://doi.org/10.1145/3708493.3712687",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Alexander Brauckmann, Anderson Faustino da Silva, et al. (2025). DFA-Net: A Compiler-Specific Neural Architecture for Robust Generalization in Data Flow Analyses. Retrieved from https://doi.org/10.1145/3708493.3712687",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "wang2023amultithreadedfast",
+      "title": "A Multi-threaded Fast Hardware Compiler for HDLs",
+      "link": "https://doi.org/10.1145/3578360.3580254",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ],
+      "reference": "Sheng-Hong Wang, Hunter James Coffman, et al. (2023). A Multi-threaded Fast Hardware Compiler for HDLs. Retrieved from https://doi.org/10.1145/3578360.3580254",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "surez2025energyefficientinf",
+      "title": "Energy-Efficient Inference on RNN and LLM networks: A Quantized Evaluation on RISC-V, ARM, and x86 Devices",
+      "link": "https://doi.org/10.1145/3679240.3735101",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Daniel Suárez, Pedro Toledo, et al. (2025). Energy-Efficient Inference on RNN and LLM networks: A Quantized Evaluation on RISC-V, ARM, and x86 Devices. Retrieved from https://doi.org/10.1145/3679240.3735101",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bathusha2026llmtunahyperparame",
+      "title": "LLM-tuna - Hyperparameter Optimization for LLM Inference",
+      "link": "https://doi.org/10.1145/3774904.3792953",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Thameem Abbas Ibrahim Bathusha, Aanya Sharma, et al. (2026). LLM-tuna - Hyperparameter Optimization for LLM Inference. Retrieved from https://doi.org/10.1145/3774904.3792953",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "bajpai2025ecollmajointoptimi",
+      "title": "EcoLLM: A Joint Optimization Framework for Ultra-Low Power, Mixed-Precision LLM Inference on Resource-Constrained Edge Systems",
+      "link": "https://doi.org/10.36227/techrxiv.176114085.56648160/v1",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Krishna Bajpai, Vedanshi Gupta (2025). EcoLLM: A Joint Optimization Framework for Ultra-Low Power, Mixed-Precision LLM Inference on Resource-Constrained Edge Systems. Retrieved from https://doi.org/10.36227/techrxiv.176114085.56648160/v1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "azis2023combattingheartdis",
+      "title": "Combatting Heart Diseases: Advanced Predictions Using Optimized DNN Architecture",
+      "link": "https://doi.org/10.28989/compiler.v12i2.1915",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "model"
+      ],
+      "reference": "Mochammad Abdul Azis, Sumarna Sumarna (2023). Combatting Heart Diseases: Advanced Predictions Using Optimized DNN Architecture. Retrieved from https://doi.org/10.28989/compiler.v12i2.1915",
+      "abstract": "Heart disease has become a global health issue and is recorded as one of the primary causes of death in many countries. In this modern era, with rapid technological advancements and shifting lifestyles, numerous factors contribute to the increasing prevalence of heart diseases. These range from dietary habits, lack of physical activity, stress, to genetic factors. Given the complexity of this ailment, information technology plays a crucial role in providing innovative solutions. One of them is predicting the risk of heart disease, enabling more targeted early prevention and treatment interventions.Correct data analysis is pivotal in making predictions. However, a common challenge often encountered is the imbalance in data classes, which can result in a predictive model being biased. This i",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 34,
+    "B": 16,
+    "C": 5
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:37.024869"
+}

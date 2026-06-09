@@ -1,0 +1,23 @@
+{
+  "chapter_id": "ch11",
+  "chapter_title": "Full Decoder MegaKernel Implementation",
+  "timestamp": "2026-06-10 03:19:49",
+  "status": "pass",
+  "min_papers": 25,
+  "catalog_count": 61,
+  "catalog_tier_a": 27,
+  "binding_count": 323,
+  "quality_binding_count": 323,
+  "sentence_count": 406,
+  "claim_sentence_count": 406,
+  "unbound_claim_sentences": 83,
+  "weak_bindings": [],
+  "missing_bib_keys": [],
+  "issues": [],
+  "keyword_count": 50,
+  "quality": {
+    "min_binding_score": 12,
+    "min_matched_keywords": 2,
+    "tier_a_only": true
+  }
+}

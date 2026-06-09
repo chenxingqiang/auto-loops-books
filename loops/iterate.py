@@ -193,7 +193,7 @@ def ensure_chapter_stub(spec: ChapterSpec) -> bool:
 
     CHAPTERS.mkdir(parents=True, exist_ok=True)
     sections = "\n\n".join(
-        f"\\section{{{s.label.replace('_', ' ').title()}}}\n\\label{{sec:{s.label}}}\n\n% TODO: expand"
+        f"\\section{{{s.label.replace('_', ' ').title()}}}\n\\label{{sec:{spec.chapter_id}_{s.label}}}\n\n% TODO: expand"
         for s in spec.sections
     )
     body = (
@@ -211,9 +211,9 @@ def ensure_main_input(spec: ChapterSpec) -> bool:
     from book_prepare import sync_main_tex_inputs
 
     main_tex = ROOT / "books" / "main.tex"
-    before = set(re.findall(r"\\input\{chapters/([^}]+)\}", main_tex.read_text(encoding="utf-8")))
+    before = set(re.findall(r"\\input\{build/chapters/([^}]+)\}", main_tex.read_text(encoding="utf-8")))
     synced = sync_main_tex_inputs()
-    after = set(re.findall(r"\\input\{chapters/([^}]+)\}", main_tex.read_text(encoding="utf-8")))
+    after = set(re.findall(r"\\input\{build/chapters/([^}]+)\}", main_tex.read_text(encoding="utf-8")))
     return spec.filename in after and (spec.filename not in before or bool(synced))
 
 
@@ -263,6 +263,66 @@ def run_fact_verification(
     ]
 
 
+def run_reference_verify(
+    spec: ChapterSpec,
+    *,
+    min_citation_score: int = 8,
+) -> list[str]:
+    from research_tools import verify_chapter_references
+
+    report = verify_chapter_references(spec, min_citation_score=min_citation_score)
+    rel = (
+        RESEARCH_ROOT / spec.chapter_id / "reference_verify_report.json"
+    ).relative_to(ROOT)
+    low = len(report.get("low_relevance_citations", []))
+    return [
+        f"refs: {report['status']} — {report['citation_count']} cites, "
+        f"{report['keyword_count']} keywords, low={low} -> {rel}"
+    ]
+
+
+def run_citation_loop(
+    spec: ChapterSpec,
+    *,
+    dry_run: bool = False,
+    min_papers: int = 25,
+    apply_tex: bool = True,
+    merge_bib: bool = True,
+    quality: CitationQualityOptions | None = None,
+) -> list[str]:
+    from citation_loop import (
+        merge_all_chapter_bibs,
+        refilter_chapter_bindings,
+        redistribute_citations_to_tex,
+        run_chapter_citation_plan,
+        strict_verify_chapter_citations,
+    )
+
+    opts = quality or CitationQualityOptions(tier_a_only=True)
+    plan = run_chapter_citation_plan(
+        spec, dry_run=dry_run, min_papers=min_papers, quality=opts
+    )
+    refilter_chapter_bindings(spec, opts)
+    verify = strict_verify_chapter_citations(spec, min_papers=min_papers, quality=opts)
+    rel = (RESEARCH_ROOT / spec.chapter_id / "citation_strict_report.json").relative_to(ROOT)
+    actions = [
+        f"citations: plan papers={plan['paper_count']} bindings={plan['binding_count']} "
+        f"min_ok={plan['meets_min_papers']}",
+        f"citations: strict {verify['status']} -> {rel}",
+    ]
+    if verify["status"] == "pass" and apply_tex and not dry_run:
+        applied = redistribute_citations_to_tex(spec, quality=opts)
+        actions.append(
+            f"citations: redistributed pool={applied['pool_count']} "
+            f"assigned={applied['assigned_count']} sections={applied['sections_with_cites']} "
+            f"keys_in_tex={applied['unique_keys_in_tex']} -> {applied['tex_path']}"
+        )
+    if merge_bib and not dry_run:
+        m = merge_all_chapter_bibs(tier_a_only=opts.tier_a_only)
+        actions.append(f"citations: merged bib {m['entry_count']} entries -> {m['output']}")
+    return actions
+
+
 def visual_marker(visual_id: str) -> str:
     return f"% AUTO_VISUAL:{visual_id}"
 
@@ -286,7 +346,7 @@ def insert_missing_visuals(spec: ChapterSpec) -> int:
         snippet_path = gen_dir / f"{vis.id}.tex"
         if not snippet_path.exists():
             continue
-        anchor = f"\\label{{sec:{vis.section}}}"
+        anchor = f"\\label{{sec:{spec.chapter_id}_{vis.section}}}"
         if anchor not in tex:
             continue
         snippet = snippet_path.read_text(encoding="utf-8").strip()
@@ -383,6 +443,13 @@ def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     for issue in style_violations(tex):
         tasks.append(f"Style fix: {issue} (see {WRITING_STYLE.name} §III)")
 
+    try:
+        from book_proper_nouns import proper_noun_tasks
+
+        tasks.extend(proper_noun_tasks(spec))
+    except ImportError:
+        pass
+
     tasks.extend(fact_verification_tasks(spec, tex))
 
     if not chapter_exists(spec):
@@ -402,6 +469,20 @@ def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
 
     if (research_dir / "section_references.md").exists():
         tasks.append(f"Cite from {research_dir / 'section_references.md'}")
+
+    try:
+        from research_tools import reference_verify_tasks
+
+        tasks.extend(reference_verify_tasks(spec.chapter_id))
+    except ImportError:
+        pass
+
+    try:
+        from citation_loop import citation_strict_tasks
+
+        tasks.extend(citation_strict_tasks(spec.chapter_id))
+    except ImportError:
+        pass
 
     for vid in ev.get("visual_missing", []):
         gen = generated_dir(spec.chapter_id) / f"{vid}.tex"
@@ -567,6 +648,16 @@ def run_step(
         report.errors.append(f"facts: {exc}")
 
     try:
+        report.actions.extend(run_reference_verify(spec))
+    except Exception as exc:
+        report.errors.append(f"refs: {exc}")
+
+    try:
+        report.actions.extend(run_citation_loop(spec))
+    except Exception as exc:
+        report.errors.append(f"citations: {exc}")
+
+    try:
         report.actions.extend(run_visuals(spec))
     except Exception as exc:
         report.errors.append(f"visuals: {exc}")
@@ -638,6 +729,7 @@ def main() -> int:
     run_p.add_argument("--research-dry-run", action="store_true")
     run_p.add_argument("--skip-fact-verify", action="store_true")
     run_p.add_argument("--fact-verify-dry-run", action="store_true")
+    run_p.add_argument("--skip-compile", action="store_true")
     run_p.add_argument("--pick", choices=("sequential", "weakest"), default="sequential")
     run_p.add_argument(
         "--bootstrap-only",
@@ -649,6 +741,44 @@ def main() -> int:
     ins_p.add_argument("--chapter", required=True)
 
     sub.add_parser("audit", help="Run book_spec_audit.py against Chinese spec")
+
+    pn_p = sub.add_parser("check-proper-nouns", help="Scan/fix canonical term capitalization (ch01–ch27)")
+    pn_p.add_argument("--chapter")
+    pn_p.add_argument("--all", action="store_true")
+    pn_p.add_argument("--fix", action="store_true")
+
+    rv_p = sub.add_parser(
+        "verify-references",
+        help="Score bib citations vs content keywords (ch01–ch27)",
+    )
+    rv_p.add_argument("--chapter")
+    rv_p.add_argument("--all", action="store_true")
+    rv_p.add_argument(
+        "--min-citation-score", type=int, default=8,
+    )
+
+    cl_p = sub.add_parser(
+        "citation-loop",
+        help="Per-chapter citation plan + strict verify (>=25 papers)",
+    )
+    cl_p.add_argument("--chapter")
+    cl_p.add_argument("--all", action="store_true")
+    cl_p.add_argument("--dry-run", action="store_true")
+    cl_p.add_argument("--min-papers", type=int, default=25)
+    cl_p.add_argument(
+        "--verify-only", action="store_true", help="Skip plan, run strict verify only"
+    )
+    cl_p.add_argument(
+        "--apply-tex",
+        action="store_true",
+        help="After strict pass, write \\citep from citation_bindings.jsonl",
+    )
+    cl_p.add_argument(
+        "--merge-bib",
+        action="store_true",
+        help="Merge all chapter.bib into books/citations_merged.bib",
+    )
+    cl_p.add_argument("--crossref-only", action="store_true")
 
     args = parser.parse_args()
 
@@ -698,6 +828,7 @@ def main() -> int:
                 research_dry_run=args.research_dry_run,
                 skip_fact_verify=args.skip_fact_verify,
                 fact_verify_dry_run=args.fact_verify_dry_run,
+                skip_compile=args.skip_compile,
                 pick=args.pick,
             )
             print_step_report(report)
@@ -711,6 +842,101 @@ def main() -> int:
                 print("\nAll OUTLINE chapters ready.")
                 break
         return code
+
+    if args.command == "citation-loop":
+        from citation_loop import (
+            apply_citation_bindings_to_tex,
+            merge_all_chapter_bibs,
+            resolve_specs as cite_specs,
+            run_chapter_citation_plan,
+            strict_verify_chapter_citations,
+        )
+
+        if not args.chapter and not args.all:
+            print("Specify --chapter or --all", file=sys.stderr)
+            return 1
+        specs = cite_specs(args.chapter if not args.all else None)
+        if not args.verify_only:
+            for spec in specs:
+                run_chapter_citation_plan(
+                    spec,
+                    dry_run=args.dry_run,
+                    min_papers=args.min_papers,
+                    crossref_only=getattr(args, "crossref_only", False),
+                )
+        fails = 0
+        for spec in specs:
+            report = strict_verify_chapter_citations(
+                spec, min_papers=args.min_papers
+            )
+            rel = (
+                RESEARCH_ROOT / spec.chapter_id / "citation_strict_report.json"
+            ).relative_to(ROOT)
+            print(
+                f"{spec.chapter_id}: {report['status']} "
+                f"papers={report['catalog_count']} "
+                f"bindings={report['binding_count']} -> {rel}"
+            )
+            if report["status"] != "pass":
+                fails += 1
+        if fails:
+            return 1
+        if args.apply_tex and not args.dry_run:
+            for spec in specs:
+                r = apply_citation_bindings_to_tex(spec)
+                print(
+                    f"{spec.chapter_id}: applied {r['cites_applied']} cites "
+                    f"updated={r['updated']}"
+                )
+        if args.merge_bib and not args.dry_run:
+            m = merge_all_chapter_bibs()
+            print(f"merged {m['entry_count']} entries -> {m['output']}")
+        return 0
+
+    if args.command == "verify-references":
+        from book_prepare import OUTLINE
+        from research_tools import verify_chapter_references
+
+        if not args.chapter and not args.all:
+            print("Specify --chapter <id> or --all", file=sys.stderr)
+            return 1
+        specs = tuple(
+            s for s in OUTLINE if not args.chapter or s.chapter_id == args.chapter
+        )
+        if args.chapter and not specs:
+            print(f"Unknown chapter: {args.chapter}", file=sys.stderr)
+            return 1
+        warn = 0
+        for spec in specs:
+            report = verify_chapter_references(
+                spec, min_citation_score=args.min_citation_score
+            )
+            rel = (
+                RESEARCH_ROOT / spec.chapter_id / "reference_verify_report.json"
+            ).relative_to(ROOT)
+            print(
+                f"{spec.chapter_id}: {report['status']} — "
+                f"{report['citation_count']} cites, {report['keyword_count']} keywords "
+                f"-> {rel}"
+            )
+            if report["status"] != "ok":
+                warn += 1
+        return 1 if warn else 0
+
+    if args.command == "check-proper-nouns":
+        from book_proper_nouns import main as proper_nouns_main
+
+        argv = ["book_proper_nouns.py"]
+        if args.all:
+            argv.append("--all")
+        elif args.chapter:
+            argv.extend(["--chapter", args.chapter])
+        else:
+            argv.append("--all")
+        if args.fix:
+            argv.append("--fix")
+        sys.argv = argv
+        return proper_nouns_main()
 
     return 0
 

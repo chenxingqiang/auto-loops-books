@@ -194,6 +194,15 @@ async def _fetch_with_craw4ai(url: str, claim: str) -> dict[str, Any]:
         }
 
 
+def arxiv_alternate_urls(url: str) -> list[str]:
+    """HTML full text often contains table numbers missing from abs abstracts."""
+    m = re.search(r"arxiv\.org/abs/([\d.]+)", url, flags=re.I)
+    if not m:
+        return []
+    aid = m.group(1)
+    return [f"https://arxiv.org/html/{aid}v1", f"https://arxiv.org/html/{aid}"]
+
+
 def fetch_url_content(url: str, *, claim: str = "", prefer_craw4ai: bool = True) -> dict[str, Any]:
     if not url or not url.startswith(("http://", "https://")):
         return {
@@ -272,6 +281,37 @@ def get_or_fetch_source(
     return payload
 
 
+def fetch_best_source_for_claim(
+    chapter_id: str,
+    url: str,
+    *,
+    claim: str,
+    force_refresh: bool = False,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Fetch primary URL; for arXiv abs pages, retry HTML when claim tokens are missing."""
+    primary = get_or_fetch_source(
+        chapter_id, url, claim=claim, force_refresh=force_refresh, dry_run=dry_run
+    )
+    if dry_run or not primary.get("success"):
+        return primary
+    matched, _ = content_matches_claim(primary.get("content_excerpt", ""), claim)
+    if matched or "arxiv.org/abs/" not in url:
+        return primary
+    for alt_url in arxiv_alternate_urls(url):
+        alt = get_or_fetch_source(
+            chapter_id, alt_url, claim=claim, force_refresh=force_refresh, dry_run=dry_run
+        )
+        if not alt.get("success"):
+            continue
+        alt_matched, _ = content_matches_claim(alt.get("content_excerpt", ""), claim)
+        if alt_matched or len(alt.get("content_excerpt", "")) > len(primary.get("content_excerpt", "")):
+            alt["primary_url"] = url
+            alt["resolved_url"] = alt_url
+            return alt
+    return primary
+
+
 def verify_entry(
     chapter_id: str,
     entry: dict[str, Any],
@@ -283,7 +323,7 @@ def verify_entry(
     source_url = str(entry.get("source_url", ""))
     corroboration_url = str(entry.get("corroboration_url", "") or "")
 
-    source = get_or_fetch_source(
+    source = fetch_best_source_for_claim(
         chapter_id, source_url, claim=claim, force_refresh=force_refresh, dry_run=dry_run
     )
     source_match, source_missing = content_matches_claim(source.get("content_excerpt", ""), claim)
@@ -292,7 +332,7 @@ def verify_entry(
     corr_match = True
     corr_missing: list[str] = []
     if corroboration_url and corroboration_url != source_url:
-        corroboration = get_or_fetch_source(
+        corroboration = fetch_best_source_for_claim(
             chapter_id,
             corroboration_url,
             claim=claim,

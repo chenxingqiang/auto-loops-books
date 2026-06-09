@@ -6,12 +6,40 @@
 
 ---
 
+## Prerequisites (one-time / after clone)
+
+```bash
+uv sync
+uv run crawl4ai-setup    # installs Playwright browser for craw4ai
+```
+
+Book PDF build includes `books/cover.pdf` as the front cover (`main.tex` → `\includepdf{cover.pdf}` before the table of contents).
+
+---
+
 ## 七、事实核验门禁（全书强制执行）
 
 凡涉及**事实描述、数据举例、厂商参数、性能数字、部署配置**的内容，**必须先经 Web 检索反复交叉验证**，方可写入正文，并留存**可访问的可靠链接**。
 
 - **禁止：** 凭模型记忆写数字、单一路径道听途说、无 URL 的「业界公认」、复制未读摘要的二次引用
-- **必须：** 至少两轮独立检索 → -primary 来源核对 → 写入 `verified_facts.jsonl` → `\citep{}` + `book.bib` 含同款 URL
+- **必须：** 至少两轮独立检索 → primary 来源核对 → 写入 `verified_facts.jsonl` → `\citep{}` + `book.bib` / `citations_merged.bib` 含同款 URL
+
+### Per-chapter citation loop
+
+Orthogonal to numeric fact gate: each chapter maintains its own reference catalog.
+
+| Artifact | Path |
+|----------|------|
+| Chapter bib (≥25) | `books/research/<ch>/chapter.bib` |
+| Sentence bindings | `books/research/<ch>/citation_bindings.jsonl` |
+| Strict report | `books/research/<ch>/citation_strict_report.json` |
+| Merged compile bib | `books/citations_merged.bib` |
+
+```bash
+uv run citation-loop loop --all --crossref-only --apply-tex --merge-bib
+uv run citation-loop verify --all
+cd books && bash make.sh
+```
 
 ### English summary
 
@@ -81,6 +109,7 @@ After logging URLs, run content verification so claims are backed by **fetched p
 uv sync
 uv run crawl4ai-setup          # once: installs browser for craw4ai
 uv run fact-verify --chapter ch01
+uv run fact-verify --all --force-refresh   # refresh caches + re-check all chapters
 uv run book-loop step --chapter ch01 --skip-research
 ```
 
@@ -88,6 +117,7 @@ uv run book-loop step --chapter ch01 --skip-research
 - **Cache:** `books/research/<chapter>/fact_sources/<hash>.json` with `content_excerpt`, `method`, `fetched_at` (ISO-8601 UTC)
 - **Report:** `books/research/<chapter>/fact_verify_report.json` — `verified_ok`, `source_content_match`, missing tokens
 - **Loop:** `book-loop step` runs fact verify after research; mismatches appear in `agent_tasks`
+- **arXiv hard numbers:** `arxiv.org/abs/…` abstracts often omit table metrics; `fact_verify.py` automatically retries `arxiv.org/html/…` when tokens are missing from the abs page
 
 ### 4. Bibliography
 

@@ -1,11 +1,11 @@
 {
   "url": "https://arxiv.org/abs/2507.14397",
-  "fetched_at": "2026-06-09T17:13:48.234944+00:00",
-  "success": false,
+  "fetched_at": "2026-06-09T17:48:48.663681+00:00",
+  "success": true,
   "method": "craw4ai",
-  "status_code": null,
-  "title": "",
-  "content_excerpt": "",
-  "content_chars": 0,
-  "error": "BrowserType.launch: Executable doesn't exist at /Users/xingqiangchen/Library/Caches/ms-playwright/chromium-1223/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+  "status_code": 200,
+  "title": "[2507.14397] LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+  "content_excerpt": "# Computer Science > Hardware Architecture\n# Title:LIMINAL: Exploring The Frontiers of LLM Decode Performance\nView a PDF of the paper titled LIMINAL: Exploring The Frontiers of LLM Decode Performance, by Michael Davies and 3 other authors\n",
+  "content_chars": 239,
+  "error": null
 }

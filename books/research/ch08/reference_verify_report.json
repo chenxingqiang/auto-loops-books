@@ -1,0 +1,263 @@
+{
+  "chapter_id": "ch08",
+  "chapter_title": "TMA Double-Buffer Pipelines and Async Movement",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch08/keywords.json",
+  "keyword_count": 50,
+  "top_keywords": [
+    {
+      "term": "TMA double-buffer pipelines and async movement",
+      "weight": 18
+    },
+    {
+      "term": "CPU dma",
+      "weight": 14
+    },
+    {
+      "term": "GPU TMA",
+      "weight": 14
+    },
+    {
+      "term": "NPU pipeline",
+      "weight": 14
+    },
+    {
+      "term": "pipeline theory",
+      "weight": 14
+    },
+    {
+      "term": "YiRage pipeline gen",
+      "weight": 14
+    },
+    {
+      "term": "CPU dma LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "GPU TMA LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "NPU pipeline LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "pipeline theory LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "YiRage pipeline gen LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "dma CPU",
+      "weight": 12
+    },
+    {
+      "term": "NPU dma",
+      "weight": 12
+    },
+    {
+      "term": "pipeline double-buffer",
+      "weight": 12
+    },
+    {
+      "term": "TMA Hopper",
+      "weight": 12
+    },
+    {
+      "term": "YiRage pipeline",
+      "weight": 12
+    },
+    {
+      "term": "CPU",
+      "weight": 10
+    },
+    {
+      "term": "dma",
+      "weight": 10
+    },
+    {
+      "term": "double-buffer",
+      "weight": 10
+    },
+    {
+      "term": "Hopper",
+      "weight": 10
+    },
+    {
+      "term": "NPU",
+      "weight": 10
+    },
+    {
+      "term": "pipeline",
+      "weight": 10
+    },
+    {
+      "term": "TMA",
+      "weight": 10
+    },
+    {
+      "term": "YiRage",
+      "weight": 10
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 18,
+      "matched_keywords": [
+        "decode"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 20,
+      "matched_keywords": [
+        "Hopper"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 10,
+      "matched_keywords": [
+        "TMA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

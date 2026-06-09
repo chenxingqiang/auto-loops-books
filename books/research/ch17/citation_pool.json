@@ -1,0 +1,387 @@
+{
+  "chapter_id": "ch17",
+  "pool_count": 36,
+  "bib_keys": [
+    "shen2022hardwaredevelopmen",
+    "yirage2026",
+    "han2024unleashingcpupoten",
+    "koblah2022hardwaremovingtarg",
+    "kern2024virtuallyaugmented",
+    "agarwal2023hardwarebasedimple",
+    "li2025nearfieldtargetloc",
+    "urbanski2025hardwarebasedcalcu",
+    "du2023sarnasahardwareawa",
+    "roy2019hardwaresoftwareco",
+    "han2025kernelinstructiono",
+    "han2025instructioncooptim",
+    "han2025instructionschedul",
+    "anon2025productionizinggpu",
+    "lin2023kescocompilerbased",
+    "bla2019gpuacceleratedfixp",
+    "tillet2024blockbasedgpuprogr",
+    "ji2022compilerdirectedin",
+    "jeong2026insidevoltdesignin",
+    "liu2019ppopenclaperforman",
+    "memoryfloor2026",
+    "zhang2018fpgaorientedmoving",
+    "jiang2021trrscopeunderstand",
+    "patel2025llminference",
+    "hagedorn2026nsightpythonapytho",
+    "dao2023flashdecoding",
+    "taxbreak2026",
+    "dao2022flashattention",
+    "kwon2023vllm",
+    "liu2024deepseekv3",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "amd2024aie",
+    "semianalysis2024tma",
+    "nvidia2024cudagraphs",
+    "dlbook"
+  ],
+  "papers": [
+    {
+      "bib_key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "source_tier": "A",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "source_tier": "A",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "backend",
+        "optim",
+        "YiRage",
+        "CPU",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "han2024unleashingcpupoten",
+      "title": "Unleashing CPU Potential for Executing GPU Programs Through Compiler/Runtime Optimizations",
+      "source_tier": "A",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "CPU",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "han2025kernelinstructiono",
+      "title": "Kernel Instruction Optimization Based on the Triton Compiler",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "han2025instructioncooptim",
+      "title": "Instruction co-optimization based on Triton compiler",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "han2025instructionschedul",
+      "title": "Instruction Scheduling Optimization Based on the Triton Compiler",
+      "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "anon2025productionizinggpu",
+      "title": "Productionizing GPU Inference on EKS with KServe and NVIDIA Triton",
+      "source_tier": "A",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "GPU",
+        "production",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "lin2023kescocompilerbased",
+      "title": "KeSCo: Compiler-based Kernel Scheduling for Multi-task GPU Applications",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "bla2019gpuacceleratedfixp",
+      "title": "GPU-accelerated fixpoint algorithms for faster compiler analyses",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "tillet2024blockbasedgpuprogr",
+      "title": "Block-based GPU Programming with Triton",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "GPU",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "ji2022compilerdirectedin",
+      "title": "Compiler-Directed Incremental Checkpointing for Low Latency GPU Preemption",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "jeong2026insidevoltdesignin",
+      "title": "Inside VOLT: Designing an Open-Source GPU Compiler (Tool)",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "liu2019ppopenclaperforman",
+      "title": "PPOpenCL: a performance-portable OpenCL compiler with host and kernel thread code fusion",
+      "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "source_tier": "A",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "decode",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "hagedorn2026nsightpythonapytho",
+      "title": "Nsight Python: A Python-First Profiling Toolkit for Seamless GPU Kernel Analysis (Tool)",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "source_tier": "A",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": []
+    }
+  ]
+}

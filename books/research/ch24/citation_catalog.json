@@ -1,0 +1,878 @@
+{
+  "chapter_id": "ch24",
+  "timestamp": "2026-06-10T02:46:42.305523",
+  "min_papers": 25,
+  "paper_count": 58,
+  "sentence_count": 336,
+  "binding_count": 335,
+  "papers": [
+    {
+      "bib_key": "hu2019multiobjectivecont",
+      "title": "Multi-objective Container Deployment on Heterogeneous Clusters",
+      "link": "https://doi.org/10.1109/ccgrid.2019.00076",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 104,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Yang Hu, Cees De Laat, Zhiming Zhao (2019). Multi-objective Container Deployment on Heterogeneous Clusters. Retrieved from https://doi.org/10.1109/ccgrid.2019.00076",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nguyen2024ruru2pheterocluste",
+      "title": "Ru-Ru2P hetero-cluster promoted V2CTx sheets-based electrocatalyst enables industrial-level AEM water electrolysis",
+      "link": "https://doi.org/10.1016/j.apcatb.2023.123517",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero",
+        "industrial"
+      ],
+      "reference": "Thanh Hai Nguyen, Phan Khanh Linh Tran, et al. (2024). Ru-Ru2P hetero-cluster promoted V2CTx sheets-based electrocatalyst enables industrial-level AEM water electrolysis. Retrieved from https://doi.org/10.1016/j.apcatb.2023.123517",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "patil2026crossguardazerotru",
+      "title": "CrossGuard: A Zero-Trust Architecture for Privacy-Preserving AI Deployment Across Heterogeneous Multi-Cloud Environments",
+      "link": "https://doi.org/10.52710/cfs.1024",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 77,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "hetero",
+        "deployment",
+        "heterogeneous",
+        "multi-hardware"
+      ],
+      "reference": "Praneeth Kamalaksha Patil (2026). CrossGuard: A Zero-Trust Architecture for Privacy-Preserving AI Deployment Across Heterogeneous Multi-Cloud Environments. Retrieved from https://doi.org/10.52710/cfs.1024",
+      "abstract": "Deploying AI agents across multi-cloud infrastructure creates a fundamental identity problem. Traditional authentication mechanisms such as OIDC, OAuth, and X.509 PKI depend on centralized identity providers. These providers can be compromised, coerced, or manipulated by malicious cloud operators seeking to impersonate agents or revoke their credentials. We present CrossGuard, an architecture that replaces centralized identity management with blockchain-anchored, hardware-attested agent identities. In our design, each agent's identity is cryptographically bound to its Trusted Execution Environment through on-chain attestation records. This binding ensures that no single party, including cloud operators with full infrastructure access, can forge credentials, override legitimate identities, ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "salman2021degeneracyeffectso",
+      "title": "Degeneracy Effects of Energy loss Straggling of Homo and Hetero Di-Cluster Ions",
+      "link": "https://doi.org/10.23851/mjs.v32i3.958",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 77,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero",
+        "fusion"
+      ],
+      "reference": "Nadher A. Salman, Khalid A. Ahmed, Baida M. Ahmed (2021). Degeneracy Effects of Energy loss Straggling of Homo and Hetero Di-Cluster Ions. Retrieved from https://doi.org/10.23851/mjs.v32i3.958",
+      "abstract": "The energy loss straggling is obtained from an exact quantum mechanical evaluation, which takes into account the degeneracy of the target plasma, and later it is compared with common classical and degeneracy approximation as a function of incident Homo (H-H, He-He) and Hetero (He-H) di-cluster energy in Kev with different kinds of plasma target. For homonuclear di-clusters (H-H) and (He-He) decreasing temperature, the exact calculation approaches the high degeneracy limit, but the differences are still significant. However, as the temperature rises, the exact result approaches the classical limit. Finally, the energy loss straggling increases with the increasing atomic number of the projectiles (He-He). Our research focuses on targets in the weakly coupled electron gas limit, where we can ",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "tork2026chargerdeploymenta",
+      "title": "Charger Deployment and Fleet Sizing for Heterogeneous Fleets Under Budget-Constrained Multi-Stage Electrification",
+      "link": "https://doi.org/10.2139/ssrn.6100409",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "fleets",
+        "heterogeneous"
+      ],
+      "reference": "Nastaran Tork, Behnam Davazdah Emami, et al. (2026). Charger Deployment and Fleet Sizing for Heterogeneous Fleets Under Budget-Constrained Multi-Stage Electrification. Retrieved from https://doi.org/10.2139/ssrn.6100409",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "zhang2024hydrogenbondedfram",
+      "title": "Hydrogen-Bonded Frameworks Based on Hetero-Trimers and -Tetramers of Octahedral Cluster Unit [Ta6cl12(Cn)6]3- and Mn Complexes",
+      "link": "https://doi.org/10.2139/ssrn.4680817",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Jianjun Zhang, Huajun  Andrew Zhou, Abdessadek Lachgar (2024). Hydrogen-Bonded Frameworks Based on Hetero-Trimers and -Tetramers of Octahedral Cluster Unit [Ta6cl12(Cn)6]3- and Mn Complexes. Retrieved from https://doi.org/10.2139/ssrn.4680817",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "zheng2021subevaccuracydelta",
+      "title": "SUB-EV ACCURACY DELTA-COUPLED-CLUSTER CALCULATIONS FOR HETERO-SITE DOUBLE CORE-IONIZED STATES",
+      "link": "https://doi.org/10.15278/isms.2021.we06",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Xuechen Zheng, Linda Young, et al. (2021). SUB-EV ACCURACY DELTA-COUPLED-CLUSTER CALCULATIONS FOR HETERO-SITE DOUBLE CORE-IONIZED STATES. Retrieved from https://doi.org/10.15278/isms.2021.we06",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "salman2022stoppingpowerofhet",
+      "title": "Stopping power of Hetero nuclear di-cluster ions from partial-wave analysis based on semi classical phase shifts",
+      "link": "https://doi.org/10.24996/ijs.2022.63.5.13",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Nadher A. Salman, Khalid A. Ahmed, Baida M. Ahmed (2022). Stopping power of Hetero nuclear di-cluster ions from partial-wave analysis based on semi classical phase shifts. Retrieved from https://doi.org/10.24996/ijs.2022.63.5.13",
+      "abstract": " \r\nWe apply a semi classical partial-wave scattering method based on the induced density approach (IDA) model. For ion electron scattering, the transport cross section is used to calculate the energy loss. This method yields a non-perturbative exemplification of energy loss, bridging the difference among classical and quantal representations. The focus of this work is the interaction of hetero nuclear di-cluster (He-H) ions with a free gas. The results show three kinds of stopping power in (a.u) (cluster stopping power, self-stopping power and correlated stopping power) of hetero nuclear di-cluster ions (He-H) with velocity at different atomic di-cluster distances at different densities and temperatures. We find that Bragg’s peak of stopping power is directly proportional to density and te",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dutta2018picoleveldnasensin",
+      "title": "Pico-level DNA sensing by hetero-polymetalate, Na10{Dy2W10O30(µ-S)6}·80H2O, cluster",
+      "link": "https://doi.org/10.1007/s13204-018-0773-1",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Taposhree Dutta, Jhuma Ganguly, Sabyasachi Sarkar (2018). Pico-level DNA sensing by hetero-polymetalate, Na10{Dy2W10O30(µ-S)6}·80H2O, cluster. Retrieved from https://doi.org/10.1007/s13204-018-0773-1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zhang2024hydrogenbondedfram_42",
+      "title": "Hydrogen-bonded frameworks based on hetero-trimers and -tetramers of octahedral cluster unit [Ta6Cl12(CN)6]3− and Mn complexes",
+      "link": "https://doi.org/10.1016/j.poly.2024.117010",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "JianJun Zhang, H. Andrew Zhou, Abdessadek Lachgar (2024). Hydrogen-bonded frameworks based on hetero-trimers and -tetramers of octahedral cluster unit [Ta6Cl12(CN)6]3− and Mn complexes. Retrieved from https://doi.org/10.1016/j.poly.2024.117010",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "mollaamin2025dopingeffectsinter",
+      "title": "Doping Effects in Ternary Aluminum Gallium Nitride Hetero-Cluster Towards High-Electron-Mobility Transistors for Hydrogen Sensing: A Density Functional Theory Study and Energy-Saving",
+      "link": "https://doi.org/10.1134/s1990793124701689",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "F. Mollaamin, M. Monajjemi (2025). Doping Effects in Ternary Aluminum Gallium Nitride Hetero-Cluster Towards High-Electron-Mobility Transistors for Hydrogen Sensing: A Density Functional Theory Study and Energy-Saving. Retrieved from https://doi.org/10.1134/s1990793124701689",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "hou2023enhancedmoisturere",
+      "title": "Enhanced moisture resistance and catalytic stability of ethylene oxidation at room temperature by the ultrasmall MnO  cluster/Pt hetero-junction",
+      "link": "https://doi.org/10.1016/j.apcatb.2023.123115",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Zhiquan Hou, Meiqi Chen, et al. (2023). Enhanced moisture resistance and catalytic stability of ethylene oxidation at room temperature by the ultrasmall MnO  cluster/Pt hetero-junction. Retrieved from https://doi.org/10.1016/j.apcatb.2023.123115",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anis2025impactofheteroatom",
+      "title": "Impact of hetero-atom doping on electronic structure and reactivity of anionic Al13− cluster: a combined density functional theory and global optimization investigation",
+      "link": "https://doi.org/10.1007/s11224-025-02493-8",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Insha Anis, Shahid Majeed, et al. (2025). Impact of hetero-atom doping on electronic structure and reactivity of anionic Al13− cluster: a combined density functional theory and global optimization investigation. Retrieved from https://doi.org/10.1007/s11224-025-02493-8",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "wang2025ll37anditstruncate",
+      "title": "LL‐37 and Its Truncated Fragments Modulate Amyloid‐β Dynamics, Aggregation and Toxicity Through Hetero‐Oligomer and Cluster Formation",
+      "link": "https://doi.org/10.1002/ange.202516241",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Xue Wang, Nicklas Österlund, et al. (2025). LL‐37 and Its Truncated Fragments Modulate Amyloid‐β Dynamics, Aggregation and Toxicity Through Hetero‐Oligomer and Cluster Formation. Retrieved from https://doi.org/10.1002/ange.202516241",
+      "abstract": "AbstractLL‐37 and its variants with amphiphilic structure can modulate amyloid‐β (Aβ) fibril formation, but the detailed mechanism behind it is still unclear. By using four different peptides (LL‐37, LL‐379–32, LL‐3718–29, LL‐3719–28), we found these peptides affect Aβ40 aggregation differently. Nanoscale analysis showed that all LL‐37 peptides form hetero‐oligomers and nanoclusters with Aβ40, but LL‐37 and LL‐3719–28, which exhibit the strongest inhibition of Aβ fibrillation, form more hetero‐oligomers and smaller nanoclusters. This suggests that hetero‐oligomers and small nanoclusters may represent an off‐pathway, preventing the formation of productive aggregates. At the microscale, all LL‐37 peptides were found to promote Aβ cluster formation, but LL‐37 and LL‐3719–28 can form larger cl",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "zheng2020heterositedoubleco",
+      "title": "Hetero-site Double Core Ionization Energies with Sub-electronvolt Accuracy from Delta-Coupled-Cluster Calculations",
+      "link": "https://doi.org/10.1021/acs.jpca.0c00901",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ],
+      "reference": "Xuechen Zheng, Junzi Liu, et al. (2020). Hetero-site Double Core Ionization Energies with Sub-electronvolt Accuracy from Delta-Coupled-Cluster Calculations. Retrieved from https://doi.org/10.1021/acs.jpca.0c00901",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 61,
+      "matched_keywords": [
+        "LLM",
+        "MLIR",
+        "YiRage",
+        "CPU"
+      ],
+      "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "mondesire2025automatinghpcsoftw",
+      "title": "Automating HPC Software Compilation, Deployment, and Error Resolution through an LLM-based Multi-Agent System",
+      "link": "https://doi.org/10.1145/3708035.3736023",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "LLM",
+        "compilation",
+        "deployment"
+      ],
+      "reference": "Sean Mondesire, Emmanuel Nsiye, et al. (2025). Automating HPC Software Compilation, Deployment, and Error Resolution through an LLM-based Multi-Agent System. Retrieved from https://doi.org/10.1145/3708035.3736023",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zhao2020theheterogeneousde",
+      "title": "The Heterogeneous Deployment Tool for Hardware and Software Co-design",
+      "link": "https://doi.org/10.1109/cits49457.2020.9232649",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Bingjie Zhao, Ziyang Li, Tao Zhang (2020). The Heterogeneous Deployment Tool for Hardware and Software Co-design. Retrieved from https://doi.org/10.1109/cits49457.2020.9232649",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "sheng2021softwarecompilatio",
+      "title": "Software Compilation and Optimization Techniques for Heterogeneous Multi‐core Platforms",
+      "link": "https://doi.org/10.1002/9781119818410.ch10",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "compilation",
+        "heterogeneous"
+      ],
+      "reference": "Weihua Sheng, Jeronimo Castrillon, Rainer Leupers (2021). Software Compilation and Optimization Techniques for Heterogeneous Multi‐core Platforms. Retrieved from https://doi.org/10.1002/9781119818410.ch10",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "gener2025tutorialcedraholis",
+      "title": "Tutorial: CEDR: A Holistic Software and Hardware Design Environment for Hardware Agnostic Application Development and Deployment on FPGA-Integrated Heterogeneous Systems",
+      "link": "https://doi.org/10.1145/3742873.3758335",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Serhan Gener, Sahil Hassan, Ali Akoglu (2025). Tutorial: CEDR: A Holistic Software and Hardware Design Environment for Hardware Agnostic Application Development and Deployment on FPGA-Integrated Heterogeneous Systems. Retrieved from https://doi.org/10.1145/3742873.3758335",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "leupers2019softwarecompilatio",
+      "title": "Software Compilation Techniques for Heterogeneous Embedded Multi-Core Systems",
+      "link": "https://doi.org/10.1007/978-3-319-91734-4_28",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "compilation",
+        "heterogeneous"
+      ],
+      "reference": "Rainer Leupers, Miguel Angel Aguilar, et al. (2019). Software Compilation Techniques for Heterogeneous Embedded Multi-Core Systems. Retrieved from https://doi.org/10.1007/978-3-319-91734-4_28",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "lin2021onlineconnectivity",
+      "title": "Online Connectivity-aware Dynamic Deployment for Heterogeneous Multi-Robot Systems",
+      "link": "https://doi.org/10.1109/icra48506.2021.9561748",
+      "year": 2021,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Chendi Lin, Wenhao Luo, Katia Sycara (2021). Online Connectivity-aware Dynamic Deployment for Heterogeneous Multi-Robot Systems. Retrieved from https://doi.org/10.1109/icra48506.2021.9561748",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "zhou2020heterogeneousnetwo",
+      "title": "Heterogeneous Networks Through Multi-resources Deployment, Performance Enhancement for",
+      "link": "https://doi.org/10.1007/978-3-319-78262-1_134",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Yuchen Zhou, Richard Fei Yu, et al. (2020). Heterogeneous Networks Through Multi-resources Deployment, Performance Enhancement for. Retrieved from https://doi.org/10.1007/978-3-319-78262-1_134",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "xu2025practicallyfixedti",
+      "title": "Practically fixed-time H∞ deployment of large-scale heterogeneous multi-agent  systems with multiple dimensions via a PDE-based approach",
+      "link": "https://doi.org/10.2139/ssrn.5912299",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "Laixiang Xu, Hao Xi, Junmin Zhao (2025). Practically fixed-time H∞ deployment of large-scale heterogeneous multi-agent  systems with multiple dimensions via a PDE-based approach. Retrieved from https://doi.org/10.2139/ssrn.5912299",
+      "abstract": "",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "valdez2025hampahardwareaccel",
+      "title": "HAMP: A Hardware Accelerator Multi-Platform Benchmark for High Performance Heterogeneous Computing",
+      "link": "https://doi.org/10.13053/cys-29-3-5898",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous",
+        "multi-hardware"
+      ],
+      "reference": "Rogelio Valdez, Yazmin Maldonado (2025). HAMP: A Hardware Accelerator Multi-Platform Benchmark for High Performance Heterogeneous Computing. Retrieved from https://doi.org/10.13053/cys-29-3-5898",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "velascomonte2018ontheflydeployment",
+      "title": "On-The-Fly Deployment of Deep Neural Networks on Heterogeneous Hardware in a Low-Cost Smart Camera",
+      "link": "https://doi.org/10.1145/3243394.3243705",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ],
+      "reference": "D. Velasco-Montero, J. Fernández-Berni, et al. (2018). On-The-Fly Deployment of Deep Neural Networks on Heterogeneous Hardware in a Low-Cost Smart Camera. Retrieved from https://doi.org/10.1145/3243394.3243705",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 49,
+      "matched_keywords": [
+        "LLM",
+        "decode",
+        "GPU"
+      ],
+      "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "link": "",
+      "year": "2025",
+      "source": "book.bib",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "LLM",
+        "decode"
+      ],
+      "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "fumero2024heterogeneoushardw",
+      "title": "Heterogeneous Hardware",
+      "link": "https://doi.org/10.1007/978-3-031-49559-5_2",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous"
+      ],
+      "reference": "Juan Fumero, Athanasios Stratikopoulos, Christos Kotselidis (2024). Heterogeneous Hardware. Retrieved from https://doi.org/10.1007/978-3-031-49559-5_2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2019fromirregularheter",
+      "title": "From irregular heterogeneous software to reconfigurable hardware",
+      "link": "https://doi.org/10.1049/pbpc022e_ch2",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous"
+      ],
+      "reference": " (2019). From irregular heterogeneous software to reconfigurable hardware. Retrieved from https://doi.org/10.1049/pbpc022e_ch2",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "maverick2026theriseofheterobeh",
+      "title": "The Rise of Hetero Behaviorus",
+      "link": "https://doi.org/10.2139/ssrn.6136452",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous",
+        "treat"
+      ],
+      "reference": "Alex Maverick (2026). The Rise of Hetero Behaviorus. Retrieved from https://doi.org/10.2139/ssrn.6136452",
+      "abstract": "<p>Economic models rely on simplified agent abstractions to achieve analytical tractability. One of the most influential of these abstractions is Homo Economicus, which represents agents as internally consistent and epistemically unconstrained decision-makers. This paper argues that a growing body of empirical evidence motivates a reconsideration of this benchmark. It introduces the concept of Hetero Behaviorus as a complementary agent abstraction that treats heterogeneity in information, cognition, expectations, and behavior as foundational rather than residual. Rather than advancing a specific formal model, the paper clarifies the analytical motivation for treating behavioral heterogeneity as foundational. In doing so, the paper provides a conceptual foundation for subsequent formal and ",
+      "source_tier": "C"
+    },
+    {
+      "bib_key": "v2018deploymentofintrus",
+      "title": "Deployment of Intrusion Prevention System on Multi-Core Processor Based Security Hardware",
+      "link": "https://doi.org/10.5121/ijcnc.2018.10302",
+      "year": 2018,
+      "source": "crossref",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "deployment",
+        "multi-hardware"
+      ],
+      "reference": "Swetha K V, Ravi Dara (2018). Deployment of Intrusion Prevention System on Multi-Core Processor Based Security Hardware. Retrieved from https://doi.org/10.5121/ijcnc.2018.10302",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "lan2025regioselective12di",
+      "title": "Regioselective 1,2-Di(hetero)arylation of Activated and Unactivated Alkenes with (Hetero)aryl Chlorides",
+      "link": "https://doi.org/10.26434/chemrxiv-2025-nss12",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Yingjun Lan, Siqi Xie, Bin Liu (2025). Regioselective 1,2-Di(hetero)arylation of Activated and Unactivated Alkenes with (Hetero)aryl Chlorides. Retrieved from https://doi.org/10.26434/chemrxiv-2025-nss12",
+      "abstract": "Aryl chlorides are more commercially available and lower cost compared with aryl bromides and iodides. However, the use of (hetero)aryl chlorides as aryl radical precursors for the di(hetero)arylation of alkenes remains an underdeveloped area. Furthermore, existing examples of theses reactions are predominantly confined to activated alkenes. In this study, we introduce a benzophenone-catalyzed 1,2-di(hetero)arylation process that is applicable to both activated and unactivated alkenes, utilizing (hetero)aryl chlorides and cyanoarenes as aryl sources. Importantly, this method allows for the simultaneous introduction of two heterocycles to alkenes with high regioselectivity.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2024heterocombform",
+      "title": "hetero-, comb. form",
+      "link": "https://doi.org/10.1093/oed/6585984980",
+      "year": 2024,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": " (2024). hetero-, comb. form. Retrieved from https://doi.org/10.1093/oed/6585984980",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "li20252naromaticityinhet",
+      "title": "2nπ Aromaticity in Hetero-onocyclic Molecules",
+      "link": "https://doi.org/10.1007/s10876-025-02920-0",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Dan Li, Mengxuan Ling, Longjiu Cheng (2025). 2nπ Aromaticity in Hetero-onocyclic Molecules. Retrieved from https://doi.org/10.1007/s10876-025-02920-0",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "miguel2019introductionthinki",
+      "title": "Introduction: Thinking beyond Hetero/Homo Normativities",
+      "link": "https://doi.org/10.36019/9780813576435-002",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Yolanda Martínez-San Miguel, Sarah Tobias (2019). Introduction: Thinking beyond Hetero/Homo Normativities. Retrieved from https://doi.org/10.36019/9780813576435-002",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "anon2023heteroadjampn",
+      "title": "hetero, adj. &amp; n.",
+      "link": "https://doi.org/10.1093/oed/6700906925",
+      "year": 2023,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": " (2023). hetero, adj. &amp; n.. Retrieved from https://doi.org/10.1093/oed/6700906925",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "beniwal2019lshapedtunnellingf",
+      "title": "L-shaped Tunnelling Field Effect Transistor with hetero-gate dielectric and hetero dielectric box",
+      "link": "https://doi.org/10.1109/icoei.2019.8862520",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Sonakshi Beniwal, Gaurav Saini (2019). L-shaped Tunnelling Field Effect Transistor with hetero-gate dielectric and hetero dielectric box. Retrieved from https://doi.org/10.1109/icoei.2019.8862520",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "ding2020anefficientprotoco",
+      "title": "An efficient protocol for the synthesis of monofluoroalkylated (hetero)arenes via Pd-catalyzed α-(hetero)arylation of α-fluoroketones with (hetero)aryl bromides",
+      "link": "https://doi.org/10.1016/j.tetlet.2020.151948",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Licheng Ding, Shuaijun Han, et al. (2020). An efficient protocol for the synthesis of monofluoroalkylated (hetero)arenes via Pd-catalyzed α-(hetero)arylation of α-fluoroketones with (hetero)aryl bromides. Retrieved from https://doi.org/10.1016/j.tetlet.2020.151948",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "schoonenberg2019heterofunctionalgr",
+      "title": "Hetero-functional Graph Theory",
+      "link": "https://doi.org/10.1007/978-3-319-99301-0_4",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Wester C. H. Schoonenberg, Inas S. Khayal, Amro M. Farid (2019). Hetero-functional Graph Theory. Retrieved from https://doi.org/10.1007/978-3-319-99301-0_4",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "arone2025tecendoaautohetero",
+      "title": "Tecendo a auto-hetero-ecoformação docente Weaving self-hetero-eco-teacher education",
+      "link": "https://doi.org/10.23925/2318-7115.2025v46i2e74522",
+      "year": 2025,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Mariangelica Arone, Izabel Petraglia (2025). Tecendo a auto-hetero-ecoformação docente Weaving self-hetero-eco-teacher education. Retrieved from https://doi.org/10.23925/2318-7115.2025v46i2e74522",
+      "abstract": "O presente capítulo aborda a formação docente sob a perspectiva da complexidade, articulando a auto-hetero-ecoformação como eixo estruturante para a formação de educadores éticos e socialmente comprometidos. O estudo teórico bibliográfico baseia-se no referencial do pensamento complexo, de Edgar Morin e da teoria tripolar de Gaston Pineau, que são articulados com a transdisciplinaridade e com os sete saberes necessários à educação do futuro. A integração da tripolaridade formativa com a compreensão da complexidade, a transdisciplinaridade e os sete saberes possibilitam a articulação de conhecimentos, práticas e valores, capazes de fortalecer a reflexão crítica, a sensibilidade relacional e ecológica e promover práticas pedagógicas transformadoras, sustentáveis e socialmente responsáveis.",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "pindoo2020heterogatedielectr",
+      "title": "Hetero-gate Dielectric with Hetero Dielectric BOX for Suppressing Ambipolar Current in Tunnel FETs",
+      "link": "https://doi.org/10.1109/iciem48762.2020.9160161",
+      "year": 2020,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Irfan Ahmad Pindoo, Sanjeet K. Sinha (2020). Hetero-gate Dielectric with Hetero Dielectric BOX for Suppressing Ambipolar Current in Tunnel FETs. Retrieved from https://doi.org/10.1109/iciem48762.2020.9160161",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "schoonenberg2019heterofunctionalgr_60",
+      "title": "Hetero-functional Graph Theory Preliminaries",
+      "link": "https://doi.org/10.1007/978-3-319-99301-0_3",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ],
+      "reference": "Wester C. H. Schoonenberg, Inas S. Khayal, Amro M. Farid (2019). Hetero-functional Graph Theory Preliminaries. Retrieved from https://doi.org/10.1007/978-3-319-99301-0_3",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "xu2019multiapplicationsm",
+      "title": "Multi-applications mapping platform based on hardware and software",
+      "link": "https://doi.org/10.1145/3318265.3318267",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "multi-hardware"
+      ],
+      "reference": "Zhi-Kang Xu, Yi-Ou Chen, Xiang Ling (2019). Multi-applications mapping platform based on hardware and software. Retrieved from https://doi.org/10.1145/3318265.3318267",
+      "abstract": "",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "diniz2022hardwarecompilatio",
+      "title": "Hardware Compilation Using SSA",
+      "link": "https://doi.org/10.1007/978-3-030-80515-9_23",
+      "year": 2022,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
+      ],
+      "reference": "Pedro C. Diniz, Philip Brisk (2022). Hardware Compilation Using SSA. Retrieved from https://doi.org/10.1007/978-3-030-80515-9_23",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "smith2026heliumdeploydiscou",
+      "title": "Helium Deploy Discount Code OFF10 – 10% OFF Deployment + Hardware (Verified 2026)",
+      "link": "https://doi.org/10.55277/researchhub.df0an5wk.1",
+      "year": 2026,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "deployment"
+      ],
+      "reference": "Lily Smith (2026). Helium Deploy Discount Code OFF10 – 10% OFF Deployment + Hardware (Verified 2026). Retrieved from https://doi.org/10.55277/researchhub.df0an5wk.1",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "enrici2019efficientdataflowa",
+      "title": "Efficient Data-Flow Analysis of UML/SysML Diagrams for Optimized Model Compilation of Hardware-software Systems",
+      "link": "https://doi.org/10.5220/0007377900860097",
+      "year": 2019,
+      "source": "crossref",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
+      ],
+      "reference": "Andrea Enrici, Ludovic Apvrille, Renaud Pacalet (2019). Efficient Data-Flow Analysis of UML/SysML Diagrams for Optimized Model Compilation of Hardware-software Systems. Retrieved from https://doi.org/10.5220/0007377900860097",
+      "abstract": "",
+      "source_tier": "B"
+    },
+    {
+      "bib_key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "link": "",
+      "year": "2023",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  ",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
+      "abstract": "   NVIDIA Technical Blog",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "AMD (2024). AI Engine Technology. ",
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
+      "abstract": "   Newsletter",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "NVIDIA (2024). CUDA Graphs. ",
+      "abstract": "   CUDA Programming Guide",
+      "source_tier": "A"
+    },
+    {
+      "bib_key": "dlbook",
+      "title": "Deep Learning",
+      "link": "",
+      "year": "2016",
+      "source": "book.bib",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
+      "abstract": "   ",
+      "source_tier": "A"
+    }
+  ],
+  "tier_counts": {
+    "A": 23,
+    "B": 31,
+    "C": 4
+  },
+  "tiers_enriched_at": "2026-06-10T03:19:42.569769"
+}

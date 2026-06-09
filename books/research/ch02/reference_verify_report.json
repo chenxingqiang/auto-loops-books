@@ -1,0 +1,250 @@
+{
+  "chapter_id": "ch02",
+  "chapter_title": "Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven",
+  "timestamp": "2026-06-10 02:33:54",
+  "keywords_file": "books/research/ch02/keywords.json",
+  "keyword_count": 90,
+  "top_keywords": [
+    {
+      "term": "two kernel design mindsets: operator-driven vs dataflow-driven",
+      "weight": 18
+    },
+    {
+      "term": "two kernel design mindsets",
+      "weight": 17
+    },
+    {
+      "term": "dataflow-driven optimization",
+      "weight": 16
+    },
+    {
+      "term": "operator-driven kernel design",
+      "weight": 16
+    },
+    {
+      "term": "data residency on-chip",
+      "weight": 15
+    },
+    {
+      "term": "MegaKernel fusion LLM",
+      "weight": 15
+    },
+    {
+      "term": "automation path",
+      "weight": 14
+    },
+    {
+      "term": "cross hardware",
+      "weight": 14
+    },
+    {
+      "term": "data residency",
+      "weight": 14
+    },
+    {
+      "term": "dataflow philosophy",
+      "weight": 14
+    },
+    {
+      "term": "iron rules",
+      "weight": 14
+    },
+    {
+      "term": "MegaKernel preview",
+      "weight": 14
+    },
+    {
+      "term": "operator first",
+      "weight": 14
+    },
+    {
+      "term": "static pipeline dataflow",
+      "weight": 14
+    },
+    {
+      "term": "XDNA AIE dataflow accelerator",
+      "weight": 14
+    },
+    {
+      "term": "automation path LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "compiler automated kernel fusion",
+      "weight": 13
+    },
+    {
+      "term": "cross hardware LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "CUDA memory hierarchy optimization",
+      "weight": 13
+    },
+    {
+      "term": "data residency LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "dataflow philosophy LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "iron rules LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "MegaKernel preview LLM inference compiler",
+      "weight": 13
+    },
+    {
+      "term": "operator first LLM inference compiler",
+      "weight": 13
+    }
+  ],
+  "citation_count": 12,
+  "citations": [
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "decode",
+        "GPU",
+        "graph",
+        "graphs"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 18,
+      "matched_keywords": [
+        "FlashAttention"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 22,
+      "matched_keywords": [
+        "XDNA"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 36,
+      "matched_keywords": [
+        "decode",
+        "tier"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 9,
+      "matched_keywords": [
+        "AIE"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 18,
+      "matched_keywords": [
+        "PagedAttention"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 54,
+      "matched_keywords": [
+        "CUDA",
+        "graph",
+        "graphs"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 18,
+      "matched_keywords": [
+        "decode",
+        "PyTorch"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "low_relevance_citations": [
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 0,
+      "matched_keywords": [],
+      "status": "low_relevance"
+    }
+  ],
+  "missing_bib_keys": [],
+  "literature_rescore": [],
+  "status": "warn",
+  "min_citation_score": 8
+}

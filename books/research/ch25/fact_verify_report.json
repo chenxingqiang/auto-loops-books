@@ -1,23 +1,33 @@
 {
   "chapter_id": "ch25",
-  "timestamp": "2026-06-09T17:13:53.881101+00:00",
-  "entry_count": 2,
-  "verified_ok_count": 0,
+  "timestamp": "2026-06-09T17:50:06.674600+00:00",
+  "entry_count": 3,
+  "verified_ok_count": 2,
   "entries": [
     {
       "claim": "ch25 cross-hardware decode metrics use bytes/token methodology",
       "bib_key": "memoryfloor2026",
       "source_url": "https://arxiv.org/abs/2605.30571",
       "corroboration_url": "https://arxiv.org/abs/2507.14397",
-      "source_fetch_ok": false,
+      "source_fetch_ok": true,
       "source_content_match": false,
       "source_missing_tokens": [
-        "empty content"
+        "ch25",
+        "cross-hardware",
+        "metrics",
+        "bytes/token",
+        "methodology"
       ],
-      "corroboration_fetch_ok": false,
+      "corroboration_fetch_ok": true,
       "corroboration_content_match": false,
       "corroboration_missing_tokens": [
-        "empty content"
+        "25",
+        "ch25",
+        "cross-hardware",
+        "metrics",
+        "use",
+        "bytes/token",
+        "methodology"
       ],
       "verified_ok": false,
       "source_method": "craw4ai",
@@ -28,17 +38,42 @@
       "bib_key": "taxbreak2026",
       "source_url": "https://arxiv.org/abs/2603.12465",
       "corroboration_url": "https://arxiv.org/abs/2603.12465",
-      "source_fetch_ok": false,
-      "source_content_match": false,
+      "source_fetch_ok": true,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "empty content"
+        "25",
+        "ch25",
+        "context",
+        "study"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
       "corroboration_missing_tokens": [],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch25/fact_sources/31fc9912722dff42.json"
+    },
+    {
+      "claim": "YiRage is a multi-backend LLM inference optimization compiler (CUDA, CPU, MPS, Triton, NKI, MLIR)",
+      "bib_key": "yirage2026",
+      "source_url": "https://github.com/chenxingqiang/YiRage",
+      "corroboration_url": "https://github.com/chenxingqiang/YiRage/blob/main/docs/architecture.md",
+      "source_fetch_ok": true,
+      "source_content_match": true,
+      "source_missing_tokens": [],
+      "corroboration_fetch_ok": true,
+      "corroboration_content_match": true,
+      "corroboration_missing_tokens": [
+        "compiler",
+        "CUDA",
+        "CPU",
+        "Triton",
+        "nki",
+        "MLIR"
+      ],
+      "verified_ok": true,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch25/fact_sources/a2a2a677f3414530.json"
     }
   ],
   "status": "issues"

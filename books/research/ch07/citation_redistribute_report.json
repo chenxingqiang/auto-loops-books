@@ -1,0 +1,131 @@
+{
+  "chapter_id": "ch07",
+  "pool_count": 20,
+  "assigned_count": 20,
+  "unassigned_count": 0,
+  "sections_with_cites": 3,
+  "unique_keys_in_tex": 19,
+  "pool_path": "books/research/ch07/citation_pool.json",
+  "sections_used": [
+    "Static Roles",
+    "YiRage Tiling",
+    "chapter"
+  ],
+  "cites_applied": 19,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch07_static_role_assignment.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "memoryfloor2026",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "taxbreak2026",
+      "section": "chapter",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "asada2020roadblocksofiopara",
+      "section": "Static Roles",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "assignment"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "babati2023theroleofimplement",
+      "section": "Static Roles",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "tan2019rolebasedstaticdes",
+      "section": "Static Roles",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "dao2022flashattention",
+      "section": "Static Roles",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "kwon2023vllm",
+      "section": "Static Roles",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "liu2024deepseekv3",
+      "section": "Static Roles",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "masri2021optimalpublicelect",
+      "section": "Static Roles",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "patel2025llminference",
+      "section": "Static Roles",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "nvidia2022hopper",
+      "section": "Static Roles",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "amd2024xdna",
+      "section": "Static Roles",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:38.905792"
+}

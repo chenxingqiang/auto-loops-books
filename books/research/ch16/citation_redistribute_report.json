@@ -1,0 +1,140 @@
+{
+  "chapter_id": "ch16",
+  "pool_count": 36,
+  "assigned_count": 36,
+  "unassigned_count": 0,
+  "sections_with_cites": 5,
+  "unique_keys_in_tex": 34,
+  "pool_path": "books/research/ch16/citation_pool.json",
+  "sections_used": [
+    "TVM Arch Passes",
+    "TVM Codegen",
+    "TVM HW Matrix",
+    "TVM Tuning",
+    "chapter"
+  ],
+  "cites_applied": 34,
+  "dry_run": false,
+  "updated": true,
+  "tex_path": "books/build/chapters/ch16_tvm.tex",
+  "assignment_samples": [
+    {
+      "sentence_id": "s0001",
+      "bib_key": "memoryfloor2026",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "he2020tvmforadrenogpus",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "GPU"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "madathil2023optimizingmachinel",
+      "section": "TVM HW Matrix",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "apache",
+        "TVM"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "diamantopoul2020agileautotuningofa",
+      "section": "TVM HW Matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "stack",
+        "TVM"
+      ]
+    },
+    {
+      "sentence_id": "s0005",
+      "bib_key": "shen2022hardwaredevelopmen",
+      "section": "TVM HW Matrix",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "koblah2022hardwaremovingtarg",
+      "section": "TVM HW Matrix",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "taxbreak2026",
+      "section": "TVM HW Matrix",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "dao2022flashattention",
+      "section": "TVM HW Matrix",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "moreau2018collectiveknowledg",
+      "section": "TVM HW Matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "stack",
+        "TVM"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "section": "TVM HW Matrix",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "li2025nearfieldtargetloc",
+      "section": "TVM HW Matrix",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "kwon2023vllm",
+      "section": "TVM HW Matrix",
+      "relevance_score": 1,
+      "matched_keywords": [],
+      "fallback": true
+    }
+  ],
+  "generated_at": "2026-06-10T03:19:40.862525"
+}

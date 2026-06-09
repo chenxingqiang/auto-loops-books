@@ -34,7 +34,7 @@
       "kind": "architecture_figure",
       "section": "hw_reward",
       "label": "fig:hw_reward_architecture",
-      "caption": "Hw Reward block diagram for Auto-Optimization and AI-Assisted Compilation.",
+      "caption": "HW Reward block diagram for Auto-Optimization and AI-Assisted Compilation.",
       "status": "done",
       "placement": "t",
       "blocks": [
