@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch15",
+  "chapter_title": "XLA: Production-Grade AI Compiler",
+  "visuals": [
+    {
+      "id": "fig_xla_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "xla_hw_matrix",
+      "label": "fig:xla_hw_matrix_pipeline",
+      "caption": "Xla Hw Matrix optimization pipeline in XLA: Production-Grade AI Compiler.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Xla Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_xla_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "xla_arch_passes",
+      "label": "fig:xla_arch_passes_architecture",
+      "caption": "Xla Arch Passes block diagram for XLA: Production-Grade AI Compiler.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

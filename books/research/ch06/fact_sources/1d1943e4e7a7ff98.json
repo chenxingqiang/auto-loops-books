@@ -1,0 +1,11 @@
+{
+  "url": "https://github.com/chenxingqiang/YiRage/blob/main/docs/architecture.md",
+  "fetched_at": "2026-06-09T17:26:53.083452+00:00",
+  "success": true,
+  "method": "craw4ai",
+  "status_code": 200,
+  "title": "YiRage/docs/architecture.md at main · chenxingqiang/YiRage · GitHub",
+  "content_excerpt": "* [YiRage](https://github.com/chenxingqiang/YiRage/tree/main)\n# YiRage Architecture Documentation\nThis document provides comprehensive architecture diagrams for the YiRage multi-backend LLM inference optimization framework.\n### Multi-Backend Support\n\n```\n%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ede9fe', 'primaryTextColor': '#3b0764', 'lineColor': '#7c3aed'}}}%%\nclassDiagram\n    class yirage {\n        +new_kernel_graph()\n        +get_available_backends()\n        +is_backend_available()\n        +set_default_backend()\n        +PersistentKernel\n    }\n\n    class KNGraph {\n        +new_input()\n        +matmul()\n        +add()\n        +relu()\n        +rms_norm()\n        +mark_output()\n        +superoptimize()\n    }\n\n    class PersistentKernel {\n        +backend: str\n        +fallback_backends: list\n        +world_size: int\n        +__call__()\n    }\n\n    class BackendConfig {\n        +get_mps_search_config()\n        +get_ascend_search_config()\n        +get_maca_search_config()\n    }\n\n    yirage --> KNGraph\n    yirage --> PersistentKernel\n    yirage --> BackendConfig\n```\n\n## Performance Optimization Flow\n\n```\n%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ede9fe', 'primaryTextColor': '#3b0764', 'lineColor': '#7c3aed'}}}%%\nflowchart TD\n    A[User Kernel Graph] --> B[Analyze Operations]\n    B --> C[Generate Fusion Candidates]\n    C --> D[Verify Correctness  \nFingerprint]\n    D --> E{Valid?}\n    E -->|No| C\n    E -->|Yes| F[Profile Performance]\n    F --> G[Select Best Configuration]\n    G --> H[Generate Optimized Code]\n    H --> I[Compile for Target Backend]\n    I --> J[Optimized Kernel Ready]\n\n    style A fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px\n    style D fill:#ede9fe,stroke:#7c3aed,stroke-width:2px\n    style J fill:#c4b5fd,stroke:#7c3aed,stroke-width:2px\n```\n\n* [YiRage GitHub Repository](https://github.com/chenxingqiang/YiRage)\n",
+  "content_chars": 1898,
+  "error": null
+}

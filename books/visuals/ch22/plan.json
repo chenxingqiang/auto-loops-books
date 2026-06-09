@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch22",
+  "chapter_title": "Compiler-Driven End-to-End Performance Tuning",
+  "visuals": [
+    {
+      "id": "fig_hw_aware_profiling_pipeline",
+      "kind": "pipeline_figure",
+      "section": "hw_aware_profiling",
+      "label": "fig:hw_aware_profiling_pipeline",
+      "caption": "Hw Aware Profiling optimization pipeline in Compiler-Driven End-to-End Performance Tuning.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Hw Aware Profiling"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_bottleneck_locating_architecture",
+      "kind": "architecture_figure",
+      "section": "bottleneck_locating",
+      "label": "fig:bottleneck_locating_architecture",
+      "caption": "Bottleneck Locating block diagram for Compiler-Driven End-to-End Performance Tuning.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

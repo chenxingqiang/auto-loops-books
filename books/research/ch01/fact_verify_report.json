@@ -1,0 +1,62 @@
+{
+  "chapter_id": "ch01",
+  "timestamp": "2026-06-09T17:13:26.138704+00:00",
+  "entry_count": 3,
+  "verified_ok_count": 0,
+  "entries": [
+    {
+      "claim": "847.5 kernels/token Llama-3.2-1B H100 BS4 SL2048 m=10",
+      "bib_key": "taxbreak2026",
+      "source_url": "https://arxiv.org/abs/2603.12465",
+      "corroboration_url": "https://arxiv.org/abs/2603.12465",
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/31fc9912722dff42.json"
+    },
+    {
+      "claim": "CUDA Graphs 1.259x speedup Qwen-2.5-7B H100 ctx2048 batch-1",
+      "bib_key": "memoryfloor2026",
+      "source_url": "https://arxiv.org/abs/2605.30571",
+      "corroboration_url": "https://arxiv.org/abs/2605.30571",
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/cf0029c11de6d2a0.json"
+    },
+    {
+      "claim": "DeepSeek-V3 10x decode vs prefill GPU deployment ratio",
+      "bib_key": "liu2024deepseekv3",
+      "source_url": "https://arxiv.org/abs/2412.19437",
+      "corroboration_url": "https://arxiv.org/abs/2507.14397",
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": false,
+      "corroboration_content_match": false,
+      "corroboration_missing_tokens": [
+        "empty content"
+      ],
+      "verified_ok": false,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch01/fact_sources/de539966b9f54c2c.json"
+    }
+  ],
+  "status": "issues"
+}

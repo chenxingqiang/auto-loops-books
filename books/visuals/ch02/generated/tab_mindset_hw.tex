@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\caption{Design mindset vs.\ hardware enforcement model.}
+\label{tab:mindset_hw}
+\begin{tabular}{lc}
+\toprule
+\visTableHeader
+\textbf{Target} & \textbf{Data residency model} \\
+\midrule
+CUDA GPU & Software-managed hierarchy \\
+XDNA / AIE & Hardware-enforced spatial buffers \\
+CPU & Cache hierarchy + explicit blocking \\
+\bottomrule
+\end{tabular}
+\end{table}

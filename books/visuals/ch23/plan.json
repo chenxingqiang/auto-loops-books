@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch23",
+  "chapter_title": "LLM and MoE Specialized Compilation",
+  "visuals": [
+    {
+      "id": "fig_llm_decode_compile_pipeline",
+      "kind": "pipeline_figure",
+      "section": "llm_decode_compile",
+      "label": "fig:llm_decode_compile_pipeline",
+      "caption": "Llm Decode Compile optimization pipeline in LLM and MoE Specialized Compilation.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Llm Decode Compile"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_moe_scheduling_architecture",
+      "kind": "architecture_figure",
+      "section": "moe_scheduling",
+      "label": "fig:moe_scheduling_architecture",
+      "caption": "Moe Scheduling block diagram for LLM and MoE Specialized Compilation.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch16",
+  "chapter_title": "TVM and Apache TVM Stack",
+  "visuals": [
+    {
+      "id": "fig_tvm_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "tvm_hw_matrix",
+      "label": "fig:tvm_hw_matrix_pipeline",
+      "caption": "Tvm Hw Matrix optimization pipeline in TVM and Apache TVM Stack.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Tvm Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_tvm_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "tvm_arch_passes",
+      "label": "fig:tvm_arch_passes_architecture",
+      "caption": "Tvm Arch Passes block diagram for TVM and Apache TVM Stack.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

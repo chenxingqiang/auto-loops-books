@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\caption{Cross-hardware constraint matrix.}
+\label{tab:constraint_matrix}
+\begin{tabular}{lccc}
+\toprule
+\visTableHeader
+\textbf{Dimension} & \textbf{GPU} & \textbf{CPU} & \textbf{NPU} \\
+\midrule
+On-chip SRAM & Shared mem / L1 & L1/L2/L3 & Tile buffers \\
+Parallel grain & Warp & Core + SIMD & Spatial PE array \\
+Dynamic shapes & Flexible & Flexible & Restricted \\
+\bottomrule
+\end{tabular}
+\end{table}

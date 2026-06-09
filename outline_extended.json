@@ -1,0 +1,912 @@
+{
+  "parts": [
+    [
+      "part01",
+      "Mindset Revolution",
+      [
+        "ch01",
+        "ch02"
+      ]
+    ],
+    [
+      "part02",
+      "Hardware Foundation",
+      [
+        "ch03"
+      ]
+    ],
+    [
+      "part03",
+      "CUDA & XDNA Architecture",
+      [
+        "ch04",
+        "ch05"
+      ]
+    ],
+    [
+      "part04",
+      "MegaKernel Core Techniques",
+      [
+        "ch06",
+        "ch07",
+        "ch08",
+        "ch09"
+      ]
+    ],
+    [
+      "part05",
+      "MegaKernel Implementation",
+      [
+        "ch10",
+        "ch11",
+        "ch12"
+      ]
+    ],
+    [
+      "part06",
+      "AI Compilers & Cross-HW Practice",
+      [
+        "ch13",
+        "ch14",
+        "ch15",
+        "ch16",
+        "ch17",
+        "ch18",
+        "ch19",
+        "ch20",
+        "ch21"
+      ]
+    ],
+    [
+      "part07",
+      "Advanced Compilation & Production",
+      [
+        "ch22",
+        "ch23",
+        "ch24",
+        "ch25",
+        "ch26",
+        "ch27"
+      ]
+    ]
+  ],
+  "compiler_section_template": [
+    [
+      "{p}_hw_matrix",
+      [
+        "hardware",
+        "target",
+        "matrix",
+        "gpu|cpu|npu"
+      ]
+    ],
+    [
+      "{p}_arch_passes",
+      [
+        "pass",
+        "lower",
+        "optim",
+        "dialect"
+      ]
+    ],
+    [
+      "{p}_codegen",
+      [
+        "codegen",
+        "backend",
+        "platform",
+        "emit"
+      ]
+    ],
+    [
+      "{p}_tuning",
+      [
+        "tun",
+        "profile",
+        "hardware",
+        "pitfall"
+      ]
+    ],
+    [
+      "{p}_case_study",
+      [
+        "case",
+        "benchmark",
+        "cross-hardware",
+        "yirage"
+      ]
+    ]
+  ],
+  "chapters": [
+    {
+      "id": "ch04",
+      "file": "ch04_cuda_hopper_blackwell.tex",
+      "title": "CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "cuda_memory_hierarchy",
+          [
+            "register",
+            "shared memory",
+            "global"
+          ]
+        ],
+        [
+          "tma",
+          [
+            "tma",
+            "tensor memory",
+            "async"
+          ]
+        ],
+        [
+          "cluster_dsm",
+          [
+            "cluster",
+            "dsm"
+          ]
+        ],
+        [
+          "sync_mechanisms",
+          [
+            "warp",
+            "block sync"
+          ]
+        ],
+        [
+          "tensor_core_bounds",
+          [
+            "tensor core",
+            "decode"
+          ]
+        ],
+        [
+          "ptx",
+          [
+            "ptx",
+            "exp2"
+          ]
+        ],
+        [
+          "yirage_cuda_backend",
+          [
+            "yirage",
+            "cuda"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch05",
+      "file": "ch05_xdna_aie_architecture.tex",
+      "title": "AMD XDNA/AIE Dataflow Architecture",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "xdna_tiles",
+          [
+            "xdna",
+            "aie",
+            "tile"
+          ]
+        ],
+        [
+          "static_dataflow_rules",
+          [
+            "static",
+            "dataflow"
+          ]
+        ],
+        [
+          "cuda_xdna_mapping",
+          [
+            "buffer descriptor",
+            "tma"
+          ]
+        ],
+        [
+          "online_softmax_hw",
+          [
+            "softmax",
+            "carrier"
+          ]
+        ],
+        [
+          "architecture_tradeoffs",
+          [
+            "cuda",
+            "xdna"
+          ]
+        ],
+        [
+          "dataflow_conclusion",
+          [
+            "dataflow",
+            "inference"
+          ]
+        ],
+        [
+          "yirage_xdna_backend",
+          [
+            "yirage",
+            "xdna"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch06",
+      "file": "ch06_onchip_residency_design.tex",
+      "title": "Data Residency and On-Chip Memory Design",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "lifetime_planning",
+          [
+            "lifetime",
+            "residen"
+          ]
+        ],
+        [
+          "gpu_residency",
+          [
+            "shared",
+            "register"
+          ]
+        ],
+        [
+          "cpu_residency",
+          [
+            "cache",
+            "numa"
+          ]
+        ],
+        [
+          "npu_residency",
+          [
+            "npu",
+            "sram"
+          ]
+        ],
+        [
+          "yirage_memory_pass",
+          [
+            "yirage",
+            "memory"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch07",
+      "file": "ch07_static_role_assignment.tex",
+      "title": "Static Role Assignment and Schedule-Free Kernels",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "static_roles",
+          [
+            "static",
+            "role"
+          ]
+        ],
+        [
+          "thread_mapping",
+          [
+            "thread",
+            "warp"
+          ]
+        ],
+        [
+          "no_runtime_sched",
+          [
+            "runtime",
+            "dispatch"
+          ]
+        ],
+        [
+          "yirage_tiling",
+          [
+            "yirage",
+            "tiling"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch08",
+      "file": "ch08_tma_double_buffer.tex",
+      "title": "TMA Double-Buffer Pipelines and Async Movement",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "pipeline_theory",
+          [
+            "pipeline",
+            "double-buffer"
+          ]
+        ],
+        [
+          "gpu_tma",
+          [
+            "tma",
+            "hopper"
+          ]
+        ],
+        [
+          "cpu_dma",
+          [
+            "dma",
+            "cpu"
+          ]
+        ],
+        [
+          "npu_pipeline",
+          [
+            "npu",
+            "dma"
+          ]
+        ],
+        [
+          "yirage_pipeline_gen",
+          [
+            "yirage",
+            "pipeline"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch09",
+      "file": "ch09_sync_hierarchy.tex",
+      "title": "Hierarchical Synchronization and Communication",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "sync_hierarchy",
+          [
+            "sync",
+            "barrier"
+          ]
+        ],
+        [
+          "hardware_sync_pick",
+          [
+            "gpu",
+            "cpu",
+            "npu"
+          ]
+        ],
+        [
+          "deadlock_detection",
+          [
+            "deadlock"
+          ]
+        ],
+        [
+          "yirage_sync_pass",
+          [
+            "yirage",
+            "sync"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch10",
+      "file": "ch10_online_softmax.tex",
+      "title": "Attention Online Softmax Optimization",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "online_softmax",
+          [
+            "online",
+            "softmax"
+          ]
+        ],
+        [
+          "numerical_stability",
+          [
+            "stable",
+            "exp"
+          ]
+        ],
+        [
+          "cross_hardware",
+          [
+            "gpu",
+            "xdna"
+          ]
+        ],
+        [
+          "fusion_boundary",
+          [
+            "fuse",
+            "megakernel"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch11",
+      "file": "ch11_decoder_megakernel.tex",
+      "title": "Full Decoder MegaKernel Implementation",
+      "min_words": 5000,
+      "max_words": 12000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "megakernel_structure",
+          [
+            "megakernel",
+            "decoder"
+          ]
+        ],
+        [
+          "qkv_attn_mlp",
+          [
+            "qkv",
+            "attention"
+          ]
+        ],
+        [
+          "source_walkthrough",
+          [
+            "source",
+            "implement"
+          ]
+        ],
+        [
+          "benchmark_results",
+          [
+            "benchmark",
+            "speedup"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch12",
+      "file": "ch12_execution_modes.tex",
+      "title": "Three Kernel Execution Modes",
+      "min_words": 3000,
+      "max_words": 7000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "eager_mode",
+          [
+            "eager",
+            "pytorch"
+          ]
+        ],
+        [
+          "graph_mode",
+          [
+            "cuda graph"
+          ]
+        ],
+        [
+          "megakernel_mode",
+          [
+            "megakernel"
+          ]
+        ],
+        [
+          "mode_selection",
+          [
+            "hardware",
+            "trade"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch13",
+      "file": "ch13_compiler_theory.tex",
+      "title": "Core Theory: AI Compiler Optimization Principles",
+      "min_words": 4500,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "tiling_theory",
+          [
+            "tiling"
+          ]
+        ],
+        [
+          "fusion_theory",
+          [
+            "fusion"
+          ]
+        ],
+        [
+          "layout_theory",
+          [
+            "layout"
+          ]
+        ],
+        [
+          "parallel_scheduling",
+          [
+            "parallel"
+          ]
+        ],
+        [
+          "gpu_cpu_npu_split",
+          [
+            "gpu",
+            "cpu",
+            "npu"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch14",
+      "file": "ch14_mlir.tex",
+      "title": "MLIR: Modern Compiler Infrastructure",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "template": "compiler",
+      "prefix": "mlir"
+    },
+    {
+      "id": "ch15",
+      "file": "ch15_xla.tex",
+      "title": "XLA: Production-Grade AI Compiler",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "template": "compiler",
+      "prefix": "xla"
+    },
+    {
+      "id": "ch16",
+      "file": "ch16_tvm.tex",
+      "title": "TVM and Apache TVM Stack",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "template": "compiler",
+      "prefix": "tvm"
+    },
+    {
+      "id": "ch17",
+      "file": "ch17_triton.tex",
+      "title": "OpenAI Triton: Pythonic GPU Kernel Compiler",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "template": "compiler",
+      "prefix": "triton"
+    },
+    {
+      "id": "ch18",
+      "file": "ch18_iree.tex",
+      "title": "IREE: MLIR-Native Runtime and Compilation",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 8,
+      "template": "compiler",
+      "prefix": "iree"
+    },
+    {
+      "id": "ch19",
+      "file": "ch19_glow.tex",
+      "title": "Glow: Lightweight AI Compiler",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "template": "compiler",
+      "prefix": "glow"
+    },
+    {
+      "id": "ch20",
+      "file": "ch20_mirage_emerging.tex",
+      "title": "Mirage and Emerging AI Compilers",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "template": "compiler",
+      "prefix": "mirage"
+    },
+    {
+      "id": "ch21",
+      "file": "ch21_compiler_benchmark.tex",
+      "title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
+      "min_words": 4500,
+      "max_words": 10000,
+      "min_citations": 12,
+      "sections": [
+        [
+          "compiler_ratings",
+          [
+            "compiler",
+            "rating"
+          ]
+        ],
+        [
+          "compile_overhead",
+          [
+            "compile",
+            "overhead"
+          ]
+        ],
+        [
+          "hw_binding",
+          [
+            "hardware",
+            "binding"
+          ]
+        ],
+        [
+          "search_space",
+          [
+            "search",
+            "autotun"
+          ]
+        ],
+        [
+          "yirage_benchmark",
+          [
+            "yirage",
+            "benchmark"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch22",
+      "file": "ch22_e2e_tuning_workflow.tex",
+      "title": "Compiler-Driven End-to-End Performance Tuning",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "hw_aware_profiling",
+          [
+            "profil",
+            "bandwidth"
+          ]
+        ],
+        [
+          "bottleneck_locating",
+          [
+            "bottleneck"
+          ]
+        ],
+        [
+          "tuning_workflow",
+          [
+            "workflow",
+            "tun"
+          ]
+        ],
+        [
+          "regression_gates",
+          [
+            "regression",
+            "gate"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch23",
+      "file": "ch23_llm_moe_compilation.tex",
+      "title": "LLM and MoE Specialized Compilation",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "llm_decode_compile",
+          [
+            "llm",
+            "decode"
+          ]
+        ],
+        [
+          "moe_scheduling",
+          [
+            "moe",
+            "expert"
+          ]
+        ],
+        [
+          "kv_hardware",
+          [
+            "kv",
+            "cache"
+          ]
+        ],
+        [
+          "hetero_moe",
+          [
+            "hetero",
+            "load"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch24",
+      "file": "ch24_heterogeneous_deployment.tex",
+      "title": "Heterogeneous Compilation and Multi-Hardware Deployment",
+      "min_words": 4500,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "hetero_cluster",
+          [
+            "hetero",
+            "cluster"
+          ]
+        ],
+        [
+          "unified_stack",
+          [
+            "mlir",
+            "unified"
+          ]
+        ],
+        [
+          "runtime_adapt",
+          [
+            "runtime",
+            "detect"
+          ]
+        ],
+        [
+          "version_regression",
+          [
+            "version",
+            "regression"
+          ]
+        ],
+        [
+          "industrial_cases",
+          [
+            "case",
+            "production"
+          ]
+        ],
+        [
+          "yirage_cluster",
+          [
+            "yirage",
+            "cluster"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch25",
+      "file": "ch25_auto_optimization.tex",
+      "title": "Auto-Optimization and AI-Assisted Compilation",
+      "min_words": 4000,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "rl_autotune",
+          [
+            "rl",
+            "autotun"
+          ]
+        ],
+        [
+          "hw_reward",
+          [
+            "reward",
+            "hardware"
+          ]
+        ],
+        [
+          "yirage_auto",
+          [
+            "yirage",
+            "auto"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch26",
+      "file": "ch26_production_practices.tex",
+      "title": "Production Deployment and Engineering Best Practices",
+      "min_words": 3500,
+      "max_words": 8000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "env_packaging",
+          [
+            "deploy",
+            "packag"
+          ]
+        ],
+        [
+          "multi_hw_ops",
+          [
+            "operation",
+            "production"
+          ]
+        ],
+        [
+          "pitfalls",
+          [
+            "pitfall",
+            "lesson"
+          ]
+        ],
+        [
+          "scheduling",
+          [
+            "schedul",
+            "fleet"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch27",
+      "file": "ch27_future_trends.tex",
+      "title": "Future Trends in AI Compilers",
+      "min_words": 3000,
+      "max_words": 7000,
+      "min_citations": 6,
+      "sections": [
+        [
+          "codesign",
+          [
+            "co-design",
+            "hardware"
+          ]
+        ],
+        [
+          "new_architectures",
+          [
+            "architecture",
+            "trend"
+          ]
+        ],
+        [
+          "edge_cloud",
+          [
+            "edge",
+            "cloud"
+          ]
+        ],
+        [
+          "autonomous_kernels",
+          [
+            "autonomous",
+            "kernel"
+          ]
+        ]
+      ]
+    }
+  ]
+}

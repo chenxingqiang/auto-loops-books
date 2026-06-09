@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{AI accelerator classes and primary execution models.}
+\label{tab:hw_landscape}
+\begin{tabular}{lcc}
+\toprule
+\visTableHeader
+\textbf{Class} & \textbf{Execution model} & \textbf{Decode fit} \\
+\midrule
+NVIDIA GPU & SIMT + tensor cores & Graphs, fusion \\
+AMD GPU & Wavefront + matrix cores & HIP fusion \\
+x86/ARM CPU & Cache + SIMD & Coarse fusion \\
+Edge NPU & Spatial dataflow & Static megakernel \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,32 @@
+{
+  "chapter_id": "ch06",
+  "timestamp": "2026-06-09T17:32:30.233439+00:00",
+  "scope": "yirage_facts_only",
+  "entry_count": 1,
+  "verified_ok_count": 1,
+  "entries": [
+    {
+      "claim": "YiRage is a multi-backend LLM inference optimization compiler (CUDA, CPU, MPS, Triton, NKI, MLIR)",
+      "bib_key": "yirage2026",
+      "source_url": "https://github.com/chenxingqiang/YiRage",
+      "corroboration_url": "https://github.com/chenxingqiang/YiRage/blob/main/docs/architecture.md",
+      "source_fetch_ok": true,
+      "source_content_match": true,
+      "source_missing_tokens": [],
+      "corroboration_fetch_ok": true,
+      "corroboration_content_match": true,
+      "corroboration_missing_tokens": [
+        "compiler",
+        "cuda",
+        "cpu",
+        "triton",
+        "nki",
+        "mlir"
+      ],
+      "verified_ok": true,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch06/fact_sources/a2a2a677f3414530.json"
+    }
+  ],
+  "status": "ok"
+}

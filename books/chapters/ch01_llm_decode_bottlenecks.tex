@@ -1,0 +1,389 @@
+\chapter{LLM Inference Performance Bottlenecks: From Symptoms to Root Causes}
+\label{chap:decode_bottlenecks}
+\typeout{START_CHAPTER "ch01" \theabspage}
+
+Large language model (LLM) serving has matured into a systems discipline where the dominant cost is often not FLOPs but \emph{how} weights, activations, and the key--value (KV) cache move through memory hierarchies and how many discrete GPU kernels the host must launch per token.
+In production, most teams hit the same contradiction: prefill benchmarks look excellent on datasheets, yet interactive decode still misses p99 latency SLOs after months of kernel tuning.
+The durable misconception is that buying faster tensor cores or enabling FlashAttention ``fixes'' decode---when measured kernels-per-token and bytes-per-token often barely move because the stack remains operator-fragmented and host-orchestrated \citep{taxbreak2026,memoryfloor2026}.
+This chapter establishes the performance vocabulary used throughout the book: we separate \newterm{prefill} from \newterm{decode}, quantify where latency hides in mainstream PyTorch and Hugging Face stacks, and explain why cross-hardware compilation is not an optional portability exercise but a prerequisite for industrial decode optimization.
+\index{LLM inference}
+\index{Decode phase}
+\index{Prefill phase}
+
+\section{Prefill and Decode: Two Performance Regimes}
+\label{sec:prefill_decode}
+% AUTO_VISUAL:fig_prefill_decode_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-5.10,0) {\footnotesize Prefill\\Parallel over $L$ tokens};
+    \node[vis arch node] (s1) at (-1.70,0) {\footnotesize KV write\\Bulk cache fill};
+    \node[vis pipeline node] (s2) at (1.70,0) {\footnotesize Decode loop\\One token / step};
+    \node[vis arch node] (s3) at (5.10,0) {\footnotesize KV read+append\\Growing context};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{Prefill processes prompt chunks in parallel; decode appends one token per step via KV cache.}
+\label{fig:prefill_decode_pipeline}
+\end{figure}
+
+
+Autoregressive transformer inference divides naturally into two phases \citep{patel2025llminference}.
+In \textbf{prefill}, the model processes the entire prompt (or a prompt chunk) in parallel across sequence positions.
+Matrix multiplications are large, arithmetic intensity is relatively high, and modern accelerators can approach their peak tensor throughput.
+In \textbf{decode}, the model generates one new token per forward pass (per request, in the common batch-1 interactive setting), conditioned on all prior tokens through the KV cache.
+
+These phases obey different roofline limits.
+Prefill is frequently \emph{compute-bound} on high-end GPUs: the GEMMs and attention blocks are wide enough to amortize memory latency.
+Decode, by contrast, repeatedly reads the full parameter set and growing KV tensors while performing only a thin slice of matmul work per token.
+Treating both phases with one optimization playbook---larger batches, flash attention defaults, tensor-core-first schedules---is a primary reason decode SLOs remain elusive after prefill tuning succeeds.
+Multiple independent analyses converge on the same conclusion: interactive decode is typically \emph{memory-bandwidth bound} on GPUs, CPUs, and many NPUs, not FLOP-bound \citep{patel2025llminference,memoryfloor2026}.
+
+Production systems increasingly \emph{disaggregate} prefill and decode into separate pools because optimizing for one phase can harm the other.
+For example, large prefill batches maximize throughput, while decode pools prioritize tail latency under batch-1 or small-batch arrivals.
+Recent large-model deployments provision substantially more decode capacity than prefill capacity because user-visible latency is dominated by per-token decode time once the prompt has been ingested \citep{patel2025llminference,liu2024deepseekv3}.
+DeepSeek-V3's production layout is illustrative: the minimum prefill deployment unit spans 4 nodes (32 GPUs), whereas the minimum decode unit spans 40 nodes (320 GPUs)---a $10\times$ capacity skew reflecting phase-specific hardware mapping \citep{liu2024deepseekv3}.
+
+\begin{table}[t]
+\centering
+\caption{Qualitative comparison of prefill vs.\ decode on a single transformer layer.}
+\label{tab:prefill_decode}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{Prefill} & \textbf{Decode (batch-1)} \\
+\midrule
+Tokens processed per step & $L$ (prompt length) & $1$ \\
+Typical arithmetic intensity & Higher & Lower \\
+Dominant limiter & Compute / tensor cores & Memory traffic / orchestration \\
+KV cache growth per step & Written in bulk & Read + append one step \\
+Serving objective & Throughput (tok/s) & Latency (ms/token) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{The Decode Pain Point: Single-Token, Low-Batch Latency}
+\label{sec:decode_pain}
+
+Interactive assistants, coding copilots, and edge voice interfaces share a harsh constraint: users measure quality in \emph{time-to-next-token}, often at batch size one.
+At batch-1 decode, each layer performs narrow GEMMs (e.g., a single new query vector against frozen weights) and attention that must touch the entire cached history.
+The working set per token is small, but the \emph{read footprint} is enormous: every weight matrix and every cached key/value vector must be visited again.
+This is why decode latency scales with model width and context length even when FLOPs per token look trivial on paper---the hardware spends its time streaming bytes, not executing MMA instructions \citep{patel2025llminference,memoryfloor2026}.
+
+Low batch sizes also prevent amortization of fixed costs---kernel launch, framework dispatch, collective synchronization, and memory allocator bookkeeping---across many tokens.
+\citet{taxbreak2026} decompose host-visible latency into three mutually exclusive components per kernel invocation: framework translation ($\Delta FT$), CUDA-library front-end time ($\Delta CT$), and kernel launch-path floor ($\Delta KT$).
+Their Host--Device Balance Index (HDBI) relates device-active time to orchestration time; HDBI $\to 0$ marks a host-bound regime.
+
+On H200 at batch-1 and sequence length 512, Llama-3.2-1B issues 850 kernel launches during prefill but 8,437 launches across a 10-token decode window (${\approx}844$ launches per autoregressive step)---nearly $10\times$ more dispatch work per forward pass \citep{taxbreak2026}.
+At decode configuration BS${=}4$/SL${=}2048$ ($m{=}10$ output tokens), dense Llama-3.2-1B averages 847.5 GPU kernel launches \emph{per output token}; OLMoE-1B/7B averages 9,305 launches per token (11$\times$ denser) \citep{taxbreak2026}.
+Measured null-kernel launch floor on H100 is 4.707\,$\mu$s (median 4.578\,$\mu$s); at 9,305 launches/token that launch-path term alone contributes ${\approx}44$\,ms per token before framework dispatch is counted \citep{taxbreak2026}.
+
+The engineering implication is blunt: shaving a few microseconds from a matmul inner loop matters less than eliminating redundant global-memory round trips, fusing layer fragments, and collapsing launch storms---especially when the product SLA is sub-50\,ms per token.
+
+\section{Limits of Mainstream PyTorch and Hugging Face Inference}
+\label{sec:framework_issues}
+
+The conventional PyTorch + Hugging Face stack looks logically complete---every transformer sub-block maps to a familiar op---yet multi-hardware deployment exposes a fatal gap: the \emph{schedule} is decided at runtime by a Python loop, not at compile time by residency and bandwidth constraints.
+A na\"ive \texttt{transformers} loop---one Python forward per token, eager PyTorch ops, separate kernels for layer norm, QKV projection, attention, MLP, residuals---mirrors the mathematical graph but not the memory hierarchy.
+Each operator materializes intermediates to global memory (GPU HBM or CPU DRAM), so a single decoder layer can trigger many read/write passes over tensors that could have stayed on chip given a different schedule.
+
+Three structural problems recur:
+\begin{enumerate}
+\item \textbf{Operator fragmentation.} A decoder block decomposes into 10--20+ discrete kernels in unfused stacks. Each boundary exports data to HBM and re-imports it for the next op.
+\item \textbf{Host orchestration tax.} Python dispatch, CUDA driver launch, and framework bookkeeping run on the CPU while the accelerator idles between micro-kernels \citep{taxbreak2026}.
+\item \textbf{KV cache management overhead.} Without paged or fused cache layouts, attention reads scatter through memory, wasting bandwidth on indexing and padding \citep{kwon2023vllm,dao2022flashattention}.
+\end{enumerate}
+
+Serving frameworks such as vLLM address \emph{capacity} and \emph{KV fragmentation} via PagedAttention and continuous batching \citep{kwon2023vllm}, but they do not by themselves remove per-layer operator boundaries inside the forward pass.
+FlashAttention reduces HBM traffic during prefill by IO-aware tiling \citep{dao2022flashattention}; Flash-Decoding adds a parallelization dimension along KV sequence length so batch-1 decode can still saturate SMs when context is long (reported up to $8\times$ end-to-end speedup at very long sequences) \citep{dao2023flashdecoding}.
+These are necessary optimizations, yet a full decoder step still contains MLPs, norms, rotary embeddings, and sampling logic that remain separable kernels unless a \newterm{MegaKernel} or compiler-generated fused schedule reunifies them.
+
+On CPUs the same fragmentation shows up as LLC misses rather than HBM stalls: each unfused boundary evicts cache lines that a fused decoder block could have kept resident across norm--matmul--activation chains.
+On XDNA-class NPUs, per-op dispatch is worse than wasteful---it violates static dataflow contracts and forces fallbacks to scalar host loops \citep{amd2024xdna}.
+Industrial deployment therefore cannot copy a single ``GPU recipe'' into production; the framework graph must be re-planned per memory hierarchy, which is exactly the job YiRage takes over in Part~VI.
+
+\section{Quantifying Overheads: Launches, Memory, and Scheduling}
+\label{sec:overhead_quant}
+
+Recent microbenchmark studies decompose end-to-end decode latency into compute, memory, and \emph{orchestration} components.
+TaxBreak reports that for Llama-3.2-1B-class models on H100, decode reduces orchestration time relative to prefill in absolute terms, but because decode issues roughly $10\times$ more launches per step, per-dispatch savings compound more aggressively in decode \citep{taxbreak2026}.
+For MoE models, decode latency can grow to multiple seconds per token at batch-1 not because GEMMs are huge, but because dispatch dominates: thousands of kernels per token with a per-launch floor on the order of microseconds yields tens of milliseconds of pure launch-path cost before framework overhead \citep{taxbreak2026}.
+
+CUDA Graphs record a static kernel DAG once and replay it with a single submission, amortizing CPU launch and framework dispatch \citep{nvidia2024cudagraphs,memoryfloor2026}.
+\citet{memoryfloor2026} ran a controlled CUDA Graphs A/B on Qwen-2.5-7B at batch-1, context 2048, across $N{=}10$ independent sessions: H100 speedup is $1.259\times$ (95\% bootstrap CI $[1.253,1.267]$), removing ${\approx}3.05$\,ms of per-step host overhead (${\approx}20.6\%$ of the eager 14.83\,ms median).
+On L4 at the same cell, Graphs yield only $1.028\times$ because the GPU already achieves $R_{\mathrm{floor}}{=}0.81$ of its analytic HBM bandwidth floor---the device waits on memory, not launches \citep{memoryfloor2026}.
+
+\begin{table}[t]
+\centering
+\caption{Verified kernel fragmentation on H100 decode (BS${=}4$, SL${=}2048$, $m{=}10$ tokens), from TaxBreak \citep{taxbreak2026}.}
+\label{tab:taxbreak_kernels}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Model} & \textbf{Kernels/token} & \textbf{Total launches} & \textbf{GPU util. (\%)} \\
+\midrule
+Llama-3.2-1B & 847.5 & 8,475 & 58.9 \\
+Llama-3.2-3B & 1,536.9 & 15,369 & 67.6 \\
+OLMoE-1B/7B & 9,305.3 & 93,053 & 15.5 \\
+Qwen1.5-MoE-A2.7B & 6,695.1 & 66,951 & 27.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{example}
+For Qwen-2.5-7B on H100, a single decode step issues ${\approx}283$ kernel launches (${\approx}10$ per layer $\times$ 28 layers plus embedding/LM-head) \citep{memoryfloor2026}.
+At batch-1 interactive decode, per-layer GPU compute can be ${\approx}10$\,$\mu$s while launch gaps are ${\approx}30$\,$\mu$s---launch dominates per block \citep{memoryfloor2026}.
+Collapsing those boundaries via MegaKernel fusion or graph capture can exceed the benefit of micro-optimizing individual GEMMs.
+\end{example}
+
+\section{Memory Bandwidth, Not Peak FLOPs}
+\label{sec:memory_not_compute}
+% AUTO_VISUAL:fig_roofline_decode
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+    \draw[vis axis] (0,0) -- (8,0) node[right] {\footnotesize Arithmetic intensity};
+    \draw[vis axis] (0,0) -- (0,6) node[above] {\footnotesize GFLOP/s};
+    \draw[vis roof bandwidth] (0,0) -- (0.30,6.00);
+    \draw[vis roof compute] (0.30,6.00) -- (8,6.00);
+    \node[vis point a] at (7.80,6.00) {};
+    \node[above right, text=visText] at (7.80,6.00) {\scriptsize Prefill GEMM};
+    \node[vis point b] at (7.80,6.00) {};
+    \node[above right, text=visText] at (7.80,6.00) {\scriptsize Decode batch-1};
+\end{tikzpicture}
+\caption{Decode sits on the memory-bandwidth slope of the roofline at low arithmetic intensity.}
+\label{fig:roofline_decode}
+\end{figure}
+
+
+The roofline model makes the decode story precise.
+Arithmetic intensity (FLOPs per byte moved) for batch-1 decode is low: one token's activations participate in thin matrix--vector-like operations while weights and KV cache supply the bulk of bytes.
+Accelerators therefore sit on the memory-bandwidth sloped region of the roofline rather than the flat compute cap \citep{patel2025llminference,memoryfloor2026}.
+The LIMINAL limit study further reports that at low batch, tensor-core utilization can be $\leq 1\%$ on both DRAM- and SRAM-based accelerator designs when compute is reasonably provisioned---decode simply does not present enough arithmetic intensity to engage peak FLOPs \citep{patel2025llminference}.
+
+\citet{memoryfloor2026} quantify ``achieved fraction of peak bandwidth'' via $R_{\mathrm{floor}}=t_{\mathrm{floor}}/t_{\mathrm{obs}}$ where $t_{\mathrm{floor}}=(W+K)/B_{\mathrm{peak}}$.
+For Qwen-2.5-7B at ctx${=}2048$, batch-1: L4 reaches $R_{\mathrm{floor}}{=}0.81$ (near the HBM roofline), while H100 reaches only $R_{\mathrm{floor}}{=}0.27$---faster silicon realizes a smaller fraction of theoretical memory throughput because fixed per-step launch overhead does not scale with bandwidth \citep{memoryfloor2026}.
+
+This explains why peak TFLOPs and peak HBM bandwidth are misleading single-number KPIs for chat latency: on H100-class GPUs the gap is often orchestration-limited; on L4-class GPUs it is bandwidth-limited.
+It also explains why decode often \emph{should not} default to tensor-core-oriented kernels: the bottleneck is feeding data, not lacking MMA throughput---a theme we develop for Hopper/Blackwell in later chapters and for fused MegaKernels in Part~V.
+
+Quantization reduces bytes moved and can shift decode toward compute-bound regimes on some GPUs, but only when the runtime actually realizes memory savings.
+On L4 with Qwen-2.5-7B at ctx${=}2048$, bf16 decode median is 62.32\,ms while bitsandbytes nf4 is 59.36\,ms and AutoAWQ+Marlin is 45.24\,ms---far less than the $4\times$ traffic reduction would predict.
+GPTQ+ExLlamaV2 (Ada-tuned int4 GEMMs) reaches 17.36\,ms, a $3.59\times$ speedup over bf16; an L4 with ExLlamaV2 (17.36\,ms/step) can approach an H100 with CUDA Graphs (11.78\,ms/step) despite ${\approx}11\times$ lower peak HBM bandwidth \citep{memoryfloor2026}.
+
+\section{Multi-Hardware Pain Points: GPU, CPU, and NPU}
+\label{sec:multi_hardware}
+
+The decode bottleneck \emph{shape} is universal; the \emph{remedy} is not.
+
+\textbf{NVIDIA and AMD GPUs.} Warp occupancy, shared memory tiling, coalesced global loads, and tensor-core vs scalar-core selection dominate.
+Launch overhead and CUDA Graph capture matter most when compute kernels are already short---exactly the decode regime on H100 \citep{memoryfloor2026,taxbreak2026}.
+AMD HIP stacks mirror many CUDA concerns but differ in wavefront width, LDS sizing, and ROCm graph support.
+
+\textbf{x86 and ARM CPUs.} Decode is still memory-bound but the hierarchy is cache- and NUMA-shaped rather than HBM-shaped.
+SIMD width (AVX-512/NEON), core pinning, and KV layout for cache locality replace shared-memory tiling.
+Operator fusion reduces DRAM round trips; excessive parallelism can thrash LLC without NUMA-aware allocation.
+A common pitfall is porting GPU-oriented fusion heuristics verbatim: medium-grain CUDA fusion that helps H100 can \emph{inflate} CPU decode latency when it destroys cache blocking or forces cross-socket KV traffic on dual-socket servers.
+For CPU decode, the first lever is often KV tensor layout (contiguous head dimensions, page size aligned to cache lines) and coarse layer fusion that keeps QKV+MLP fragments in L3 for the duration of a token step---not micro-kernels tuned for warp occupancy.
+
+\textbf{Edge NPUs (XDNA/AIE and similar).} Spatial dataflow arrays (AMD XDNA) emphasize static tile assignment, on-chip buffer residency, and DMA pipelines with minimal dynamic scheduling \citep{amd2024xdna,amd2024aie}.
+Decode favors fully static graphs, large fused regions, and pre-planned memory reuse; dynamic shapes and per-op Python dispatch are architectural mismatches.
+The compiler must allocate buffers, routes, and DMA descriptors at compile time rather than relying on a runtime kernel launcher.
+Where CUDA permits flexible grid launches and runtime shape guards, AIE tiles require fixed ADF graphs: if the compiler cannot prove tensor lifetimes fit on-chip SRAM, the schedule fails bring-up rather than degrading gracefully to DRAM-heavy eager paths.
+That asymmetry is why NPU decode optimization ranks \emph{static fusion and DMA ping-pong} above attention-kernel swaps---the binding constraint is residency proof, not FLOP count.
+
+\begin{table}[t]
+\centering
+\caption{Decode optimization priorities by hardware class.}
+\label{tab:hw_priorities}
+\begin{tabular}{lp{3.2in}}
+\toprule
+\textbf{Hardware} & \textbf{First-order decode levers} \\
+\midrule
+NVIDIA GPU & Fusion, graphs, KV bandwidth, shared mem tiling \\
+AMD GPU & HIP fusion, LDS reuse, launch reduction \\
+CPU & Cache blocking, SIMD, NUMA, coarse fusion \\
+Edge NPU & Static ADF graphs, DMA ping-pong, full-layer fusion \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Industry Benchmarks: Native Frameworks vs.\ Fused Kernels}
+\label{sec:benchmark_gap}
+
+Industry leaderboards rarely tell the decode story teams actually ship against.
+Published prefill throughput (tokens/s on long prompts) and single-kernel attention speedups are real contributions, but they answer a different question than batch-1 ms/token under continuous batching with growing KV state.
+The technique is sound in theory---FlashAttention, PagedAttention, CUDA Graphs each remove a documented bottleneck---yet in live serving the stack often regresses because remaining layer fragments still export activations to HBM and the host still pays thousands of launches per token on MoE stacks \citep{taxbreak2026,kwon2023vllm}.
+Benchmark literacy therefore means tracking normalized diagnostics---kernels/token, bytes/token, $R_{\mathrm{floor}}$, HDBI---on \emph{identical} model revisions, not comparing marketing peaks across mismatched batch policies.
+
+% AUTO_VISUAL:fig_fusion_gap
+\begin{figure}[t]
+\centering
+\vispending{Run Appendix B harness before filling bars}
+\caption{Pending: YiRage/MegaKernel vs.\ PyTorch eager speedup (Appendix~B harness).}
+\label{fig:fusion_gap}
+\end{figure}
+
+
+Published baselines establish the performance gap that motivates this book's MegaKernel and compiler stack.
+Flash-Decoding reports up to $8\times$ faster generation at very long contexts by parallelizing KV loads; attention-only speedups can reach $50\times$ versus unfused FlashAttention at batch-1 because standard attention parallelizes poorly when query length is 1 \citep{dao2023flashdecoding,dao2022flashattention}.
+vLLM demonstrates that serving-system optimizations (paged KV, continuous batching) improve throughput under concurrent requests but leave per-kernel efficiency inside the transformer block as a separate axis \citep{kwon2023vllm}.
+
+TaxBreak and related studies quantify that framework-level improvements cannot fully absorb launch inflation when models fragment into thousands of micro-kernels per token---especially MoE architectures \citep{taxbreak2026}.
+The gap we target in later chapters is the additional uplift from \emph{whole-decoder fusion}: replacing on the order of ten to twenty discrete kernels with one dataflow-planned MegaKernel that keeps activations in registers and shared memory across QKV, attention, MLP, and residuals.
+Exact speedups are model-, hardware-, and quantization-dependent; this book reports measurements through a unified benchmark harness (Appendix~B) rather than anecdotal single-point claims.
+
+\section{Opening Case Study: YiRage Cross-Hardware Compilation Preview}
+\label{sec:yirage_preview}
+% AUTO_VISUAL:fig_yirage_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-6.80,0) {\footnotesize Hardware probe\\SRAM, BW, launch rules};
+    \node[vis arch node] (s1) at (-3.40,0) {\footnotesize Dataflow plan\\Tensor lifetimes};
+    \node[vis pipeline node] (s2) at (0.00,0) {\footnotesize Fusion passes\\Layer collapse};
+    \node[vis arch node] (s3) at (3.40,0) {\footnotesize Codegen\\CUDA / CPU / XDNA};
+    \node[vis pipeline node] (s4) at (6.80,0) {\footnotesize Regression\\vs. open baselines};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+    \draw[vis arrow] (s3.east) -- (s4.west);
+\end{tikzpicture}
+\caption{YiRage decode compilation pipeline (preview).}
+\label{fig:yirage_pipeline}
+\end{figure}
+
+
+\textbf{YiRage} is the book's reference \newterm{hardware-aware} LLM compiler: it ingests high-level decoder graphs, models chip constraints (memory tiers, launch granularity, SIMD/SIMT width), and emits fused schedules for CUDA, CPU, and XDNA-class targets.
+This chapter's role is to state the \emph{problem} YiRage solves; subsequent parts develop the hardware abstractions, manual MegaKernel craft (Part~V), and automated pass pipelines (Part~VI).
+
+A preview of the YiRage workflow for decode:
+\begin{enumerate}
+\item \textbf{Hardware probe.} Read bandwidth caps, on-chip SRAM sizes, and static-scheduling rules for the target.
+\item \textbf{Global dataflow plan.} Assign tensor lifetimes to register, shared/LDS, or global tiers before choosing individual ops.
+\item \textbf{Fusion and pipeline passes.} Collapse decoder layers; insert async copy pipelines (TMA on Hopper, DMA on AIE) where hardware supports them \citep{nvidia2022hopper,amd2024aie}.
+\item \textbf{Backend code generation.} Emit a single kernel or captured graph per layer group; tune tile sizes per architecture.
+\item \textbf{Regression against open baselines.} Compare to PyTorch eager, Flash-Decoding, and framework servers on identical models (Pythia-2.8B, Qwen2.5 family) across GPU, CPU, and NPU targets.
+\end{enumerate}
+
+The preview case establishes performance baselines and documents compiler constraints discovered during bring-up---not to claim a single universal speedup factor, but to show that \emph{hardware-aware dataflow compilation} closes the gap between hand-tuned CUDA and production-ready multi-target deployment.
+
+Cross-hardware bring-up surfaces constraints that single-GPU books omit.
+A fusion pass that succeeds on CUDA may fail XDNA buffer allocation; a CPU backend may require different tile shapes to keep AVX units fed without blowing L2.
+YiRage encodes these outcomes as \emph{hard failures} during compilation (illegal residency, launch granularity mismatch) rather than silent slowdowns at runtime---matching how industrial teams gate releases.
+This preview chapter therefore ends with requirements R1--R5 (\S\ref{sec:design_requirements}) that every later pass must satisfy with measured regression evidence, not anecdotal speedups on one card.
+
+\subsection{Diagnostic Workflow: TaxBreak and Memory-Floor Studies}
+\label{sec:diagnostic_workflow}
+
+Before optimizing kernels, industrial teams must answer: is this workload host-bound or device-bound, and \emph{which host layer} dominates?
+TaxBreak answers the first decomposition: reduce $T_{\mathrm{Orchestration}}$ via \texttt{torch.compile} when $\sum \Delta FT + \sum \Delta CT$ dominates; fuse kernels or adopt CUDA Graphs when $N \cdot T_{\mathrm{sys}}^{\mathrm{floor}}$ dominates; tune driver/runtime when per-kernel $\Delta KT_{fw}$ residuals are large \citep{taxbreak2026}.
+For MoE decode, TaxBreak shows persistently low HDBI even at BS${=}16$: routing fragments execution into 8--11$\times$ more launches per token than dense models of comparable activated parameter count, and faster H200 hosts reduce orchestration 10--29\% versus H100---CPU single-thread performance is a first-order knob for host-bound decode \citep{taxbreak2026}.
+
+The memory-floor study complements TaxBreak on the device side: when $R_{\mathrm{floor}}$ is high (L4, ${\approx}0.8$), optimize bytes moved (quantization kernels that actually stream int4 weights, KV layout).
+When $R_{\mathrm{floor}}$ is low (H100, ${\approx}0.27$), optimize launches (graphs, fusion) before chasing attention-kernel swaps---on H100 batch-1 decode, explicit FlashAttention-2 eager paths can be \emph{slower} than PyTorch SDPA because attention is not the binding constraint \citep{memoryfloor2026,taxbreak2026}.
+This book's YiRage passes encode both diagnostics as regression gates (Appendix~F).
+
+\subsection{Roofline Intuition for Decoder Layers}
+\label{sec:roofline_decode}
+
+The roofline model plots attainable FLOP/s as $\min(\text{peak FLOP/s},\ \text{bandwidth} \times \text{AI})$, where arithmetic intensity (AI) is FLOPs per byte transferred from DRAM \citep{patel2025llminference}.
+For a decoder layer at batch-1, AI is roughly
+\[
+  \mathrm{AI} \approx \frac{2N_{\mathrm{params}} + 2N_{\mathrm{KV}}}{N_{\mathrm{params}} + N_{\mathrm{KV}}}
+\]
+in the crudest weight+KV read model (ignoring activations and writebacks), where $N_{\mathrm{KV}}$ grows linearly with context length.
+As context grows, AI rises slowly but usually remains on the bandwidth-limited slope for practical LLM sizes on GPUs.
+This is why Flash-Decoding and fused attention kernels fight for \emph{bytes} and \emph{launch count}, not raw MMA throughput \citep{dao2022flashattention}.
+
+\subsection{Why Disaggregated Serving Changes the Optimization Target}
+\label{sec:disagg}
+
+When prefill and decode run on separate fleets, decode nodes see a steadier stream of single-token steps with hot weights resident on device.
+That shifts engineering effort toward (i)~per-step latency, (ii)~KV cache locality, and (iii)~kernel persistence (CUDA Graphs, MegaKernels) rather than maximizing prompt throughput \citep{patel2025llminference,kwon2023vllm}.
+Disaggregation also exposes \emph{network} and \emph{serialization} costs if KV tensors move between pools---another reason compile-time dataflow planning must account for where tensors live across steps.
+
+
+\subsection{Tensor Cores and Decode: A Common Misconfiguration}
+\label{sec:tc_decode}
+
+Tensor cores excel when GEMMs present sufficiently large $M\times N\times K$ tiles.
+Decode batch-1 often reduces effective $M$ to one (or a tiny batch), shrinking MMA utilization and increasing setup overhead \citep{semianalysis2024tma}.
+Hopper's Tensor Memory Accelerator (TMA) shifts address-generation and bulk copy work off scalar threads, but TMA still favors transfers large enough to amortize descriptor setup---small KV slices may remain latency-bound on regular loads \citep{nvidia2022hopper,semianalysis2024tma}.
+The book's MegaKernel strategy therefore treats tensor cores as \emph{optional epilogues} inside a dataflow schedule that first minimizes bytes and synchronization, then maps surviving GEMMs to MMA when dimensions justify it.
+
+\subsection{From Symptoms to Design Requirements}
+\label{sec:design_requirements}
+
+The pain points in this chapter translate into concrete compiler and kernel requirements used in Parts~IV--VII:
+\begin{itemize}
+\item \textbf{R1 --- Minimize global round trips.} Keep decoder activations in registers or shared memory across matmul, norm, activation, and attention phases.
+\item \textbf{R2 --- Static schedules where possible.} Prefer compile-time tile assignment, especially on NPUs with spatial dataflow \citep{amd2024xdna}.
+\item \textbf{R3 --- Hardware-shaped fusion granularity.} GPUs tolerate medium fusion; CPUs need cache-aware blocking; NPUs require layer-scale or model-scale static graphs.
+\item \textbf{R4 --- Launch amortization.} Use graphs, persistent kernels, or single MegaKernels to remove host dispatch from the critical path \citep{taxbreak2026,memoryfloor2026}.
+\item \textbf{R5 --- Measurable regression gates.} Every pass must show bytes/token and kernels/token improvements on a fixed benchmark matrix.
+\end{itemize}
+These requirements are the bridge to \chapref{chap:decode_bottlenecks}'s successor chapter on dataflow-first kernel design.
+
+\subsection{Measurement Methodology Used in This Book}
+\label{sec:measure_method}
+
+We report decode latency as \textbf{median ms/token} at batch-1 unless stated otherwise, with warmup and fixed context lengths (512, 2048, 8192).
+Throughput experiments use continuous batching where noted.
+Every claim ties to a reproducible configuration: model revision, precision, framework version, driver, and compiler commit.
+Placeholder rows in Appendix~B mark experiments pending hardware access; we never interpolate fake speedups.
+Cross-hardware tables normalize by \emph{bytes moved per token} and \emph{kernels launched per token} so readers can compare mechanisms, not marketing peaks \citep{taxbreak2026,memoryfloor2026}.
+
+
+\subsection{Verified Reference Numbers (Literature Snapshot)}
+\label{sec:verified_numbers}
+
+Table~\ref{tab:verified_snapshot} collects externally published measurements cited in this chapter.
+These are \emph{not} YiRage internal benchmarks; they anchor the problem statement before we introduce book-specific experiments in later parts.
+
+\begin{table}[t]
+\centering
+\caption{Literature-backed decode metrics referenced in this chapter (conditions vary by row).}
+\label{tab:verified_snapshot}
+\small
+\begin{tabular}{p{1.55in}p{1.1in}p{2.0in}}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Source / conditions} \\
+\midrule
+Prefill vs decode node ratio & $10\times$ decode & DeepSeek-V3: 32-GPU prefill unit vs 320-GPU decode unit \citep{liu2024deepseekv3} \\
+Dense kernels / decode step & ${\approx}844$ & Llama-3.2-1B, H200, BS1/SL512, vs 850 prefill \citep{taxbreak2026} \\
+MoE kernels / output token & 9,305 & OLMoE-1B/7B, H100, BS4/SL2048, $m{=}10$ \citep{taxbreak2026} \\
+Launch floor $\Delta KT$ & 4.707\,$\mu$s & H100 null-kernel median \citep{taxbreak2026} \\
+CUDA Graphs speedup & $1.259\times$ & Qwen-2.5-7B, H100, ctx2048, $N{=}10$ sessions \citep{memoryfloor2026} \\
+CUDA Graphs on L4 & $1.028\times$ & Same cell; bandwidth-bound null result \citep{memoryfloor2026} \\
+$R_{\mathrm{floor}}$ H100 / L4 & 0.27 / 0.81 & Qwen-2.5-7B, ctx2048, batch-1 \citep{memoryfloor2026} \\
+Low-batch tensor util. & $\leq 1\%$ & LIMINAL limit study, DRAM/SRAM xPU \citep{patel2025llminference} \\
+Flash-Decoding speedup & up to $8\times$ & Very long context, attention parallelized on KV \citep{dao2023flashdecoding} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When migrating these lessons across hardware targets, compare normalized metrics---kernels per token, bytes per token, $R_{\mathrm{floor}}$, HDBI---rather than absolute milliseconds, which entangle silicon generation, framework version, and batching policy.
+
+\subsection{Anti-Patterns That Waste Engineering Cycles}
+\label{sec:anti_patterns}
+
+Three optimization anti-patterns recur in decode programs that miss SLOs despite heavy investment.
+\textbf{(1) Chasing peak FLOPs.} Teams profile GEMMs, tune tile sizes, and declare victory while launch storms and HBM re-reads dominate ms/token \citep{taxbreak2026}.
+\textbf{(2) Single-hardware tunnel vision.} A CUDA Graph capture that rescues H100 decode may be irrelevant on L4 (bandwidth-saturated) or illegal on static NPU targets \citep{memoryfloor2026,amd2024xdna}.
+\textbf{(3) Attention-only myopia.} Replacing SDPA with a flash variant when $R_{\mathrm{floor}}$ is already low on H100 can \emph{slow} decode because attention was never the binding constraint \citep{memoryfloor2026}.
+The corrective workflow is diagnostic-first: measure HDBI and $R_{\mathrm{floor}}$, then select fusion depth, graph capture, quantization kernels, or compile-time dataflow replanning---in that priority order when orchestration dominates.
+Teams that skip this ordering often re-implement the same matmul tweak quarterly while p99 latency flatlines---because the root cause was never FLOPs, it was residency and dispatch.
+Industrial deployment cannot copy a single template; hardware class dictates whether graphs, fusion depth, or static NPU graphs come first on the critical path.
+
+\section{Chapter Summary}
+\label{sec:ch01_summary}
+
+Decode-phase LLM inference is a systems problem disguised as a modeling problem.
+Prefill and decode obey different limits; interactive decode at low batch is dominated by memory traffic and orchestration overhead, not peak tensor FLOPs.
+Mainstream PyTorch and Hugging Face paths fragment layers into many kernels, amplify host launch costs, and under-utilize on-chip storage.
+GPUs, CPUs, and NPUs each demand different fusion granularities and compilation strategies---there is no portable ``best kernel,'' only hardware-shaped schedules.
+Industry kernels (FlashAttention, PagedAttention) and serving systems (vLLM) are necessary but insufficient for the extreme fusion pursued in this book.
+YiRage provides the automated, cross-hardware path from the manual MegaKernel insights developed next.
+This is the book's recurring thesis: performance is a property of \emph{data movement and orchestration under a specific memory hierarchy}, and compilers must own that schedule end-to-end.
+
+\typeout{END_CHAPTER "ch01" \theabspage}

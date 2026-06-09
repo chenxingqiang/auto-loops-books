@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch12",
+  "chapter_title": "Three Kernel Execution Modes",
+  "visuals": [
+    {
+      "id": "fig_eager_mode_pipeline",
+      "kind": "pipeline_figure",
+      "section": "eager_mode",
+      "label": "fig:eager_mode_pipeline",
+      "caption": "Eager Mode optimization pipeline in Three Kernel Execution Modes.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Eager Mode"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_graph_mode_architecture",
+      "kind": "architecture_figure",
+      "section": "graph_mode",
+      "label": "fig:graph_mode_architecture",
+      "caption": "Graph Mode block diagram for Three Kernel Execution Modes.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch13",
+  "chapter_title": "Core Theory: AI Compiler Optimization Principles",
+  "visuals": [
+    {
+      "id": "fig_tiling_theory_pipeline",
+      "kind": "pipeline_figure",
+      "section": "tiling_theory",
+      "label": "fig:tiling_theory_pipeline",
+      "caption": "Tiling Theory optimization pipeline in Core Theory: AI Compiler Optimization Principles.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Tiling Theory"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_fusion_theory_architecture",
+      "kind": "architecture_figure",
+      "section": "fusion_theory",
+      "label": "fig:fusion_theory_architecture",
+      "caption": "Fusion Theory block diagram for Core Theory: AI Compiler Optimization Principles.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

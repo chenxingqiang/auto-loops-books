@@ -1,0 +1,16 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-6.80,0) {\footnotesize Hardware probe\\SRAM, BW, launch rules};
+    \node[vis arch node] (s1) at (-3.40,0) {\footnotesize Dataflow plan\\Tensor lifetimes};
+    \node[vis pipeline node] (s2) at (0.00,0) {\footnotesize Fusion passes\\Layer collapse};
+    \node[vis arch node] (s3) at (3.40,0) {\footnotesize Codegen\\CUDA / CPU / XDNA};
+    \node[vis pipeline node] (s4) at (6.80,0) {\footnotesize Regression\\vs. open baselines};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+    \draw[vis arrow] (s3.east) -- (s4.west);
+\end{tikzpicture}
+\caption{YiRage decode compilation pipeline (preview).}
+\label{fig:yirage_pipeline}
+\end{figure}

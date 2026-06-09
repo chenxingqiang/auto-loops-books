@@ -1,0 +1,11 @@
+{
+  "url": "https://arxiv.org/abs/2605.30571",
+  "fetched_at": "2026-06-09T17:13:50.620135+00:00",
+  "success": false,
+  "method": "craw4ai",
+  "status_code": null,
+  "title": "",
+  "content_excerpt": "",
+  "content_chars": 0,
+  "error": "BrowserType.launch: Executable doesn't exist at /Users/xingqiangchen/Library/Caches/ms-playwright/chromium-1223/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+}

@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch07",
+  "chapter_title": "Static Role Assignment and Schedule-Free Kernels",
+  "visuals": [
+    {
+      "id": "fig_static_roles_pipeline",
+      "kind": "pipeline_figure",
+      "section": "static_roles",
+      "label": "fig:static_roles_pipeline",
+      "caption": "Static Roles optimization pipeline in Static Role Assignment and Schedule-Free Kernels.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Static Roles"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_thread_mapping_architecture",
+      "kind": "architecture_figure",
+      "section": "thread_mapping",
+      "label": "fig:thread_mapping_architecture",
+      "caption": "Thread Mapping block diagram for Static Role Assignment and Schedule-Free Kernels.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

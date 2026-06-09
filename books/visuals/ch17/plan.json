@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch17",
+  "chapter_title": "OpenAI Triton: Pythonic GPU Kernel Compiler",
+  "visuals": [
+    {
+      "id": "fig_triton_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "triton_hw_matrix",
+      "label": "fig:triton_hw_matrix_pipeline",
+      "caption": "Triton Hw Matrix optimization pipeline in OpenAI Triton: Pythonic GPU Kernel Compiler.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Triton Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_triton_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "triton_arch_passes",
+      "label": "fig:triton_arch_passes_architecture",
+      "caption": "Triton Arch Passes block diagram for OpenAI Triton: Pythonic GPU Kernel Compiler.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

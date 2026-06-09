@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch06",
+  "chapter_title": "Data Residency and On-Chip Memory Design",
+  "visuals": [
+    {
+      "id": "fig_lifetime_planning_pipeline",
+      "kind": "pipeline_figure",
+      "section": "lifetime_planning",
+      "label": "fig:lifetime_planning_pipeline",
+      "caption": "Lifetime Planning optimization pipeline in Data Residency and On-Chip Memory Design.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Lifetime Planning"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_gpu_residency_architecture",
+      "kind": "architecture_figure",
+      "section": "gpu_residency",
+      "label": "fig:gpu_residency_architecture",
+      "caption": "Gpu Residency block diagram for Data Residency and On-Chip Memory Design.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

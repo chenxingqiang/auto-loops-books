@@ -1,0 +1,10 @@
+% Shared figure/table helpers for autobooks generated visuals.
+\input{visuals_style.tex}
+
+\newcommand{\vispending}[1]{%
+  \begin{tikzpicture}
+    \node[vis placeholder box, text width=0.82\linewidth, align=center] {%
+      \textbf{[Placeholder]} #1%
+    };
+  \end{tikzpicture}%
+}

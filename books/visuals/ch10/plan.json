@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch10",
+  "chapter_title": "Attention Online Softmax Optimization",
+  "visuals": [
+    {
+      "id": "fig_online_softmax_pipeline",
+      "kind": "pipeline_figure",
+      "section": "online_softmax",
+      "label": "fig:online_softmax_pipeline",
+      "caption": "Online Softmax optimization pipeline in Attention Online Softmax Optimization.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Online Softmax"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_numerical_stability_architecture",
+      "kind": "architecture_figure",
+      "section": "numerical_stability",
+      "label": "fig:numerical_stability_architecture",
+      "caption": "Numerical Stability block diagram for Attention Online Softmax Optimization.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

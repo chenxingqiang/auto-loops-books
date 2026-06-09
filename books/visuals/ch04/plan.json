@@ -1,0 +1,79 @@
+{
+  "chapter_id": "ch04",
+  "chapter_title": "CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds",
+  "visuals": [
+    {
+      "id": "tab_cuda_memory",
+      "kind": "comparison_table",
+      "section": "cuda_memory_hierarchy",
+      "label": "tab:cuda_memory",
+      "caption": "CUDA memory spaces relevant to decode megakernels (Hopper-class).",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "Space",
+        "Scope",
+        "Decode role"
+      ],
+      "rows": [
+        [
+          "Register",
+          "Thread",
+          "Online softmax carriers, thin GEMM fragments"
+        ],
+        [
+          "Shared memory",
+          "Block",
+          "Fused QKV/MLP tiles, TMA staging"
+        ],
+        [
+          "Global (HBM)",
+          "Grid",
+          "Weights, KV cache, spill traffic"
+        ]
+      ]
+    },
+    {
+      "id": "fig_tma_pipeline",
+      "kind": "pipeline_figure",
+      "section": "tma",
+      "label": "fig:tma_pipeline",
+      "caption": "TMA double-buffer pattern: async global-to-shared copy overlaps tensor-core math.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "TMA load",
+          "detail": "Async to shared"
+        },
+        {
+          "name": "MMA compute",
+          "detail": "Previous tile"
+        },
+        {
+          "name": "Epilogue",
+          "detail": "Fused in shared"
+        },
+        {
+          "name": "TMA prefetch",
+          "detail": "Next tile"
+        }
+      ]
+    },
+    {
+      "id": "fig_cuda_sync_levels",
+      "kind": "architecture_figure",
+      "section": "sync_mechanisms",
+      "label": "fig:cuda_sync_levels",
+      "caption": "CUDA synchronization hierarchy used in decoder megakernels.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Warp shuffle",
+        "Block sync",
+        "Cluster DSM",
+        "Grid sync"
+      ]
+    }
+  ]
+}

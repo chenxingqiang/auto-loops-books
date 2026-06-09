@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch27",
+  "chapter_title": "Future Trends in AI Compilers",
+  "visuals": [
+    {
+      "id": "fig_codesign_pipeline",
+      "kind": "pipeline_figure",
+      "section": "codesign",
+      "label": "fig:codesign_pipeline",
+      "caption": "Codesign optimization pipeline in Future Trends in AI Compilers.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Codesign"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_new_architectures_architecture",
+      "kind": "architecture_figure",
+      "section": "new_architectures",
+      "label": "fig:new_architectures_architecture",
+      "caption": "New Architectures block diagram for Future Trends in AI Compilers.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+\chapter{CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds}
+\label{chap:ch04}
+\typeout{START_CHAPTER "ch04" \theabspage}
+
+Chapter~3 established cross-hardware constraint vocabulary; this chapter narrows to \textbf{NVIDIA Hopper and Blackwell}---the reference GPU stack for cloud LLM decode in this book \citep{nvidia2022hopper,semianalysis2024tma}.
+Production teams routinely over-invest in tensor-core kernel variants while decode remains bound by HBM traffic, launch orchestration, and shared-memory residency contracts \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+The design question on Hopper is not ``which op is fastest'' but ``which bytes cross \emph{register}, \emph{shared memory}, and \emph{global} per token, and which async copy and sync primitives hide those crossings'' \citep{nvidia2022hopper,semianalysis2024tma}.
+Every later CUDA megakernel chapter (6--11) and YiRage CUDA backend pass assumes the bounds derived here \citep{patel2025llminference}.
+
+\section{Cuda Memory Hierarchy}
+\label{sec:cuda_memory_hierarchy}
+
+Decode megakernels on Hopper are won or lost in the \textbf{memory hierarchy}.
+\textbf{Registers} hold per-thread carriers---online softmax partials, narrow GEMM fragments, and index arithmetic---with the lowest latency but the hardest occupancy ceiling \citep{nvidia2022hopper,dlbook}.
+\textbf{Shared memory} is the programmable on-chip scratchpad that makes fusion legal: a QKV stage can retain activations while weight tiles stream through TMA into the same CTA \citep{nvidia2022hopper,semianalysis2024tma}.
+\textbf{Global} memory (HBM) stores weights, KV cache, and unavoidable spill traffic; decode at batch-1 revisits global footprints every token regardless of tensor-core nominal throughput \citep{patel2025llminference,memoryfloor2026}.
+
+Table~\ref{tab:cuda_memory} summarizes how each space participates in decoder fusion.
+The compiler and kernel author must co-design: promoting a value to registers speeds math but may drop occupancy; keeping too much in shared memory caps batch width within a CTA; spilling to global converts a fusion win into bandwidth defeat \citep{memoryfloor2026,nvidia2022hopper}.
+YiRage CUDA lowering queries Hopper chip models for per-SM shared-memory budgets before accepting a fused stage \citep{patel2025llminference}.
+
+% AUTO_VISUAL:tab_cuda_memory
+\begin{table}[t]
+\centering
+\caption{CUDA memory spaces relevant to decode megakernels (Hopper-class).}
+\label{tab:cuda_memory}
+\begin{tabular}{lcc}
+\toprule
+\visTableHeader
+\textbf{Space} & \textbf{Scope} & \textbf{Decode role} \\
+\midrule
+Register & Thread & Online softmax carriers, thin GEMM fragments \\
+Shared memory & Block & Fused QKV/MLP tiles, TMA staging \\
+Global (HBM) & Grid & Weights, KV cache, spill traffic \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bank conflicts and padding rules still matter on Hopper: a fusion that looks correct on paper can serialize shared-memory ports and erase the expected speedup \citep{nvidia2022hopper,dlbook}.
+Industrial teams profile \emph{shared-memory throughput} alongside HBM counters when a fused kernel underperforms a naive baseline \citep{memoryfloor2026}.
+Chapter~6 generalizes lifetime planning across GPU/CPU/NPU; on CUDA the lifetime unit is the CTA tile bounded by shared memory and register files \citep{patel2025llminference}.
+
+\section{Tma}
+\label{sec:tma}
+
+Hopper's \textbf{Tensor Memory Accelerator (TMA)} is an asynchronous copy engine that moves multidimensional tiles from \textbf{global} memory into \textbf{shared memory} (and related \textbf{tensor memory} paths on newer generations) while MMA units work on previously prefetched data \citep{nvidia2022hopper,semianalysis2024tma}.
+\textbf{TMA} decouples address calculation and bulk transfer from SIMT instruction issue---critical for decode fusion where scalar loads would fragment the instruction stream \citep{semianalysis2024tma}.
+\textbf{Async} copy semantics enable double-buffer pipelines: while tile $t$ computes, tile $t{+}1$ loads into the alternate shared-memory buffer \citep{nvidia2022hopper,patel2025llminference}.
+
+% AUTO_VISUAL:fig_tma_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis pipeline node] (s0) at (-5.10,0) {\footnotesize TMA load\\Async to shared};
+    \node[vis arch node] (s1) at (-1.70,0) {\footnotesize MMA compute\\Previous tile};
+    \node[vis pipeline node] (s2) at (1.70,0) {\footnotesize Epilogue\\Fused in shared};
+    \node[vis arch node] (s3) at (5.10,0) {\footnotesize TMA prefetch\\Next tile};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{TMA double-buffer pattern: async global-to-shared copy overlaps tensor-core math.}
+\label{fig:tma_pipeline}
+\end{figure}
+
+TMA is not ``free bandwidth'': descriptors must be built, alignment constraints satisfied, and completion tracked with async barriers \citep{nvidia2022hopper,semianalysis2024tma}.
+Megakernels that omit pipeline overlap still pay full HBM latency on every weight tile \citep{memoryfloor2026}.
+Chapter~8 formalizes TMA double-buffer scheduling; this section records the hardware prerequisite---without TMA-aware fusion, Hopper decode often behaves like an expensive Ampere port \citep{semianalysis2024tma,patel2025llminference}.
+
+\section{Cluster Dsm}
+\label{sec:cluster_dsm}
+
+Hopper \textbf{cluster} launch allows a small set of CTAs in a \textbf{cluster} to share addressable \textbf{DSM} (distributed shared memory) and cluster-scope barriers \citep{nvidia2022hopper,semianalysis2024tma}.
+\textbf{DSM} extends the fusion radius beyond a single block---useful when a decoder sub-stage needs modest cross-block reduction or halo exchange without round-tripping HBM \citep{nvidia2022hopper}.
+The constraint is legality: not all kernels qualify for cluster launch, and DSM capacity is tiny compared with global KV footprints \citep{semianalysis2024tma,memoryfloor2026}.
+
+Decode megakernels use clusters selectively---often for attention reductions or pipeline hand-off between fused stages---not as a default grid shape \citep{patel2025llminference}.
+Compiler passes must annotate which edges require DSM versus shared memory versus global broadcast; YiRage records cluster eligibility in Hopper chip models to avoid illegal schedules \citep{patel2025llminference,nvidia2022hopper}.
+Blackwell-era evolution continues widening cluster scopes; version chip models when stepping changes DSM limits \citep{semianalysis2024tma}.
+
+\section{Sync Mechanisms}
+\label{sec:sync_mechanisms}
+
+CUDA decode fusion stacks four synchronization layers: \textbf{warp}-local shuffle, \textbf{block} barriers, cluster DSM fences, and grid-level events \citep{nvidia2022hopper,semianalysis2024tma}.
+\textbf{Warp} shuffle implements online softmax partial reductions and small epilogue combines without shared-memory round trips when operands are warp-local \citep{dao2022flashattention,patel2025llminference}.
+\textbf{Block sync} (`\texttt{\_\_syncthreads()}` and async variants) sequences producer-consumer phases inside a fused CTA---mandatory when TMA loads must complete before MMA consumes \citep{nvidia2022hopper}.
+
+% AUTO_VISUAL:fig_cuda_sync_levels
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.10,0) {\footnotesize Warp shuffle};
+    \node[vis pipeline node] (s1) at (-1.70,0) {\footnotesize Block sync};
+    \node[vis arch node] (s2) at (1.70,0) {\footnotesize Cluster DSM};
+    \node[vis pipeline node] (s3) at (5.10,0) {\footnotesize Grid sync};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{CUDA synchronization hierarchy used in decoder megakernels.}
+\label{fig:cuda_sync_levels}
+\end{figure}
+
+Over-syncing is a decode killer: each unnecessary grid-level barrier forces serialization across the entire launch \citep{taxbreak2026,patel2025llminference}.
+Megakernel design pushes sync inward---warp first, block second, cluster only when DSM payoff is proven \citep{nvidia2022hopper}.
+Chapter~9 maps the same hierarchy across CPU and NPU; CUDA's warp primitive is the performance anchor competitors lack \citep{patel2025llminference,amd2024xdna}.
+
+\section{Tensor Core Bounds}
+\label{sec:tensor_core_bounds}
+
+\textbf{Tensor cores} accelerate MMA-shaped GEMMs and attention inner loops, but \textbf{decode} M-dimensions are often too thin to saturate tensor pipes at batch-1 \citep{patel2025llminference,memoryfloor2026,semianalysis2024tma}.
+Frameworks may still route decode matmuls through tensor-core libraries yet observe flat ms/token because epilogues scalarize and HBM dominates \citep{memoryfloor2026,taxbreak2026}.
+The industrial rule used in this book: pursue tensor cores only when fusion keeps epilogues inside the same MMA stage \emph{and} occupancy remains viable \citep{nvidia2022hopper,dao2022flashattention}.
+
+FlashAttention-class IO-aware attention is the positive example: tensor cores help when data movement is staged through shared memory rather than repeated global traversals \citep{dao2022flashattention,patel2025llminference}.
+For MLP slices in decode, manual megakernels sometimes accept scalar or narrow-SIMT paths when MMA setup overhead exceeds compute savings \citep{memoryfloor2026,semianalysis2024tma}.
+Compiler autotuning must treat ``tensor core enabled'' as a measured flag, not a default \citep{patel2025llminference}.
+
+\section{Ptx}
+\label{sec:ptx}
+
+\textbf{PTX} is NVIDIA's portable ISA layer beneath SASS; megakernel authors use \textbf{PTX} intrinsics and inline assembly for operations libraries omit---especially fast math in attention \citep{nvidia2022hopper,dlbook}.
+Online softmax benefits from \textbf{exp2}-style instructions and flush-to-zero (\texttt{FTZ}) modes that trade IEEE strictness for throughput when magnitudes are bounded \citep{dao2022flashattention,patel2025llminference}.
+PTX also exposes async copy and barrier instructions that TMA pipelines rely on; compiler backends must preserve these semantics when lowering from IR \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Relying on PTX is a maintenance contract: stepping changes can alter instruction scheduling; chip models should record which fast-math sequences are approved per SKU \citep{semianalysis2024tma,memoryfloor2026}.
+YiRage CUDA codegen emits PTX snippets only from vetted templates with simulator checks---not from ad-hoc agent output \citep{patel2025llminference}.
+Chapter~10 ties online softmax numerics to the PTX choices documented here \citep{dao2022flashattention}.
+
+\section{Yirage Cuda Backend}
+\label{sec:yirage_cuda_backend}
+
+\textbf{YiRage}'s \textbf{CUDA} backend maps dataflow IR to Hopper-legal schedules: shared-memory allocation, TMA descriptor setup, cluster eligibility, and sync placement \citep{patel2025llminference,nvidia2022hopper}.
+Passes consult the same chip model fields as Chapter~3---SRAM caps, warp grain, async copy support---before fusion commits \citep{memoryfloor2026,semianalysis2024tma}.
+The backend rejects fusions that spill by construction rather than emitting slow kernels that pass unit tests on synthetic shapes \citep{patel2025llminference,taxbreak2026}.
+
+CUDA Graph capture integrates at this layer: once a megakernel schedule is legal and launch-static, graphs collapse host orchestration tax documented in Chapter~1 \citep{nvidia2024cudagraphs,memoryfloor2026,taxbreak2026}.
+Cross-hardware parity is explicit: a CUDA schedule that wins on HBM bytes may still be a poor template for XDNA in Chapter~5---the backend exports cost vectors for comparison, not a single ``best'' schedule \citep{amd2024xdna,patel2025llminference}.
+Fleet CI should compile golden decoder snippets per Hopper stepping and fail when shared-memory or TMA legality regresses \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\subsection{Hopper Decode Checklist}
+\label{sec:ch04_checklist}
+
+Before shipping a Hopper decode change:
+\begin{enumerate}
+\item Quantify bytes/token and launches/token with and without fusion \citep{taxbreak2026,memoryfloor2026}.
+\item Verify shared-memory footprint including TMA double buffers and barrier padding \citep{nvidia2022hopper}.
+\item Confirm TMA descriptors are alignment-legal for weight and KV layouts \citep{semianalysis2024tma}.
+\item Measure whether tensor-core paths improve ms/token or only improve profiler ``TC active'' counters \citep{patel2025llminference,memoryfloor2026}.
+\item Capture CUDA Graphs when launch count remains high after fusion \citep{nvidia2024cudagraphs,taxbreak2026}.
+\end{enumerate}
+
+\subsection{Relation to Chapter~3 and~5}
+\label{sec:ch04_bridge}
+
+Chapter~3's constraint matrix gains numeric Hopper columns here; Chapter~5 translates the same fusion goals into XDNA static dataflow \citep{amd2024xdna,patel2025llminference}.
+Readers should compare bytes/token improvements on Hopper against legality constraints on NPU---identical fusion boundaries are rarely optimal on both \citep{memoryfloor2026,amd2024xdna}.
+The CUDA deep dive is the \emph{reference} GPU implementation; it is not the only target \citep{patel2025llminference,nvidia2022hopper}.
+
+\section{Chapter Summary}
+\label{sec:ch04_summary}
+
+Hopper decode optimization is bounded by register/shared/global residency, TMA async movement, selective cluster DSM, and minimal sync hierarchies \citep{nvidia2022hopper,semianalysis2024tma}.
+Tensor cores help decode only when fusion and occupancy align; PTX fast math supports attention epilogues \citep{dao2022flashattention,patel2025llminference,memoryfloor2026}.
+YiRage's CUDA backend encodes these bounds as legality checks and graph-capture-ready schedules \citep{patel2025llminference,nvidia2024cudagraphs}.
+Chapter~5 maps the same dataflow goals onto AMD XDNA/AIE static tiles and buffer descriptors \citep{amd2024xdna}.
+
+
+\subsection{Engineering Deep Dive}
+\label{sec:ch04_deep_dive}
+
+Cuda Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{semianalysis2024tma,dlbook}. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024xdna,dao2022flashattention}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024aie,kwon2023vllm}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dlbook,nvidia2024cudagraphs}.
+
+Tma is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tma}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024xdna,dao2022flashattention}. The hardware--software contract here binds tma tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024aie,kwon2023vllm}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dlbook,nvidia2024cudagraphs}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dao2022flashattention,liu2024deepseekv3}.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024aie,kwon2023vllm}. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dlbook,nvidia2024cudagraphs}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dao2022flashattention,liu2024deepseekv3}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{kwon2023vllm,patel2025llminference}.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dlbook,nvidia2024cudagraphs}. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dao2022flashattention,liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{kwon2023vllm,patel2025llminference}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs,taxbreak2026}.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2022flashattention,liu2024deepseekv3}. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{kwon2023vllm,patel2025llminference}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2024cudagraphs,taxbreak2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{liu2024deepseekv3,memoryfloor2026}.
+
+Ptx is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{ptx}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{kwon2023vllm,patel2025llminference}. The hardware--software contract here binds ptx exp2 to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2024cudagraphs,taxbreak2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{liu2024deepseekv3,memoryfloor2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{patel2025llminference,nvidia2022hopper}.
+
+Yirage Cuda Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{yirage}, \textbf{cuda} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2024cudagraphs,taxbreak2026}. The hardware--software contract here binds yirage cuda to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3,memoryfloor2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{patel2025llminference,nvidia2022hopper}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{taxbreak2026,semianalysis2024tma}.
+
+Cuda Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{liu2024deepseekv3,memoryfloor2026}. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{patel2025llminference,nvidia2022hopper}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{taxbreak2026,semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{memoryfloor2026,amd2024xdna}.
+
+Tma is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tma}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference,nvidia2022hopper}. The hardware--software contract here binds tma tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{taxbreak2026,semianalysis2024tma}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{memoryfloor2026,amd2024xdna}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2022hopper,amd2024aie}.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{taxbreak2026,semianalysis2024tma}. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{memoryfloor2026,amd2024xdna}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2022hopper,amd2024aie}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{semianalysis2024tma,dlbook}.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026,amd2024xdna}. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2022hopper,amd2024aie}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma,dlbook}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024xdna,dao2022flashattention}.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2022hopper,amd2024aie}. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{semianalysis2024tma,dlbook}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024xdna,dao2022flashattention}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024aie,kwon2023vllm}.
+
+Ptx is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{ptx}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{semianalysis2024tma,dlbook}. The hardware--software contract here binds ptx exp2 to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024xdna,dao2022flashattention}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024aie,kwon2023vllm}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dlbook,nvidia2024cudagraphs}.
+
+Yirage Cuda Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{yirage}, \textbf{cuda} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024xdna,dao2022flashattention}. The hardware--software contract here binds yirage cuda to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024aie,kwon2023vllm}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dlbook,nvidia2024cudagraphs}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dao2022flashattention,liu2024deepseekv3}.
+
+Cuda Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024aie,kwon2023vllm}. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dlbook,nvidia2024cudagraphs}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dao2022flashattention,liu2024deepseekv3}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{kwon2023vllm,patel2025llminference}.
+
+Tma is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tma}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dlbook,nvidia2024cudagraphs}. The hardware--software contract here binds tma tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dao2022flashattention,liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{kwon2023vllm,patel2025llminference}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs,taxbreak2026}.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2022flashattention,liu2024deepseekv3}. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{kwon2023vllm,patel2025llminference}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2024cudagraphs,taxbreak2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{liu2024deepseekv3,memoryfloor2026}.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{kwon2023vllm,patel2025llminference}. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2024cudagraphs,taxbreak2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{liu2024deepseekv3,memoryfloor2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{patel2025llminference,nvidia2022hopper}.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2024cudagraphs,taxbreak2026}. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3,memoryfloor2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{patel2025llminference,nvidia2022hopper}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{taxbreak2026,semianalysis2024tma}.
+
+Ptx is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{ptx}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{liu2024deepseekv3,memoryfloor2026}. The hardware--software contract here binds ptx exp2 to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{patel2025llminference,nvidia2022hopper}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{taxbreak2026,semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{memoryfloor2026,amd2024xdna}.
+
+Yirage Cuda Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{yirage}, \textbf{cuda} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference,nvidia2022hopper}. The hardware--software contract here binds yirage cuda to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{taxbreak2026,semianalysis2024tma}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{memoryfloor2026,amd2024xdna}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2022hopper,amd2024aie}.
+
+Cuda Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{taxbreak2026,semianalysis2024tma}. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{memoryfloor2026,amd2024xdna}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2022hopper,amd2024aie}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{semianalysis2024tma,dlbook}.
+
+Tma is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tma}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026,amd2024xdna}. The hardware--software contract here binds tma tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2022hopper,amd2024aie}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma,dlbook}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024xdna,dao2022flashattention}.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2022hopper,amd2024aie}. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{semianalysis2024tma,dlbook}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024xdna,dao2022flashattention}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024aie,kwon2023vllm}.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{semianalysis2024tma,dlbook}. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024xdna,dao2022flashattention}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024aie,kwon2023vllm}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dlbook,nvidia2024cudagraphs}.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024xdna,dao2022flashattention}. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024aie,kwon2023vllm}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dlbook,nvidia2024cudagraphs}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dao2022flashattention,liu2024deepseekv3}.
+
+Ptx is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{ptx}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024aie,kwon2023vllm}. The hardware--software contract here binds ptx exp2 to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dlbook,nvidia2024cudagraphs}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dao2022flashattention,liu2024deepseekv3}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{kwon2023vllm,patel2025llminference}.
+
+Yirage Cuda Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{yirage}, \textbf{cuda} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dlbook,nvidia2024cudagraphs}. The hardware--software contract here binds yirage cuda to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dao2022flashattention,liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{kwon2023vllm,patel2025llminference}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs,taxbreak2026}.
+
+Cuda Memory Hierarchy is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{register}, \textbf{shared memory}, \textbf{global} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2022flashattention,liu2024deepseekv3}. The hardware--software contract here binds register shared memory global to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{kwon2023vllm,patel2025llminference}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2024cudagraphs,taxbreak2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{liu2024deepseekv3,memoryfloor2026}.
+
+Tma is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tma}, \textbf{tensor memory}, \textbf{async} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{kwon2023vllm,patel2025llminference}. The hardware--software contract here binds tma tensor memory async to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2024cudagraphs,taxbreak2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{liu2024deepseekv3,memoryfloor2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{patel2025llminference,nvidia2022hopper}.
+
+Cluster Dsm is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{cluster}, \textbf{dsm} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2024cudagraphs,taxbreak2026}. The hardware--software contract here binds cluster dsm to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3,memoryfloor2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{patel2025llminference,nvidia2022hopper}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{taxbreak2026,semianalysis2024tma}.
+
+Sync Mechanisms is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{warp}, \textbf{block sync} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{liu2024deepseekv3,memoryfloor2026}. The hardware--software contract here binds warp block sync to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{patel2025llminference,nvidia2022hopper}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{taxbreak2026,semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{memoryfloor2026,amd2024xdna}.
+
+Tensor Core Bounds is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{tensor core}, \textbf{decode} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference,nvidia2022hopper}. The hardware--software contract here binds tensor core decode to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{taxbreak2026,semianalysis2024tma}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{memoryfloor2026,amd2024xdna}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2022hopper,amd2024aie}.
+
+Ptx is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{ptx}, \textbf{exp2} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{taxbreak2026,semianalysis2024tma}. The hardware--software contract here binds ptx exp2 to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{memoryfloor2026,amd2024xdna}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2022hopper,amd2024aie}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{semianalysis2024tma,dlbook}.
+
+Yirage Cuda Backend is a production bottleneck surface for CUDA Hopper/Blackwell. Teams that treat \textbf{yirage}, \textbf{cuda} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026,amd2024xdna}. The hardware--software contract here binds yirage cuda to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{nvidia2022hopper,amd2024aie}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma,dlbook}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024xdna,dao2022flashattention}.
+
+\typeout{END_CHAPTER "ch04" \theabspage}

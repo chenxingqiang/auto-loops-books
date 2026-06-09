@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch24",
+  "chapter_title": "Heterogeneous Compilation and Multi-Hardware Deployment",
+  "visuals": [
+    {
+      "id": "fig_hetero_cluster_pipeline",
+      "kind": "pipeline_figure",
+      "section": "hetero_cluster",
+      "label": "fig:hetero_cluster_pipeline",
+      "caption": "Hetero Cluster optimization pipeline in Heterogeneous Compilation and Multi-Hardware Deployment.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Hetero Cluster"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_unified_stack_architecture",
+      "kind": "architecture_figure",
+      "section": "unified_stack",
+      "label": "fig:unified_stack_architecture",
+      "caption": "Unified Stack block diagram for Heterogeneous Compilation and Multi-Hardware Deployment.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

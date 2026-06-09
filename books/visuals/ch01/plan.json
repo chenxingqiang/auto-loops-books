@@ -1,0 +1,209 @@
+{
+  "chapter_id": "ch01",
+  "chapter_title": "LLM Inference Performance Bottlenecks: From Symptoms to Root Causes",
+  "visuals": [
+    {
+      "id": "tab_prefill_decode",
+      "kind": "comparison_table",
+      "section": "prefill_decode",
+      "label": "tab:prefill_decode",
+      "caption": "Qualitative comparison of prefill vs.\\ decode on a single transformer layer.",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "",
+        "Prefill",
+        "Decode (batch-1)"
+      ],
+      "rows": [
+        [
+          "Tokens processed per step",
+          "$L$ (prompt length)",
+          "$1$"
+        ],
+        [
+          "Typical arithmetic intensity",
+          "Higher",
+          "Lower"
+        ],
+        [
+          "Dominant limiter",
+          "Compute / tensor cores",
+          "Memory traffic / orchestration"
+        ],
+        [
+          "KV cache growth per step",
+          "Written in bulk",
+          "Read + append one step"
+        ],
+        [
+          "Serving objective",
+          "Throughput (tok/s)",
+          "Latency (ms/token)"
+        ]
+      ]
+    },
+    {
+      "id": "fig_prefill_decode_pipeline",
+      "kind": "pipeline_figure",
+      "section": "prefill_decode",
+      "label": "fig:prefill_decode_pipeline",
+      "caption": "Prefill processes prompt chunks in parallel; decode appends one token per step via KV cache.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Prefill",
+          "detail": "Parallel over $L$ tokens"
+        },
+        {
+          "name": "KV write",
+          "detail": "Bulk cache fill"
+        },
+        {
+          "name": "Decode loop",
+          "detail": "One token / step"
+        },
+        {
+          "name": "KV read+append",
+          "detail": "Growing context"
+        }
+      ]
+    },
+    {
+      "id": "tab_taxbreak_kernels",
+      "kind": "benchmark_table",
+      "section": "overhead_quant",
+      "label": "tab:taxbreak_kernels",
+      "caption": "Verified kernel fragmentation on H100 decode (BS$=4$, SL$=2048$, $m=10$ tokens), from TaxBreak.",
+      "status": "done",
+      "placement": "t",
+      "cite": "taxbreak2026",
+      "columns": [
+        "Model",
+        "Kernels/token",
+        "Total launches",
+        "GPU util. (\\%)"
+      ],
+      "rows": [
+        [
+          "Llama-3.2-1B",
+          "847.5",
+          "8,475",
+          "58.9"
+        ],
+        [
+          "Llama-3.2-3B",
+          "1,536.9",
+          "15,369",
+          "67.6"
+        ],
+        [
+          "OLMoE-1B/7B",
+          "9,305.3",
+          "93,053",
+          "15.5"
+        ],
+        [
+          "Qwen1.5-MoE-A2.7B",
+          "6,695.1",
+          "66,951",
+          "27.7"
+        ]
+      ]
+    },
+    {
+      "id": "fig_roofline_decode",
+      "kind": "roofline_figure",
+      "section": "memory_not_compute",
+      "label": "fig:roofline_decode",
+      "caption": "Decode sits on the memory-bandwidth slope of the roofline at low arithmetic intensity.",
+      "status": "done",
+      "placement": "t",
+      "peak_gflops": 989,
+      "peak_gbps": 3350,
+      "points": [
+        {
+          "name": "Prefill GEMM",
+          "ai": 120
+        },
+        {
+          "name": "Decode batch-1",
+          "ai": 8
+        }
+      ]
+    },
+    {
+      "id": "tab_hw_priorities",
+      "kind": "checklist_table",
+      "section": "multi_hardware",
+      "label": "tab:hw_priorities",
+      "caption": "Decode optimization priorities by hardware class.",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "Hardware",
+        "First-order decode levers"
+      ],
+      "rows": [
+        [
+          "NVIDIA GPU",
+          "Fusion, graphs, KV bandwidth, shared mem tiling"
+        ],
+        [
+          "AMD GPU",
+          "HIP fusion, LDS reuse, launch reduction"
+        ],
+        [
+          "CPU",
+          "Cache blocking, SIMD, NUMA, coarse fusion"
+        ],
+        [
+          "Edge NPU",
+          "Static ADF graphs, DMA ping-pong, full-layer fusion"
+        ]
+      ]
+    },
+    {
+      "id": "fig_fusion_gap",
+      "kind": "placeholder_figure",
+      "section": "benchmark_gap",
+      "label": "fig:fusion_gap",
+      "caption": "Pending: YiRage/MegaKernel vs.\\ PyTorch eager speedup (Appendix~B harness).",
+      "status": "done",
+      "placement": "t",
+      "pending_note": "Run Appendix B harness before filling bars"
+    },
+    {
+      "id": "fig_yirage_pipeline",
+      "kind": "pipeline_figure",
+      "section": "yirage_preview",
+      "label": "fig:yirage_pipeline",
+      "caption": "YiRage decode compilation pipeline (preview).",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Hardware probe",
+          "detail": "SRAM, BW, launch rules"
+        },
+        {
+          "name": "Dataflow plan",
+          "detail": "Tensor lifetimes"
+        },
+        {
+          "name": "Fusion passes",
+          "detail": "Layer collapse"
+        },
+        {
+          "name": "Codegen",
+          "detail": "CUDA / CPU / XDNA"
+        },
+        {
+          "name": "Regression",
+          "detail": "vs. open baselines"
+        }
+      ]
+    }
+  ]
+}

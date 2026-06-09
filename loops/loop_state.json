@@ -1,0 +1,35 @@
+{
+  "updated_at": "2026-06-09T17:14:29.643260+00:00",
+  "chapter_id": "ch27",
+  "phase": "complete",
+  "actions": [
+    "main.tex: added chapter \\input",
+    "research: skipped",
+    "facts: 0/2 content-verified (issues) -> books/research/ch27/fact_verify_report.json",
+    "visuals: plan synced",
+    "visuals: rendered",
+    "visuals: inserted 0 snippet(s)",
+    "compile: ok"
+  ],
+  "agent_tasks": [
+    "Voice: follow WRITING_STYLE.md (engineer-narrative; problem-first; HW/SW bound; multi-hardware). Gold standard: ch01.",
+    "Facts: every numeric claim / worked example must pass web verification (≥2 independent sources); log to books/research/ch27/verified_facts.jsonl with URLs — see FACT_VERIFICATION.md",
+    "Fact crawl failed (source): ch27 cross-hardware decode metrics use bytes/token methodology… — https://arxiv.org/abs/2605.30571",
+    "Fact crawl failed (corroboration): https://arxiv.org/abs/2507.14397",
+    "Fact crawl failed (source): ch27 launch overhead context from TaxBreak decode study… — https://arxiv.org/abs/2603.12465",
+    "Fact crawl failed (corroboration): https://arxiv.org/abs/2603.12465"
+  ],
+  "evaluation": {
+    "chapter": "ch27",
+    "coverage_pct": 100.0,
+    "word_count": 4123,
+    "citation_count": 12,
+    "compile_ok": true,
+    "quality_score": 97.4,
+    "missing_sections": [],
+    "table_count": 0,
+    "figure_count": 0,
+    "visual_missing": []
+  },
+  "errors": []
+}

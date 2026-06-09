@@ -1,0 +1,16 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis arch node] (s0) at (-6.80,0) {\footnotesize LayerNorm\\};
+    \node[vis arch node] (s1) at (-3.40,0) {\footnotesize QKV\\};
+    \node[vis arch node] (s2) at (0.00,0) {\footnotesize Attn\\};
+    \node[vis arch node] (s3) at (3.40,0) {\footnotesize MLP\\};
+    \node[vis arch node] (s4) at (6.80,0) {\footnotesize HBM\\};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+    \draw[vis arrow] (s3.east) -- (s4.west);
+\end{tikzpicture}
+\caption{Operator-driven schedule: each op reads/writes global memory.}
+\label{fig:operator_graph}
+\end{figure}

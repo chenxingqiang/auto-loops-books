@@ -1,0 +1,60 @@
+{
+  "chapter_id": "ch02",
+  "timestamp": "2026-06-09T17:13:39.418422+00:00",
+  "entry_count": 3,
+  "verified_ok_count": 0,
+  "entries": [
+    {
+      "claim": "H200 batch-1 SL512 Llama-3.2-1B: 850 prefill vs 8437 decode launches over 10 tokens",
+      "bib_key": null,
+      "source_url": "",
+      "corroboration_url": null,
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "none",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch02/fact_sources/e3b0c44298fc1c14.json"
+    },
+    {
+      "claim": "Null-kernel launch floor H100 median 4.578 μs",
+      "bib_key": null,
+      "source_url": "",
+      "corroboration_url": null,
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "none",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch02/fact_sources/e3b0c44298fc1c14.json"
+    },
+    {
+      "claim": "DeepSeek-V3 min prefill 4 nodes (32 GPU) vs decode 40 nodes (320 GPU)",
+      "bib_key": null,
+      "source_url": "",
+      "corroboration_url": null,
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "none",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch02/fact_sources/e3b0c44298fc1c14.json"
+    }
+  ],
+  "status": "issues"
+}

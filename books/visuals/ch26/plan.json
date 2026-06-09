@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch26",
+  "chapter_title": "Production Deployment and Engineering Best Practices",
+  "visuals": [
+    {
+      "id": "fig_env_packaging_pipeline",
+      "kind": "pipeline_figure",
+      "section": "env_packaging",
+      "label": "fig:env_packaging_pipeline",
+      "caption": "Env Packaging optimization pipeline in Production Deployment and Engineering Best Practices.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Env Packaging"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_multi_hw_ops_architecture",
+      "kind": "architecture_figure",
+      "section": "multi_hw_ops",
+      "label": "fig:multi_hw_ops_architecture",
+      "caption": "Multi Hw Ops block diagram for Production Deployment and Engineering Best Practices.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

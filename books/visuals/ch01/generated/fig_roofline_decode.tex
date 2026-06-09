@@ -1,0 +1,15 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+    \draw[vis axis] (0,0) -- (8,0) node[right] {\footnotesize Arithmetic intensity};
+    \draw[vis axis] (0,0) -- (0,6) node[above] {\footnotesize GFLOP/s};
+    \draw[vis roof bandwidth] (0,0) -- (0.30,6.00);
+    \draw[vis roof compute] (0.30,6.00) -- (8,6.00);
+    \node[vis point a] at (7.80,6.00) {};
+    \node[above right, text=visText] at (7.80,6.00) {\scriptsize Prefill GEMM};
+    \node[vis point b] at (7.80,6.00) {};
+    \node[above right, text=visText] at (7.80,6.00) {\scriptsize Decode batch-1};
+\end{tikzpicture}
+\caption{Decode sits on the memory-bandwidth slope of the roofline at low arithmetic intensity.}
+\label{fig:roofline_decode}
+\end{figure}

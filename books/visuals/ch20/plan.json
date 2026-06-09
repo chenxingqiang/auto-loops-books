@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch20",
+  "chapter_title": "Mirage and Emerging AI Compilers",
+  "visuals": [
+    {
+      "id": "fig_mirage_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "mirage_hw_matrix",
+      "label": "fig:mirage_hw_matrix_pipeline",
+      "caption": "Mirage Hw Matrix optimization pipeline in Mirage and Emerging AI Compilers.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Mirage Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_mirage_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "mirage_arch_passes",
+      "label": "fig:mirage_arch_passes_architecture",
+      "caption": "Mirage Arch Passes block diagram for Mirage and Emerging AI Compilers.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

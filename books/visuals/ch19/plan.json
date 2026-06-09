@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch19",
+  "chapter_title": "Glow: Lightweight AI Compiler",
+  "visuals": [
+    {
+      "id": "fig_glow_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "glow_hw_matrix",
+      "label": "fig:glow_hw_matrix_pipeline",
+      "caption": "Glow Hw Matrix optimization pipeline in Glow: Lightweight AI Compiler.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Glow Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_glow_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "glow_arch_passes",
+      "label": "fig:glow_arch_passes_architecture",
+      "caption": "Glow Arch Passes block diagram for Glow: Lightweight AI Compiler.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

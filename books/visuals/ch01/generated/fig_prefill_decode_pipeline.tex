@@ -1,0 +1,14 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-5.10,0) {\footnotesize Prefill\\Parallel over $L$ tokens};
+    \node[vis arch node] (s1) at (-1.70,0) {\footnotesize KV write\\Bulk cache fill};
+    \node[vis pipeline node] (s2) at (1.70,0) {\footnotesize Decode loop\\One token / step};
+    \node[vis arch node] (s3) at (5.10,0) {\footnotesize KV read+append\\Growing context};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{Prefill processes prompt chunks in parallel; decode appends one token per step via KV cache.}
+\label{fig:prefill_decode_pipeline}
+\end{figure}

@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch11",
+  "chapter_title": "Full Decoder MegaKernel Implementation",
+  "visuals": [
+    {
+      "id": "fig_megakernel_structure_pipeline",
+      "kind": "pipeline_figure",
+      "section": "megakernel_structure",
+      "label": "fig:megakernel_structure_pipeline",
+      "caption": "Megakernel Structure optimization pipeline in Full Decoder MegaKernel Implementation.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Megakernel Structure"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_qkv_attn_mlp_architecture",
+      "kind": "architecture_figure",
+      "section": "qkv_attn_mlp",
+      "label": "fig:qkv_attn_mlp_architecture",
+      "caption": "Qkv Attn Mlp block diagram for Full Decoder MegaKernel Implementation.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

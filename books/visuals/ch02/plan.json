@@ -1,0 +1,72 @@
+{
+  "chapter_id": "ch02",
+  "chapter_title": "Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven",
+  "visuals": [
+    {
+      "id": "fig_operator_graph",
+      "kind": "architecture_figure",
+      "section": "operator_first",
+      "label": "fig:operator_graph",
+      "caption": "Operator-driven schedule: each op reads/writes global memory.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "LayerNorm",
+        "QKV",
+        "Attn",
+        "MLP",
+        "HBM"
+      ]
+    },
+    {
+      "id": "fig_dataflow_residency",
+      "kind": "pipeline_figure",
+      "section": "dataflow_philosophy",
+      "label": "fig:dataflow_residency",
+      "caption": "Dataflow-driven schedule: activations stay on-chip across fused stages.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "On-chip tile",
+          "detail": "Register / shared"
+        },
+        {
+          "name": "Fused QKV+Attn",
+          "detail": "No HBM export"
+        },
+        {
+          "name": "Fused MLP",
+          "detail": "Pipeline"
+        }
+      ]
+    },
+    {
+      "id": "tab_mindset_hw",
+      "kind": "comparison_table",
+      "section": "cross_hardware",
+      "label": "tab:mindset_hw",
+      "caption": "Design mindset vs.\\ hardware enforcement model.",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "Target",
+        "Data residency model"
+      ],
+      "rows": [
+        [
+          "CUDA GPU",
+          "Software-managed hierarchy"
+        ],
+        [
+          "XDNA / AIE",
+          "Hardware-enforced spatial buffers"
+        ],
+        [
+          "CPU",
+          "Cache hierarchy + explicit blocking"
+        ]
+      ]
+    }
+  ]
+}

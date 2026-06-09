@@ -1,0 +1,14 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Register file\\};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Shared memory\\};
+    \node[vis arch node] (s2) at (1.67,0) {\footnotesize L2 cache\\};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize HBM\\};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{GPU memory hierarchy constraints for decode megakernels.}
+\label{fig:gpu_memory_hierarchy}
+\end{figure}

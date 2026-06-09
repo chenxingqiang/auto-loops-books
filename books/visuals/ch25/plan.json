@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch25",
+  "chapter_title": "Auto-Optimization and AI-Assisted Compilation",
+  "visuals": [
+    {
+      "id": "fig_rl_autotune_pipeline",
+      "kind": "pipeline_figure",
+      "section": "rl_autotune",
+      "label": "fig:rl_autotune_pipeline",
+      "caption": "Rl Autotune optimization pipeline in Auto-Optimization and AI-Assisted Compilation.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Rl Autotune"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_hw_reward_architecture",
+      "kind": "architecture_figure",
+      "section": "hw_reward",
+      "label": "fig:hw_reward_architecture",
+      "caption": "Hw Reward block diagram for Auto-Optimization and AI-Assisted Compilation.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

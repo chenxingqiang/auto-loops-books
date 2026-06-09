@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch18",
+  "chapter_title": "IREE: MLIR-Native Runtime and Compilation",
+  "visuals": [
+    {
+      "id": "fig_iree_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "iree_hw_matrix",
+      "label": "fig:iree_hw_matrix_pipeline",
+      "caption": "Iree Hw Matrix optimization pipeline in IREE: MLIR-Native Runtime and Compilation.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Iree Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_iree_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "iree_arch_passes",
+      "label": "fig:iree_arch_passes_architecture",
+      "caption": "Iree Arch Passes block diagram for IREE: MLIR-Native Runtime and Compilation.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

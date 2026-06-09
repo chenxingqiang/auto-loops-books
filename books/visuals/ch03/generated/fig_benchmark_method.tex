@@ -1,0 +1,12 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-3.40,0) {\footnotesize Fixed model+ctx\\Repro config};
+    \node[vis arch node] (s1) at (0.00,0) {\footnotesize Normalize metrics\\bytes/token};
+    \node[vis pipeline node] (s2) at (3.40,0) {\footnotesize Compare targets\\GPU / CPU / NPU};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+\end{tikzpicture}
+\caption{Cross-hardware benchmark methodology used in this book.}
+\label{fig:benchmark_method}
+\end{figure}

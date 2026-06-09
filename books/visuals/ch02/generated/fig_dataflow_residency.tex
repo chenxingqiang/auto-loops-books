@@ -1,0 +1,12 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+    \node[vis pipeline node] (s0) at (-3.40,0) {\footnotesize On-chip tile\\Register / shared};
+    \node[vis arch node] (s1) at (0.00,0) {\footnotesize Fused QKV+Attn\\No HBM export};
+    \node[vis pipeline node] (s2) at (3.40,0) {\footnotesize Fused MLP\\Pipeline};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+\end{tikzpicture}
+\caption{Dataflow-driven schedule: activations stay on-chip across fused stages.}
+\label{fig:dataflow_residency}
+\end{figure}

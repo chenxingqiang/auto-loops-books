@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch09",
+  "chapter_title": "Hierarchical Synchronization and Communication",
+  "visuals": [
+    {
+      "id": "fig_sync_hierarchy_pipeline",
+      "kind": "pipeline_figure",
+      "section": "sync_hierarchy",
+      "label": "fig:sync_hierarchy_pipeline",
+      "caption": "Sync Hierarchy optimization pipeline in Hierarchical Synchronization and Communication.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Sync Hierarchy"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_hardware_sync_pick_architecture",
+      "kind": "architecture_figure",
+      "section": "hardware_sync_pick",
+      "label": "fig:hardware_sync_pick_architecture",
+      "caption": "Hardware Sync Pick block diagram for Hierarchical Synchronization and Communication.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

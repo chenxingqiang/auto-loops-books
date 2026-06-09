@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch21",
+  "chapter_title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
+  "visuals": [
+    {
+      "id": "fig_compiler_ratings_pipeline",
+      "kind": "pipeline_figure",
+      "section": "compiler_ratings",
+      "label": "fig:compiler_ratings_pipeline",
+      "caption": "Compiler Ratings optimization pipeline in Unified AI Compiler Analysis and Cross-Hardware Benchmark.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Compiler Ratings"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_compile_overhead_architecture",
+      "kind": "architecture_figure",
+      "section": "compile_overhead",
+      "label": "fig:compile_overhead_architecture",
+      "caption": "Compile Overhead block diagram for Unified AI Compiler Analysis and Cross-Hardware Benchmark.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

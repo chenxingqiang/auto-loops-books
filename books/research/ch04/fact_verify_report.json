@@ -1,0 +1,45 @@
+{
+  "chapter_id": "ch04",
+  "timestamp": "2026-06-09T17:13:40.263497+00:00",
+  "entry_count": 2,
+  "verified_ok_count": 0,
+  "entries": [
+    {
+      "claim": "ch04 cross-hardware decode metrics use bytes/token methodology",
+      "bib_key": "memoryfloor2026",
+      "source_url": "https://arxiv.org/abs/2605.30571",
+      "corroboration_url": "https://arxiv.org/abs/2507.14397",
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": false,
+      "corroboration_content_match": false,
+      "corroboration_missing_tokens": [
+        "empty content"
+      ],
+      "verified_ok": false,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch04/fact_sources/cf0029c11de6d2a0.json"
+    },
+    {
+      "claim": "ch04 launch overhead context from TaxBreak decode study",
+      "bib_key": "taxbreak2026",
+      "source_url": "https://arxiv.org/abs/2603.12465",
+      "corroboration_url": "https://arxiv.org/abs/2603.12465",
+      "source_fetch_ok": false,
+      "source_content_match": false,
+      "source_missing_tokens": [
+        "empty content"
+      ],
+      "corroboration_fetch_ok": null,
+      "corroboration_content_match": null,
+      "corroboration_missing_tokens": [],
+      "verified_ok": false,
+      "source_method": "craw4ai",
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch04/fact_sources/31fc9912722dff42.json"
+    }
+  ],
+  "status": "issues"
+}

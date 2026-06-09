@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch08",
+  "chapter_title": "TMA Double-Buffer Pipelines and Async Movement",
+  "visuals": [
+    {
+      "id": "fig_pipeline_theory_pipeline",
+      "kind": "pipeline_figure",
+      "section": "pipeline_theory",
+      "label": "fig:pipeline_theory_pipeline",
+      "caption": "Pipeline Theory optimization pipeline in TMA Double-Buffer Pipelines and Async Movement.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Pipeline Theory"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_gpu_tma_architecture",
+      "kind": "architecture_figure",
+      "section": "gpu_tma",
+      "label": "fig:gpu_tma_architecture",
+      "caption": "Gpu Tma block diagram for TMA Double-Buffer Pipelines and Async Movement.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "chapter_id": "ch03",
+  "chapter_title": "AI Hardware Architecture and Compiler Constraints",
+  "visuals": [
+    {
+      "id": "tab_hw_landscape",
+      "kind": "comparison_table",
+      "section": "hardware_landscape",
+      "label": "tab:hw_landscape",
+      "caption": "AI accelerator classes and primary execution models.",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "Class",
+        "Execution model",
+        "Decode fit"
+      ],
+      "rows": [
+        [
+          "NVIDIA GPU",
+          "SIMT + tensor cores",
+          "Graphs, fusion"
+        ],
+        [
+          "AMD GPU",
+          "Wavefront + matrix cores",
+          "HIP fusion"
+        ],
+        [
+          "x86/ARM CPU",
+          "Cache + SIMD",
+          "Coarse fusion"
+        ],
+        [
+          "Edge NPU",
+          "Spatial dataflow",
+          "Static megakernel"
+        ]
+      ]
+    },
+    {
+      "id": "tab_constraint_matrix",
+      "kind": "checklist_table",
+      "section": "constraint_matrix",
+      "label": "tab:constraint_matrix",
+      "caption": "Cross-hardware constraint matrix.",
+      "status": "done",
+      "placement": "t",
+      "columns": [
+        "Dimension",
+        "GPU",
+        "CPU",
+        "NPU"
+      ],
+      "rows": [
+        [
+          "On-chip SRAM",
+          "Shared mem / L1",
+          "L1/L2/L3",
+          "Tile buffers"
+        ],
+        [
+          "Parallel grain",
+          "Warp",
+          "Core + SIMD",
+          "Spatial PE array"
+        ],
+        [
+          "Dynamic shapes",
+          "Flexible",
+          "Flexible",
+          "Restricted"
+        ]
+      ]
+    },
+    {
+      "id": "fig_gpu_memory_hierarchy",
+      "kind": "architecture_figure",
+      "section": "gpu_constraints",
+      "label": "fig:gpu_memory_hierarchy",
+      "caption": "GPU memory hierarchy constraints for decode megakernels.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Register file",
+        "Shared memory",
+        "L2 cache",
+        "HBM"
+      ]
+    },
+    {
+      "id": "fig_benchmark_method",
+      "kind": "pipeline_figure",
+      "section": "benchmark_method",
+      "label": "fig:benchmark_method",
+      "caption": "Cross-hardware benchmark methodology used in this book.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Fixed model+ctx",
+          "detail": "Repro config"
+        },
+        {
+          "name": "Normalize metrics",
+          "detail": "bytes/token"
+        },
+        {
+          "name": "Compare targets",
+          "detail": "GPU / CPU / NPU"
+        }
+      ]
+    }
+  ]
+}

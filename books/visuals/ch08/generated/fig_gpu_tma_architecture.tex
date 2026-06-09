@@ -1,0 +1,14 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
+    \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{Gpu Tma block diagram for TMA Double-Buffer Pipelines and Async Movement.}
+\label{fig:gpu_tma_architecture}
+\end{figure}

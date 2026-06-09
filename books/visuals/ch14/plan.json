@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch14",
+  "chapter_title": "MLIR: Modern Compiler Infrastructure",
+  "visuals": [
+    {
+      "id": "fig_mlir_hw_matrix_pipeline",
+      "kind": "pipeline_figure",
+      "section": "mlir_hw_matrix",
+      "label": "fig:mlir_hw_matrix_pipeline",
+      "caption": "Mlir Hw Matrix optimization pipeline in MLIR: Modern Compiler Infrastructure.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Mlir Hw Matrix"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_mlir_arch_passes_architecture",
+      "kind": "architecture_figure",
+      "section": "mlir_arch_passes",
+      "label": "fig:mlir_arch_passes_architecture",
+      "caption": "Mlir Arch Passes block diagram for MLIR: Modern Compiler Infrastructure.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

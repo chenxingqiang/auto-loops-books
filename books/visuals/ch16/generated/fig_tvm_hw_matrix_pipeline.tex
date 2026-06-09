@@ -1,0 +1,14 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Tvm Hw Matrix};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
+    \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\Megakernel stage};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{Tvm Hw Matrix optimization pipeline in TVM and Apache TVM Stack.}
+\label{fig:tvm_hw_matrix_pipeline}
+\end{figure}

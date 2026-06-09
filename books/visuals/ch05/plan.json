@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch05",
+  "chapter_title": "AMD XDNA/AIE Dataflow Architecture",
+  "visuals": [
+    {
+      "id": "fig_xdna_tiles_pipeline",
+      "kind": "pipeline_figure",
+      "section": "xdna_tiles",
+      "label": "fig:xdna_tiles_pipeline",
+      "caption": "Xdna Tiles optimization pipeline in AMD XDNA/AIE Dataflow Architecture.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "Xdna Tiles"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_static_dataflow_rules_architecture",
+      "kind": "architecture_figure",
+      "section": "static_dataflow_rules",
+      "label": "fig:static_dataflow_rules_architecture",
+      "caption": "Static Dataflow Rules block diagram for AMD XDNA/AIE Dataflow Architecture.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}
