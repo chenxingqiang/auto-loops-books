@@ -1,131 +1,137 @@
 {
   "chapter_id": "ch19",
-  "pool_count": 25,
-  "assigned_count": 25,
+  "pool_count": 48,
+  "assigned_count": 48,
   "unassigned_count": 0,
-  "sections_with_cites": 3,
-  "unique_keys_in_tex": 24,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 46,
   "pool_path": "books/research/ch19/citation_pool.json",
   "sections_used": [
-    "Glow Arch Passes",
-    "Glow HW Matrix",
+    "Chapter Summary",
+    "Glow HW matrix",
+    "Glow arch passes",
+    "Glow case study",
+    "Glow codegen",
+    "Glow tuning",
     "chapter"
   ],
-  "cites_applied": 24,
+  "cites_applied": 46,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch19_glow.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "amit2024tldetectaibasedapp",
       "section": "chapter",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "glow"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "pasupuleti2025aiguidedquantumcom",
+      "section": "chapter",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "hardware",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "charlotte2024aidrivenoptimizati",
+      "section": "Glow HW matrix",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "optim",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "ford2023glowinthedarklabel",
+      "section": "Glow HW matrix",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "glow"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "Glow HW matrix",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "memoryfloor2026",
+      "section": "Glow HW matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "batch-1",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "schoeder2022amodulationbasedra",
+      "section": "Glow HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "patel2025llminference",
+      "section": "Glow HW matrix",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "sentence_id": "s0010",
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "section": "Glow HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
     },
     {
-      "sentence_id": "s0003",
+      "sentence_id": "s0011",
+      "bib_key": "li2025nearfieldtargetloc",
+      "section": "Glow HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
       "bib_key": "kim2023revisitinglightwei",
-      "section": "Glow HW Matrix",
+      "section": "Glow arch passes",
       "relevance_score": 18,
       "matched_keywords": [
         "compiler"
       ]
     },
     {
-      "sentence_id": "s0004",
-      "bib_key": "dao2022flashattention",
-      "section": "Glow HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "Glow HW Matrix",
-      "relevance_score": 64,
+      "sentence_id": "s0013",
+      "bib_key": "dao2023flashdecoding",
+      "section": "Glow arch passes",
+      "relevance_score": 9,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "Glow HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "kwon2023vllm",
-      "section": "Glow HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Glow HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "nvidia2022hopper",
-      "section": "Glow HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0010",
-      "bib_key": "agarwal2023hardwarebasedimple",
-      "section": "Glow HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0011",
-      "bib_key": "li2025nearfieldtargetloc",
-      "section": "Glow HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "amd2024xdna",
-      "section": "Glow HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+        "decode"
+      ],
+      "fallback": false
     }
   ],
-  "generated_at": "2026-06-10T03:19:41.697501"
+  "generated_at": "2026-06-10T09:10:09.382502"
 }

@@ -12,7 +12,7 @@
     "weight": 14
   },
   {
-    "term": "MegaKernel mode",
+    "term": "megakernel mode",
     "weight": 14
   },
   {
@@ -20,23 +20,23 @@
     "weight": 14
   },
   {
-    "term": "eager mode LLM inference compiler",
+    "term": "eager mode llm inference compiler",
     "weight": 13
   },
   {
-    "term": "graph mode LLM inference compiler",
+    "term": "graph mode llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MegaKernel mode LLM inference compiler",
+    "term": "megakernel mode llm inference compiler",
     "weight": 13
   },
   {
-    "term": "mode selection LLM inference compiler",
+    "term": "mode selection llm inference compiler",
     "weight": 13
   },
   {
-    "term": "eager PyTorch",
+    "term": "eager pytorch",
     "weight": 12
   },
   {
@@ -44,11 +44,11 @@
     "weight": 12
   },
   {
-    "term": "CUDA Graphs",
+    "term": "cuda graph",
     "weight": 11
   },
   {
-    "term": "MegaKernel",
+    "term": "megakernel",
     "weight": 11
   },
   {
@@ -60,7 +60,7 @@
     "weight": 10
   },
   {
-    "term": "PyTorch",
+    "term": "pytorch",
     "weight": 10
   },
   {
@@ -68,11 +68,19 @@
     "weight": 10
   },
   {
-    "term": "bottleneck",
+    "term": "aie",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -84,15 +92,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
-    "weight": 9
-  },
-  {
-    "term": "CUDA",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -100,15 +104,11 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
     "term": "execution",
     "weight": 9
   },
   {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -116,11 +116,23 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
+    "weight": 9
+  },
+  {
+    "term": "graphs",
+    "weight": 9
+  },
+  {
+    "term": "hbm",
+    "weight": 9
+  },
+  {
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -128,23 +140,7 @@
     "weight": 9
   },
   {
-    "term": "kernels",
-    "weight": 9
-  },
-  {
-    "term": "knobs",
-    "weight": 9
-  },
-  {
     "term": "launches",
-    "weight": 9
-  },
-  {
-    "term": "microbenchmarks",
-    "weight": 9
-  },
-  {
-    "term": "miss",
     "weight": 9
   },
   {
@@ -156,23 +152,31 @@
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "residency",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "static",
+    "weight": 9
+  },
+  {
+    "term": "target",
     "weight": 9
   },
   {
@@ -184,15 +188,23 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "warp",
     "weight": 9
   },
   {
-    "term": "YiRage",
+    "term": "xdna",
+    "weight": 9
+  },
+  {
+    "term": "yirage",
     "weight": 9
   }
 ]

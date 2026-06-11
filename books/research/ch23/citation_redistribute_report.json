@@ -1,26 +1,99 @@
 {
   "chapter_id": "ch23",
-  "pool_count": 32,
-  "assigned_count": 32,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 4,
-  "unique_keys_in_tex": 30,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch23/citation_pool.json",
   "sections_used": [
-    "Kv Hardware",
-    "LLM Decode Compile",
-    "Moe Scheduling",
-    "chapter"
+    "Chapter Summary",
+    "LLM decode compile",
+    "chapter",
+    "hetero moe",
+    "kv hardware",
+    "moe scheduling"
   ],
-  "cites_applied": 30,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch23_llm_moe_compilation.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "dao2023flashdecoding",
+      "bib_key": "hong2024llmaidedcompilatio",
       "section": "chapter",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "llm",
+        "compilation"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "anon2023decodev",
+      "section": "chapter",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "patel2025llminference",
+      "section": "LLM decode compile",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "llm decode",
+        "decode",
+        "llm"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "memoryfloor2026",
+      "section": "LLM decode compile",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "llm decode",
+        "decode",
+        "llm",
+        "cuda"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "LLM decode compile",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "anon2020decodemap",
+      "section": "LLM decode compile",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "fan2025ellieenergyefficie",
+      "section": "LLM decode compile",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "llm decode",
+        "decode",
+        "llm"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "dao2023flashdecoding",
+      "section": "LLM decode compile",
       "relevance_score": 10,
       "matched_keywords": [
         "decode"
@@ -28,112 +101,44 @@
       "fallback": false
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "dao2022flashattention",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
-      "bib_key": "patel2025llminference",
-      "section": "LLM Decode Compile",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "LLM decode",
-        "decode",
-        "LLM"
-      ]
-    },
-    {
-      "sentence_id": "s0004",
-      "bib_key": "fan2025ellieenergyefficie",
-      "section": "LLM Decode Compile",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "LLM decode",
-        "decode",
-        "LLM"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "qiao2026tellmeanefficiente",
-      "section": "LLM Decode Compile",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "LLM decode",
-        "decode",
-        "LLM"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "memoryfloor2026",
-      "section": "LLM Decode Compile",
-      "relevance_score": 73,
-      "matched_keywords": [
-        "LLM decode",
-        "decode",
-        "LLM",
-        "GPU"
-      ]
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "kwon2023vllm",
-      "section": "LLM Decode Compile",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "liu2024deepseekv3",
-      "section": "LLM Decode Compile",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "kamath2025podascpttentionscp",
-      "section": "LLM Decode Compile",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "LLM decode",
-        "decode",
-        "LLM"
-      ]
-    },
-    {
       "sentence_id": "s0010",
-      "bib_key": "taxbreak2026",
-      "section": "LLM Decode Compile",
-      "relevance_score": 20,
+      "bib_key": "qiao2026tellmeanefficiente",
+      "section": "LLM decode compile",
+      "relevance_score": 64,
       "matched_keywords": [
-        "LLM"
+        "llm decode",
+        "decode",
+        "llm"
       ]
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "yirage2026",
-      "section": "LLM Decode Compile",
-      "relevance_score": 29,
-      "matched_keywords": [
-        "LLM",
-        "CPU"
-      ]
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "nvidia2022hopper",
-      "section": "LLM Decode Compile",
+      "bib_key": "dao2022flashattention",
+      "section": "LLM decode compile",
       "relevance_score": 1,
       "matched_keywords": [],
       "fallback": true
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "zhang2025duoservemoedualpha",
+      "section": "moe scheduling",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "moe scheduling",
+        "llm",
+        "moe"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "zhang2026lifecyclemixtureof",
+      "section": "moe scheduling",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "moe"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:42.545820"
+  "generated_at": "2026-06-10T09:10:12.827148"
 }

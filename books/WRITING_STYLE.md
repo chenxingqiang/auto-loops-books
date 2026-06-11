@@ -160,6 +160,71 @@ When expanding ch02+, read ch01's section openings and paragraph rhythm before d
 
 ---
 
+## 七、O'Reilly 对齐：*AI Systems Performance Engineering*（Fregly）风格映射
+
+**Reference sample:** `chapter1-AI Systems Performance Engineering - Chris Fregly.pdf` (repo root).
+
+本书与 Fregly 同属 **中高阶 AI 系统性能工程专著**，但聚焦 **编译器 + 多硬件 decode/MegaKernel**（YiRage），而非 PyTorch 全栈 + NVIDIA 集群运维。对齐的是 **叙事范式与章节结构**，不是复制其 CUDA/PyTorch 生态边界。
+
+### 1. 双线主轴对照（全书贯穿）
+
+| Fregly 主线 | 本书等价 |
+|-------------|----------|
+| **Mechanical Sympathy**（软硬件协同） | **Hardware–software codesign**：硬件约束 → 编译 Pass → 内核/静态图；每节必须绑定 residency |
+| **Goodput**（有效吞吐） | **Useful decode metrics**：`kernels/token`、`bytes/token`、batch-1 `ms/token`、`R_floor`、HDBI——拒绝裸 FLOPs / 利用率 |
+| DeepSeek 等工业标杆 | TaxBreak、Memory-Floor、FlashAttention/Flash-Decoding、DeepSeek-V3 部署比、YiRage 回归矩阵 |
+| Profile-driven tuning | TaxBreak 分解 + Nsight/roofline 思维 + IR diff 回归门 |
+
+**EN:** Open chapters by naming the **constraint** (hardware export rules, SRAM ceiling, launch floor), not by defining softmax/attention from first principles.
+
+### 2. 单章固定范式（Fregly 对齐，全书强制）
+
+每章按以下顺序组织（与 Fregly 的 *Key Takeaways → Conclusion* 一致）：
+
+1. **Opening** — 行业痛点 / 约束 / 量化锚点（1–3 段）
+2. **`\section{…}` 正文** — 每节 = 一个具体工程问题；小节标题可检索
+3. **Figure / Table / Example** — 数据优先
+4. **`\section{Key Takeaways}`** — 5–8 条 bullet，可碎片化查阅
+5. **`\section{Conclusion}`** — 串联本章、引出下一章
+
+**LaTeX 模板：**
+
+```latex
+\section{Key Takeaways}
+\label{sec:chXX_key_takeaways}
+\begin{itemize}
+\item \textbf{Measure …} — … \citep{…}
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:chXX_conclusion}
+… bridge to Chapter~YY …
+```
+
+**迁移：** 深度 Agent 润色章用 `Key Takeaways` + `Conclusion`；旧 `Chapter Summary` 在改版时替换。
+
+### 3. 叙事模板（问题驱动 + 量化）
+
+`工程痛点 → 约束 → 底层机制 → 分层方案（GPU/CPU/NPU）→ 基准/数字 → 取舍`
+
+### 4. 与 Fregly 的刻意差异
+
+| 维度 | Fregly | 本书 |
+|------|--------|------|
+| 硬件 | NVIDIA 为主 | GPU + CPU + XDNA/AIE |
+| 软件 | PyTorch / CUDA / K8s | YiRage IR、MegaKernel |
+| 附录 | 175+ 优化清单 | 回归基准 + verified_facts JSONL |
+
+### 5. 深度 Agent 润色（选项 2）Fregly 验收
+
+1. 章首 200 词内：**可核验数字** 或 **named benchmark**
+2. 每 `\section`：**multi-hardware delta**
+3. 结尾：**Key Takeaways + Conclusion**（非 padding）
+4. 禁止 `Review gate` 机械复读
+5. `verified_facts.jsonl` 为技术主张，非 meta 描述
+
+---
+
 ## Agent checklist (per editing session)
 
 Before committing chapter prose:
@@ -175,7 +240,7 @@ Before committing chapter prose:
 
 ---
 
-## 七、事实核验门禁（与 FACT_VERIFICATION.md 同步）
+## 八、事实核验门禁（与 FACT_VERIFICATION.md 同步）
 
 凡**事实描述、数据举例、厂商参数、性能数字**，必须先 **Web 检索 ≥2 轮、交叉验证**，写入 `books/research/<chapter_id>/verified_facts.jsonl` 并附 **可靠链接**，方可进入 `books/chapters/*.tex`。
 

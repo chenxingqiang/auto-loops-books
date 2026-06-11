@@ -8,7 +8,7 @@
     "weight": 14
   },
   {
-    "term": "multi HW ops",
+    "term": "multi hw ops",
     "weight": 14
   },
   {
@@ -20,19 +20,19 @@
     "weight": 14
   },
   {
-    "term": "env packaging LLM inference compiler",
+    "term": "env packaging llm inference compiler",
     "weight": 13
   },
   {
-    "term": "multi HW ops LLM inference compiler",
+    "term": "multi hw ops llm inference compiler",
     "weight": 13
   },
   {
-    "term": "pitfalls LLM inference compiler",
+    "term": "pitfalls llm inference compiler",
     "weight": 13
   },
   {
-    "term": "scheduling LLM inference compiler",
+    "term": "scheduling llm inference compiler",
     "weight": 13
   },
   {
@@ -84,15 +84,31 @@
     "weight": 10
   },
   {
+    "term": "aie",
+    "weight": 9
+  },
+  {
+    "term": "bandwidth",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
     "term": "best",
     "weight": 9
   },
   {
-    "term": "bottleneck",
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -104,11 +120,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -124,11 +140,7 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -136,19 +148,19 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -156,19 +168,23 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "means",
     "weight": 9
   },
   {
-    "term": "microbenchmarks",
+    "term": "megakernel",
     "weight": 9
   },
   {
-    "term": "miss",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "numa",
+    "weight": 9
+  },
+  {
+    "term": "on-chip",
     "weight": 9
   },
   {
@@ -176,15 +192,23 @@
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "profile",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "residency",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "static",
+    "weight": 9
+  },
+  {
+    "term": "target",
     "weight": 9
   },
   {
@@ -192,15 +216,27 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "traffic",
     "weight": 9
   },
   {
-    "term": "YiRage",
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
+    "weight": 9
+  },
+  {
+    "term": "yirage",
     "weight": 9
   }
 ]

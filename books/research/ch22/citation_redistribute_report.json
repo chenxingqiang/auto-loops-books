@@ -1,43 +1,50 @@
 {
   "chapter_id": "ch22",
-  "pool_count": 22,
-  "assigned_count": 22,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 3,
-  "unique_keys_in_tex": 20,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch22/citation_pool.json",
   "sections_used": [
-    "Bottleneck Locating",
-    "HW Aware Profiling",
-    "chapter"
+    "Chapter Summary",
+    "HW aware profiling",
+    "bottleneck locating",
+    "chapter",
+    "regression gates",
+    "tuning workflow"
   ],
-  "cites_applied": 20,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch22_e2e_tuning_workflow.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "kanchumarthi2026endtoendlinuxadmin",
       "section": "chapter",
-      "relevance_score": 38,
+      "relevance_score": 74,
       "matched_keywords": [
-        "bandwidth",
-        "decode"
+        "tun",
+        "end-to-end",
+        "performance",
+        "tuning"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
+      "bib_key": "dao2023flashdecoding",
       "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "fallback": false
     },
     {
       "sentence_id": "s0003",
       "bib_key": "mai2025cimwiseanireebased",
-      "section": "HW Aware Profiling",
+      "section": "HW aware profiling",
       "relevance_score": 74,
       "matched_keywords": [
         "tun",
@@ -49,7 +56,7 @@
     {
       "sentence_id": "s0004",
       "bib_key": "avantika2025endtoendsystemperf",
-      "section": "HW Aware Profiling",
+      "section": "HW aware profiling",
       "relevance_score": 74,
       "matched_keywords": [
         "tun",
@@ -59,73 +66,80 @@
       ]
     },
     {
-      "sentence_id": "s0005",
-      "bib_key": "yirage2026",
-      "section": "HW Aware Profiling",
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "HW aware profiling",
       "relevance_score": 18,
       "matched_keywords": [
-        "end-to-end"
+        "xdna"
       ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "dao2022flashattention",
-      "section": "HW Aware Profiling",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "kwon2023vllm",
-      "section": "HW Aware Profiling",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "liu2024deepseekv3",
-      "section": "HW Aware Profiling",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "sliwa2019towardsdatadrivens",
-      "section": "HW Aware Profiling",
-      "relevance_score": 36,
+      "bib_key": "memoryfloor2026",
+      "section": "HW aware profiling",
+      "relevance_score": 56,
       "matched_keywords": [
-        "end-to-end",
-        "performance"
-      ]
-    },
-    {
-      "sentence_id": "s0010",
-      "bib_key": "patel2025llminference",
-      "section": "HW Aware Profiling",
-      "relevance_score": 18,
-      "matched_keywords": [
+        "bandwidth",
+        "batch-1",
         "decode"
       ]
     },
     {
-      "sentence_id": "s0011",
-      "bib_key": "nvidia2022hopper",
-      "section": "HW Aware Profiling",
+      "sentence_id": "s0008",
+      "bib_key": "purwakarta2022kompostanamanandal",
+      "section": "HW aware profiling",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "taxbreak2026",
+      "section": "HW aware profiling",
       "relevance_score": 1,
       "matched_keywords": [],
       "fallback": true
     },
     {
+      "sentence_id": "s0010",
+      "bib_key": "anon2022nigerprofilduproje",
+      "section": "HW aware profiling",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "anon2023bandwidth",
+      "section": "HW aware profiling",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "bandwidth"
+      ]
+    },
+    {
       "sentence_id": "s0012",
-      "bib_key": "amd2024xdna",
-      "section": "HW Aware Profiling",
+      "bib_key": "wen2026querymarftquerygui",
+      "section": "bottleneck locating",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "bottleneck",
+        "tun",
+        "end-to-end",
+        "tuning"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "dao2022flashattention",
+      "section": "bottleneck locating",
       "relevance_score": 1,
       "matched_keywords": [],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:42.353354"
+  "generated_at": "2026-06-10T09:10:11.992231"
 }

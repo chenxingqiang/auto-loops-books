@@ -1,24 +1,38 @@
 {
   "chapter_id": "ch13",
-  "pool_count": 21,
-  "assigned_count": 21,
+  "pool_count": 40,
+  "assigned_count": 40,
   "unassigned_count": 0,
-  "sections_with_cites": 4,
-  "unique_keys_in_tex": 20,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 38,
   "pool_path": "books/research/ch13/citation_pool.json",
   "sections_used": [
-    "GPU CPU NPU Split",
-    "Parallel Scheduling",
-    "Tiling Theory",
-    "chapter"
+    "Chapter Summary",
+    "GPU CPU NPU split",
+    "chapter",
+    "fusion theory",
+    "layout theory",
+    "parallel scheduling",
+    "tiling theory"
   ],
-  "cites_applied": 20,
+  "cites_applied": 38,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch13_compiler_theory.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
+      "bib_key": "markowitz2023generativeaiaremor",
+      "section": "chapter",
+      "relevance_score": 70,
+      "matched_keywords": [
+        "core theory",
+        "core",
+        "theory"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
       "bib_key": "patel2025llminference",
       "section": "chapter",
       "relevance_score": 18,
@@ -27,103 +41,111 @@
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "park2026cpugpuworkloaddist",
-      "section": "chapter",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "GPU CPU",
-        "CPU",
-        "GPU"
-      ]
-    },
-    {
       "sentence_id": "s0003",
-      "bib_key": "wu2023pytorch20thejourne",
-      "section": "Tiling Theory",
-      "relevance_score": 36,
+      "bib_key": "chowdhury2026marginalizedstakeh",
+      "section": "tiling theory",
+      "relevance_score": 70,
       "matched_keywords": [
-        "compiler",
-        "core"
+        "core theory",
+        "core",
+        "theory"
       ]
     },
     {
       "sentence_id": "s0004",
       "bib_key": "jeong2026flowgraphawaretili",
-      "section": "Tiling Theory",
+      "section": "tiling theory",
       "relevance_score": 22,
       "matched_keywords": [
         "tiling"
       ]
     },
     {
-      "sentence_id": "s0005",
-      "bib_key": "taxbreak2026",
-      "section": "Tiling Theory",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
       "sentence_id": "s0006",
-      "bib_key": "pronk2026beyondmodeloptimiz",
-      "section": "Tiling Theory",
-      "relevance_score": 20,
+      "bib_key": "park2026cpugpuworkloaddist",
+      "section": "tiling theory",
+      "relevance_score": 64,
       "matched_keywords": [
-        "NPU"
+        "gpu cpu",
+        "cpu",
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "yirage2026",
-      "section": "Tiling Theory",
-      "relevance_score": 18,
+      "bib_key": "rjoub2026greendecodingelqco",
+      "section": "tiling theory",
+      "relevance_score": 1,
       "matched_keywords": [
-        "YiRage"
-      ]
+        "independent",
+        "miss",
+        "real",
+        "ship"
+      ],
+      "fallback": true
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "malaraju2025aiaugmentedcompile",
-      "section": "Tiling Theory",
-      "relevance_score": 18,
+      "bib_key": "zhuang2023convolutionalneura",
+      "section": "tiling theory",
+      "relevance_score": 42,
       "matched_keywords": [
-        "compiler"
+        "tiling",
+        "npu"
       ]
     },
     {
       "sentence_id": "s0009",
-      "bib_key": "semianalysis2024tma",
-      "section": "Tiling Theory",
-      "relevance_score": 18,
+      "bib_key": "memoryfloor2026",
+      "section": "tiling theory",
+      "relevance_score": 37,
       "matched_keywords": [
-        "core"
+        "gpu",
+        "cell",
+        "decode"
       ]
     },
     {
       "sentence_id": "s0010",
-      "bib_key": "dao2022flashattention",
-      "section": "Tiling Theory",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "li2025llmpoweredautomate",
+      "section": "tiling theory",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "static"
+      ]
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "kwon2023vllm",
-      "section": "Tiling Theory",
+      "bib_key": "chandra2025reducinglatencyand",
+      "section": "tiling theory",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "constraints",
+        "real"
+      ],
       "fallback": true
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Tiling Theory",
+      "bib_key": "jayawardena2026coreprinciplesofma",
+      "section": "fusion theory",
+      "relevance_score": 95,
+      "matched_keywords": [
+        "core theory",
+        "fusion theory",
+        "fusion",
+        "core",
+        "theory"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "taxbreak2026",
+      "section": "fusion theory",
       "relevance_score": 1,
       "matched_keywords": [],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:39.969696"
+  "generated_at": "2026-06-10T09:10:03.294264"
 }

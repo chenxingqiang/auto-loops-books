@@ -1,20 +1,55 @@
 {
   "chapter_id": "ch24",
-  "pool_count": 23,
+  "pool_count": 58,
   "bib_keys": [
     "hu2019multiobjectivecont",
+    "nguyen2024ruru2pheterocluste",
+    "patil2026crossguardazerotru",
+    "salman2021degeneracyeffectso",
+    "tork2026chargerdeploymenta",
+    "zhang2024hydrogenbondedfram",
+    "zheng2021subevaccuracydelta",
+    "salman2022stoppingpowerofhet",
+    "dutta2018picoleveldnasensin",
+    "zhang2024hydrogenbondedfram_42",
+    "mollaamin2025dopingeffectsinter",
+    "hou2023enhancedmoisturere",
+    "anis2025impactofheteroatom",
+    "wang2025ll37anditstruncate",
+    "zheng2020heterositedoubleco",
     "yirage2026",
     "mondesire2025automatinghpcsoftw",
     "zhao2020theheterogeneousde",
+    "sheng2021softwarecompilatio",
     "gener2025tutorialcedraholis",
+    "leupers2019softwarecompilatio",
     "lin2021onlineconnectivity",
+    "zhou2020heterogeneousnetwo",
+    "xu2025practicallyfixedti",
+    "valdez2025hampahardwareaccel",
     "velascomonte2018ontheflydeployment",
     "memoryfloor2026",
     "patel2025llminference",
+    "fumero2024heterogeneoushardw",
+    "anon2019fromirregularheter",
+    "maverick2026theriseofheterobeh",
+    "v2018deploymentofintrus",
     "taxbreak2026",
+    "lan2025regioselective12di",
+    "anon2024heterocombform",
+    "li20252naromaticityinhet",
+    "miguel2019introductionthinki",
+    "anon2023heteroadjampn",
     "beniwal2019lshapedtunnellingf",
+    "ding2020anefficientprotoco",
+    "schoonenberg2019heterofunctionalgr",
+    "arone2025tecendoaautohetero",
     "pindoo2020heterogatedielectr",
+    "schoonenberg2019heterofunctionalgr_60",
     "xu2019multiapplicationsm",
+    "diniz2022hardwarecompilatio",
+    "smith2026heliumdeploydiscou",
+    "enrici2019efficientdataflowa",
     "dao2023flashdecoding",
     "dao2022flashattention",
     "kwon2023vllm",
@@ -38,6 +73,165 @@
         "hetero",
         "deployment",
         "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "nguyen2024ruru2pheterocluste",
+      "title": "Ru-Ru2P hetero-cluster promoted V2CTx sheets-based electrocatalyst enables industrial-level AEM water electrolysis",
+      "source_tier": "B",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero",
+        "industrial"
+      ]
+    },
+    {
+      "bib_key": "patil2026crossguardazerotru",
+      "title": "CrossGuard: A Zero-Trust Architecture for Privacy-Preserving AI Deployment Across Heterogeneous Multi-Cloud Environments",
+      "source_tier": "B",
+      "relevance_score": 77,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "hetero",
+        "deployment",
+        "heterogeneous",
+        "multi-hardware"
+      ]
+    },
+    {
+      "bib_key": "salman2021degeneracyeffectso",
+      "title": "Degeneracy Effects of Energy loss Straggling of Homo and Hetero Di-Cluster Ions",
+      "source_tier": "B",
+      "relevance_score": 77,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "tork2026chargerdeploymenta",
+      "title": "Charger Deployment and Fleet Sizing for Heterogeneous Fleets Under Budget-Constrained Multi-Stage Electrification",
+      "source_tier": "C",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "fleets",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "zhang2024hydrogenbondedfram",
+      "title": "Hydrogen-Bonded Frameworks Based on Hetero-Trimers and -Tetramers of Octahedral Cluster Unit [Ta6cl12(Cn)6]3- and Mn Complexes",
+      "source_tier": "C",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "zheng2021subevaccuracydelta",
+      "title": "SUB-EV ACCURACY DELTA-COUPLED-CLUSTER CALCULATIONS FOR HETERO-SITE DOUBLE CORE-IONIZED STATES",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "salman2022stoppingpowerofhet",
+      "title": "Stopping power of Hetero nuclear di-cluster ions from partial-wave analysis based on semi classical phase shifts",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "dutta2018picoleveldnasensin",
+      "title": "Pico-level DNA sensing by hetero-polymetalate, Na10{Dy2W10O30(µ-S)6}·80H2O, cluster",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "zhang2024hydrogenbondedfram_42",
+      "title": "Hydrogen-bonded frameworks based on hetero-trimers and -tetramers of octahedral cluster unit [Ta6Cl12(CN)6]3− and Mn complexes",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "mollaamin2025dopingeffectsinter",
+      "title": "Doping Effects in Ternary Aluminum Gallium Nitride Hetero-Cluster Towards High-Electron-Mobility Transistors for Hydrogen Sensing: A Density Functional Theory Study and Energy-Saving",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "hou2023enhancedmoisturere",
+      "title": "Enhanced moisture resistance and catalytic stability of ethylene oxidation at room temperature by the ultrasmall MnO  cluster/Pt hetero-junction",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "anis2025impactofheteroatom",
+      "title": "Impact of hetero-atom doping on electronic structure and reactivity of anionic Al13− cluster: a combined density functional theory and global optimization investigation",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "wang2025ll37anditstruncate",
+      "title": "LL‐37 and Its Truncated Fragments Modulate Amyloid‐β Dynamics, Aggregation and Toxicity Through Hetero‐Oligomer and Cluster Formation",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "zheng2020heterositedoubleco",
+      "title": "Hetero-site Double Core Ionization Energies with Sub-electronvolt Accuracy from Delta-Coupled-Cluster Calculations",
+      "source_tier": "B",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
       ]
     },
     {
@@ -75,6 +269,17 @@
       ]
     },
     {
+      "bib_key": "sheng2021softwarecompilatio",
+      "title": "Software Compilation and Optimization Techniques for Heterogeneous Multi‐core Platforms",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "compilation",
+        "heterogeneous"
+      ]
+    },
+    {
       "bib_key": "gener2025tutorialcedraholis",
       "title": "Tutorial: CEDR: A Holistic Software and Hardware Design Environment for Hardware Agnostic Application Development and Deployment on FPGA-Integrated Heterogeneous Systems",
       "source_tier": "A",
@@ -82,6 +287,17 @@
       "matched_keywords": [
         "hetero",
         "deployment",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "leupers2019softwarecompilatio",
+      "title": "Software Compilation Techniques for Heterogeneous Embedded Multi-Core Systems",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "compilation",
         "heterogeneous"
       ]
     },
@@ -94,6 +310,39 @@
         "hetero",
         "deployment",
         "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "zhou2020heterogeneousnetwo",
+      "title": "Heterogeneous Networks Through Multi-resources Deployment, Performance Enhancement for",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "xu2025practicallyfixedti",
+      "title": "Practically fixed-time H∞ deployment of large-scale heterogeneous multi-agent  systems with multiple dimensions via a PDE-based approach",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "valdez2025hampahardwareaccel",
+      "title": "HAMP: A Hardware Accelerator Multi-Platform Benchmark for High Performance Heterogeneous Computing",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous",
+        "multi-hardware"
       ]
     },
     {
@@ -129,6 +378,47 @@
       ]
     },
     {
+      "bib_key": "fumero2024heterogeneoushardw",
+      "title": "Heterogeneous Hardware",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "anon2019fromirregularheter",
+      "title": "From irregular heterogeneous software to reconfigurable hardware",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous"
+      ]
+    },
+    {
+      "bib_key": "maverick2026theriseofheterobeh",
+      "title": "The Rise of Hetero Behaviorus",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "hetero",
+        "heterogeneous",
+        "treat"
+      ]
+    },
+    {
+      "bib_key": "v2018deploymentofintrus",
+      "title": "Deployment of Intrusion Prevention System on Multi-Core Processor Based Security Hardware",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "deployment",
+        "multi-hardware"
+      ]
+    },
+    {
       "bib_key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
       "source_tier": "A",
@@ -138,9 +428,81 @@
       ]
     },
     {
+      "bib_key": "lan2025regioselective12di",
+      "title": "Regioselective 1,2-Di(hetero)arylation of Activated and Unactivated Alkenes with (Hetero)aryl Chlorides",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "anon2024heterocombform",
+      "title": "hetero-, comb. form",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "li20252naromaticityinhet",
+      "title": "2nπ Aromaticity in Hetero-onocyclic Molecules",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "miguel2019introductionthinki",
+      "title": "Introduction: Thinking beyond Hetero/Homo Normativities",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "anon2023heteroadjampn",
+      "title": "hetero, adj. &amp; n.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
       "bib_key": "beniwal2019lshapedtunnellingf",
       "title": "L-shaped Tunnelling Field Effect Transistor with hetero-gate dielectric and hetero dielectric box",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "ding2020anefficientprotoco",
+      "title": "An efficient protocol for the synthesis of monofluoroalkylated (hetero)arenes via Pd-catalyzed α-(hetero)arylation of α-fluoroketones with (hetero)aryl bromides",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "schoonenberg2019heterofunctionalgr",
+      "title": "Hetero-functional Graph Theory",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
+      "bib_key": "arone2025tecendoaautohetero",
+      "title": "Tecendo a auto-hetero-ecoformação docente Weaving self-hetero-eco-teacher education",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
         "hetero"
@@ -156,12 +518,48 @@
       ]
     },
     {
+      "bib_key": "schoonenberg2019heterofunctionalgr_60",
+      "title": "Hetero-functional Graph Theory Preliminaries",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hetero"
+      ]
+    },
+    {
       "bib_key": "xu2019multiapplicationsm",
       "title": "Multi-applications mapping platform based on hardware and software",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "multi-hardware"
+      ]
+    },
+    {
+      "bib_key": "diniz2022hardwarecompilatio",
+      "title": "Hardware Compilation Using SSA",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
+      ]
+    },
+    {
+      "bib_key": "smith2026heliumdeploydiscou",
+      "title": "Helium Deploy Discount Code OFF10 – 10% OFF Deployment + Hardware (Verified 2026)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "deployment"
+      ]
+    },
+    {
+      "bib_key": "enrici2019efficientdataflowa",
+      "title": "Efficient Data-Flow Analysis of UML/SysML Diagrams for Optimized Model Compilation of Hardware-software Systems",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
       ]
     },
     {

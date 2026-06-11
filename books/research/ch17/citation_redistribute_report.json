@@ -1,140 +1,140 @@
 {
   "chapter_id": "ch17",
-  "pool_count": 36,
-  "assigned_count": 36,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 5,
-  "unique_keys_in_tex": 34,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch17/citation_pool.json",
   "sections_used": [
     "Chapter Summary",
-    "Triton Arch Passes",
-    "Triton Codegen",
-    "Triton HW Matrix",
+    "Triton HW matrix",
+    "Triton arch passes",
+    "Triton case study",
+    "Triton codegen",
+    "Triton tuning",
     "chapter"
   ],
-  "cites_applied": 34,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch17_triton.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "lin2023kescocompilerbased",
+      "bib_key": "han2024unleashingcpupoten",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 36,
       "matched_keywords": [
-        "compiler"
+        "cpu",
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "bla2019gpuacceleratedfixp",
+      "bib_key": "kern2024virtuallyaugmented",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 20,
       "matched_keywords": [
-        "GPU"
+        "hardware"
       ]
     },
     {
       "sentence_id": "s0003",
-      "bib_key": "han2024unleashingcpupoten",
-      "section": "Triton HW Matrix",
+      "bib_key": "li2026benchmarkingcudacu",
+      "section": "Triton HW matrix",
       "relevance_score": 56,
       "matched_keywords": [
         "optim",
-        "compiler",
-        "GPU"
+        "gpu",
+        "triton"
       ]
     },
     {
       "sentence_id": "s0004",
       "bib_key": "anon2025productionizinggpu",
-      "section": "Triton HW Matrix",
-      "relevance_score": 36,
+      "section": "Triton HW matrix",
+      "relevance_score": 18,
       "matched_keywords": [
-        "production",
-        "Triton"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "Triton HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "triton"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "Triton HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "akbar2019gpuacceleratedfuzz",
+      "section": "Triton HW matrix",
+      "relevance_score": 36,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "gpu",
+        "means"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "taxbreak2026",
-      "section": "Triton HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "memoryfloor2026",
+      "section": "Triton HW matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "batch-1",
+        "decode"
+      ]
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "ji2022compilerdirectedin",
-      "section": "Triton HW Matrix",
-      "relevance_score": 18,
+      "bib_key": "lin2023kescocompilerbased",
+      "section": "Triton HW matrix",
+      "relevance_score": 36,
       "matched_keywords": [
-        "compiler"
+        "compiler",
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0009",
-      "bib_key": "tillet2024blockbasedgpuprogr",
-      "section": "Triton HW Matrix",
+      "bib_key": "gangrade2023applicationsofahig",
+      "section": "Triton HW matrix",
       "relevance_score": 18,
       "matched_keywords": [
-        "Triton"
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0010",
-      "bib_key": "kern2024virtuallyaugmented",
-      "section": "Triton HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "schoeder2022amodulationbasedra",
+      "section": "Triton HW matrix",
+      "relevance_score": 20,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "hardware"
       ]
     },
     {
       "sentence_id": "s0011",
       "bib_key": "agarwal2023hardwarebasedimple",
-      "section": "Triton HW Matrix",
-      "relevance_score": 64,
+      "section": "Triton HW matrix",
+      "relevance_score": 20,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
         "target"
       ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "dao2022flashattention",
-      "section": "Triton HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "han2025kernelinstructiono",
+      "section": "Triton arch passes",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "triton"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "tillet2024blockbasedgpuprogr",
+      "section": "Triton arch passes",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "triton"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:41.178235"
+  "generated_at": "2026-06-10T09:10:07.693799"
 }

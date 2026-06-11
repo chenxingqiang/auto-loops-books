@@ -5,12 +5,12 @@
   "\"codegen\" AND \"backend\"",
   "\"tun\" AND \"profile\"",
   "\"case\" AND \"benchmark\"",
-  "\"TVM and apache TVM stack\" AND \"TVM arch passes\"",
-  "\"TVM case study\" AND \"TVM codegen\"",
-  "\"TVM HW matrix\" AND \"TVM tuning\"",
-  "\"TVM arch passes LLM inference compiler\" AND \"TVM case study LLM inference compiler\"",
-  "\"TVM codegen LLM inference compiler\" AND \"TVM HW matrix LLM inference compiler\"",
-  "\"TVM tuning LLM inference compiler\" AND \"case benchmark\"",
+  "\"tvm and apache tvm stack\" AND \"tvm arch passes\"",
+  "\"tvm case study\" AND \"tvm codegen\"",
+  "\"tvm hw matrix\" AND \"tvm tuning\"",
+  "\"tvm arch passes llm inference compiler\" AND \"tvm case study llm inference compiler\"",
+  "\"tvm codegen llm inference compiler\" AND \"tvm hw matrix llm inference compiler\"",
+  "\"tvm tuning llm inference compiler\" AND \"case benchmark\"",
   "\"codegen backend\" AND \"hardware target\"",
   "\"pass lower\" AND \"tun profile\""
 ]

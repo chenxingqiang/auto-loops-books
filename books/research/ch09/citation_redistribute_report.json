@@ -1,25 +1,39 @@
 {
   "chapter_id": "ch09",
-  "pool_count": 29,
-  "assigned_count": 29,
+  "pool_count": 60,
+  "assigned_count": 60,
   "unassigned_count": 0,
-  "sections_with_cites": 5,
-  "unique_keys_in_tex": 27,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 58,
   "pool_path": "books/research/ch09/citation_pool.json",
   "sections_used": [
-    "Deadlock Detection",
-    "Hardware Sync Pick",
-    "Sync Hierarchy",
-    "YiRage Sync Pass",
-    "chapter"
+    "Chapter Summary",
+    "YiRage sync pass",
+    "chapter",
+    "deadlock detection",
+    "hardware sync pick",
+    "sync hierarchy"
   ],
-  "cites_applied": 27,
+  "cites_applied": 58,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch09_sync_hierarchy.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
+      "bib_key": "zheng2023researchonclocksyn",
+      "section": "chapter",
+      "relevance_score": 110,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
       "bib_key": "patel2025llminference",
       "section": "chapter",
       "relevance_score": 18,
@@ -28,17 +42,9 @@
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
       "sentence_id": "s0003",
-      "bib_key": "zheng2023researchonclocksyn",
-      "section": "Sync Hierarchy",
+      "bib_key": "mahgoli2026ahierarchicalaidri",
+      "section": "sync hierarchy",
       "relevance_score": 110,
       "matched_keywords": [
         "hierarchical synchronization and communication",
@@ -50,55 +56,8 @@
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "mahgoli2026ahierarchicalaidri",
-      "section": "Sync Hierarchy",
-      "relevance_score": 110,
-      "matched_keywords": [
-        "hierarchical synchronization and communication",
-        "sync",
-        "communication",
-        "hierarchical",
-        "synchronization"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "hu2021plisyncprefetchlos",
-      "section": "Sync Hierarchy",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "sync"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "sviridov2018tosyncornottosyncw",
-      "section": "Sync Hierarchy",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "sync"
-      ]
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "dao2022flashattention",
-      "section": "Sync Hierarchy",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "kwon2023vllm",
-      "section": "Sync Hierarchy",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "hunold2018hierarchicalclocks",
-      "section": "Sync Hierarchy",
+      "bib_key": "luo2025multisystemintegra",
+      "section": "sync hierarchy",
       "relevance_score": 56,
       "matched_keywords": [
         "sync",
@@ -107,9 +66,49 @@
       ]
     },
     {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "sync hierarchy",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "grunichev2018analysisoftimeforh",
+      "section": "sync hierarchy",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "communication",
+        "hierarchical"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "dantas2026subconscioussyncah",
+      "section": "sync hierarchy",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "memoryfloor2026",
+      "section": "sync hierarchy",
+      "relevance_score": 37,
+      "matched_keywords": [
+        "gpu",
+        "cell",
+        "decode"
+      ]
+    },
+    {
       "sentence_id": "s0010",
-      "bib_key": "nakada2024lipsyncmlmachinele",
-      "section": "Sync Hierarchy",
+      "bib_key": "louadj2021howtosynchronizean",
+      "section": "sync hierarchy",
       "relevance_score": 20,
       "matched_keywords": [
         "sync"
@@ -117,20 +116,34 @@
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Sync Hierarchy",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "dao2023flashdecoding",
+      "section": "sync hierarchy",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "fallback": false
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "nvidia2022hopper",
-      "section": "Sync Hierarchy",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "petkoski2020normalizingthebrai",
+      "section": "hardware sync pick",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "francesco2025similsynclinearsyn",
+      "section": "hardware sync pick",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:39.319627"
+  "generated_at": "2026-06-10T09:09:59.967119"
 }

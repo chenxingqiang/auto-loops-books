@@ -4,11 +4,11 @@
     "weight": 18
   },
   {
-    "term": "CPU residency",
+    "term": "cpu residency",
     "weight": 14
   },
   {
-    "term": "GPU residency",
+    "term": "gpu residency",
     "weight": 14
   },
   {
@@ -16,35 +16,35 @@
     "weight": 14
   },
   {
-    "term": "NPU residency",
+    "term": "npu residency",
     "weight": 14
   },
   {
-    "term": "YiRage memory pass",
+    "term": "yirage memory pass",
     "weight": 14
   },
   {
-    "term": "CPU residency LLM inference compiler",
+    "term": "cpu residency llm inference compiler",
     "weight": 13
   },
   {
-    "term": "GPU residency LLM inference compiler",
+    "term": "gpu residency llm inference compiler",
     "weight": 13
   },
   {
-    "term": "lifetime planning LLM inference compiler",
+    "term": "lifetime planning llm inference compiler",
     "weight": 13
   },
   {
-    "term": "NPU residency LLM inference compiler",
+    "term": "npu residency llm inference compiler",
     "weight": 13
   },
   {
-    "term": "YiRage memory pass LLM inference compiler",
+    "term": "yirage memory pass llm inference compiler",
     "weight": 13
   },
   {
-    "term": "cache NUMA",
+    "term": "cache numa",
     "weight": 12
   },
   {
@@ -52,7 +52,7 @@
     "weight": 12
   },
   {
-    "term": "NPU sram",
+    "term": "npu sram",
     "weight": 12
   },
   {
@@ -60,7 +60,7 @@
     "weight": 12
   },
   {
-    "term": "YiRage memory",
+    "term": "yirage memory",
     "weight": 12
   },
   {
@@ -76,11 +76,11 @@
     "weight": 10
   },
   {
-    "term": "NPU",
+    "term": "npu",
     "weight": 10
   },
   {
-    "term": "NUMA",
+    "term": "numa",
     "weight": 10
   },
   {
@@ -100,15 +100,27 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
   },
   {
-    "term": "bottleneck",
+    "term": "aie",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -120,11 +132,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -140,11 +152,7 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -152,19 +160,19 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -172,11 +180,11 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "means",
     "weight": 9
   },
   {
-    "term": "microbenchmarks",
+    "term": "megakernel",
     "weight": 9
   },
   {
@@ -184,23 +192,19 @@
     "weight": 9
   },
   {
-    "term": "production",
-    "weight": 9
-  },
-  {
     "term": "residency",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "same",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "static",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "target",
     "weight": 9
   },
   {
@@ -208,11 +212,23 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "traffic",
+    "weight": 9
+  },
+  {
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
     "weight": 9
   }
 ]

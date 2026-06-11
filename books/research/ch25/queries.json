@@ -2,13 +2,13 @@
   "\"Auto-Optimization and AI-Assisted Compilation\"",
   "\"rl\" AND \"autotun\"",
   "\"reward\" AND \"hardware\"",
-  "\"YiRage\" AND \"auto\"",
-  "\"auto-optimization and AI-assisted compilation\" AND \"HW reward\"",
-  "\"rl autotune\" AND \"YiRage auto\"",
-  "\"HW reward LLM inference compiler\" AND \"rl autotune LLM inference compiler\"",
-  "\"YiRage auto LLM inference compiler\" AND \"reward hardware\"",
+  "\"yirage\" AND \"auto\"",
+  "\"auto-optimization and ai-assisted compilation\" AND \"hw reward\"",
+  "\"rl autotune\" AND \"yirage auto\"",
+  "\"hw reward llm inference compiler\" AND \"rl autotune llm inference compiler\"",
+  "\"yirage auto llm inference compiler\" AND \"reward hardware\"",
   "\"rl autotun\" AND \"auto\"",
   "\"autotun\" AND \"hardware\"",
-  "\"reward\" AND \"YiRage\"",
-  "\"AI-assisted\" AND \"auto-optimization\""
+  "\"reward\" AND \"yirage\"",
+  "\"ai-assisted\" AND \"aie\""
 ]

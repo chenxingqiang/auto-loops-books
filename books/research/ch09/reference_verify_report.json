@@ -1,9 +1,9 @@
 {
   "chapter_id": "ch09",
   "chapter_title": "Hierarchical Synchronization and Communication",
-  "timestamp": "2026-06-10 02:33:54",
+  "timestamp": "2026-06-10 09:12:59",
   "keywords_file": "books/research/ch09/keywords.json",
-  "keyword_count": 45,
+  "keyword_count": 50,
   "top_keywords": [
     {
       "term": "hierarchical synchronization and communication",
@@ -22,27 +22,27 @@
       "weight": 14
     },
     {
-      "term": "YiRage sync pass",
+      "term": "yirage sync pass",
       "weight": 14
     },
     {
-      "term": "deadlock detection LLM inference compiler",
+      "term": "deadlock detection llm inference compiler",
       "weight": 13
     },
     {
-      "term": "hardware sync pick LLM inference compiler",
+      "term": "hardware sync pick llm inference compiler",
       "weight": 13
     },
     {
-      "term": "sync hierarchy LLM inference compiler",
+      "term": "sync hierarchy llm inference compiler",
       "weight": 13
     },
     {
-      "term": "YiRage sync pass LLM inference compiler",
+      "term": "yirage sync pass llm inference compiler",
       "weight": 13
     },
     {
-      "term": "GPU CPU",
+      "term": "gpu cpu",
       "weight": 12
     },
     {
@@ -50,7 +50,7 @@
       "weight": 12
     },
     {
-      "term": "YiRage sync",
+      "term": "yirage sync",
       "weight": 12
     },
     {
@@ -62,15 +62,15 @@
       "weight": 10
     },
     {
-      "term": "CPU",
+      "term": "cpu",
       "weight": 10
     },
     {
-      "term": "GPU",
+      "term": "gpu",
       "weight": 10
     },
     {
-      "term": "NPU",
+      "term": "npu",
       "weight": 10
     },
     {
@@ -78,11 +78,19 @@
       "weight": 10
     },
     {
-      "term": "YiRage",
+      "term": "yirage",
       "weight": 10
     },
     {
-      "term": "bottleneck",
+      "term": "aie",
+      "weight": 9
+    },
+    {
+      "term": "batch-1",
+      "weight": 9
+    },
+    {
+      "term": "buffer",
       "weight": 9
     },
     {
@@ -90,184 +98,1247 @@
       "weight": 9
     },
     {
-      "term": "chapter summary",
-      "weight": 9
-    },
-    {
-      "term": "communication",
-      "weight": 9
-    },
-    {
-      "term": "compiler",
+      "term": "cell",
       "weight": 9
     }
   ],
-  "citation_count": 12,
+  "citation_count": 58,
   "citations": [
     {
-      "key": "patel2025llminference",
-      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
-      "score": 18,
+      "key": "zheng2023researchonclocksyn",
+      "title": "Research on clock synchronization technology of metering equipment based on satellite communication and wide area hierarchical aggregation",
+      "score": 229,
       "matched_keywords": [
-        "decode"
+        "hierarchical synchronization and communication",
+        "sync hierarchy",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "hierarchical",
+        "launches",
+        "megakernel",
+        "same",
+        "synchronization",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 114,
+      "matched_keywords": [
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "bytes",
+        "compiler",
+        "decode",
+        "launches",
+        "megakernel",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "luo2025multisystemintegra",
+      "title": "Multisystem integration of hierarchical structures underlies individual variability in speech auditory-motor synchronization",
+      "score": 101,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
     },
     {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 172,
+      "matched_keywords": [
+        "gpu cpu",
+        "sync barrier",
+        "barrier",
+        "cpu",
+        "gpu",
+        "sync",
+        "aie",
+        "batch-1",
+        "buffer",
+        "decode",
+        "gemm",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "grunichev2018analysisoftimeforh",
+      "title": "Analysis of time for hierarchical distributed updating of location information of subscribers in next-generation mobile communication networks",
+      "score": 199,
+      "matched_keywords": [
+        "gpu cpu",
+        "sync barrier",
+        "barrier",
+        "cpu",
+        "gpu",
+        "sync",
+        "aie",
+        "batch-1",
+        "buffer",
+        "communication",
+        "decode",
+        "gemm",
+        "hierarchical",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dantas2026subconscioussyncah",
+      "title": "Subconscious Sync: A Human–AI Co-Resonance Framework",
+      "score": 157,
+      "matched_keywords": [
+        "sync hierarchy",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "bytes",
+        "cell",
+        "compiler",
+        "decode",
+        "launches",
+        "residency",
+        "same",
+        "target",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
-      "score": 28,
+      "score": 196,
       "matched_keywords": [
-        "GPU",
-        "decode"
+        "sync hierarchy",
+        "sync hierarchy llm inference compiler",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "batch-1",
+        "bytes",
+        "cell",
+        "compiler",
+        "cuda",
+        "decode",
+        "launches",
+        "residency",
+        "same",
+        "target",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "louadj2021howtosynchronizean",
+      "title": "How to synchronize an out of sync system?",
+      "score": 119,
+      "matched_keywords": [
+        "sync",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 55,
+      "matched_keywords": [
+        "barrier",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "kwon2023vllm",
-      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    }
-  ],
-  "low_relevance_citations": [
-    {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "francesco2025similsynclinearsyn",
+      "title": "Simil Sync/Linear Sync",
+      "score": 56,
+      "matched_keywords": [
+        "sync",
+        "decode",
+        "flops",
+        "residency",
+        "teams"
+      ],
+      "status": "ok"
     },
     {
       "key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 95,
+      "matched_keywords": [
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "dao2022flashattention",
       "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 95,
+      "matched_keywords": [
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "kwon2023vllm",
       "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 95,
+      "matched_keywords": [
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 32,
+      "matched_keywords": [
+        "gpu cpu",
+        "cpu",
+        "gpu"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 64,
+      "matched_keywords": [
+        "cpu",
+        "aie",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yan2024insyncoroutofsyncu",
+      "title": "In Sync or Out of Sync? Understanding Stress and Learning Performance in Collaborative Healthcare Simulations through Physiological Synchrony and Arousal",
+      "score": 99,
+      "matched_keywords": [
+        "hardware sync pick",
+        "gpu",
+        "npu",
+        "sync",
+        "buffer",
+        "compiler",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2018securecommunicatio",
+      "title": "Secure Communication Using Chaos Synchronization",
+      "score": 194,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "yirage sync",
+        "deadlock",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "yirage",
+        "communication",
+        "gemm",
+        "hierarchical",
+        "on-chip",
+        "synchronization",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 166,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "yirage sync",
+        "deadlock",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "yirage",
+        "communication",
+        "gemm",
+        "hierarchical",
+        "on-chip",
+        "synchronization",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 184,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "yirage sync",
+        "deadlock",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "yirage",
+        "communication",
+        "cuda",
+        "gemm",
+        "hierarchical",
+        "on-chip",
+        "synchronization",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "luo2025hierarchicalsynchr",
+      "title": "Hierarchical Synchronization and Distortion Scaling in Social Media Networks: A Fractal-Like Topology Theory",
+      "score": 223,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 204,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "hunold2018hierarchicalclocks",
+      "title": "Hierarchical Clock Synchronization in MPI",
+      "score": 213,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "jordheim2022insyncoutofsync",
+      "title": "In sync/Out of sync",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "klimov2018featuresofsynchron",
+      "title": "FEATURES OF SYNCHRONIZATION IN WIRELESS COMMUNICATION NETWORKS",
+      "score": 213,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2022syncandswarm",
+      "title": "Sync and Swarm",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2023lipsyncv",
+      "title": "lip-sync, v.",
+      "score": 183,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "yirage sync",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "yirage",
+        "buffer",
+        "bytes",
+        "communication",
+        "decode",
+        "hbm",
+        "hierarchical",
+        "static",
+        "synchronization",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "argyriou2020secrecyinwirelessc",
+      "title": "Secrecy in wireless communication through closed-loop receiver de-synchronization",
+      "score": 201,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "yirage sync",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "yirage",
+        "buffer",
+        "bytes",
+        "communication",
+        "decode",
+        "hbm",
+        "hierarchical",
+        "static",
+        "synchronization",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wiesner2024timesynchronizatio",
+      "title": "Time Synchronization Extension for the IO-Link Industrial Communication Protocol",
+      "score": 213,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "pickett2026pdfdescargarsyncam",
+      "title": "pdf descargar SYNC \\& SAVOR",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2022synchronizationand",
+      "title": "Synchronization and Communication Primitives",
+      "score": 213,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2023postsyncv",
+      "title": "post-sync, v.",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kim2025hierarchicalreinfo",
+      "title": "Hierarchical Reinforcement Learning with Optimal Level Synchronization Based on Flow-Based Deep Generative Model",
+      "score": 202,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "deadlock",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "volgushev2024integratedcommunic",
+      "title": "Integrated Communication, Localization, Sensing and Synchronization in 6G Cognitive Wireless Networks",
+      "score": 202,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "deadlock",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon20212021ieeeinternatio",
+      "title": "2021 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "score": 223,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon20242024ieeeinternatio",
+      "title": "2024 IEEE International Symposium on Precision Clock Synchronization for Measurement, Control, and Communication (ISPCS)",
+      "score": 213,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2023lipsyncn",
+      "title": "lip-sync, n.",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync barrier",
+        "barrier",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "he2026physicallayersecur",
+      "title": "Physical layer security strategy for network time synchronization message transmission",
+      "score": 204,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2023syncnampv",
+      "title": "sync, n. \\& v.",
+      "score": 195,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2018clocksynchronizati",
+      "title": "Clock Synchronization in Distributed Systems",
+      "score": 193,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "deadlock",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "blommaert2020commentarychronoto",
+      "title": "Commentary: Chronotopes, synchronization and formats",
+      "score": 214,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "sync",
+        "bytes",
+        "communication",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hierarchical",
+        "hopper",
+        "launches",
+        "residency",
+        "same",
+        "synchronization",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "hu2021plisyncprefetchlos",
+      "title": "PLI-Sync: Prefetch Loss-Insensitive Sync for NDN Group Streaming",
+      "score": 57,
+      "matched_keywords": [
+        "cpu",
+        "sync",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "delforge2025correctiontoinsync",
+      "title": "Correction to: In sync or out of sync?",
+      "score": 96,
+      "matched_keywords": [
+        "yirage sync pass",
+        "sync barrier",
+        "yirage sync",
+        "barrier",
+        "sync",
+        "yirage",
+        "compiler",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2023postsyncnampadj",
+      "title": "post-sync, n. \\& adj.",
+      "score": 43,
+      "matched_keywords": [
+        "sync hierarchy",
+        "sync",
+        "tile"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "delforge2025insyncoroutofsync",
+      "title": "In sync or out of sync?",
+      "score": 89,
+      "matched_keywords": [
+        "sync hierarchy",
+        "npu",
+        "sync",
+        "buffer",
+        "compiler",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "sviridov2018tosyncornottosyncw",
+      "title": "To Sync or Not to Sync: Why Asynchronous Traffic Control Is Good Enough for Your Data Center",
+      "score": 119,
+      "matched_keywords": [
+        "sync",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "mkacher2018securetimesynchron",
+      "title": "Secure Time Synchronization Protocol",
+      "score": 92,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "rowlands2020syncspeed",
+      "title": "Sync Speed",
+      "score": 157,
+      "matched_keywords": [
+        "hardware sync pick",
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "sync",
+        "bytes",
+        "cell",
+        "compiler",
+        "decode",
+        "launches",
+        "residency",
+        "same",
+        "target",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "score": 66,
+      "matched_keywords": [
+        "cpu",
+        "yirage",
+        "cuda",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "johnshoy2020tosyncornottosynct",
+      "title": "To Sync or Not to Sync, That is the Question: Choosing Between Synchronous and Asynchronous Modes in Remote and Online Language Teaching",
+      "score": 74,
+      "matched_keywords": [
+        "yirage sync pass",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "compiler",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "bhagat2025routesyncaunifiede",
+      "title": "Route-Sync: A Unified Experience",
+      "score": 65,
+      "matched_keywords": [
+        "yirage sync pass",
+        "yirage sync",
+        "sync",
+        "yirage",
+        "tile"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2025outgunningmcrpcwit",
+      "title": "Outgunning mCRPC with SYNC-T",
+      "score": 111,
+      "matched_keywords": [
+        "yirage sync pass",
+        "yirage sync",
+        "npu",
+        "sync",
+        "yirage",
+        "buffer",
+        "compiler",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "gasparini2022coralpolypsdancens",
+      "title": "Coral Polyps Dance ’n Sync",
+      "score": 57,
+      "matched_keywords": [
+        "cpu",
+        "sync",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nakada2024lipsyncmlmachinele",
+      "title": "Lip-Sync ML: Machine Learning-based Framework to Generate Lip-sync Animations in FINAL FANTASY VII REBIRTH",
+      "score": 96,
+      "matched_keywords": [
+        "yirage sync pass",
+        "sync barrier",
+        "yirage sync",
+        "barrier",
+        "sync",
+        "yirage",
+        "compiler",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2019synchronization",
+      "title": "SYNCHRONIZATION",
+      "score": 92,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wiesner2025timesynchronizatio",
+      "title": "Time Synchronization Performance of Single-Pair Ethernet (SPE) Solutions",
+      "score": 92,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "coleman2021multicoreintraproc",
+      "title": "Multi-Core Intra-Process Clock Synchronization",
+      "score": 92,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "luo2018ahighreliabilitysu",
+      "title": "A High-Reliability Sub-Nanosecond Network Time Synchronization Method Enabled by Double-Frequency Distributed Time Synchronization",
+      "score": 92,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "buffer",
+        "communication",
+        "cuda",
+        "hierarchical",
+        "synchronization"
+      ],
+      "status": "ok"
     }
   ],
+  "low_relevance_citations": [],
   "missing_bib_keys": [],
   "literature_rescore": [],
-  "status": "warn",
+  "status": "ok",
   "min_citation_score": 8
 }

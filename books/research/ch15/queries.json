@@ -5,12 +5,12 @@
   "\"codegen\" AND \"backend\"",
   "\"tun\" AND \"profile\"",
   "\"case\" AND \"benchmark\"",
-  "\"XLA: production-grade AI compiler\" AND \"XLA\"",
-  "\"XLA arch passes\" AND \"XLA case study\"",
-  "\"XLA codegen\" AND \"XLA HW matrix\"",
-  "\"XLA tuning\" AND \"XLA arch passes LLM inference compiler\"",
-  "\"XLA case study LLM inference compiler\" AND \"XLA codegen LLM inference compiler\"",
-  "\"XLA HW matrix LLM inference compiler\" AND \"XLA tuning LLM inference compiler\"",
+  "\"xla: production-grade ai compiler\" AND \"xla\"",
+  "\"xla arch passes\" AND \"xla case study\"",
+  "\"xla codegen\" AND \"xla hw matrix\"",
+  "\"xla tuning\" AND \"xla arch passes llm inference compiler\"",
+  "\"xla case study llm inference compiler\" AND \"xla codegen llm inference compiler\"",
+  "\"xla hw matrix llm inference compiler\" AND \"xla tuning llm inference compiler\"",
   "\"case benchmark\" AND \"codegen backend\"",
   "\"hardware target\" AND \"pass lower\""
 ]

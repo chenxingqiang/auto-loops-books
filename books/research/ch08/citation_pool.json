@@ -1,15 +1,35 @@
 {
   "chapter_id": "ch08",
-  "pool_count": 29,
+  "pool_count": 52,
   "bib_keys": [
+    "dalabaev2020kinematicflowparam",
+    "arifjanov2020hydraulicfrictionc",
     "huemer2020timingdomaincrossi",
+    "lowry2025lumbeepipelines",
+    "chong2021stressintensityfac",
     "zhao2023rbgcrepurposethebu",
     "yirage2026",
+    "priantama2019implementasialgori",
+    "mao2026designandimplement",
+    "asuquo2025amachinelearningpi",
     "memoryfloor2026",
     "nvidia2022hopper",
+    "ghosh2026thedoublethreatpar",
+    "hanson2023pipelinetripledoub",
+    "su2020acomparisonofsingl",
+    "wang2026doublelayerdatadri",
+    "hanson2021pipelinetripledoub",
     "zhang2020learninghowtodrive",
+    "nakagawa2026evosubsterapipelin",
+    "liu2020areferenceguideddo",
+    "dong2022ultrathindoublebar",
+    "anon2022protectiveproperti",
     "shukla2020doubledifferential",
+    "kumar2023developmentofcemno",
+    "feng2023studyonthemechanis",
     "li2021trajectorybasedpri",
+    "f2021numericalstudyonto",
+    "fuss2021doublewallhardened",
     "patel2025llminference",
     "anon2020async2020commentar",
     "anon2020async2020committee",
@@ -21,6 +41,9 @@
     "anon2023async2023organizin",
     "anon2018messagefromtheasyn",
     "anon2023async2023messagefr",
+    "groot2022asyncwithandfor",
+    "vail2022transcendingthedou",
+    "kautsch2023introducingasyncaw",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -34,6 +57,28 @@
   ],
   "papers": [
     {
+      "bib_key": "dalabaev2020kinematicflowparam",
+      "title": "Kinematic Flow Parameters During Liquid Movement in Pressurized Water Pipelines",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "pipeline",
+        "movement",
+        "pipelines"
+      ]
+    },
+    {
+      "bib_key": "arifjanov2020hydraulicfrictionc",
+      "title": "Hydraulic Friction Coefficient at Hydraulic Mixing Movement in Pressure Pipelines",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "pipeline",
+        "movement",
+        "pipelines"
+      ]
+    },
+    {
       "bib_key": "huemer2020timingdomaincrossi",
       "title": "Timing Domain Crossing using Muller Pipelines",
       "source_tier": "A",
@@ -41,6 +86,26 @@
       "matched_keywords": [
         "pipeline",
         "pipelines"
+      ]
+    },
+    {
+      "bib_key": "lowry2025lumbeepipelines",
+      "title": "Lumbee Pipelines",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ]
+    },
+    {
+      "bib_key": "chong2021stressintensityfac",
+      "title": "Stress Intensity Factor of Double Cracks on Seabed-Spanning Pipeline Surface under the Spring Boundary",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "pipeline",
+        "surface"
       ]
     },
     {
@@ -64,6 +129,36 @@
       ]
     },
     {
+      "bib_key": "priantama2019implementasialgori",
+      "title": "IMPLEMENTASI ALGORITMA BACKGROUND SUBTRACTION UNTUK DETEKSI TINGGI MUKA AIR (TMA) PADA APLIKASI PERINGATAN DINI BANJIR BANDANG BERBASIS PENGOLAHAN CITRA",
+      "source_tier": "B",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "NPU",
+        "TMA"
+      ]
+    },
+    {
+      "bib_key": "mao2026designandimplement",
+      "title": "Design and implementation of reorder buffer in superscalar pipeline processor",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "pipeline",
+        "pipelines"
+      ]
+    },
+    {
+      "bib_key": "asuquo2025amachinelearningpi",
+      "title": "A Machine-Learning Pipeline for Predicting Methanol Yield in a Double-Pass Plug-Flow Reactor Using a Synthetic Langmuir–Hinshelwood Dataset",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "pipeline",
+        "production"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -83,12 +178,93 @@
       ]
     },
     {
+      "bib_key": "ghosh2026thedoublethreatpar",
+      "title": "The Double Threat Paradox: Do Dual Banking Systems Buffer Climate and Geopolitical Shocks? ​",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "hanson2023pipelinetripledoub",
+      "title": "Pipeline Triple-Double: Designing for 3 Pipe Materials with 2 Diameter Alternates",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
+      "bib_key": "su2020acomparisonofsingl",
+      "title": "A Comparison of Single-Buffer and Double-Buffer Design in a Systolic Array Generator",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "wang2026doublelayerdatadri",
+      "title": "Double-Layer Data-Driven Risk Assessment and Prediction of Drainage Pipeline Networks",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
+      "bib_key": "hanson2021pipelinetripledoub",
+      "title": "Pipeline Triple-Double—Designing for Three Pipe Materials with Two Diameter Alternates",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
       "bib_key": "zhang2020learninghowtodrive",
       "title": "Learning how to drive using DDPG Algorithm with Double Experience Buffer Priority Sampling",
       "source_tier": "A",
       "relevance_score": 20,
       "matched_keywords": [
         "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "nakagawa2026evosubsterapipelin",
+      "title": "EvoSubster: a pipeline for evolutionary inference of single- and double-base substitution spectra",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
+      "bib_key": "liu2020areferenceguideddo",
+      "title": "A Reference-Guided Double Pipeline Face Image Completion Network",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
+      "bib_key": "dong2022ultrathindoublebar",
+      "title": "Ultra-thin double barrier AlGaN/GaN high threshold voltage HEMT with graded AlGaN/Si3N4 gate and p-type buffer layer",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "anon2022protectiveproperti",
+      "title": "PROTECTIVE PROPERTIES OF PIPELINE INSULATION WITH A BUFFER LAYER BASED ON LIQUID ORGANIC HYDROGEN CARRIERS",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
       ]
     },
     {
@@ -101,12 +277,48 @@
       ]
     },
     {
+      "bib_key": "kumar2023developmentofcemno",
+      "title": "Development of CeMnO2 and CeMnO2 buffer layer nanomaterials for CIGSSe/perovskite double-graded solar cells",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "feng2023studyonthemechanis",
+      "title": "Study on the Mechanism of Buffer Absorbing Energy of Double-Layer Heterostructure Based on Viscoelastic Materials for Mems Devices",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "double-buffer"
+      ]
+    },
+    {
       "bib_key": "li2021trajectorybasedpri",
       "title": "Trajectory Based Prioritized Double Experience Buffer for Sample-Efficient Policy Optimization",
       "source_tier": "A",
       "relevance_score": 20,
       "matched_keywords": [
         "double-buffer"
+      ]
+    },
+    {
+      "bib_key": "f2021numericalstudyonto",
+      "title": "Numerical Study on Torsional Behavior of Carbon Steel-Concrete-Stainless Steel Double-Skin Tube (Dst) Used in Submarine Pipeline",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
+      ]
+    },
+    {
+      "bib_key": "fuss2021doublewallhardened",
+      "title": "Double-wall hardened abrasion resistant steel pipeline systems for hydraulic and pneumatic mine backfill conveying",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pipeline"
       ]
     },
     {
@@ -203,6 +415,33 @@
       "bib_key": "anon2023async2023messagefr",
       "title": "ASYNC 2023 Message from the Organizing Committee",
       "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "groot2022asyncwithandfor",
+      "title": "Async With and For",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "async"
+      ]
+    },
+    {
+      "bib_key": "vail2022transcendingthedou",
+      "title": "Transcending the Double Movement",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "movement"
+      ]
+    },
+    {
+      "bib_key": "kautsch2023introducingasyncaw",
+      "title": "Introducing async/await",
+      "source_tier": "B",
       "relevance_score": 18,
       "matched_keywords": [
         "async"

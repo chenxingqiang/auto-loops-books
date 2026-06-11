@@ -2,11 +2,15 @@
 \label{chap:ch12}
 \typeout{START_CHAPTER "ch12" \theabspage}
 
-Production decode teams rarely fail for lack of framework features---they fail because compiler and kernel schedules violate residency, launch, and bandwidth contracts on the SKU they actually ship \citep{patel2025llminference}. This chapter continues the book's problem-first thread: name the contradiction, trace it to hardware limits, then show how passes and megakernels recover SLO on GPU, CPU, and NPU fleets \citep{alizadeh2020machinelearningbas}.
+Parts~I--II established decode metrics and hardware contracts; \emph{Three Kernel Execution Modes} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
 
-\section{Eager Mode}
-\label{sec:eager_mode}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\section{eager mode}
+\label{sec:ch12_eager_mode}
+
 % AUTO_VISUAL:fig_eager_mode_pipeline
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -22,18 +26,25 @@ Production decode teams rarely fail for lack of framework features---they fail b
 \label{fig:eager_mode_pipeline}
 \end{figure}
 
+Teams hit \textbf{eager mode} when Three Kernel Execution Modes looks correct in isolation yet decode telemetry disagrees---usually because eager was planned without PyTorch residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes \citep{fukumura2024visuallyrepresenti}. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{kirchheim2022pytorchoodalibrary}. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{taxbreak2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{yirage2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dao2022flashattention}.
+Hardware truth: GPUs bound eager with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes \citep{chen2019crstateinkernelche}. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2023flashdecoding}. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2022hopper}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024xdna}.
+Compiler/kernel fix: predicate fusion on eager/PyTorch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes \citep{antonov2021inferringcustomsyn}. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2024cudagraphs}. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024aie}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize eager with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked PyTorch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes \citep{pitigalaarac2024symbolicexecutionf}. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused eager raises bytes/token; fused schedule must keep PyTorch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\section{Graph Mode}
-\label{sec:graph_mode}
+\paragraph{Scope.} This section binds eager, PyTorch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{graph mode}
+\label{sec:ch12_graph_mode}
+
 % AUTO_VISUAL:fig_graph_mode_architecture
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -49,100 +60,209 @@ MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Mo
 \label{fig:graph_mode_architecture}
 \end{figure}
 
+The production surprise at \textbf{graph mode} is not peak FLOPs; it is illegal tier placement: CUDA Graphs spilling to HBM/DDR while CUDA Graphs still pays launch or DMA tax every token \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes \citep{kwon2023vllm}. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026}. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: CUDA Graphs producers must feed CUDA Graphs consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for CUDA Graphs on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds CUDA Graphs to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{MegaKernel Mode}
-\label{sec:megakernel_mode}
+\section{MegaKernel mode}
+\label{sec:ch12_megakernel_mode}
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{MegaKernel mode} is where Three Kernel Execution Modes meets Chapter~1 counters: fix MegaKernel and MegaKernel together or bytes/token flatlines while kernel microbenchs celebrate \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware truth: GPUs bound MegaKernel with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler/kernel fix: predicate fusion on MegaKernel/MegaKernel legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize MegaKernel with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked MegaKernel---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\section{Mode Selection}
-\label{sec:mode_selection}
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused MegaKernel raises bytes/token; fused schedule must keep MegaKernel on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds MegaKernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{mode selection}
+\label{sec:ch12_mode_selection}
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Teams hit \textbf{mode selection} when Three Kernel Execution Modes looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without trade residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: hardware producers must feed trade consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds hardware, trade to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{Chapter Summary}
 \label{sec:ch12_summary}
 
-The through-line for ch12 is unchanged: hardware constraints dictate compiler passes, fusion boundaries, and deployment metrics. Carry bytes/token and launches/token spreadsheets forward; later chapters assume those baselines exist.
+Three Kernel Execution Modes succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch12_eager_mode}, Section~\ref{sec:ch12_graph_mode}, Section~\ref{sec:ch12_megakernel_mode} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
 
+\textbf{eager mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-\subsection{Engineering Deep Dive}
-\label{sec:ch12_deep_dive}
+Binding software to silicon: compiler passes must encode eager/PyTorch legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When eager mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Three Kernel Execution Modes failure at \textbf{graph mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: CUDA Graphs and CUDA Graphs must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for graph mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{MegaKernel mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: MegaKernel sets the residency envelope; MegaKernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify MegaKernel, MegaKernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{mode selection} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode hardware/trade legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When mode selection disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{eager mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: eager sets the residency envelope; PyTorch determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify eager, PyTorch, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: PyTorch constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{graph mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-Eager Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{eager}, \textbf{PyTorch} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds eager PyTorch to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode CUDA Graphs/CUDA Graphs legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Graph Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{CUDA Graphs} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds CUDA Graphs to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When graph mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-MegaKernel Mode is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{MegaKernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds MegaKernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting graph mode, attach roofline or NPU buffer accounting showing CUDA Graphs residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Mode Selection is a production bottleneck surface for Three Kernel Execution Modes. Teams that treat \textbf{hardware}, \textbf{trade} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds hardware trade to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+The usual Three Kernel Execution Modes failure at \textbf{MegaKernel mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: MegaKernel and MegaKernel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for MegaKernel mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize MegaKernel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+Production teams misread \textbf{mode selection} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: hardware sets the residency envelope; trade determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify hardware, trade, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trade constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+The usual Three Kernel Execution Modes failure at \textbf{eager mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: eager and PyTorch must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for eager mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: PyTorch constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{graph mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: CUDA Graphs sets the residency envelope; CUDA Graphs determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify CUDA Graphs, CUDA Graphs, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting graph mode, attach roofline or NPU buffer accounting showing CUDA Graphs residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\textbf{MegaKernel mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode MegaKernel/MegaKernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When MegaKernel mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize MegaKernel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+The usual Three Kernel Execution Modes failure at \textbf{mode selection} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: hardware and trade must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for mode selection: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trade constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\textbf{eager mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode eager/PyTorch legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When eager mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Three Kernel Execution Modes failure at \textbf{graph mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: CUDA Graphs and CUDA Graphs must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for graph mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+Production teams misread \textbf{MegaKernel mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: MegaKernel sets the residency envelope; MegaKernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify MegaKernel, MegaKernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\textbf{mode selection} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode hardware/trade legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When mode selection disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
 \typeout{END_CHAPTER "ch12" \theabspage}

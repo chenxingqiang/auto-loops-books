@@ -1,50 +1,50 @@
 [
   {
-    "term": "Glow: lightweight AI compiler",
+    "term": "glow: lightweight ai compiler",
     "weight": 18
   },
   {
-    "term": "Glow",
+    "term": "glow",
     "weight": 17
   },
   {
-    "term": "Glow arch passes",
+    "term": "glow arch passes",
     "weight": 14
   },
   {
-    "term": "Glow case study",
+    "term": "glow case study",
     "weight": 14
   },
   {
-    "term": "Glow codegen",
+    "term": "glow codegen",
     "weight": 14
   },
   {
-    "term": "Glow HW matrix",
+    "term": "glow hw matrix",
     "weight": 14
   },
   {
-    "term": "Glow tuning",
+    "term": "glow tuning",
     "weight": 14
   },
   {
-    "term": "Glow arch passes LLM inference compiler",
+    "term": "glow arch passes llm inference compiler",
     "weight": 13
   },
   {
-    "term": "Glow case study LLM inference compiler",
+    "term": "glow case study llm inference compiler",
     "weight": 13
   },
   {
-    "term": "Glow codegen LLM inference compiler",
+    "term": "glow codegen llm inference compiler",
     "weight": 13
   },
   {
-    "term": "Glow HW matrix LLM inference compiler",
+    "term": "glow hw matrix llm inference compiler",
     "weight": 13
   },
   {
-    "term": "Glow tuning LLM inference compiler",
+    "term": "glow tuning llm inference compiler",
     "weight": 13
   },
   {
@@ -96,7 +96,7 @@
     "weight": 10
   },
   {
-    "term": "GPU CPU NPU",
+    "term": "gpu cpu npu",
     "weight": 10
   },
   {
@@ -140,15 +140,27 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
   },
   {
-    "term": "bottleneck",
+    "term": "aie",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -160,11 +172,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -172,11 +184,7 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -184,19 +192,19 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -204,7 +212,11 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "means",
+    "weight": 9
+  },
+  {
+    "term": "megakernel",
     "weight": 9
   },
   {
@@ -212,31 +224,31 @@
     "weight": 9
   },
   {
-    "term": "miss",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "passes",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "residency",
     "weight": 9
   },
   {
-    "term": "slos",
+    "term": "same",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "static",
     "weight": 9
   },
   {
@@ -244,11 +256,23 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "traffic",
+    "weight": 9
+  },
+  {
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
     "weight": 9
   }
 ]

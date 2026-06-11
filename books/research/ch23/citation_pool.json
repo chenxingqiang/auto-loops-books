@@ -1,28 +1,58 @@
 {
   "chapter_id": "ch23",
-  "pool_count": 32,
+  "pool_count": 62,
   "bib_keys": [
+    "zhang2025duoservemoedualpha",
+    "chandroth2026alfmoeanattentionb",
+    "wang2026costefficientdeplo",
     "zhou2025dsmoedynamicexpert",
+    "ju2026empiricalresourcea",
+    "li2026submoeefficientmix",
+    "lai2026rsmoecoupledexpert",
+    "zhai2026pipemoenermoelorae",
     "memoryfloor2026",
+    "bernhardt2023mantleofexpertmoei",
+    "souza2021aprendizagemativap",
+    "harikumar2026plancompileradeter",
     "patel2025llminference",
     "fan2025ellieenergyefficie",
     "qiao2026tellmeanefficiente",
     "kamath2025podascpttentionscp",
+    "fadlon2025decodelikeaclinici",
+    "zhang2026lifecyclemixtureof",
+    "fang2025expertfuseahuffman",
     "lu2025moeopuanfpgaoverla",
+    "lidn2021expertreliabilityi",
     "hu2025communicationeffic",
+    "chen2022tamoetopologyaware",
     "shi2026socialmoemultiagen",
     "ma2025taskorientedmoelor",
+    "boschi2019mantleoftheexpertm",
+    "yang2024moei2compressingmi",
+    "li2025dynamicexpertspeci",
     "yirage2026",
+    "albuquerque2024investigatingllmca",
     "hong2024llmaidedcompilatio",
+    "tahmid2024biollmnetenhancing",
+    "jeong2024domainspecializedl",
+    "maj2026amultiagentensembl",
     "faldu2019posterdomainspecia",
     "barrak2025traceabilityandacc",
     "zarb2025programsynthesiswi",
     "ahammad2025magisterllmbasedte",
+    "chen2025llmreasoningengine",
     "robotin2025specializedinforma",
     "more2026macvaspecializedmu",
+    "viana2021specializedcorpusc",
+    "zhou2023researchonthecompi",
     "taxbreak2026",
+    "kyaw2026repoaiautomatedcod",
     "kyaw2024epicensembledpoiso",
     "merouani2025agenticautoschedul",
+    "malik2025perancanganstruktu",
+    "anon2023decodev",
+    "anon2020decodemap",
+    "cai2026apmoenetfourieramp",
     "asheim2022aspecializedbtborg",
     "dao2023flashdecoding",
     "dao2022flashattention",
@@ -37,6 +67,50 @@
   ],
   "papers": [
     {
+      "bib_key": "zhang2025duoservemoedualpha",
+      "title": "DuoServe-MoE: Dual-Phase Expert Prefetch and Cache Scheduling for Efficient MoE LLM Inference",
+      "source_tier": "C",
+      "relevance_score": 132,
+      "matched_keywords": [
+        "moe scheduling",
+        "moe expert",
+        "cache",
+        "expert",
+        "LLM",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "chandroth2026alfmoeanattentionb",
+      "title": "ALF-MoE: An Attention-Based Learnable Fusion of Specialized Expert Networks for Accurate Traffic Classification",
+      "source_tier": "B",
+      "relevance_score": 124,
+      "matched_keywords": [
+        "hetero moe",
+        "moe expert",
+        "expert",
+        "hetero",
+        "moe",
+        "fusion",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "wang2026costefficientdeplo",
+      "title": "Cost-Efficient Deployment of MoE Inference in Edge Networks under Expert-Level Security Constraints",
+      "source_tier": "C",
+      "relevance_score": 115,
+      "matched_keywords": [
+        "hetero moe",
+        "moe expert",
+        "expert",
+        "hetero",
+        "moe",
+        "constraints",
+        "token"
+      ]
+    },
+    {
       "bib_key": "zhou2025dsmoedynamicexpert",
       "title": "DS-MoE: Dynamic Expert Scheduling for Efficient MoE-based LLM Inference",
       "source_tier": "A",
@@ -50,6 +124,56 @@
       ]
     },
     {
+      "bib_key": "ju2026empiricalresourcea",
+      "title": "Empirical Resource Analysis of MoE Architectures and an Expert Selection Optimization System for LLM-based Session Recommendation",
+      "source_tier": "B",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "li2026submoeefficientmix",
+      "title": "Sub-MoE: Efficient Mixture-of-Expert LLMs Compression via Subspace Expert Merging",
+      "source_tier": "B",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "lai2026rsmoecoupledexpert",
+      "title": "RS-MoE: Coupled Expert Compression via Activation-Peak Guided Collaborative Decomposition",
+      "source_tier": "C",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "LLM",
+        "moe",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "zhai2026pipemoenermoelorae",
+      "title": "PipeMoE-NER: MoE-LoRA Expert Adaptation and Three-Stage Chain-of-Thought for Pipeline Safety NER",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "constraints",
+        "specialized"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -59,6 +183,42 @@
         "decode",
         "LLM",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "bernhardt2023mantleofexpertmoei",
+      "title": "Mantle of Expert (MoE)’ in Kindergarten Education",
+      "source_tier": "B",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "souza2021aprendizagemativap",
+      "title": "APRENDIZAGEM ATIVA PAUTADA NA DRAMATIZAÇÃO: MOE (MANTLE OF THE EXPERT)",
+      "source_tier": "B",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe",
+        "miss"
+      ]
+    },
+    {
+      "bib_key": "harikumar2026plancompileradeter",
+      "title": "PlanCompiler: A Deterministic Compilation Architecture for Structured Multi-Step LLM Pipelines",
+      "source_tier": "B",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "LLM",
+        "compilation",
+        "compiler",
+        "constraints"
       ]
     },
     {
@@ -106,6 +266,39 @@
       ]
     },
     {
+      "bib_key": "fadlon2025decodelikeaclinici",
+      "title": "Decode Like a Clinician: Enhancing LLM Fine-Tuning with Temporal Structured Data Representation",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "LLM decode",
+        "decode",
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "zhang2026lifecyclemixtureof",
+      "title": "Lifecycle Mixture of Experts: Staggered Death Prevents Expert Collapse in Mutual Activation MoE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "fang2025expertfuseahuffman",
+      "title": "Expertfuse: A Huffman Tree-Based Gradual Expert Integration Framework for Moe Models",
+      "source_tier": "C",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
       "bib_key": "lu2025moeopuanfpgaoverla",
       "title": "MoE-OPU: An FPGA Overlay Processor Leveraging Expert Parallelism for MoE-based Large Language Models",
       "source_tier": "A",
@@ -117,9 +310,31 @@
       ]
     },
     {
+      "bib_key": "lidn2021expertreliabilityi",
+      "title": "Expert Reliability in Legal Proceedings: “Eeny, Meeny, Miny, Moe, With Which Expert Should We Go?”",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
       "bib_key": "hu2025communicationeffic",
       "title": "Communication-Efficient MoE Fine-Tuning with Locality-Aware Expert Placement",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "chen2022tamoetopologyaware",
+      "title": "TA-MoE: Topology-Aware Large Scale Mixture-Of-Expert Training",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "moe expert",
@@ -150,6 +365,39 @@
       ]
     },
     {
+      "bib_key": "boschi2019mantleoftheexpertm",
+      "title": "Mantle of the Expert (MoE) e o uso das Tecnologias Digitais na escola - uma experiência inglesa",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "yang2024moei2compressingmi",
+      "title": "MoE-I2: Compressing Mixture of Experts Models through Inter-Expert Pruning and Intra-Expert Low-Rank Decomposition",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
+      "bib_key": "li2025dynamicexpertspeci",
+      "title": "Dynamic Expert Specialization: Towards Catastrophic Forgetting-Free Multi-Domain MoE Adaptation",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "moe expert",
+        "expert",
+        "moe"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -161,6 +409,17 @@
       ]
     },
     {
+      "bib_key": "albuquerque2024investigatingllmca",
+      "title": "Investigating LLM Capabilities in the Identification of Compilation Errors in Configurable Systems",
+      "source_tier": "B",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "LLM",
+        "compilation",
+        "compiler"
+      ]
+    },
+    {
       "bib_key": "hong2024llmaidedcompilatio",
       "title": "LLM-Aided Compilation for Tensor Accelerators",
       "source_tier": "A",
@@ -168,6 +427,36 @@
       "matched_keywords": [
         "LLM",
         "compilation"
+      ]
+    },
+    {
+      "bib_key": "tahmid2024biollmnetenhancing",
+      "title": "BioLLMNet: Enhancing RNA-Interaction Prediction with a Specialized Cross-LLM Transformation Network",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "jeong2024domainspecializedl",
+      "title": "Domain-specialized LLM: Financial fine-tuning and utilization method using Mistral 7B",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "maj2026amultiagentensembl",
+      "title": "A multi-agent ensemble framework for enhancing task performance using specialized LLM",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
       ]
     },
     {
@@ -211,6 +500,16 @@
       ]
     },
     {
+      "bib_key": "chen2025llmreasoningengine",
+      "title": "LLM Reasoning Engine: Specialized Training for Enhanced Mathematical Reasoning",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "LLM",
+        "specialized"
+      ]
+    },
+    {
       "bib_key": "robotin2025specializedinforma",
       "title": "Specialized Information Retrieval with Improved Reliability via LLM Finetuning",
       "source_tier": "A",
@@ -231,9 +530,38 @@
       ]
     },
     {
+      "bib_key": "viana2021specializedcorpusc",
+      "title": "Specialized corpus compilation for EAP",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compilation",
+        "specialized"
+      ]
+    },
+    {
+      "bib_key": "zhou2023researchonthecompi",
+      "title": "Research on the Compilation of Idiom Entries in Specialized Chinese Textbooks",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compilation",
+        "specialized"
+      ]
+    },
+    {
       "bib_key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "kyaw2026repoaiautomatedcod",
+      "title": "RepoAI: Automated Code Refactoring through Multi-Agent LLM Orchestration and Retrieval-Augmented Generation",
+      "source_tier": "C",
       "relevance_score": 20,
       "matched_keywords": [
         "LLM"
@@ -255,6 +583,42 @@
       "relevance_score": 20,
       "matched_keywords": [
         "LLM"
+      ]
+    },
+    {
+      "bib_key": "malik2025perancanganstruktu",
+      "title": "Perancangan Struktur Fitur Aplikasi Warung Kopi Menggunakan LLM",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "LLM"
+      ]
+    },
+    {
+      "bib_key": "anon2023decodev",
+      "title": "decode, v.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2020decodemap",
+      "title": "DeCODE Map",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "cai2026apmoenetfourieramp",
+      "title": "APMoE-Net: Fourier amplitude-phase joint enhancement and MoE compensation for low-light image enhancement",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "moe"
       ]
     },
     {

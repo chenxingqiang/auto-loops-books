@@ -1,14 +1,31 @@
 {
   "chapter_id": "ch25",
-  "pool_count": 18,
+  "pool_count": 35,
   "bib_keys": [
     "liu2025aportableautotunin",
+    "wu2025aiassistedcustomer",
+    "liu2026intentspeczerointr",
+    "kummarapurug2024aidrivenpredictive",
     "merouani2025agenticautoschedul",
     "xu2023aiassistedisphyper",
+    "rustamov20235genabledinterneto",
+    "boulaich2025aiassistedmetasurf",
     "yirage2026",
+    "collins2024rlornotrlparsingth",
     "memoryfloor2026",
     "rana2025quantumaihybridarc",
+    "vy2026revidaicouponcode2",
     "patel2025llminference",
+    "oreoluwa2026securedataplaneopt",
+    "erban2026behaviorallyadapti",
+    "wang2024aiassistedlandscap",
+    "movchan2022investigationintoa",
+    "bhimavarapu2025aiassistedgamemech",
+    "kwany2024optimizationoffemt",
+    "chavan2026aiassistedmaterial",
+    "khurana2026artificialintellig",
+    "anon2025aiassistedpersonal",
+    "yang2023compilationoptimiz",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -34,6 +51,42 @@
       ]
     },
     {
+      "bib_key": "wu2025aiassistedcustomer",
+      "title": "AI-assisted customer behavior analysis and hotel loyalty strategy optimization",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "auto",
+        "reward",
+        "AI-assisted",
+        "auto-optimization",
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "liu2026intentspeczerointr",
+      "title": "IntentSpec: Zero-Intrusion Contract Compilation and Oine Acceptance Testing for Heterogeneous AI Agents",
+      "source_tier": "C",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "AI-assisted",
+        "compilation",
+        "constraints",
+        "miss",
+        "teams"
+      ]
+    },
+    {
+      "bib_key": "kummarapurug2024aidrivenpredictive",
+      "title": "AI-Driven Predictive Scaling for Multi-Cloud Resource Management: Using Adaptive Forecasting, Cost-Optimization, and Auto-Tuning Algorithms",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "auto",
+        "auto-optimization"
+      ]
+    },
+    {
       "bib_key": "merouani2025agenticautoschedul",
       "title": "Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization",
       "source_tier": "A",
@@ -54,6 +107,27 @@
       ]
     },
     {
+      "bib_key": "rustamov20235genabledinterneto",
+      "title": "5G-Enabled Internet of Things: Latency Optimization through AI-Assisted Network Slicing",
+      "source_tier": "B",
+      "relevance_score": 37,
+      "matched_keywords": [
+        "auto",
+        "AI-assisted",
+        "auto-optimization"
+      ]
+    },
+    {
+      "bib_key": "boulaich2025aiassistedmetasurf",
+      "title": "AI-Assisted Metasurface Antennas Design/Optimization and Performance Enhancement Techniques: A Comprehensive Survey",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "AI-assisted",
+        "surface"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -61,6 +135,16 @@
       "matched_keywords": [
         "YiRage",
         "CPU"
+      ]
+    },
+    {
+      "bib_key": "collins2024rlornotrlparsingth",
+      "title": "RL or not RL? Parsing the processes that support human reward-based learning.",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "reward",
+        "routinely"
       ]
     },
     {
@@ -83,12 +167,112 @@
       ]
     },
     {
+      "bib_key": "vy2026revidaicouponcode2",
+      "title": "Revid AI Coupon Code 20SAVE – 20% OFF Auto Clip Creator AI | Apr 2026",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "auto"
+      ]
+    },
+    {
       "bib_key": "patel2025llminference",
       "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "oreoluwa2026securedataplaneopt",
+      "title": "Secure Data Plane Optimization for Ultra-Low-Latency Networks Using AI-Assisted Traffic Engineering",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "erban2026behaviorallyadapti",
+      "title": "Behaviorally Adaptive Portfolio Optimization Under Uncertainty: An AI-Assisted Robust Framework for Cryptocurrency Investments",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "wang2024aiassistedlandscap",
+      "title": "AI-Assisted Landscape Design Optimization and Innovation Research based on AI Assistance",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "movchan2022investigationintoa",
+      "title": "INVESTIGATION INTO AI-ASSISTED OPTIMIZATION OF THIN-WALLED CROSS-SECTIONS",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "bhimavarapu2025aiassistedgamemech",
+      "title": "AI-Assisted Game Mechanics Optimization for Multiplayer Environments",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "kwany2024optimizationoffemt",
+      "title": "Optimization of femtosecond pulses by AI-assisted spectral phase modulation: influence of spectral resolution",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "chavan2026aiassistedmaterial",
+      "title": "AI-Assisted Material Strength Evaluation and Structural Health Monitoring of Buildings",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "khurana2026artificialintellig",
+      "title": "Artificial Intelligence (AI) –Assisted Optimization of Online Gastrointestinal Patient Education Materials: A Cross-Sectional Study (Preprint)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "independent",
+        "miss"
+      ]
+    },
+    {
+      "bib_key": "anon2025aiassistedpersonal",
+      "title": "AI-assisted personalized learning path optimization strategy",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "AI-assisted"
+      ]
+    },
+    {
+      "bib_key": "yang2023compilationoptimiz",
+      "title": "Compilation Optimization",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compilation"
       ]
     },
     {

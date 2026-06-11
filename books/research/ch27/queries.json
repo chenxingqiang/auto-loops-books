@@ -4,12 +4,12 @@
   "\"architecture\" AND \"trend\"",
   "\"edge\" AND \"cloud\"",
   "\"autonomous\" AND \"kernel\"",
-  "\"future trends in AI compilers\" AND \"autonomous kernels\"",
+  "\"future trends in ai compilers\" AND \"autonomous kernels\"",
   "\"codesign\" AND \"edge cloud\"",
-  "\"new architectures\" AND \"autonomous kernels LLM inference compiler\"",
-  "\"codesign LLM inference compiler\" AND \"edge cloud LLM inference compiler\"",
-  "\"new architectures LLM inference compiler\" AND \"AI compiler optimization\"",
-  "\"AI hardware architecture\" AND \"architecture trend\"",
+  "\"new architectures\" AND \"autonomous kernels llm inference compiler\"",
+  "\"codesign llm inference compiler\" AND \"edge cloud llm inference compiler\"",
+  "\"new architectures llm inference compiler\" AND \"ai compiler optimization\"",
+  "\"ai hardware architecture\" AND \"architecture trend\"",
   "\"autonomous kernel\" AND \"co-design hardware\"",
   "\"dataflow kernel optimization\" AND \"api\""
 ]

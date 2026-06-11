@@ -2,11 +2,15 @@
 \label{chap:ch08}
 \typeout{START_CHAPTER "ch08" \theabspage}
 
-Production decode teams rarely fail for lack of framework features---they fail because compiler and kernel schedules violate residency, launch, and bandwidth contracts on the SKU they actually ship \citep{memoryfloor2026}. This chapter continues the book's problem-first thread: name the contradiction, trace it to hardware limits, then show how passes and megakernels recover SLO on GPU, CPU, and NPU fleets \citep{taxbreak2026}.
+Parts~I--II established decode metrics and hardware contracts; \emph{TMA Double-Buffer Pipelines and Async Movement} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
 
-\section{Pipeline Theory}
-\label{sec:pipeline_theory}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\section{pipeline theory}
+\label{sec:ch08_pipeline_theory}
+
 % AUTO_VISUAL:fig_pipeline_theory_pipeline
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -22,18 +26,25 @@ Production decode teams rarely fail for lack of framework features---they fail b
 \label{fig:pipeline_theory_pipeline}
 \end{figure}
 
+Teams hit \textbf{pipeline theory} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because pipeline was planned without double-buffer residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{zhang2020learninghowtodrive}. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{shukla2020doubledifferential}. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{zhao2023rbgcrepurposethebu}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{dao2022flashattention}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{kwon2023vllm}.
+Hardware truth: GPUs bound pipeline with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{li2021trajectorybasedpri}. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference}. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024xdna}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024aie}.
+Compiler/kernel fix: predicate fusion on pipeline/double-buffer legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2020async2020commentar}. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2022hopper}. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{semianalysis2024tma}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2024cudagraphs}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize pipeline with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked double-buffer---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2020async2020committee}. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2023flashdecoding}. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused schedule must keep double-buffer on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{GPU TMA}
-\label{sec:gpu_tma}
+\label{sec:ch08_gpu_tma}
+
 % AUTO_VISUAL:fig_gpu_tma_architecture
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -49,115 +60,266 @@ CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and A
 \label{fig:gpu_tma_architecture}
 \end{figure}
 
+The production surprise at \textbf{GPU TMA} is not peak FLOPs; it is illegal tier placement: TMA spilling to HBM/DDR while Hopper still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2023async2023coverpage}. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: TMA producers must feed Hopper consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2020async2020index}. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2020freshideaspapersas}. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for TMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2020async2020toc}. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{CPU Dma}
-\label{sec:cpu_dma}
+\section{CPU dma}
+\label{sec:ch08_cpu_dma}
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2023async2023organizin}. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{CPU dma} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix dma and CPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2018messagefromtheasyn}. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware truth: GPUs bound dma with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement \citep{anon2023async2023messagefr}. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler/kernel fix: predicate fusion on dma/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize dma with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\section{NPU Pipeline}
-\label{sec:npu_pipeline}
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused dma raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{NPU pipeline}
+\label{sec:ch08_npu_pipeline}
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Teams hit \textbf{NPU pipeline} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without dma residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: NPU producers must feed dma consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\section{YiRage Pipeline Gen}
-\label{sec:yirage_pipeline_gen}
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{yirage2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{YiRage pipeline gen}
+\label{sec:ch08_yirage_pipeline_gen}
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The production surprise at \textbf{YiRage pipeline gen} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while pipeline still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on YiRage/pipeline legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked pipeline---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep pipeline on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{Chapter Summary}
 \label{sec:ch08_summary}
 
-The through-line for ch08 is unchanged: hardware constraints dictate compiler passes, fusion boundaries, and deployment metrics. Carry bytes/token and launches/token spreadsheets forward; later chapters assume those baselines exist.
+TMA Double-Buffer Pipelines and Async Movement succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch08_pipeline_theory}, Section~\ref{sec:ch08_gpu_tma}, Section~\ref{sec:ch08_cpu_dma} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
 
+\textbf{pipeline theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-\subsection{Engineering Deep Dive}
-\label{sec:ch08_deep_dive}
+Binding software to silicon: compiler passes must encode pipeline/double-buffer legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When pipeline theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting pipeline theory, attach roofline or NPU buffer accounting showing pipeline residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize pipeline with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{GPU TMA} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: TMA and Hopper must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,semianalysis2024tma}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for GPU TMA: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,semianalysis2024tma}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize TMA with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: Hopper constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{CPU dma} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: dma sets the residency envelope; CPU determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify dma, CPU, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting CPU dma, attach roofline or NPU buffer accounting showing dma residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{NPU pipeline} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode NPU/dma legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When NPU pipeline disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting NPU pipeline, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{YiRage pipeline gen} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: YiRage and pipeline must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for YiRage pipeline gen: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: pipeline constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{pipeline theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: pipeline sets the residency envelope; double-buffer determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{dao2022flashattention,yirage2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Pipeline Theory is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{pipeline}, \textbf{double-buffer} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds pipeline double-buffer to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify pipeline, double-buffer, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{dao2022flashattention,yirage2026}.
 
-GPU TMA is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{TMA}, \textbf{Hopper} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds TMA Hopper to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: double-buffer constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
 
-CPU Dma is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{dma}, \textbf{CPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds dma CPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting pipeline theory, attach roofline or NPU buffer accounting showing pipeline residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
 
-NPU Pipeline is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{NPU}, \textbf{dma} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU dma to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{GPU TMA} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-YiRage Pipeline Gen is a production bottleneck surface for TMA Double-Buffer Pipelines and Async Movement. Teams that treat \textbf{YiRage}, \textbf{pipeline} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage pipeline to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode TMA/Hopper legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,semianalysis2024tma}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When GPU TMA disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU TMA, attach roofline or NPU buffer accounting showing TMA residency fits on-chip for the target SKU \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize TMA with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
+
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{CPU dma} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: dma and CPU must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for CPU dma: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize dma with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+Production teams misread \textbf{NPU pipeline} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: NPU sets the residency envelope; dma determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify NPU, dma, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: dma constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting NPU pipeline, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\textbf{YiRage pipeline gen} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode YiRage/pipeline legality before codegen, not as comments in hand-written kernels \citep{yirage2026,chen2020compilerbasedhardw}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When YiRage pipeline gen disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting YiRage pipeline gen, attach roofline or NPU buffer accounting showing YiRage residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
+
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{pipeline theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: pipeline and double-buffer must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,yirage2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for pipeline theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,yirage2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize pipeline with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: double-buffer constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
+
+Production teams misread \textbf{GPU TMA} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: TMA sets the residency envelope; Hopper determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,semianalysis2024tma}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify TMA, Hopper, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: Hopper constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU TMA, attach roofline or NPU buffer accounting showing TMA residency fits on-chip for the target SKU \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\textbf{CPU dma} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode dma/CPU legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When CPU dma disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting CPU dma, attach roofline or NPU buffer accounting showing dma residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize dma with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{NPU pipeline} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: NPU and dma must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for NPU pipeline: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: dma constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+Production teams misread \textbf{YiRage pipeline gen} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: YiRage sets the residency envelope; pipeline determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{yirage2026,chen2020compilerbasedhardw}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify YiRage, pipeline, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: pipeline constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting YiRage pipeline gen, attach roofline or NPU buffer accounting showing YiRage residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\textbf{pipeline theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode pipeline/double-buffer legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When pipeline theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting pipeline theory, attach roofline or NPU buffer accounting showing pipeline residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize pipeline with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
+
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{GPU TMA} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: TMA and Hopper must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,semianalysis2024tma}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for GPU TMA: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,semianalysis2024tma}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize TMA with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: Hopper constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Production teams misread \textbf{CPU dma} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: dma sets the residency envelope; CPU determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify dma, CPU, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting CPU dma, attach roofline or NPU buffer accounting showing dma residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\textbf{NPU pipeline} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode NPU/dma legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When NPU pipeline disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting NPU pipeline, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+The usual TMA Double-Buffer Pipelines and Async Movement failure at \textbf{YiRage pipeline gen} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: YiRage and pipeline must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for YiRage pipeline gen: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: pipeline constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch08" \theabspage}

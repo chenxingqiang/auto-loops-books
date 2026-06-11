@@ -1,20 +1,54 @@
 {
   "chapter_id": "ch11",
-  "pool_count": 27,
+  "pool_count": 61,
   "bib_keys": [
+    "vijayalakshm2023polardecoderbasedf",
+    "anon2018sampleveriloghdlco_25",
+    "vordonis2021hardwareimplementa",
+    "kozorez2026hardwareimplementa",
     "chaudhary2026benchmarkingencode",
+    "j2019designandimplement",
+    "anon2020peerreview1ofavite",
+    "anon2020peerreview4ofavite",
+    "anon2020peerreview3ofavite",
+    "middya2023designandimplement",
+    "anon2020peerreview3ofavite_21",
+    "anon2020peerreview2ofavite",
+    "anon2018sampleveriloghdlco",
     "badar2022successivecancella",
     "cyriac2018polarcodeencoderan",
     "badar2021implementationofco",
+    "krylov2021priorityqueuearchi",
+    "gerken2023a43conceptofaselfx",
+    "s2019efficientimplement",
     "delomier2018frommulticoreldpcd",
+    "slade2026invariantstructure",
+    "hameed2022designandimplement",
     "ghourchian2021securesourcecoding",
     "yavits2018enablingfullassoci",
+    "kumar2026fcmfidafullcoverag",
+    "li2024lclfdalocalcontext",
+    "anon2024chapter8fullstacki",
+    "erol2024plutonetanefficien",
+    "liu2024comparativeanalysi",
+    "hu2022ageneraltwobranchd",
+    "kasparaviit2019onlineencoderdecod",
+    "anon2020decoderdevice",
     "zhong2019molecularpolarbeli",
+    "gallego2019onminingconditions",
     "krnzler2023estimatingsoftware",
+    "proddutoori2024robustdecoderhardw",
+    "rahman2022asymmetricdecoderd",
+    "singh2025dosedecoder",
     "putten2020efficientdecoderre",
+    "satyanarayan2025oilspillsegmentati",
+    "johnson2022heatmaprouteranenc",
     "deng2019reducedcomplexityd",
+    "tang2024deeddynamicearlyex",
+    "ali2020designanalysisoftu",
     "lyu2023ureapricepredictio",
     "polok2025decreddecodercentr",
+    "zechin2022previsodevelocidad",
     "dao2023flashdecoding",
     "memoryfloor2026",
     "yirage2026",
@@ -32,6 +66,58 @@
   ],
   "papers": [
     {
+      "bib_key": "vijayalakshm2023polardecoderbasedf",
+      "title": "Polar Decoder-Based Full Adders: Implementation and Comparative Analysis Using 180 nm and 90 nm Technologies in Cadence",
+      "source_tier": "B",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2018sampleveriloghdlco_25",
+      "title": "Sample Verilog HDL codes for implementation of fully-parallel LDPC decoder architecture",
+      "source_tier": "B",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "vordonis2021hardwareimplementa",
+      "title": "Hardware Implementation and Performance Analysis of Improved Sphere Decoder in Spatially Correlated Massive MIMO Channels",
+      "source_tier": "B",
+      "relevance_score": 85,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation",
+        "NPU"
+      ]
+    },
+    {
+      "bib_key": "kozorez2026hardwareimplementa",
+      "title": "Hardware implementation of first-order Reed-Muller decoder with soft output",
+      "source_tier": "B",
+      "relevance_score": 85,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation",
+        "NPU"
+      ]
+    },
+    {
       "bib_key": "chaudhary2026benchmarkingencode",
       "title": "Benchmarking Encoder–Decoder and Decoder-Only Models for Extremely Low-Resource English to Myaamia Translation",
       "source_tier": "A",
@@ -41,6 +127,102 @@
         "decoder",
         "source",
         "decode"
+      ]
+    },
+    {
+      "bib_key": "j2019designandimplement",
+      "title": "Design and Implementation of High Speed Viterbi Decoder and Convolution Encoder for SDR",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2020peerreview1ofavite",
+      "title": "Peer Review #1 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2020peerreview4ofavite",
+      "title": "Peer Review #4 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\"",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2020peerreview3ofavite",
+      "title": "Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.2)\"",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "middya2023designandimplement",
+      "title": "Design and Implementation of Virtual-Single-Length Turbo Decoder for Multi-User Parallel Decoding",
+      "source_tier": "C",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2020peerreview3ofavite_21",
+      "title": "Peer Review #3 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2020peerreview2ofavite",
+      "title": "Peer Review #2 of \"A Viterbi decoder and its hardware Trojan models: an FPGA-based implementation study (v0.1)\"",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "anon2018sampleveriloghdlco",
+      "title": "Sample Verilog HDL codes for implementation of partially-parallel LDPC decoder architecture",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
       ]
     },
     {
@@ -80,6 +262,42 @@
       ]
     },
     {
+      "bib_key": "krylov2021priorityqueuearchi",
+      "title": "Priority queue architecture for sequential decoder of polar codes for implementation in hardware",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "gerken2023a43conceptofaselfx",
+      "title": "A4.3 - Concept of a Self-X Sensory System and its first implementation on an XMR-based Angular Decoder Demonstrator",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "s2019efficientimplement",
+      "title": "Efficient Implementation of Complex Matrix Inversion for LMMSE Decoder",
+      "source_tier": "B",
+      "relevance_score": 76,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "implementation"
+      ]
+    },
+    {
       "bib_key": "delomier2018frommulticoreldpcd",
       "title": "From multicore LDPC decoder implementations to FPGA decoder architectures: a case study",
       "source_tier": "A",
@@ -89,6 +307,31 @@
         "implement",
         "decode",
         "implementation"
+      ]
+    },
+    {
+      "bib_key": "slade2026invariantstructure",
+      "title": "Invariant Structure in Deterministic Decoder Transformation Pipelines",
+      "source_tier": "B",
+      "relevance_score": 66,
+      "matched_keywords": [
+        "decoder",
+        "implement",
+        "decode",
+        "full",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "hameed2022designandimplement",
+      "title": "Design and Implementation of Half Adder, Full Adder and CMOS Full Adder",
+      "source_tier": "B",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "implement",
+        "full",
+        "implementation",
+        "miss"
       ]
     },
     {
@@ -114,9 +357,103 @@
       ]
     },
     {
+      "bib_key": "kumar2026fcmfidafullcoverag",
+      "title": "FCMFID: A Full Coverage Multi-bit Fault-Tolerant Instruction Decoder for RISC-V based softcore",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ]
+    },
+    {
+      "bib_key": "li2024lclfdalocalcontext",
+      "title": "Lcl_Fda: Local Context Learning and Full-Level Decoder Aggregation Network for Large-Scale Point Cloud Semantic Segmentation",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ]
+    },
+    {
+      "bib_key": "anon2024chapter8fullstacki",
+      "title": "Chapter 8: Full-Stack Implementation",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "implement",
+        "full",
+        "implementation"
+      ]
+    },
+    {
+      "bib_key": "erol2024plutonetanefficien",
+      "title": "PlutoNet: An Efficient Polyp Segmentation Network with Modified Partial Decoder and Decoder Consistency Training",
+      "source_tier": "B",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "decoder",
+        "decode",
+        "full"
+      ]
+    },
+    {
+      "bib_key": "liu2024comparativeanalysi",
+      "title": "Comparative Analysis of Encoder-Only, Decoder-Only, and Encoder- Decoder Language Models",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "hu2022ageneraltwobranchd",
+      "title": "A General Two-branch Decoder Architecture for Improving Encoder-decoder Image Segmentation Models",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "kasparaviit2019onlineencoderdecod",
+      "title": "Online Encoder-decoder Anomaly Detection using Encoder-decoder Architecture with Novel Self-configuring Neural Networks &amp; Pure Linear Genetic Programming for Embedded Systems",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2020decoderdevice",
+      "title": "Decoder Device",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
       "bib_key": "zhong2019molecularpolarbeli",
       "title": "Molecular Polar Belief Propagation Decoder and Successive Cancellation Decoder",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "gallego2019onminingconditions",
+      "title": "On Mining Conditions using Encoder-decoder Networks",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "decoder",
@@ -134,6 +471,36 @@
       ]
     },
     {
+      "bib_key": "proddutoori2024robustdecoderhardw",
+      "title": "Robust Decoder Hardware System Improvements for Tuned Predictions",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "rahman2022asymmetricdecoderd",
+      "title": "Asymmetric decoder design for efficient convolutional encoder-decoder architectures in medical image reconstruction",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "singh2025dosedecoder",
+      "title": "DOSE DECODER",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
       "bib_key": "putten2020efficientdecoderre",
       "title": "Efficient Decoder Reduction for a Variety of Encoder-Decoder Problems",
       "source_tier": "A",
@@ -144,9 +511,49 @@
       ]
     },
     {
+      "bib_key": "satyanarayan2025oilspillsegmentati",
+      "title": "Oil Spill Segmentation Using Deep Encoder-Decoder Models",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "johnson2022heatmaprouteranenc",
+      "title": "Heatmap Router: An encoder-decoder approach to PCB routing",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
       "bib_key": "deng2019reducedcomplexityd",
       "title": "Reduced-complexity Deep Neural Network-aided Channel Code Decoder: A Case Study for BCH Decoder",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "tang2024deeddynamicearlyex",
+      "title": "DEED: Dynamic Early Exit on Decoder for Accelerating Encoder-Decoder Transformer Models",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "ali2020designanalysisoftu",
+      "title": "Design Analysis of Turbo Decoder Based on One MAP Decoder Using High Level Synthesis Tool",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "decoder",
@@ -167,6 +574,16 @@
       "bib_key": "polok2025decreddecodercentr",
       "title": "DeCRED: Decoder-Centric Regularization for Encoder-Decoder Based Speech Recognition",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "decoder",
+        "decode"
+      ]
+    },
+    {
+      "bib_key": "zechin2022previsodevelocidad",
+      "title": "Previsão de velocidades de tráfego com rede neural LSTM encoder-decoder Forecast of traffic speeds with neural network LSTM encoder-decoder",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "decoder",

@@ -1,6 +1,6 @@
 {
   "chapter_id": "ch04",
-  "timestamp": "2026-06-09T17:46:51.804095+00:00",
+  "timestamp": "2026-06-10T13:32:09.145094+00:00",
   "entry_count": 3,
   "verified_ok_count": 2,
   "entries": [
@@ -24,8 +24,6 @@
         "04",
         "ch04",
         "cross-hardware",
-        "metrics",
-        "use",
         "bytes/token",
         "methodology"
       ],
@@ -65,11 +63,11 @@
       "corroboration_content_match": true,
       "corroboration_missing_tokens": [
         "compiler",
-        "CUDA",
-        "CPU",
-        "Triton",
+        "cuda",
+        "cpu",
+        "triton",
         "nki",
-        "MLIR"
+        "mlir"
       ],
       "verified_ok": true,
       "source_method": "craw4ai",

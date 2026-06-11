@@ -1,56 +1,28 @@
 {
   "chapter_id": "ch10",
-  "pool_count": 26,
-  "assigned_count": 26,
+  "pool_count": 55,
+  "assigned_count": 55,
   "unassigned_count": 0,
-  "sections_with_cites": 4,
-  "unique_keys_in_tex": 24,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 53,
   "pool_path": "books/research/ch10/citation_pool.json",
   "sections_used": [
-    "Cross Hardware",
-    "Numerical Stability",
-    "Online Softmax",
-    "chapter"
+    "Chapter Summary",
+    "chapter",
+    "cross hardware",
+    "fusion boundary",
+    "numerical stability",
+    "online softmax"
   ],
-  "cites_applied": 24,
+  "cites_applied": 53,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch10_online_softmax.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "dao2023flashdecoding",
-      "section": "chapter",
-      "relevance_score": 9,
-      "matched_keywords": [
-        "decode"
-      ],
-      "fallback": false
-    },
-    {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
-      "bib_key": "lee2021gatedrecurrentcont",
-      "section": "Online Softmax",
-      "relevance_score": 86,
-      "matched_keywords": [
-        "online softmax",
-        "online",
-        "softmax",
-        "attention"
-      ]
-    },
-    {
-      "sentence_id": "s0004",
       "bib_key": "hirayae2025hardwareorientedan",
-      "section": "Online Softmax",
+      "section": "chapter",
       "relevance_score": 68,
       "matched_keywords": [
         "online softmax",
@@ -59,43 +31,102 @@
       ]
     },
     {
-      "sentence_id": "s0005",
-      "bib_key": "s2022digitalimplementat",
-      "section": "Online Softmax",
+      "sentence_id": "s0002",
+      "bib_key": "dao2022flashattention",
+      "section": "chapter",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "attention"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "jha2024aerosoftmaxonlyllm",
+      "section": "online softmax",
+      "relevance_score": 62,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "npu",
+        "optimization"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "kim2019personalizedonline",
+      "section": "online softmax",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "online softmax",
+        "exp",
+        "online",
+        "softmax"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "online softmax",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "memoryfloor2026",
+      "section": "online softmax",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "bandwidth",
+        "batch-1",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "anon2026softmax",
+      "section": "online softmax",
       "relevance_score": 20,
       "matched_keywords": [
         "softmax"
       ]
     },
     {
-      "sentence_id": "s0006",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Online Softmax",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "sentence_id": "s0009",
+      "bib_key": "dao2023flashdecoding",
+      "section": "online softmax",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "decode"
+      ],
+      "fallback": false
     },
     {
-      "sentence_id": "s0007",
-      "bib_key": "yirage2026",
-      "section": "Online Softmax",
-      "relevance_score": 18,
+      "sentence_id": "s0010",
+      "bib_key": "patel2025llminference",
+      "section": "online softmax",
+      "relevance_score": 38,
       "matched_keywords": [
-        "YiRage"
+        "exp",
+        "decode"
       ]
     },
     {
-      "sentence_id": "s0008",
-      "bib_key": "nvidia2022hopper",
-      "section": "Online Softmax",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "sentence_id": "s0011",
+      "bib_key": "menegaux2025phylohsaphylogenet",
+      "section": "online softmax",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
     },
     {
-      "sentence_id": "s0009",
+      "sentence_id": "s0012",
       "bib_key": "deng2024zerothorderalgorit",
-      "section": "Online Softmax",
+      "section": "numerical stability",
       "relevance_score": 56,
       "matched_keywords": [
         "softmax",
@@ -104,29 +135,15 @@
       ]
     },
     {
-      "sentence_id": "s0010",
-      "bib_key": "amd2024aie",
-      "section": "Online Softmax",
+      "sentence_id": "s0013",
+      "bib_key": "kwon2023vllm",
+      "section": "numerical stability",
       "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0011",
-      "bib_key": "semianalysis2024tma",
-      "section": "Online Softmax",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "nvidia2024cudagraphs",
-      "section": "Online Softmax",
-      "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "attention"
+      ],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:39.479773"
+  "generated_at": "2026-06-10T09:10:00.834646"
 }

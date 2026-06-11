@@ -1,6 +1,6 @@
 {
   "chapter_id": "ch03",
-  "timestamp": "2026-06-09T17:46:34.255008+00:00",
+  "timestamp": "2026-06-10T13:31:42.170980+00:00",
   "entry_count": 4,
   "verified_ok_count": 3,
   "entries": [
@@ -19,7 +19,7 @@
       "corroboration_missing_tokens": [],
       "verified_ok": true,
       "source_method": "craw4ai",
-      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/6e62ecdeb2756288.json"
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/fcf18d19532eb8d4.json"
     },
     {
       "claim": "TaxBreak H100 null-kernel launch floor median 4.578 us",
@@ -56,7 +56,7 @@
       "corroboration_fetch_ok": true,
       "corroboration_content_match": false,
       "corroboration_missing_tokens": [
-        "XDNA",
+        "xdna",
         "uses",
         "static",
         "spatial",
@@ -66,7 +66,7 @@
       ],
       "verified_ok": false,
       "source_method": "craw4ai",
-      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/de712a8e1710c3f1.json"
+      "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch03/fact_sources/fef7deffa13e6de7.json"
     },
     {
       "claim": "YiRage is a multi-backend LLM inference optimization compiler (CUDA, CPU, MPS, Triton, NKI, MLIR)",
@@ -80,11 +80,11 @@
       "corroboration_content_match": true,
       "corroboration_missing_tokens": [
         "compiler",
-        "CUDA",
-        "CPU",
-        "Triton",
+        "cuda",
+        "cpu",
+        "triton",
         "nki",
-        "MLIR"
+        "mlir"
       ],
       "verified_ok": true,
       "source_method": "craw4ai",

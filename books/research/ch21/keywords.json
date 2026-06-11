@@ -1,6 +1,6 @@
 [
   {
-    "term": "unified AI compiler analysis and cross-hardware benchmark",
+    "term": "unified ai compiler analysis and cross-hardware benchmark",
     "weight": 18
   },
   {
@@ -12,7 +12,7 @@
     "weight": 14
   },
   {
-    "term": "HW binding",
+    "term": "hw binding",
     "weight": 14
   },
   {
@@ -20,27 +20,27 @@
     "weight": 14
   },
   {
-    "term": "YiRage benchmark",
+    "term": "yirage benchmark",
     "weight": 14
   },
   {
-    "term": "compile overhead LLM inference compiler",
+    "term": "compile overhead llm inference compiler",
     "weight": 13
   },
   {
-    "term": "compiler ratings LLM inference compiler",
+    "term": "compiler ratings llm inference compiler",
     "weight": 13
   },
   {
-    "term": "HW binding LLM inference compiler",
+    "term": "hw binding llm inference compiler",
     "weight": 13
   },
   {
-    "term": "search space LLM inference compiler",
+    "term": "search space llm inference compiler",
     "weight": 13
   },
   {
-    "term": "YiRage benchmark LLM inference compiler",
+    "term": "yirage benchmark llm inference compiler",
     "weight": 13
   },
   {
@@ -92,15 +92,23 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
+  },
+  {
+    "term": "aie",
+    "weight": 9
   },
   {
     "term": "analysis",
     "weight": 9
   },
   {
-    "term": "bottleneck",
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
@@ -108,15 +116,15 @@
     "weight": 9
   },
   {
+    "term": "cell",
+    "weight": 9
+  },
+  {
     "term": "chapter summary",
     "weight": 9
   },
   {
-    "term": "constraints",
-    "weight": 9
-  },
-  {
-    "term": "CPU",
+    "term": "cpu",
     "weight": 9
   },
   {
@@ -124,15 +132,15 @@
     "weight": 9
   },
   {
+    "term": "cuda",
+    "weight": 9
+  },
+  {
     "term": "decode",
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -140,19 +148,19 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -160,7 +168,11 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "means",
+    "weight": 9
+  },
+  {
+    "term": "megakernel",
     "weight": 9
   },
   {
@@ -168,27 +180,35 @@
     "weight": 9
   },
   {
-    "term": "miss",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "profile",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "residency",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "static",
+    "weight": 9
+  },
+  {
+    "term": "target",
     "weight": 9
   },
   {
@@ -196,15 +216,23 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "unified",
     "weight": 9
   },
   {
-    "term": "unified",
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
     "weight": 9
   }
 ]

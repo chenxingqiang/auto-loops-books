@@ -1,21 +1,48 @@
 {
   "chapter_id": "ch15",
-  "pool_count": 25,
+  "pool_count": 52,
   "bib_keys": [
+    "zhang2025ahardwareaccelerat",
+    "astuti2023optimizationofprod",
     "shen2022hardwaredevelopmen",
+    "silvestrini2024processorandhardwa",
+    "wang2023anfpgabasedhardwar",
     "yirage2026",
+    "lane2023targetrecognitioni",
+    "grimberg2026stone23voyager1for",
     "koblah2022hardwaremovingtarg",
+    "akbar2019hardwaredesignofco",
+    "anon2026statictargetsnapsh",
+    "panda2023particlefilterbase",
     "kern2024virtuallyaugmented",
+    "schoeder2022amodulationbasedra",
     "agarwal2023hardwarebasedimple",
     "li2025nearfieldtargetloc",
     "urbanski2025hardwarebasedcalcu",
     "du2023sarnasahardwareawa",
     "roy2019hardwaresoftwareco",
+    "anon2018assessmentofthehar",
+    "lepekhina2019radartargethardwar",
+    "rossi2021basicsettingsseria",
+    "shome2019phasedmimoradarusi",
+    "an2022memorysafecomputat",
     "schardl2019tapirxlaembeddingf",
+    "asriningtias2023minimizationimplem",
+    "charlotte2024aidrivenoptimizati",
     "memoryfloor2026",
+    "ganguly2025llmevaluationandop",
+    "ren2024exploringtheeffect",
+    "zhang2019trajectorypredicti",
     "zhang2018fpgaorientedmoving",
     "jiang2021trrscopeunderstand",
     "patel2025llminference",
+    "anon2025retrievalaugmented",
+    "leong2025assuringcorrectnes",
+    "bhatnagar2025mitigatingaillmpro",
+    "gurram2024theendofgenerative",
+    "perikala2025designingproductio",
+    "kozhevin2026protobufdeepdivefr",
+    "kamadi2025machinelearningand",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -30,6 +57,33 @@
   ],
   "papers": [
     {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "source_tier": "B",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "astuti2023optimizationofprod",
+      "title": "Optimization of production planning using integer linear programming method (case study of bakpia menik)",
+      "source_tier": "B",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "case",
+        "optim",
+        "tun",
+        "constraints",
+        "production",
+        "ship"
+      ]
+    },
+    {
       "bib_key": "shen2022hardwaredevelopmen",
       "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
       "source_tier": "A",
@@ -39,6 +93,30 @@
         "hardware",
         "target",
         "fusion"
+      ]
+    },
+    {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "miss"
+      ]
+    },
+    {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
       ]
     },
     {
@@ -54,6 +132,28 @@
       ]
     },
     {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "koblah2022hardwaremovingtarg",
       "title": "Hardware Moving Target Defenses against Physical Attacks",
       "source_tier": "A",
@@ -65,9 +165,53 @@
       ]
     },
     {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "kern2024virtuallyaugmented",
       "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -131,12 +275,87 @@
       ]
     },
     {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "an2022memorysafecomputat",
+      "title": "Memory Safe Computations with XLA Compiler",
+      "source_tier": "B",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "XLA",
+        "compiler"
+      ]
+    },
+    {
       "bib_key": "schardl2019tapirxlaembeddingf",
       "title": "TapirXLA: Embedding Fork-Join Parallelism into the XLA Compiler in TensorFlow Using Tapir",
       "source_tier": "A",
       "relevance_score": 52,
       "matched_keywords": [
         "XLA",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "asriningtias2023minimizationimplem",
+      "title": "Minimization Implementation of Fuzzy Logic to Optimize a Cashew Nut Production using Simpleks-Duality Theory",
+      "source_tier": "B",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "case",
+        "optim",
+        "production"
+      ]
+    },
+    {
+      "bib_key": "charlotte2024aidrivenoptimizati",
+      "title": "AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "optim",
         "compiler"
       ]
     },
@@ -148,6 +367,33 @@
       "matched_keywords": [
         "decode",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "ganguly2025llmevaluationandop",
+      "title": "LLM Evaluation and Optimization",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "optim"
+      ]
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
       ]
     },
     {
@@ -175,6 +421,69 @@
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2025retrievalaugmented",
+      "title": "Retrieval-Augmented Generation (RAG) Systems in Production: Software Architecture Strategies for Enterprise-Grade AI Applications",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ]
+    },
+    {
+      "bib_key": "leong2025assuringcorrectnes",
+      "title": "Assuring Correctness in AI-Assisted Development with LLM Diversity and Compiler Techniques",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "bhatnagar2025mitigatingaillmpro",
+      "title": "Mitigating AI LLM Prompt Injection, Hallucination, and Security Risks using Semantically Encoded Compiler Stage Watermarks",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "gurram2024theendofgenerative",
+      "title": "The End of Generative AI Experiments Designing Production‑Grade Data Architectures for LLM Systems",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ]
+    },
+    {
+      "bib_key": "perikala2025designingproductio",
+      "title": "DESIGNING PRODUCTION-GRADE GENERATIVE AI WITH MODULAR PROMPT SYSTEMS",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ]
+    },
+    {
+      "bib_key": "kozhevin2026protobufdeepdivefr",
+      "title": "Protobuf Deep Dive: From Simple to Production-Grade",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
+      ]
+    },
+    {
+      "bib_key": "kamadi2025machinelearningand",
+      "title": "Machine Learning and AI Architecture: A Comprehensive Framework for Production-Grade Intelligent Systems",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "production"
       ]
     },
     {

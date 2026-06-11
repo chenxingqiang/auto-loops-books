@@ -1,20 +1,34 @@
 {
   "chapter_id": "ch16",
-  "pool_count": 36,
+  "pool_count": 63,
   "bib_keys": [
+    "castell2024experienceguidedmi",
     "wu2023autotuningapachetv",
     "diamantopoul2020agileautotuningofa",
+    "zhang2025ahardwareaccelerat",
     "wang2023autotuningquantize",
     "shen2022hardwaredevelopmen",
     "madathil2023optimizingmachinel",
+    "wang2023anfpgabasedhardwar",
     "yirage2026",
+    "sato2019lsclaparoscopicsac",
+    "lane2023targetrecognitioni",
+    "grimberg2026stone23voyager1for",
     "koblah2022hardwaremovingtarg",
+    "anon2026statictargetsnapsh",
+    "akbar2019hardwaredesignofco",
+    "panda2023particlefilterbase",
+    "schoeder2022amodulationbasedra",
     "agarwal2023hardwarebasedimple",
     "li2025nearfieldtargetloc",
     "kern2024virtuallyaugmented",
     "urbanski2025hardwarebasedcalcu",
     "du2023sarnasahardwareawa",
+    "silvestrini2024processorandhardwa",
     "roy2019hardwaresoftwareco",
+    "anon2018assessmentofthehar",
+    "lepekhina2019radartargethardwar",
+    "rossi2021basicsettingsseria",
     "zhang2022infraredimagetarge",
     "moreau2018collectiveknowledg",
     "moreau2018leveragingthevtatv",
@@ -22,11 +36,24 @@
     "ayad2023energyefficientecg",
     "he2020tvmforadrenogpus",
     "memoryfloor2026",
+    "kumcham2023insitugrownsweetal",
+    "ren2024exploringtheeffect",
+    "zhang2019trajectorypredicti",
     "zhang2018fpgaorientedmoving",
     "jiang2021trrscopeunderstand",
     "patel2025llminference",
+    "anon2025aiolosrestrainsthe",
+    "harrison2021coprophagiabreakin",
+    "anon2018riskreturnandtheti",
+    "alexander2021visualtimelinesine",
+    "anon2019theclinicaloutcome",
     "lu2023theimageofnumerals",
+    "hillman2022tvmthepublicsnewss",
+    "pan2019ureteralstenosisaf",
+    "zhu2018tvmbasedmodelforho",
+    "anon2024tvmukadoptsnewname",
     "yamada2020atvmbasedwidebandp",
+    "alexander2021usingexceltosimula",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -40,6 +67,22 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "castell2024experienceguidedmi",
+      "title": "Experience-guided, Mixed-precision Matrix Multiplication with Apache TVM for ARM processors",
+      "source_tier": "B",
+      "relevance_score": 128,
+      "matched_keywords": [
+        "TVM HW matrix",
+        "TVM tuning",
+        "hardware",
+        "matrix",
+        "optim",
+        "tun",
+        "apache",
+        "TVM"
+      ]
+    },
     {
       "bib_key": "wu2023autotuningapachetv",
       "title": "Autotuning Apache TVM-based Scientific Applications Using Bayesian Optimization",
@@ -64,6 +107,19 @@
         "compiler",
         "stack",
         "TVM"
+      ]
+    },
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "source_tier": "B",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
       ]
     },
     {
@@ -103,6 +159,18 @@
       ]
     },
     {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -115,9 +183,86 @@
       ]
     },
     {
+      "bib_key": "sato2019lsclaparoscopicsac",
+      "title": "LSC (LAPAROSCOPIC SACROCOLPOPEXY) VERSUS UPHOLD TYPE TVM: A CASE CONTROL STUDY 当院におけるLSCとUphold型TVMの治療成績の検討",
+      "source_tier": "B",
+      "relevance_score": 66,
+      "matched_keywords": [
+        "TVM case study",
+        "case",
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "koblah2022hardwaremovingtarg",
       "title": "Hardware Moving Target Defenses against Physical Attacks",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -181,9 +326,53 @@
       ]
     },
     {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "roy2019hardwaresoftwareco",
       "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -266,6 +455,33 @@
       ]
     },
     {
+      "bib_key": "kumcham2023insitugrownsweetal",
+      "title": "In-Situ Grown Sweet Alyssum Flowers-Like Co-Rich Comoo4 For High Performance Hybrid Supercapacitors",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "lower"
+      ]
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
       "bib_key": "zhang2018fpgaorientedmoving",
       "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
       "source_tier": "A",
@@ -293,6 +509,51 @@
       ]
     },
     {
+      "bib_key": "anon2025aiolosrestrainsthe",
+      "title": "Aiolos restrains the generation of antigen-inexperienced, virtual memory CD8 T (TVM) cells",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "harrison2021coprophagiabreakin",
+      "title": "Coprophagia: breaking a dirty habit (TVM)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "anon2018riskreturnandtheti",
+      "title": "Risk, Return, And The Time Value Of Money (TVM)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "alexander2021visualtimelinesine",
+      "title": "Visual Timelines in Excel to Illustrate TVM Calculations",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "anon2019theclinicaloutcome",
+      "title": "The Clinical Outcome of TVM or LSC Mesh Suspension for POP",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
       "bib_key": "lu2023theimageofnumerals",
       "title": "The Image of Numerals with Calibration on TVM",
       "source_tier": "A",
@@ -302,9 +563,54 @@
       ]
     },
     {
+      "bib_key": "hillman2022tvmthepublicsnewss",
+      "title": "TVM, the public's news service",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "pan2019ureteralstenosisaf",
+      "title": "Ureteral Stenosis after Uterine Suspension Using TVM (Transvaginal Mesh)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "zhu2018tvmbasedmodelforho",
+      "title": "TVM-Based Model for How Climate Change Influence Regional Instability",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "anon2024tvmukadoptsnewname",
+      "title": "TVM UK adopts new name",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
       "bib_key": "yamada2020atvmbasedwidebandp",
       "title": "A TVM Based Wideband Phase Measurement System by Multiusing One Thermal Voltage Converter",
       "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "TVM"
+      ]
+    },
+    {
+      "bib_key": "alexander2021usingexceltosimula",
+      "title": "Using Excel to Simulate a Financial Calculator and Excel TVM Formulas",
+      "source_tier": "C",
       "relevance_score": 18,
       "matched_keywords": [
         "TVM"

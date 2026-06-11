@@ -224,8 +224,8 @@ def compile_book() -> bool:
         proc = subprocess.run(
             ["bash", "make.sh"],
             cwd=BOOKS,
-            capture_output=True,
-            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             timeout=180,
             check=False,
         )

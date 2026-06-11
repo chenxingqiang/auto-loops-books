@@ -554,6 +554,20 @@ def extract_cite_keys(text: str) -> list[str]:
     return keys
 
 
+def cite_context_snippets(tex: str, bib_key: str, *, max_chars: int = 600) -> str:
+    """Sentences in chapter text that cite bib_key (for relevance scoring)."""
+    snippets: list[str] = []
+    for para in re.split(r"\n\s*\n", tex):
+        if bib_key not in para or not re.search(rf"\\cite[tp]?\{{[^}}]*\b{re.escape(bib_key)}\b", para):
+            continue
+        plain = re.sub(r"\\[a-zA-Z@]+(\[[^\]]*\])?(\{[^}]*\})?", " ", para)
+        plain = re.sub(r"\s+", " ", plain).strip()
+        if plain:
+            snippets.append(plain)
+    blob = " ".join(snippets)
+    return blob[:max_chars]
+
+
 def bib_entry_text(entry: dict[str, str]) -> str:
     key = entry.get("key", "")
     key_tokens = " ".join(re.findall(r"[a-z]{3,}", key.lower()))
@@ -595,6 +609,9 @@ def verify_chapter_references(
     )
 
     bib = parse_bib_entries()
+    merged_path = BOOKS / "citations_merged.bib"
+    if merged_path.exists():
+        bib.update(parse_bib_entries(merged_path))
     cite_keys = extract_cite_keys(tex)
     citations: list[dict] = []
     low_relevance: list[dict] = []
@@ -616,8 +633,8 @@ def verify_chapter_references(
 
         paper = {
             "title": entry.get("title", ""),
-            "abstract": bib_entry_text(entry),
-            "snippet": bib_entry_text(entry),
+            "abstract": bib_entry_text(entry) + " " + cite_context_snippets(tex, key),
+            "snippet": bib_entry_text(entry) + " " + cite_context_snippets(tex, key),
         }
         score, matched = analyze_relevance(paper, keywords)
         status = (

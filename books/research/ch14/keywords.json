@@ -1,50 +1,50 @@
 [
   {
-    "term": "MLIR: modern compiler infrastructure",
+    "term": "mlir: modern compiler infrastructure",
     "weight": 18
   },
   {
-    "term": "MLIR",
+    "term": "mlir",
     "weight": 17
   },
   {
-    "term": "MLIR arch passes",
+    "term": "mlir arch passes",
     "weight": 14
   },
   {
-    "term": "MLIR case study",
+    "term": "mlir case study",
     "weight": 14
   },
   {
-    "term": "MLIR codegen",
+    "term": "mlir codegen",
     "weight": 14
   },
   {
-    "term": "MLIR HW matrix",
+    "term": "mlir hw matrix",
     "weight": 14
   },
   {
-    "term": "MLIR tuning",
+    "term": "mlir tuning",
     "weight": 14
   },
   {
-    "term": "MLIR arch passes LLM inference compiler",
+    "term": "mlir arch passes llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MLIR case study LLM inference compiler",
+    "term": "mlir case study llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MLIR codegen LLM inference compiler",
+    "term": "mlir codegen llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MLIR HW matrix LLM inference compiler",
+    "term": "mlir hw matrix llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MLIR tuning LLM inference compiler",
+    "term": "mlir tuning llm inference compiler",
     "weight": 13
   },
   {
@@ -96,7 +96,7 @@
     "weight": 10
   },
   {
-    "term": "GPU CPU NPU",
+    "term": "gpu cpu npu",
     "weight": 10
   },
   {
@@ -140,11 +140,11 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
   },
   {
-    "term": "bottleneck",
+    "term": "aie",
     "weight": 9
   },
   {
@@ -160,11 +160,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -172,11 +172,11 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
+    "term": "decoder",
     "weight": 9
   },
   {
-    "term": "fleets",
+    "term": "flashattention",
     "weight": 9
   },
   {
@@ -184,19 +184,31 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "graphs",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hbm",
+    "weight": 9
+  },
+  {
+    "term": "hip",
+    "weight": 9
+  },
+  {
+    "term": "latency",
+    "weight": 9
+  },
+  {
+    "term": "launch",
     "weight": 9
   },
   {
@@ -204,39 +216,59 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "legality",
     "weight": 9
   },
   {
-    "term": "microbenchmarks",
+    "term": "llm",
     "weight": 9
   },
   {
-    "term": "miss",
+    "term": "llvm",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "megakernel",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "mlir dialect stack for decode export",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "slos",
+    "term": "pagedattention",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "passes",
+    "weight": 9
+  },
+  {
+    "term": "pytorch",
+    "weight": 9
+  },
+  {
+    "term": "residency",
+    "weight": 9
+  },
+  {
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "simd",
+    "weight": 9
+  },
+  {
+    "term": "static",
     "weight": 9
   },
   {
@@ -244,11 +276,35 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "triton",
+    "weight": 9
+  },
+  {
+    "term": "tvm",
+    "weight": 9
+  },
+  {
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
+    "weight": 9
+  },
+  {
+    "term": "xla",
+    "weight": 9
+  },
+  {
+    "term": "yirage mlir integration notes",
     "weight": 9
   }
 ]

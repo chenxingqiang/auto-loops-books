@@ -5,12 +5,12 @@
   "\"codegen\" AND \"backend\"",
   "\"tun\" AND \"profile\"",
   "\"case\" AND \"benchmark\"",
-  "\"IREE: MLIR-native runtime and compilation\" AND \"IREE\"",
-  "\"IREE arch passes\" AND \"IREE case study\"",
-  "\"IREE codegen\" AND \"IREE HW matrix\"",
-  "\"IREE tuning\" AND \"IREE arch passes LLM inference compiler\"",
-  "\"IREE case study LLM inference compiler\" AND \"IREE codegen LLM inference compiler\"",
-  "\"IREE HW matrix LLM inference compiler\" AND \"IREE tuning LLM inference compiler\"",
+  "\"iree: mlir-native runtime and compilation\" AND \"iree\"",
+  "\"iree arch passes\" AND \"iree case study\"",
+  "\"iree codegen\" AND \"iree hw matrix\"",
+  "\"iree tuning\" AND \"iree arch passes llm inference compiler\"",
+  "\"iree case study llm inference compiler\" AND \"iree codegen llm inference compiler\"",
+  "\"iree hw matrix llm inference compiler\" AND \"iree tuning llm inference compiler\"",
   "\"case benchmark\" AND \"codegen backend\"",
   "\"hardware target\" AND \"pass lower\""
 ]

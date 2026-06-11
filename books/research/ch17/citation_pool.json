@@ -1,32 +1,58 @@
 {
   "chapter_id": "ch17",
-  "pool_count": 36,
+  "pool_count": 62,
   "bib_keys": [
+    "li2026benchmarkingcudacu",
+    "zhang2025ahardwareaccelerat",
+    "sedrakian2021distributedgpubase",
     "shen2022hardwaredevelopmen",
+    "silvestrini2024processorandhardwa",
     "yirage2026",
     "han2024unleashingcpupoten",
+    "wang2023anfpgabasedhardwar",
+    "grimberg2026stone23voyager1for",
+    "lane2023targetrecognitioni",
     "koblah2022hardwaremovingtarg",
+    "akbar2019hardwaredesignofco",
+    "anon2026statictargetsnapsh",
+    "panda2023particlefilterbase",
     "kern2024virtuallyaugmented",
+    "schoeder2022amodulationbasedra",
     "agarwal2023hardwarebasedimple",
     "li2025nearfieldtargetloc",
     "urbanski2025hardwarebasedcalcu",
     "du2023sarnasahardwareawa",
     "roy2019hardwaresoftwareco",
+    "anon2018assessmentofthehar",
+    "lepekhina2019radartargethardwar",
+    "rossi2021basicsettingsseria",
+    "shome2019phasedmimoradarusi",
     "han2025kernelinstructiono",
+    "han2025optimizationofredu",
     "han2025instructioncooptim",
     "han2025instructionschedul",
     "anon2025productionizinggpu",
+    "majumdar2025clanguageempowered",
     "lin2023kescocompilerbased",
+    "agourakis2026nativegpuoctonions",
     "bla2019gpuacceleratedfixp",
+    "gangrade2023applicationsofahig",
     "tillet2024blockbasedgpuprogr",
     "ji2022compilerdirectedin",
     "jeong2026insidevoltdesignin",
+    "lavrinov2022anoverviewofthenum",
     "liu2019ppopenclaperforman",
     "memoryfloor2026",
+    "ren2024exploringtheeffect",
+    "zhang2019trajectorypredicti",
     "zhang2018fpgaorientedmoving",
     "jiang2021trrscopeunderstand",
     "patel2025llminference",
     "hagedorn2026nsightpythonapytho",
+    "akbar2019gpuacceleratedfuzz",
+    "kothapalli2024integratingwebappl",
+    "festa2025pythonicvsrefactor",
+    "jin2019astudyofgeodesicdi",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -41,6 +67,52 @@
   ],
   "papers": [
     {
+      "bib_key": "li2026benchmarkingcudacu",
+      "title": "Benchmarking CUDA, CuPy, and Triton Kernel Optimizations for 3D Point Cloud Segmentation: An Empirical Comparison of Latency, Memory Efficiency, and GPU Utilization",
+      "source_tier": "B",
+      "relevance_score": 132,
+      "matched_keywords": [
+        "benchmark",
+        "lower",
+        "optim",
+        "tun",
+        "constraints",
+        "fusion",
+        "GPU",
+        "kernels",
+        "NPU",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "source_tier": "B",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "sedrakian2021distributedgpubase",
+      "title": "Distributed GPU Based Matrix Power Kernel for Geoscience Applications",
+      "source_tier": "B",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "case",
+        "hardware",
+        "matrix",
+        "optim",
+        "CPU",
+        "GPU",
+        "kernels"
+      ]
+    },
+    {
       "bib_key": "shen2022hardwaredevelopmen",
       "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
       "source_tier": "A",
@@ -50,6 +122,18 @@
         "hardware",
         "target",
         "fusion"
+      ]
+    },
+    {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "miss"
       ]
     },
     {
@@ -78,6 +162,40 @@
       ]
     },
     {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "koblah2022hardwaremovingtarg",
       "title": "Hardware Moving Target Defenses against Physical Attacks",
       "source_tier": "A",
@@ -89,9 +207,53 @@
       ]
     },
     {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "kern2024virtuallyaugmented",
       "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -155,9 +317,64 @@
       ]
     },
     {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "han2025kernelinstructiono",
       "title": "Kernel Instruction Optimization Based on the Triton Compiler",
       "source_tier": "A",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "optim",
+        "compiler",
+        "Triton"
+      ]
+    },
+    {
+      "bib_key": "han2025optimizationofredu",
+      "title": "Optimization of reduction kernel based on Triton compiler",
+      "source_tier": "B",
       "relevance_score": 56,
       "matched_keywords": [
         "optim",
@@ -199,9 +416,30 @@
       ]
     },
     {
+      "bib_key": "majumdar2025clanguageempowered",
+      "title": "C-Language Empowered GPU Kernel Optimization Towards Greener AI",
+      "source_tier": "B",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "hardware",
+        "optim",
+        "GPU"
+      ]
+    },
+    {
       "bib_key": "lin2023kescocompilerbased",
       "title": "KeSCo: Compiler-based Kernel Scheduling for Multi-task GPU Applications",
       "source_tier": "A",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "agourakis2026nativegpuoctonions",
+      "title": "Native GPU Octonion Support for Deep Learning: A Compiler-First Approach",
+      "source_tier": "B",
       "relevance_score": 36,
       "matched_keywords": [
         "compiler",
@@ -216,6 +454,16 @@
       "matched_keywords": [
         "compiler",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "gangrade2023applicationsofahig",
+      "title": "Applications of a High-Resolution, Multi-GPU Accelerated 2D Hydrodynamic Flood Model (Triton) for Large-Scale Floodplain Modeling",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "GPU",
+        "Triton"
       ]
     },
     {
@@ -249,6 +497,16 @@
       ]
     },
     {
+      "bib_key": "lavrinov2022anoverviewofthenum",
+      "title": "AN OVERVIEW OF THE NUMBA JIT COMPILER  AS A GPU PARALLEL COMPUTING TOOL",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "GPU"
+      ]
+    },
+    {
       "bib_key": "liu2019ppopenclaperforman",
       "title": "PPOpenCL: a performance-portable OpenCL compiler with host and kernel thread code fusion",
       "source_tier": "A",
@@ -266,6 +524,24 @@
       "matched_keywords": [
         "decode",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
       ]
     },
     {
@@ -299,6 +575,42 @@
       "bib_key": "hagedorn2026nsightpythonapytho",
       "title": "Nsight Python: A Python-First Profiling Toolkit for Seamless GPU Kernel Analysis (Tool)",
       "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "akbar2019gpuacceleratedfuzz",
+      "title": "GPU Accelerated Fuzzy C-Means (FCM) Color Image Segmentation",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "GPU"
+      ]
+    },
+    {
+      "bib_key": "kothapalli2024integratingwebappl",
+      "title": "Integrating Web Applications with Azure OpenAI Services: A Focus on Semantic Kernel",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "OpenAI"
+      ]
+    },
+    {
+      "bib_key": "festa2025pythonicvsrefactor",
+      "title": "Pythonic vs Refactorable Pythonic: On the Relationship between Pythonic Idioms and Code Quality in Machine Learning Projects",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "jin2019astudyofgeodesicdi",
+      "title": "A Study of Geodesic Distance Kernel on an Integrated GPU",
+      "source_tier": "B",
       "relevance_score": 18,
       "matched_keywords": [
         "GPU"

@@ -1,15 +1,15 @@
 {
   "chapter_id": "ch14",
-  "timestamp": "2026-06-10T03:02:54.850464",
+  "timestamp": "2026-06-10T20:18:11.414495",
   "min_binding_score": 12,
   "min_matched_keywords": 2,
   "tier_a_only": true,
-  "bindings_before": 90,
-  "bindings_after": 277,
+  "bindings_before": 189,
+  "bindings_after": 189,
   "rejected_from_previous": 0,
   "tier_counts_in_bindings": {
-    "A": 277
+    "A": 189
   },
-  "catalog_tier_a": 46,
-  "catalog_total": 64
+  "catalog_tier_a": 54,
+  "catalog_total": 82
 }

@@ -9,6 +9,7 @@ Usage:
     uv run book-loop status
     uv run book-loop step
     uv run book-loop step --chapter ch01 --skip-research
+    uv run book-loop deep-rewrite --chapter ch14
     uv run book-loop run --max-steps 5
     uv run book-loop insert-visuals --chapter ch01
 """
@@ -291,6 +292,7 @@ def run_citation_loop(
     quality: CitationQualityOptions | None = None,
 ) -> list[str]:
     from citation_loop import (
+        CitationQualityOptions,
         merge_all_chapter_bibs,
         refilter_chapter_bindings,
         redistribute_citations_to_tex,
@@ -546,6 +548,214 @@ def part_progress() -> list[dict[str, Any]]:
     return rows
 
 
+
+
+def section_label_display(spec: ChapterSpec, section_label: str) -> str:
+    from book_proper_nouns import canonicalize_prose
+
+    return canonicalize_prose(section_label.replace("_", " "))
+
+
+def write_deep_rewrite_brief(spec: ChapterSpec) -> Path:
+    """Write per-section rewrite brief for agent (Chinese spec bullets + EN patterns)."""
+    from research_tools import chapter_number, extract_outline_bullets
+
+    ch_num = chapter_number(spec.chapter_id)
+    bullets = extract_outline_bullets(ch_num)
+    lines = [
+        f"# Deep rewrite brief — {spec.chapter_id}",
+        "",
+        f"**Title:** {spec.title}",
+        f"**Gold standard:** `{STYLE_REFERENCE_CHAPTER}` + `books/WRITING_STYLE.md`",
+        "",
+        "## Machine pass (done by `book-loop deep-rewrite`)",
+        "",
+        "1. Strip template / batch filler",
+        "2. Section-aligned prose scaffold (`book_prose_upgrade.py`)",
+        "3. Proper nouns, facts, citations, visuals, compile",
+        "",
+        "## Agent pass — rewrite each section to ch01 density",
+        "",
+        "Per section: problem-first hook → HW constraint → compile/kernel fix → "
+        "multi-HW delta → cited metric or worked example.",
+        "",
+    ]
+    for i, sec in enumerate(spec.sections):
+        title = section_label_display(spec, sec.label)
+        bullet = bullets[i] if i < len(bullets) else "(see Chinese spec)"
+        patterns = ", ".join(sec.patterns)
+        lines.extend(
+            [
+                f"### {i + 1}. `{sec.label}` — {title}",
+                "",
+                f"- **Spec bullet:** {bullet}",
+                f"- **Coverage patterns:** `{patterns}`",
+                f"- **Target:** ≥3 paragraphs + optional table/example; no template rotation",
+                f"- **Anchor:** `\\label{{sec:{sec.label}}}` or `sec:{spec.chapter_id}_{sec.label}`",
+                "",
+            ]
+        )
+    out = RESEARCH_ROOT / spec.chapter_id / "deep_rewrite_brief.md"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return out
+
+
+def build_deep_rewrite_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
+    brief = write_deep_rewrite_brief(spec)
+    rel_brief = brief.relative_to(ROOT)
+    gold = CHAPTERS / f"{STYLE_REFERENCE_CHAPTER}_llm_decode_bottlenecks.tex"
+    if not gold.exists():
+        gold = next((CHAPTERS / s.filename for s in OUTLINE if s.chapter_id == STYLE_REFERENCE_CHAPTER), None)
+
+    tasks = [
+        f"Deep rewrite {spec.chapter_id}: read {rel_brief} and rewrite EVERY section in "
+        f"`books/build/chapters/{spec.filename}` to match ch01 engineering narrative density.",
+        f"Voice: {WRITING_STYLE.name} — problem-first, HW↔SW chain, GPU/CPU/NPU deltas; "
+        "no template paragraphs.",
+    ]
+    if gold and gold.exists():
+        tasks.append(f"Rhythm reference: {gold.relative_to(ROOT)}")
+
+    tasks.extend(build_agent_tasks(spec, ev))
+
+    q = ev.get("quality_score", 0)
+    if q < 85:
+        tasks.append(
+            f"Quality uplift: quality_score={q:.1f} — add cited metrics, tables, or "
+            f"\begin{{example}} blocks per section (see ch01)."
+        )
+    return tasks
+
+
+def run_deep_rewrite(
+    *,
+    chapter: str,
+    skip_research: bool = False,
+    research_dry_run: bool = False,
+    skip_fact_verify: bool = False,
+    fact_verify_dry_run: bool = False,
+    skip_prose: bool = False,
+    skip_compile: bool = False,
+    force_prose: bool = True,
+    citation_redistribute: bool = False,
+) -> StepReport:
+    spec = chapter_spec(chapter)
+    if not spec:
+        raise SystemExit(f"Unknown chapter: {chapter}")
+
+    report = StepReport(chapter_id=spec.chapter_id, phase="deep-rewrite")
+
+    brief = write_deep_rewrite_brief(spec)
+    report.actions.append(f"brief: {brief.relative_to(ROOT)}")
+
+    if ensure_chapter_stub(spec):
+        report.actions.append(f"stub: created {spec.filename}")
+    if ensure_main_input(spec):
+        report.actions.append("main.tex: added chapter \input")
+
+    if not skip_prose:
+        try:
+            from book_batch_complete import strip_boilerplate
+            from book_prose_upgrade import upgrade_chapter
+
+            tex_path = chapter_tex_path(spec)
+            if tex_path.exists():
+                cleaned = strip_boilerplate(tex_path.read_text(encoding="utf-8"))
+                tex_path.write_text(cleaned, encoding="utf-8")
+                report.actions.append("prose: stripped batch boilerplate")
+            ur = upgrade_chapter(spec, dry_run=False)
+            report.actions.append(
+                f"prose: upgraded words {ur['words_before']}->{ur['words_after']}"
+            )
+        except Exception as exc:
+            report.errors.append(f"prose: {exc}")
+
+    try:
+        from book_proper_nouns import fix_chapter
+
+        n, _ = fix_chapter(spec)
+        if n:
+            report.actions.append(f"proper-nouns: fixed {n} issue(s)")
+    except Exception as exc:
+        report.errors.append(f"proper-nouns: {exc}")
+
+    try:
+        report.actions.extend(run_research(spec, skip=skip_research, dry_run=research_dry_run))
+    except Exception as exc:
+        report.errors.append(f"research: {exc}")
+
+    try:
+        report.actions.extend(
+            run_fact_verification(
+                spec,
+                skip=skip_fact_verify,
+                dry_run=fact_verify_dry_run,
+            )
+        )
+    except Exception as exc:
+        report.errors.append(f"facts: {exc}")
+
+    try:
+        report.actions.extend(run_reference_verify(spec))
+    except Exception as exc:
+        report.errors.append(f"refs: {exc}")
+
+    try:
+        report.actions.extend(run_citation_loop(spec))
+    except Exception as exc:
+        report.errors.append(f"citations: {exc}")
+
+    if citation_redistribute:
+        try:
+            from citation_loop import merge_all_chapter_bibs, redistribute_citations_to_tex
+
+            redist = redistribute_citations_to_tex(spec)
+            report.actions.append(
+                f"citations: redistributed assigned={redist.get('assigned_count', 0)} "
+                f"keys={redist.get('unique_keys_in_tex', 0)}"
+            )
+            merge_all_chapter_bibs()
+            report.actions.append("citations: merged citations_merged.bib")
+        except Exception as exc:
+            report.errors.append(f"citations-redistribute: {exc}")
+    else:
+        report.actions.append("citations: skipped redistribute (agent-safe default)")
+
+    try:
+        from book_batch_complete import strip_boilerplate
+        from book_prose_upgrade import strip_template_paragraphs
+
+        tex_path = chapter_tex_path(spec)
+        cleaned = strip_template_paragraphs(strip_boilerplate(tex_path.read_text(encoding="utf-8")))
+        marker = f'\\typeout{{END_CHAPTER "{spec.chapter_id}"'
+        if marker in cleaned:
+            head, _, tail = cleaned.partition(marker)
+            cleaned = head.rstrip() + "\n\n" + marker + tail
+        tex_path.write_text(cleaned, encoding="utf-8")
+        report.actions.append("prose: post-citation template strip")
+    except Exception as exc:
+        report.errors.append(f"prose-cleanup: {exc}")
+
+    try:
+        report.actions.extend(run_visuals(spec))
+    except Exception as exc:
+        report.errors.append(f"visuals: {exc}")
+
+    compile_ok = True
+    if not skip_compile:
+        compile_ok = compile_book()
+        report.actions.append(f"compile: {'ok' if compile_ok else 'failed'}")
+        if not compile_ok:
+            report.errors.append("make.sh failed")
+
+    ev = evaluate_chapter(spec, compile_ok)
+    report.evaluation = ev
+    report.agent_tasks = build_deep_rewrite_agent_tasks(spec, ev)
+    append_results_row(ev, description="deep-rewrite")
+    save_loop_state(report)
+    return report
+
 def print_status(*, pick: str = "sequential") -> None:
     progress = book_progress()
     print("=== autobooks loop status ===\n")
@@ -737,8 +947,30 @@ def main() -> int:
         help="Machine phases only (research/visuals/stub); no expectation of prose improvement",
     )
 
+    dr_p = sub.add_parser(
+        "deep-rewrite",
+        help="Single-chapter deep rewrite loop (prose scaffold + cite/fact/compile + agent brief)",
+    )
+    dr_p.add_argument("--chapter", required=True, help="e.g. ch14")
+    dr_p.add_argument("--skip-research", action="store_true")
+    dr_p.add_argument("--research-dry-run", action="store_true")
+    dr_p.add_argument("--skip-fact-verify", action="store_true")
+    dr_p.add_argument("--fact-verify-dry-run", action="store_true")
+    dr_p.add_argument(
+        "--skip-prose",
+        action="store_true",
+        help="Skip book_prose_upgrade machine scaffold",
+    )
+    dr_p.add_argument("--skip-compile", action="store_true")
+    dr_p.add_argument(
+        "--citation-redistribute",
+        action="store_true",
+        help="Run citation redistribute (can inject template filler; off by default)",
+    )
+
     ins_p = sub.add_parser("insert-visuals")
-    ins_p.add_argument("--chapter", required=True)
+    ins_p.add_argument("--chapter")
+    ins_p.add_argument("--all", action="store_true")
 
     sub.add_parser("audit", help="Run book_spec_audit.py against Chinese spec")
 
@@ -786,14 +1018,39 @@ def main() -> int:
         print_status(pick=args.pick)
         return 0
 
+    if args.command == "deep-rewrite":
+        report = run_deep_rewrite(
+            chapter=args.chapter,
+            skip_research=args.skip_research,
+            research_dry_run=args.research_dry_run,
+            skip_fact_verify=args.skip_fact_verify,
+            fact_verify_dry_run=args.fact_verify_dry_run,
+            skip_prose=args.skip_prose,
+            skip_compile=args.skip_compile,
+            citation_redistribute=args.citation_redistribute,
+        )
+        print_step_report(report)
+        return 0 if not report.errors else 1
+
     if args.command == "insert-visuals":
-        spec = chapter_spec(args.chapter)
-        if not spec:
+        if not args.chapter and not args.all:
+            print("Specify --chapter <id> or --all", file=sys.stderr)
             return 1
-        cmd_plan(args.chapter)
-        cmd_render(args.chapter, None)
-        n = insert_missing_visuals(spec)
-        print(f"Inserted {n} visual(s)")
+        if args.all:
+            targets = OUTLINE
+        else:
+            spec = chapter_spec(args.chapter)
+            if not spec:
+                return 1
+            targets = (spec,)
+        total = 0
+        for spec in targets:
+            cmd_plan(spec.chapter_id)
+            cmd_render(spec.chapter_id, None)
+            n = insert_missing_visuals(spec)
+            print(f"{spec.chapter_id}: inserted {n} visual(s)")
+            total += n
+        print(f"Total inserted: {total}")
         return 0
 
     if args.command == "step":
@@ -894,7 +1151,6 @@ def main() -> int:
         return 0
 
     if args.command == "verify-references":
-        from book_prepare import OUTLINE
         from research_tools import verify_chapter_references
 
         if not args.chapter and not args.all:

@@ -1,44 +1,29 @@
 {
   "chapter_id": "ch06",
-  "pool_count": 27,
-  "assigned_count": 27,
+  "pool_count": 59,
+  "assigned_count": 59,
   "unassigned_count": 0,
-  "sections_with_cites": 5,
-  "unique_keys_in_tex": 25,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 57,
   "pool_path": "books/research/ch06/citation_pool.json",
   "sections_used": [
-    "CPU Residency",
-    "GPU Residency",
-    "Lifetime Planning",
-    "YiRage Memory Pass",
-    "chapter"
+    "CPU residency",
+    "Chapter Summary",
+    "GPU residency",
+    "NPU residency",
+    "YiRage memory pass",
+    "chapter",
+    "lifetime planning"
   ],
-  "cites_applied": 25,
+  "cites_applied": 57,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch06_onchip_residency_design.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "jyoti2019expressionempowere",
-      "section": "chapter",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "residen"
-      ]
-    },
-    {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
       "bib_key": "zuzak2020obfusgemenhancingp",
-      "section": "Lifetime Planning",
+      "section": "chapter",
       "relevance_score": 74,
       "matched_keywords": [
         "memory",
@@ -48,64 +33,70 @@
       ]
     },
     {
-      "sentence_id": "s0004",
-      "bib_key": "bera2026machinelearningdri",
-      "section": "Lifetime Planning",
-      "relevance_score": 56,
-      "matched_keywords": [
-        "memory",
-        "design",
-        "on-chip"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
+      "sentence_id": "s0002",
       "bib_key": "patel2025llminference",
-      "section": "Lifetime Planning",
+      "section": "chapter",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
       ]
     },
     {
-      "sentence_id": "s0006",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Lifetime Planning",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "nvidia2022hopper",
-      "section": "Lifetime Planning",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "amd2024xdna",
-      "section": "Lifetime Planning",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "byeon2024multithreadeddatas",
-      "section": "Lifetime Planning",
-      "relevance_score": 56,
+      "sentence_id": "s0003",
+      "bib_key": "anon2023reviewformemorybce",
+      "section": "lifetime planning",
+      "relevance_score": 58,
       "matched_keywords": [
         "memory",
-        "data",
-        "on-chip"
+        "residen",
+        "residency"
       ]
     },
     {
-      "sentence_id": "s0010",
+      "sentence_id": "s0004",
+      "bib_key": "anon2023decisionletterform",
+      "section": "lifetime planning",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "memory",
+        "residen",
+        "residency"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "gaadhe2026designofstableande",
+      "section": "lifetime planning",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "static"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "memoryfloor2026",
+      "section": "lifetime planning",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "batch-1",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "min2020programrawatandanp",
+      "section": "lifetime planning",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
       "bib_key": "dao2023flashdecoding",
-      "section": "Lifetime Planning",
+      "section": "lifetime planning",
       "relevance_score": 9,
       "matched_keywords": [
         "decode"
@@ -113,21 +104,44 @@
       "fallback": false
     },
     {
+      "sentence_id": "s0010",
+      "bib_key": "nvidia2022hopper",
+      "section": "lifetime planning",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "hopper"
+      ]
+    },
+    {
       "sentence_id": "s0011",
-      "bib_key": "amd2024aie",
-      "section": "Lifetime Planning",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "sudarta2019determinansikapres",
+      "section": "lifetime planning",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "semianalysis2024tma",
-      "section": "Lifetime Planning",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "huang2026architecturaltrade",
+      "section": "GPU residency",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "design",
+        "gpu"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "permana2018peranspiritualitas",
+      "section": "GPU residency",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:38.753383"
+  "generated_at": "2026-06-10T09:09:57.583482"
 }

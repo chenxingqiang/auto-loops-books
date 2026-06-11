@@ -1,6 +1,6 @@
 [
   {
-    "term": "full decoder MegaKernel implementation",
+    "term": "full decoder megakernel implementation",
     "weight": 18
   },
   {
@@ -8,7 +8,7 @@
     "weight": 14
   },
   {
-    "term": "MegaKernel structure",
+    "term": "megakernel structure",
     "weight": 14
   },
   {
@@ -20,19 +20,19 @@
     "weight": 14
   },
   {
-    "term": "benchmark results LLM inference compiler",
+    "term": "benchmark results llm inference compiler",
     "weight": 13
   },
   {
-    "term": "MegaKernel structure LLM inference compiler",
+    "term": "megakernel structure llm inference compiler",
     "weight": 13
   },
   {
-    "term": "qkv attn mlp LLM inference compiler",
+    "term": "qkv attn mlp llm inference compiler",
     "weight": 13
   },
   {
-    "term": "source walkthrough LLM inference compiler",
+    "term": "source walkthrough llm inference compiler",
     "weight": 13
   },
   {
@@ -40,7 +40,7 @@
     "weight": 12
   },
   {
-    "term": "MegaKernel decoder",
+    "term": "megakernel decoder",
     "weight": 12
   },
   {
@@ -68,7 +68,7 @@
     "weight": 10
   },
   {
-    "term": "MegaKernel",
+    "term": "megakernel",
     "weight": 10
   },
   {
@@ -84,11 +84,19 @@
     "weight": 10
   },
   {
-    "term": "bottleneck",
+    "term": "aie",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -100,11 +108,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -112,11 +120,7 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -128,23 +132,23 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
+    "weight": 9
+  },
+  {
+    "term": "gpu",
+    "weight": 9
+  },
+  {
+    "term": "hbm",
+    "weight": 9
+  },
+  {
+    "term": "hopper",
     "weight": 9
   },
   {
     "term": "implementation",
-    "weight": 9
-  },
-  {
-    "term": "independent",
-    "weight": 9
-  },
-  {
-    "term": "kernels",
-    "weight": 9
-  },
-  {
-    "term": "knobs",
     "weight": 9
   },
   {
@@ -156,31 +160,35 @@
     "weight": 9
   },
   {
-    "term": "miss",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "profile",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "residency",
     "weight": 9
   },
   {
-    "term": "slos",
+    "term": "same",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "static",
+    "weight": 9
+  },
+  {
+    "term": "target",
     "weight": 9
   },
   {
@@ -188,15 +196,27 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "traffic",
     "weight": 9
   },
   {
-    "term": "YiRage",
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
+    "weight": 9
+  },
+  {
+    "term": "yirage",
     "weight": 9
   }
 ]

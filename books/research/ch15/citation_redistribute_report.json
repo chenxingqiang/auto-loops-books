@@ -1,132 +1,138 @@
 {
   "chapter_id": "ch15",
-  "pool_count": 25,
-  "assigned_count": 25,
+  "pool_count": 52,
+  "assigned_count": 52,
   "unassigned_count": 0,
-  "sections_with_cites": 3,
-  "unique_keys_in_tex": 24,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 50,
   "pool_path": "books/research/ch15/citation_pool.json",
   "sections_used": [
-    "XLA Arch Passes",
-    "XLA HW Matrix",
+    "Chapter Summary",
+    "XLA HW matrix",
+    "XLA arch passes",
+    "XLA case study",
+    "XLA codegen",
+    "XLA tuning",
     "chapter"
   ],
-  "cites_applied": 24,
+  "cites_applied": 50,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch15_xla.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "anon2025retrievalaugmented",
       "section": "chapter",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "production"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "kern2024virtuallyaugmented",
+      "section": "chapter",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "an2022memorysafecomputat",
+      "section": "XLA HW matrix",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "xla",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "nvidia2024cudagraphs",
+      "section": "XLA HW matrix",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "cuda"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "XLA HW matrix",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "memoryfloor2026",
+      "section": "XLA HW matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "batch-1",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "schardl2019tapirxlaembeddingf",
+      "section": "XLA HW matrix",
+      "relevance_score": 52,
+      "matched_keywords": [
+        "xla",
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "patel2025llminference",
+      "section": "XLA HW matrix",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
-      "bib_key": "schardl2019tapirxlaembeddingf",
-      "section": "XLA HW Matrix",
-      "relevance_score": 52,
-      "matched_keywords": [
-        "XLA",
-        "compiler"
-      ]
-    },
-    {
-      "sentence_id": "s0004",
-      "bib_key": "dao2022flashattention",
-      "section": "XLA HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "XLA HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "XLA HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "kwon2023vllm",
-      "section": "XLA HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "liu2024deepseekv3",
-      "section": "XLA HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "nvidia2022hopper",
-      "section": "XLA HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
       "sentence_id": "s0010",
-      "bib_key": "kern2024virtuallyaugmented",
-      "section": "XLA HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "schoeder2022amodulationbasedra",
+      "section": "XLA HW matrix",
+      "relevance_score": 20,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "hardware"
       ]
     },
     {
       "sentence_id": "s0011",
       "bib_key": "agarwal2023hardwarebasedimple",
-      "section": "XLA HW Matrix",
-      "relevance_score": 64,
+      "section": "XLA HW matrix",
+      "relevance_score": 20,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
         "target"
       ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "amd2024xdna",
-      "section": "XLA HW Matrix",
+      "bib_key": "leong2025assuringcorrectnes",
+      "section": "XLA arch passes",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "perikala2025designingproductio",
+      "section": "XLA arch passes",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "production"
+      ],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:40.549572"
+  "generated_at": "2026-06-10T09:10:05.456851"
 }

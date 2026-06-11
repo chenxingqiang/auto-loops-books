@@ -1,16 +1,16 @@
 {
   "chapter_id": "ch25",
   "chapter_title": "Auto-Optimization and AI-Assisted Compilation",
-  "timestamp": "2026-06-10 02:33:54",
+  "timestamp": "2026-06-10 09:13:02",
   "keywords_file": "books/research/ch25/keywords.json",
-  "keyword_count": 44,
+  "keyword_count": 50,
   "top_keywords": [
     {
-      "term": "auto-optimization and AI-assisted compilation",
+      "term": "auto-optimization and ai-assisted compilation",
       "weight": 18
     },
     {
-      "term": "HW reward",
+      "term": "hw reward",
       "weight": 14
     },
     {
@@ -18,19 +18,19 @@
       "weight": 14
     },
     {
-      "term": "YiRage auto",
+      "term": "yirage auto",
       "weight": 14
     },
     {
-      "term": "HW reward LLM inference compiler",
+      "term": "hw reward llm inference compiler",
       "weight": 13
     },
     {
-      "term": "rl autotune LLM inference compiler",
+      "term": "rl autotune llm inference compiler",
       "weight": 13
     },
     {
-      "term": "YiRage auto LLM inference compiler",
+      "term": "yirage auto llm inference compiler",
       "weight": 13
     },
     {
@@ -58,11 +58,15 @@
       "weight": 10
     },
     {
-      "term": "YiRage",
+      "term": "yirage",
       "weight": 10
     },
     {
-      "term": "AI-assisted",
+      "term": "ai-assisted",
+      "weight": 9
+    },
+    {
+      "term": "aie",
       "weight": 9
     },
     {
@@ -70,11 +74,23 @@
       "weight": 9
     },
     {
-      "term": "bottleneck",
+      "term": "bandwidth",
+      "weight": 9
+    },
+    {
+      "term": "batch-1",
+      "weight": 9
+    },
+    {
+      "term": "buffer",
       "weight": 9
     },
     {
       "term": "bytes",
+      "weight": 9
+    },
+    {
+      "term": "cell",
       "weight": 9
     },
     {
@@ -84,190 +100,772 @@
     {
       "term": "compilation",
       "weight": 9
-    },
-    {
-      "term": "compiler",
-      "weight": 9
-    },
-    {
-      "term": "constraints",
-      "weight": 9
-    },
-    {
-      "term": "CPU",
-      "weight": 9
-    },
-    {
-      "term": "decode",
-      "weight": 9
     }
   ],
-  "citation_count": 12,
+  "citation_count": 33,
   "citations": [
     {
-      "key": "patel2025llminference",
-      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
-      "score": 18,
+      "key": "liu2025aportableautotunin",
+      "title": "A Portable Auto-Tuning Framework for Quantum Compilation Optimization Based on D3QN",
+      "score": 166,
       "matched_keywords": [
-        "decode"
+        "auto",
+        "autotun",
+        "hardware",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "megakernel",
+        "npu",
+        "same",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 109,
+      "matched_keywords": [
+        "hardware",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "megakernel",
+        "npu",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "merouani2025agenticautoschedul",
+      "title": "Agentic Auto-Scheduling: An Experimental Study of LLM-Guided Loop Optimization",
+      "score": 92,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "auto",
+        "ai-assisted",
+        "auto-optimization",
+        "buffer",
+        "compilation",
+        "cuda"
+      ],
+      "status": "ok"
     },
     {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 165,
+      "matched_keywords": [
+        "auto",
+        "autotun",
+        "hardware",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cpu",
+        "decode",
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
       "key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
-      "score": 27,
+      "score": 201,
       "matched_keywords": [
+        "auto",
+        "autotun",
+        "hardware",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cell",
+        "cpu",
+        "cuda",
         "decode",
-        "GPU"
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
       ],
       "status": "ok"
     },
     {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "rana2025quantumaihybridarc",
+      "title": "Quantum-AI Hybrid Architecture for Intelligent Fault Detection and Auto-Remediation in Distributed Cloud Systems",
+      "score": 155,
+      "matched_keywords": [
+        "rl autotune",
+        "rl autotun",
+        "auto",
+        "autotun",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "khurana2026artificialintellig",
+      "title": "Artificial Intelligence (AI) –Assisted Optimization of Online Gastrointestinal Patient Education Materials: A Cross-Sectional Study (Preprint)",
+      "score": 154,
+      "matched_keywords": [
+        "rl autotune",
+        "rl autotun",
+        "auto",
+        "autotun",
+        "auto-optimization",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "kwon2023vllm",
-      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    }
-  ],
-  "low_relevance_citations": [
     {
       "key": "nvidia2022hopper",
       "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 108,
+      "matched_keywords": [
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "vy2026revidaicouponcode2",
+      "title": "Revid AI Coupon Code 20SAVE – 20\\% OFF Auto Clip Creator AI | Apr 2026",
+      "score": 84,
+      "matched_keywords": [
+        "auto",
+        "autotun",
+        "bandwidth",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "collins2024rlornotrlparsingth",
+      "title": "RL or not RL? Parsing the processes that support human reward-based learning.",
+      "score": 56,
+      "matched_keywords": [
+        "reward",
+        "decode",
+        "flops",
+        "residency",
+        "teams"
+      ],
+      "status": "ok"
     },
     {
       "key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 113,
+      "matched_keywords": [
+        "reward hardware",
+        "hardware",
+        "reward",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "profile",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "dao2022flashattention",
       "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 113,
+      "matched_keywords": [
+        "reward hardware",
+        "hardware",
+        "reward",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "profile",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "kwon2023vllm",
       "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 113,
+      "matched_keywords": [
+        "reward hardware",
+        "hardware",
+        "reward",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "profile",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 52,
+      "matched_keywords": [
+        "reward hardware",
+        "auto",
+        "autotun",
+        "hardware",
+        "reward"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 64,
+      "matched_keywords": [
+        "hardware",
+        "bandwidth",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 78,
+      "matched_keywords": [
+        "hw reward",
+        "reward",
+        "aie",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "rustamov20235genabledinterneto",
+      "title": "5G-Enabled Internet of Things: Latency Optimization through AI-Assisted Network Slicing",
+      "score": 152,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "hardware",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "compilation",
+        "cpu",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 143,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "hardware",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "compilation",
+        "cpu",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 143,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "hardware",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "compilation",
+        "cpu",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wu2025aiassistedcustomer",
+      "title": "AI-assisted customer behavior analysis and hotel loyalty strategy optimization",
+      "score": 222,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "reward hardware",
+        "auto",
+        "hardware",
+        "reward",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2026intentspeczerointr",
+      "title": "IntentSpec: Zero-Intrusion Contract Compilation and Oine Acceptance Testing for Heterogeneous AI Agents",
+      "score": 222,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "reward hardware",
+        "auto",
+        "hardware",
+        "reward",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "boulaich2025aiassistedmetasurf",
+      "title": "AI-Assisted Metasurface Antennas Design/Optimization and Performance Enhancement Techniques: A Comprehensive Survey",
+      "score": 222,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "reward hardware",
+        "auto",
+        "hardware",
+        "reward",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "oreoluwa2026securedataplaneopt",
+      "title": "Secure Data Plane Optimization for Ultra-Low-Latency Networks Using AI-Assisted Traffic Engineering",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "erban2026behaviorallyadapti",
+      "title": "Behaviorally Adaptive Portfolio Optimization Under Uncertainty: An AI-Assisted Robust Framework for Cryptocurrency Investments",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wang2024aiassistedlandscap",
+      "title": "AI-Assisted Landscape Design Optimization and Innovation Research based on AI Assistance",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "movchan2022investigationintoa",
+      "title": "INVESTIGATION INTO AI-ASSISTED OPTIMIZATION OF THIN-WALLED CROSS-SECTIONS",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "bhimavarapu2025aiassistedgamemech",
+      "title": "AI-Assisted Game Mechanics Optimization for Multiplayer Environments",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwany2024optimizationoffemt",
+      "title": "Optimization of femtosecond pulses by AI-assisted spectral phase modulation: influence of spectral resolution",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "chavan2026aiassistedmaterial",
+      "title": "AI-Assisted Material Strength Evaluation and Structural Health Monitoring of Buildings",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2025aiassistedpersonal",
+      "title": "AI-assisted personalized learning path optimization strategy",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yang2023compilationoptimiz",
+      "title": "Compilation Optimization",
+      "score": 214,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "bytes",
+        "compilation",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "profile",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 82,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "auto",
+        "ai-assisted",
+        "auto-optimization",
+        "buffer",
+        "compilation",
+        "cuda"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "score": 116,
+      "matched_keywords": [
+        "auto-optimization and ai-assisted compilation",
+        "yirage auto",
+        "auto",
+        "yirage",
+        "ai-assisted",
+        "auto-optimization",
+        "buffer",
+        "compilation",
+        "cpu",
+        "cuda"
+      ],
+      "status": "ok"
     }
   ],
+  "low_relevance_citations": [],
   "missing_bib_keys": [],
   "literature_rescore": [],
-  "status": "warn",
+  "status": "ok",
   "min_citation_score": 8
 }

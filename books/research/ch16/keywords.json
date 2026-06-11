@@ -1,46 +1,46 @@
 [
   {
-    "term": "TVM and apache TVM stack",
+    "term": "tvm and apache tvm stack",
     "weight": 18
   },
   {
-    "term": "TVM arch passes",
+    "term": "tvm arch passes",
     "weight": 14
   },
   {
-    "term": "TVM case study",
+    "term": "tvm case study",
     "weight": 14
   },
   {
-    "term": "TVM codegen",
+    "term": "tvm codegen",
     "weight": 14
   },
   {
-    "term": "TVM HW matrix",
+    "term": "tvm hw matrix",
     "weight": 14
   },
   {
-    "term": "TVM tuning",
+    "term": "tvm tuning",
     "weight": 14
   },
   {
-    "term": "TVM arch passes LLM inference compiler",
+    "term": "tvm arch passes llm inference compiler",
     "weight": 13
   },
   {
-    "term": "TVM case study LLM inference compiler",
+    "term": "tvm case study llm inference compiler",
     "weight": 13
   },
   {
-    "term": "TVM codegen LLM inference compiler",
+    "term": "tvm codegen llm inference compiler",
     "weight": 13
   },
   {
-    "term": "TVM HW matrix LLM inference compiler",
+    "term": "tvm hw matrix llm inference compiler",
     "weight": 13
   },
   {
-    "term": "TVM tuning LLM inference compiler",
+    "term": "tvm tuning llm inference compiler",
     "weight": 13
   },
   {
@@ -92,7 +92,7 @@
     "weight": 10
   },
   {
-    "term": "GPU CPU NPU",
+    "term": "gpu cpu npu",
     "weight": 10
   },
   {
@@ -136,19 +136,31 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
+  },
+  {
+    "term": "aie",
+    "weight": 9
   },
   {
     "term": "apache",
     "weight": 9
   },
   {
-    "term": "bottleneck",
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -160,11 +172,11 @@
     "weight": 9
   },
   {
-    "term": "constraints",
+    "term": "cpu",
     "weight": 9
   },
   {
-    "term": "CPU",
+    "term": "cuda",
     "weight": 9
   },
   {
@@ -172,31 +184,23 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
+    "term": "flops",
     "weight": 9
   },
   {
-    "term": "fleets",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "fusion",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "independent",
-    "weight": 9
-  },
-  {
-    "term": "kernels",
-    "weight": 9
-  },
-  {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -204,27 +208,35 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "means",
     "weight": 9
   },
   {
-    "term": "microbenchmarks",
+    "term": "megakernel",
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "passes",
+    "weight": 9
+  },
+  {
+    "term": "residency",
+    "weight": 9
+  },
+  {
+    "term": "same",
     "weight": 9
   },
   {
@@ -232,7 +244,7 @@
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "static",
     "weight": 9
   },
   {
@@ -240,15 +252,23 @@
     "weight": 9
   },
   {
+    "term": "tile",
+    "weight": 9
+  },
+  {
     "term": "token",
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "tvm",
     "weight": 9
   },
   {
-    "term": "TVM",
+    "term": "warp",
+    "weight": 9
+  },
+  {
+    "term": "xdna",
     "weight": 9
   }
 ]

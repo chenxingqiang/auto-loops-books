@@ -5,12 +5,12 @@
   "\"codegen\" AND \"backend\"",
   "\"tun\" AND \"profile\"",
   "\"case\" AND \"benchmark\"",
-  "\"Mirage and emerging AI compilers\" AND \"Mirage arch passes\"",
-  "\"Mirage case study\" AND \"Mirage codegen\"",
-  "\"Mirage HW matrix\" AND \"Mirage tuning\"",
-  "\"Mirage arch passes LLM inference compiler\" AND \"Mirage case study LLM inference compiler\"",
-  "\"Mirage codegen LLM inference compiler\" AND \"Mirage HW matrix LLM inference compiler\"",
-  "\"Mirage tuning LLM inference compiler\" AND \"case benchmark\"",
+  "\"mirage and emerging ai compilers\" AND \"mirage arch passes\"",
+  "\"mirage case study\" AND \"mirage codegen\"",
+  "\"mirage hw matrix\" AND \"mirage tuning\"",
+  "\"mirage arch passes llm inference compiler\" AND \"mirage case study llm inference compiler\"",
+  "\"mirage codegen llm inference compiler\" AND \"mirage hw matrix llm inference compiler\"",
+  "\"mirage tuning llm inference compiler\" AND \"case benchmark\"",
   "\"codegen backend\" AND \"hardware target\"",
   "\"pass lower\" AND \"tun profile\""
 ]

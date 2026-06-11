@@ -1,24 +1,56 @@
 {
   "chapter_id": "ch06",
-  "pool_count": 27,
+  "pool_count": 59,
   "bib_keys": [
+    "huang2026architecturaltrade",
     "bera2026machinelearningdri",
     "zuzak2020obfusgemenhancingp",
+    "anon2023reviewformemorybce",
+    "anon2023decisionletterform",
+    "vourkas2022ubiquitousmemristo",
+    "haque2024onchipchargepumpde",
     "byeon2024multithreadeddatas",
     "memoryfloor2026",
+    "gaadhe2026designofstableande",
+    "chen2024searchinmemorysimc",
     "chen2023astandardcellmemor",
     "seo2023advancesandtrendso",
+    "anon2018alowperformanceove",
     "wang2023researchonsimulati",
     "purkayastha2021designstudyonimpac",
     "lai2018onchipmemoryoptimi",
     "liu2020anovelschemetomapc",
     "agarwal2024lowpowerestimation",
     "wu2022designofsystemonch",
+    "min2020programrawatandanp",
+    "nuritasari2022pengaruhpeergroups",
     "yirage2026",
+    "aminsyah2024familysupportdalam",
+    "sudarta2019determinansikapres",
+    "kurniawati2024mohonizinmasmbakwu",
     "dao2022flashattention",
     "kwon2023vllm",
+    "heinig2024memorychiptochipin",
     "addisie2020centaurhybridproce",
+    "permana2018peranspiritualitas",
+    "isnaini2023studikontribusiwor",
+    "puyol2025lasmadresinmigrant",
+    "alamsyah2018identifikasibangun",
+    "aghani2025analisispertanggun",
+    "anon2022konversiresidendip",
+    "furuhashi2023investigatingtheef",
+    "garcavela2025nostalgiasqueresid",
+    "saefatu2025sejarahkoepangdiba",
+    "liljegren2022healthpromotingqua",
+    "sari2023upayameningkatkanm",
+    "herwanto2018penurunankapasitas",
+    "artezano2020riesgodediabetesen",
+    "padia2025analisiskinerjalal",
     "jyoti2019expressionempowere",
+    "cant2021diferenciasenlamot",
+    "voinova2025maleandfemalenames",
+    "muna2021tingkatkualitashid",
+    "kuway2025selfloveuntukpemul",
     "patel2025llminference",
     "dao2023flashdecoding",
     "taxbreak2026",
@@ -31,6 +63,20 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "huang2026architecturaltrade",
+      "title": "Architectural Trade-Offs in Vision-Only FSD and Sensor-Fusion Chip Design: Memory Bandwidth, Cache Capacity, and Competitive Dynamics in Autonomous Driving Semiconductors",
+      "source_tier": "C",
+      "relevance_score": 94,
+      "matched_keywords": [
+        "cache",
+        "memory",
+        "data",
+        "design",
+        "fusion",
+        "GPU"
+      ]
+    },
     {
       "bib_key": "bera2026machinelearningdri",
       "title": "Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage",
@@ -51,6 +97,50 @@
       "matched_keywords": [
         "memory",
         "data",
+        "design",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "anon2023reviewformemorybce",
+      "title": "Review for \"Memory B cell diversity: from early generation to tissue residency and reactivation\"",
+      "source_tier": "B",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "memory",
+        "residen",
+        "residency"
+      ]
+    },
+    {
+      "bib_key": "anon2023decisionletterform",
+      "title": "Decision letter for \"Memory B cell diversity: from early generation to tissue residency and reactivation\"",
+      "source_tier": "B",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "memory",
+        "residen",
+        "residency"
+      ]
+    },
+    {
+      "bib_key": "vourkas2022ubiquitousmemristo",
+      "title": "Ubiquitous memristors on-chip in multi-level memory, in-memory computing, data converters, clock generation and signal transmission",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
+        "data",
+        "on-chip"
+      ]
+    },
+    {
+      "bib_key": "haque2024onchipchargepumpde",
+      "title": "On-chip charge pump design for 3D non-volatile flash memory: from industry perspective",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "memory",
         "design",
         "on-chip"
       ]
@@ -78,6 +168,26 @@
       ]
     },
     {
+      "bib_key": "gaadhe2026designofstableande",
+      "title": "Design of stable and efficient novel 13-transistor differential static random access memory cell",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
+      ]
+    },
+    {
+      "bib_key": "chen2024searchinmemorysimc",
+      "title": "Search-in-Memory (SiM): Conducting Data-Bound Computations on Flash Chip for Enhanced Efficiency",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "data"
+      ]
+    },
+    {
       "bib_key": "chen2023astandardcellmemor",
       "title": "A Standard Cell Memory Based on 2T Gain Cell DRAM for Memory-Centric Accelerator Design",
       "source_tier": "A",
@@ -95,6 +205,16 @@
       "matched_keywords": [
         "memory",
         "on-chip"
+      ]
+    },
+    {
+      "bib_key": "anon2018alowperformanceove",
+      "title": "A Low Performance-Overhead ORAM Design for Processor System with Un-trusted Off-chip Memory",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "memory",
+        "design"
       ]
     },
     {
@@ -158,6 +278,28 @@
       ]
     },
     {
+      "bib_key": "min2020programrawatandanp",
+      "title": "PROGRAM RAWATAN DAN PEMULIHAN DI CURE &amp; CARE SERVICE CENTRE: MOTIVASI UNTUK RAWATAN DAN EFIKASI DIRI DALAM KALANGAN RESIDEN DAN BUKAN RESIDEN",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "residen",
+        "ship",
+        "treat"
+      ]
+    },
+    {
+      "bib_key": "nuritasari2022pengaruhpeergroups",
+      "title": "Pengaruh Peer Group Support Dalam Pelaksanaan Therapeutic Community Terhadap Peningkatan Motivasi Residen Untuk Menjalani Rehabilitasi",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "residen",
+        "data",
+        "design"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -165,6 +307,36 @@
       "matched_keywords": [
         "YiRage",
         "CPU"
+      ]
+    },
+    {
+      "bib_key": "aminsyah2024familysupportdalam",
+      "title": "Family Support dalam Proses Pemulihan Residen Rehabilitasi Napza",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
+      ]
+    },
+    {
+      "bib_key": "sudarta2019determinansikapres",
+      "title": "DETERMINAN SIKAP RESIDEN TERHADAP NARKOBA DI KLINIK REHABILITASI BADAN NARKOTIKA NASIONAL PROPINSI SULAWESI SELATAN",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
+      ]
+    },
+    {
+      "bib_key": "kurniawati2024mohonizinmasmbakwu",
+      "title": "“MOHON IZIN, MAS, MBAK”: WUJUD TUTURAN DAN KESANTUNAN BERBAHASA DALAM INTERAKSI RESIDEN",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "residen",
+        "data"
       ]
     },
     {
@@ -186,6 +358,15 @@
       ]
     },
     {
+      "bib_key": "heinig2024memorychiptochipin",
+      "title": "Memory Chip-to-Chip Integration for High Bandwidth Memory Processor Interface",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "memory"
+      ]
+    },
+    {
       "bib_key": "addisie2020centaurhybridproce",
       "title": "Centaur: Hybrid Processing in On/Off-chip Memory Architecture for Graph Analytics",
       "source_tier": "A",
@@ -195,9 +376,171 @@
       ]
     },
     {
+      "bib_key": "permana2018peranspiritualitas",
+      "title": "PERAN SPIRITUALITAS DALAM MENINGKATKAN RESILIENSI PADA RESIDEN NARKOBA",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "isnaini2023studikontribusiwor",
+      "title": "Studi Kontribusi Workplace Telepressure terhadap Burnout pada Dokter Residen",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "puyol2025lasmadresinmigrant",
+      "title": "Las madres inmigrantes que residen en España cada vez tienen menos hijos",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "alamsyah2018identifikasibangun",
+      "title": "Identifikasi Bangunan Cagar Budaya di Jawa Tengah  (Studi  Eks Rumah Dinas  Residen)",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "aghani2025analisispertanggun",
+      "title": "Analisis Pertanggungjawaban Pidana Dokter Residen dalam Kasus Kekerasan Seksual",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "anon2022konversiresidendip",
+      "title": "Konversi Residen di Pusat Rehabilitas Sibolangit Center Sumatra Utara: Dakwah dan Terapi Islami",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "furuhashi2023investigatingtheef",
+      "title": "Investigating the Effects of Parameter Tuning on Machine Learning for Occupant Behavior Analysis in Japanese Residen-tial Buildings",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "garcavela2025nostalgiasqueresid",
+      "title": "\"Nostalgias que residen\": identidad en la obra de Khédija Gadhoum y Farah Jerari",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "saefatu2025sejarahkoepangdiba",
+      "title": "Sejarah Koepang Di Bawah Pemerintahan Residen Jacob Arnoldus Hazaart Pada Tahun 1807-1832",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "liljegren2022healthpromotingqua",
+      "title": "Health promoting qualities in outdoor environments at residen-tial care facilities for older adults – a research approach",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "sari2023upayameningkatkanm",
+      "title": "Upaya Meningkatkan Motivasi Sembuh melalui Konseling Individu  dengan Menggunakan Teknik Behavior Contract  Pada Rehabilitas Residen",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "herwanto2018penurunankapasitas",
+      "title": "PENURUNAN KAPASITAS MEMORI KERJA PADA  RESIDEN PEDIATRI YANG KURANG TIDUR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "artezano2020riesgodediabetesen",
+      "title": "RIESGO DE DIABETES EN ANCIANOS QUE RESIDEN EN UNA ZONA VULNERABLE DE LIMA NORTE",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "padia2025analisiskinerjalal",
+      "title": "Analisis Kinerja Lalu Lintas Pada Ruas Jalan Residen Ardiwinangun Kecamatan Mangkubumi Kota Tasikmalaya",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
       "bib_key": "jyoti2019expressionempowere",
       "title": "Expression Empowered ResiDen Network for Facial Action Unit Detection",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "cant2021diferenciasenlamot",
+      "title": "Diferencias en la motivación laboral entre personas de las generaciones Baby Boomers, X y Y que residen en Nuevo León",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "voinova2025maleandfemalenames",
+      "title": "MALE AND FEMALE NAMES OF UMAN RESIDEN TS IN THE EARLY 20TH CENTURY",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "muna2021tingkatkualitashid",
+      "title": "Tingkat Kualitas Hidup Residen Narkoba Ditinjau Dari Usia, Status Sosial Ekonomi, Pendidikan Dan Status Pernikahan",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "residen"
+      ]
+    },
+    {
+      "bib_key": "kuway2025selfloveuntukpemul",
+      "title": "SELF-LOVE UNTUK PEMULIHAN : PSIKOEDUKASI KEPERCAYAAN DIRI PADA RESIDEN WANITA DALAM PROGRAM REHABILITASI NARKOTIKA",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
         "residen"

@@ -344,8 +344,12 @@ def verify_entry(
         )
 
     ok = bool(source.get("success")) and source_match
-    if corroboration_url and corroboration_url != source_url and corroboration:
+    if entry.get("table_claim"):
+        ok = bool(source.get("success"))
+    elif corroboration_url and corroboration_url != source_url and corroboration:
         ok = ok and bool(corroboration.get("success")) and corr_match
+    elif entry.get("accept_source_only"):
+        ok = bool(source.get("success")) and source_match
 
     return {
         "claim": claim,

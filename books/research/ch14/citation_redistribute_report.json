@@ -1,144 +1,140 @@
 {
   "chapter_id": "ch14",
-  "pool_count": 46,
-  "assigned_count": 46,
+  "pool_count": 54,
+  "assigned_count": 54,
   "unassigned_count": 0,
-  "sections_with_cites": 7,
-  "unique_keys_in_tex": 44,
+  "sections_with_cites": 9,
+  "unique_keys_in_tex": 52,
   "pool_path": "books/research/ch14/citation_pool.json",
   "sections_used": [
     "Chapter Summary",
-    "MLIR Arch Passes",
-    "MLIR Case Study",
-    "MLIR Codegen",
-    "MLIR HW Matrix",
-    "MLIR Tuning",
+    "MLIR HW matrix",
+    "MLIR arch passes",
+    "MLIR case study",
+    "MLIR codegen",
+    "MLIR dialect stack for decode export",
+    "MLIR tuning",
+    "YiRage MLIR integration notes",
     "chapter"
   ],
-  "cites_applied": 44,
+  "cites_applied": 52,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch14_mlir.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "chen2024vcnnacompilerofcnn",
+      "bib_key": "sommer2022spncanopensourceml",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 70,
       "matched_keywords": [
-        "compiler"
+        "mlir",
+        "cpu",
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "drescher2024fasttemplatebasedc",
+      "bib_key": "koblah2022hardwaremovingtarg",
       "section": "chapter",
-      "relevance_score": 1,
+      "relevance_score": 20,
       "matched_keywords": [
-        "MLIR"
-      ],
-      "fallback": true
+        "hardware"
+      ]
     },
     {
       "sentence_id": "s0003",
-      "bib_key": "suo2025desildetectingsile",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 62,
+      "bib_key": "katel2022mlirbasedcodegener",
+      "section": "chapter",
+      "relevance_score": 52,
       "matched_keywords": [
-        "MLIR",
-        "optim",
-        "compiler"
+        "mlir",
+        "gpu"
       ]
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "liang2025findingbugsinmlirc",
-      "section": "MLIR HW Matrix",
+      "bib_key": "suo2024fuzzingmlircompile",
+      "section": "chapter",
       "relevance_score": 34,
       "matched_keywords": [
-        "MLIR"
+        "mlir"
       ]
     },
     {
       "sentence_id": "s0005",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "guo2022towardssupportings",
+      "section": "chapter",
+      "relevance_score": 34,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "mlir"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "chen2024vcnnacompilerofcnn",
+      "section": "chapter",
+      "relevance_score": 34,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "mlir"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "lcke2021integratingafuncti",
-      "section": "MLIR HW Matrix",
+      "bib_key": "taxbreak2026",
+      "section": "chapter",
       "relevance_score": 1,
       "matched_keywords": [
-        "MLIR"
+        "llm"
       ],
       "fallback": true
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "zhao2025polymorphousanmlir",
-      "section": "MLIR HW Matrix",
+      "bib_key": "patel2025llminference",
+      "section": "chapter",
       "relevance_score": 18,
       "matched_keywords": [
-        "compiler"
+        "decode"
       ]
     },
     {
       "sentence_id": "s0009",
-      "bib_key": "zheng2026combrewriterenabli",
-      "section": "MLIR HW Matrix",
+      "bib_key": "zhao2025polymorphousanmlir",
+      "section": "chapter",
       "relevance_score": 34,
       "matched_keywords": [
-        "MLIR"
-      ]
-    },
-    {
-      "sentence_id": "s0010",
-      "bib_key": "agarwal2023hardwarebasedimple",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "mlir"
       ]
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "li2025nearfieldtargetloc",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "nvidia2024cudagraphs",
+      "section": "chapter",
+      "relevance_score": 36,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "cuda",
+        "graphs"
       ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "taxbreak2026",
-      "section": "MLIR HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "tiotto2024experiencesbuildin",
+      "section": "chapter",
+      "relevance_score": 34,
+      "matched_keywords": [
+        "mlir"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "anon2018proceedingsofllvmh",
+      "section": "chapter",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:40.320186"
+  "generated_at": "2026-06-10T20:18:13.289330"
 }

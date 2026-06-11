@@ -2,11 +2,15 @@
 \label{chap:ch06}
 \typeout{START_CHAPTER "ch06" \theabspage}
 
-Production decode teams rarely fail for lack of framework features---they fail because compiler and kernel schedules violate residency, launch, and bandwidth contracts on the SKU they actually ship \citep{jyoti2019expressionempowere}. This chapter continues the book's problem-first thread: name the contradiction, trace it to hardware limits, then show how passes and megakernels recover SLO on GPU, CPU, and NPU fleets \citep{taxbreak2026}.
+Parts~I--II established decode metrics and hardware contracts; \emph{Data Residency and On-Chip Memory Design} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
 
-\section{Lifetime Planning}
-\label{sec:lifetime_planning}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\section{lifetime planning}
+\label{sec:ch06_lifetime_planning}
+
 % AUTO_VISUAL:fig_lifetime_planning_pipeline
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -22,18 +26,25 @@ Production decode teams rarely fail for lack of framework features---they fail b
 \label{fig:lifetime_planning_pipeline}
 \end{figure}
 
+Teams hit \textbf{lifetime planning} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because lifetime was planned without residen residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{bera2026machinelearningdri}. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference}. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024deepseekv3}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{nvidia2022hopper}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{amd2024xdna}.
+Hardware truth: GPUs bound lifetime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{byeon2024multithreadeddatas}. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2023flashdecoding}. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024aie}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs}.
+Compiler/kernel fix: predicate fusion on lifetime/residen legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{chen2023astandardcellmemor}. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dlbook}. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize lifetime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked residen---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{seo2023advancesandtrendso}. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused schedule must keep residen on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\section{GPU Residency}
-\label{sec:gpu_residency}
+\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{GPU residency}
+\label{sec:ch06_gpu_residency}
+
 % AUTO_VISUAL:fig_gpu_residency_architecture
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -49,115 +60,266 @@ CPU Residency is a production bottleneck surface for Data Residency and On-Chip 
 \label{fig:gpu_residency_architecture}
 \end{figure}
 
+The production surprise at \textbf{GPU residency} is not peak FLOPs; it is illegal tier placement: shared spilling to HBM/DDR while register still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{purkayastha2021designstudyonimpac}. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: shared producers must feed register consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{lai2018onchipmemoryoptimi}. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{liu2020anovelschemetomapc}. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for shared on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{agarwal2024lowpowerestimation}. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{CPU Residency}
-\label{sec:cpu_residency}
+\section{CPU residency}
+\label{sec:ch06_cpu_residency}
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{wu2022designofsystemonch}. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{CPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix cache and NUMA together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{dao2022flashattention}. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware truth: GPUs bound cache with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{kwon2023vllm}. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler/kernel fix: predicate fusion on cache/NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design \citep{addisie2020centaurhybridproce}. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize cache with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\section{NPU Residency}
-\label{sec:npu_residency}
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused cache raises bytes/token; fused schedule must keep NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{NPU residency}
+\label{sec:ch06_npu_residency}
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Teams hit \textbf{NPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without sram residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: NPU producers must feed sram consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\section{YiRage Memory Pass}
-\label{sec:yirage_memory_pass}
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026}. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{yirage2026}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{YiRage memory pass}
+\label{sec:ch06_yirage_memory_pass}
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The production surprise at \textbf{YiRage memory pass} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while memory still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on YiRage/memory legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked memory---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep memory on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{Chapter Summary}
 \label{sec:ch06_summary}
 
-The through-line for ch06 is unchanged: hardware constraints dictate compiler passes, fusion boundaries, and deployment metrics. Carry bytes/token and launches/token spreadsheets forward; later chapters assume those baselines exist.
+Data Residency and On-Chip Memory Design succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch06_lifetime_planning}, Section~\ref{sec:ch06_gpu_residency}, Section~\ref{sec:ch06_cpu_residency} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
 
+\textbf{lifetime planning} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-\subsection{Engineering Deep Dive}
-\label{sec:ch06_deep_dive}
+Binding software to silicon: compiler passes must encode lifetime/residen legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When lifetime planning disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting lifetime planning, attach roofline or NPU buffer accounting showing lifetime residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize lifetime with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Data Residency and On-Chip Memory Design failure at \textbf{GPU residency} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: shared and register must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,semianalysis2024tma}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for GPU residency: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,semianalysis2024tma}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize shared with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: register constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{CPU residency} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: cache sets the residency envelope; NUMA determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify cache, NUMA, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: NUMA constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting CPU residency, attach roofline or NPU buffer accounting showing cache residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{NPU residency} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode NPU/sram legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When NPU residency disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting NPU residency, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Data Residency and On-Chip Memory Design failure at \textbf{YiRage memory pass} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: YiRage and memory must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for YiRage memory pass: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: memory constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{lifetime planning} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: lifetime sets the residency envelope; residen determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Lifetime Planning is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{lifetime}, \textbf{residen} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds lifetime residen to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify lifetime, residen, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
 
-GPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{shared}, \textbf{register} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds shared register to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: residen constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
 
-CPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{cache}, \textbf{NUMA} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds cache NUMA to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting lifetime planning, attach roofline or NPU buffer accounting showing lifetime residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
 
-NPU Residency is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{NPU}, \textbf{sram} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds NPU sram to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{GPU residency} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-YiRage Memory Pass is a production bottleneck surface for Data Residency and On-Chip Memory Design. Teams that treat \textbf{YiRage}, \textbf{memory} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds YiRage memory to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode shared/register legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,semianalysis2024tma}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When GPU residency disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU residency, attach roofline or NPU buffer accounting showing shared residency fits on-chip for the target SKU \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize shared with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
+
+The usual Data Residency and On-Chip Memory Design failure at \textbf{CPU residency} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: cache and NUMA must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for CPU residency: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize cache with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: NUMA constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+Production teams misread \textbf{NPU residency} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: NPU sets the residency envelope; sram determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify NPU, sram, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: sram constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting NPU residency, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\textbf{YiRage memory pass} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode YiRage/memory legality before codegen, not as comments in hand-written kernels \citep{yirage2026,chen2020compilerbasedhardw}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When YiRage memory pass disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting YiRage memory pass, attach roofline or NPU buffer accounting showing YiRage residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
+
+The usual Data Residency and On-Chip Memory Design failure at \textbf{lifetime planning} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: lifetime and residen must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for lifetime planning: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize lifetime with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: residen constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+Production teams misread \textbf{GPU residency} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: shared sets the residency envelope; register determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,semianalysis2024tma}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify shared, register, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: register constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU residency, attach roofline or NPU buffer accounting showing shared residency fits on-chip for the target SKU \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\textbf{CPU residency} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode cache/NUMA legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When CPU residency disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting CPU residency, attach roofline or NPU buffer accounting showing cache residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize cache with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+The usual Data Residency and On-Chip Memory Design failure at \textbf{NPU residency} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: NPU and sram must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for NPU residency: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: sram constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+Production teams misread \textbf{YiRage memory pass} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: YiRage sets the residency envelope; memory determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{yirage2026,chen2020compilerbasedhardw}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify YiRage, memory, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: memory constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting YiRage memory pass, attach roofline or NPU buffer accounting showing YiRage residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\textbf{lifetime planning} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode lifetime/residen legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When lifetime planning disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting lifetime planning, attach roofline or NPU buffer accounting showing lifetime residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize lifetime with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+The usual Data Residency and On-Chip Memory Design failure at \textbf{GPU residency} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: shared and register must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,semianalysis2024tma}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for GPU residency: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,semianalysis2024tma}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize shared with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: register constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Production teams misread \textbf{CPU residency} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: cache sets the residency envelope; NUMA determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify cache, NUMA, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: NUMA constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting CPU residency, attach roofline or NPU buffer accounting showing cache residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
+
+\textbf{NPU residency} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode NPU/sram legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When NPU residency disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting NPU residency, attach roofline or NPU buffer accounting showing NPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize NPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+The usual Data Residency and On-Chip Memory Design failure at \textbf{YiRage memory pass} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: YiRage and memory must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for YiRage memory pass: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize YiRage with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: memory constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch06" \theabspage}

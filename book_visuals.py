@@ -20,11 +20,12 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from book_prepare import OUTLINE, ChapterSpec
-
 ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
-CHAPTERS = BOOKS / "chapters"
+sys.path.insert(0, str(ROOT))
+
+from book_prepare import CHAPTERS, OUTLINE, ChapterSpec  # noqa: E402
+
 VISUALS_ROOT = BOOKS / "visuals"
 GENERATED = "generated"
 

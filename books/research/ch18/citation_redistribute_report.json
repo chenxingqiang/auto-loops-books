@@ -1,139 +1,140 @@
 {
   "chapter_id": "ch18",
-  "pool_count": 35,
-  "assigned_count": 35,
+  "pool_count": 55,
+  "assigned_count": 55,
   "unassigned_count": 0,
-  "sections_with_cites": 4,
-  "unique_keys_in_tex": 33,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 53,
   "pool_path": "books/research/ch18/citation_pool.json",
   "sections_used": [
-    "IREE Arch Passes",
-    "IREE Codegen",
-    "IREE HW Matrix",
+    "Chapter Summary",
+    "IREE HW matrix",
+    "IREE arch passes",
+    "IREE case study",
+    "IREE codegen",
+    "IREE tuning",
     "chapter"
   ],
-  "cites_applied": 33,
+  "cites_applied": 53,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch18_iree.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "guo2022towardssupportings",
+      "bib_key": "gallego2025accelerationofccke",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 1,
       "matched_keywords": [
-        "compiler"
-      ]
+        "kernels",
+        "MLIR"
+      ],
+      "fallback": true
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "gallego2025accelerationofccke",
+      "bib_key": "panda2023particlefilterbase",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 20,
       "matched_keywords": [
-        "kernels"
+        "hardware"
       ]
     },
     {
       "sentence_id": "s0003",
       "bib_key": "gao2023designandimplement",
-      "section": "IREE HW Matrix",
+      "section": "IREE HW matrix",
       "relevance_score": 38,
       "matched_keywords": [
         "optim",
-        "MLIR"
+        "mlir"
       ]
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "moses2021polygeistraisingct",
-      "section": "IREE HW Matrix",
-      "relevance_score": 1,
+      "bib_key": "nvidia2024cudagraphs",
+      "section": "IREE HW matrix",
+      "relevance_score": 18,
       "matched_keywords": [
-        "MLIR"
-      ],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "zhang2022infraredimagetarge",
-      "section": "IREE HW Matrix",
-      "relevance_score": 82,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target",
-        "miss"
+        "cuda"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "IREE HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "amd2024xdna",
+      "section": "IREE HW matrix",
+      "relevance_score": 18,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "xdna"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "perez2023leveragingmlirforb",
-      "section": "IREE HW Matrix",
-      "relevance_score": 1,
+      "bib_key": "memoryfloor2026",
+      "section": "IREE HW matrix",
+      "relevance_score": 36,
       "matched_keywords": [
-        "MLIR"
-      ],
-      "fallback": true
+        "batch-1",
+        "decode"
+      ]
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "taxbreak2026",
-      "section": "IREE HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "dao2022flashattention",
-      "section": "IREE HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0010",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "IREE HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "kern2024virtuallyaugmented",
+      "section": "IREE HW matrix",
+      "relevance_score": 20,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
         "target"
       ]
     },
     {
-      "sentence_id": "s0011",
-      "bib_key": "kern2024virtuallyaugmented",
-      "section": "IREE HW Matrix",
-      "relevance_score": 64,
+      "sentence_id": "s0009",
+      "bib_key": "patel2025llminference",
+      "section": "IREE HW matrix",
+      "relevance_score": 18,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "schoeder2022amodulationbasedra",
+      "section": "IREE HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "section": "IREE HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
         "target"
       ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "kwon2023vllm",
-      "section": "IREE HW Matrix",
+      "bib_key": "kun2025mlirusingtraits",
+      "section": "IREE arch passes",
+      "relevance_score": 37,
+      "matched_keywords": [
+        "pass",
+        "mlir",
+        "passes"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "moses2021polygeistraisingct",
+      "section": "IREE arch passes",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "MLIR"
+      ],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:41.470001"
+  "generated_at": "2026-06-10T09:10:08.602634"
 }

@@ -70,6 +70,30 @@ uv run book-loop run --chapter ch01 --max-steps 3
 
 Stops early when `phase == complete` (all OUTLINE chapters pass gates).
 
+### `deep-rewrite`
+
+Single-chapter depth loop: machine scaffold + agent brief for ch01-level prose.
+
+```bash
+uv run book-loop deep-rewrite --chapter ch14
+uv run book-loop deep-rewrite --chapter ch05 --skip-research --skip-compile
+uv run book-loop deep-rewrite --chapter ch01 --skip-prose   # agent-only brief + gates
+```
+
+**Requires `--chapter`** (one OUTLINE id).
+
+**Machine phases (in order):**
+
+1. **Brief** — `books/research/<id>/deep_rewrite_brief.md` (per-section spec bullets + rewrite targets)
+2. **Prose scaffold** — strip batch filler + `book_prose_upgrade.py` section rewrite
+3. **Proper nouns** — fix chapter `.tex`
+4. **Research** — optional (`--skip-research`)
+5. **Facts / refs / citations** — verify + redistribute + merge bib
+6. **Visuals** — plan → render → insert
+7. **Compile + evaluate** — optional (`--skip-compile`)
+
+**Agent pass:** edit tasks from `loop_state.json`; rewrite each section using the brief and ch01 rhythm. Re-run until `quality_score` ≥ 85.
+
 ### `insert-visuals`
 
 Plan, render, and insert snippets for one chapter (no full step).

@@ -1,23 +1,52 @@
 {
   "chapter_id": "ch10",
-  "pool_count": 26,
+  "pool_count": 55,
   "bib_keys": [
     "lee2021gatedrecurrentcont",
+    "kim2019personalizedonline",
+    "jha2024aerosoftmaxonlyllm",
     "hirayae2025hardwareorientedan",
     "deng2024zerothorderalgorit",
+    "curry2025diffusionattention",
+    "jyothi2026fuzzyattentionsegn",
+    "li2020gumbelsoftmaxbased",
     "yirage2026",
+    "banerjee2021exploringalternati",
+    "franke2023thesoftmaxfunction",
     "patel2025llminference",
     "deng2025whysoftmaxattentio",
     "cho2021filterpruningviaso",
+    "kim2025improvingattention",
+    "chen2022partialdisastercla",
     "koohpayegani2024simasimplesoftmaxf",
     "patil2023streamingbilingual",
+    "lee2023softmaxoutputappro",
     "wang2021escapingthegradien",
     "bhola2024securingindustrial",
     "koca2023hardwareefficients",
+    "collins2024incontextlearningw",
     "kim2024alowpowerattention",
+    "han2024bridgingthedivider",
+    "anon2026softmax",
+    "menegaux2025phylohsaphylogenet",
     "memoryfloor2026",
+    "ganeri2018orientingattention",
+    "ganeri2018perceptualattentio",
+    "ganeri2018empatheticattentio",
+    "ganeri2018narrativeattention",
     "amd2024xdna",
+    "kartal2025csoftmaxcontextual",
+    "kong2019idsoftmaxasoftmaxl",
+    "yang2023learningdifferenti",
+    "choi2020f2softmaxdiversify",
+    "ko2024reviewofaerosoftma",
+    "zakamulin2025entropyregularized",
+    "anon2025logisticandsoftmax",
+    "luo2024causalsoftmaxforou",
+    "anon2021speakerverificatio",
+    "kim2025designoftensorcore",
     "s2022digitalimplementat",
+    "bratischenko2025alatentparametermo",
     "dao2022flashattention",
     "dao2023flashdecoding",
     "kwon2023vllm",
@@ -44,6 +73,32 @@
       ]
     },
     {
+      "bib_key": "kim2019personalizedonline",
+      "title": "Personalized Online Live Video Streaming Using Softmax-Based Multinomial Classification",
+      "source_tier": "B",
+      "relevance_score": 78,
+      "matched_keywords": [
+        "online softmax",
+        "exp",
+        "online",
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "jha2024aerosoftmaxonlyllm",
+      "title": "AERO: Softmax-Only LLMs for Efficient Private Inference",
+      "source_tier": "B",
+      "relevance_score": 71,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "decode",
+        "NPU",
+        "optimization"
+      ]
+    },
+    {
       "bib_key": "hirayae2025hardwareorientedan",
       "title": "Hardware-Oriented and Precisely Approximated Online Softmax for Deep Learning Models",
       "source_tier": "A",
@@ -66,6 +121,40 @@
       ]
     },
     {
+      "bib_key": "curry2025diffusionattention",
+      "title": "Diffusion Attention: Replacing Softmax with Heat Kernel Dynamics",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "fusion"
+      ]
+    },
+    {
+      "bib_key": "jyothi2026fuzzyattentionsegn",
+      "title": "Fuzzy Attention SegNet Model with Serval Ablation Optimization and Log-Cosh Softmax Loss for Effective Brain Tumor Segmentation Using MRI Imaging",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "attention",
+        "optimization"
+      ]
+    },
+    {
+      "bib_key": "li2020gumbelsoftmaxbased",
+      "title": "Gumbel-softmax-based Optimization: A Simple General Framework for Optimization Problems on Graphs",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "softmax",
+        "constraints",
+        "independent",
+        "optimization"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -74,6 +163,27 @@
         "CPU",
         "optimization",
         "YiRage"
+      ]
+    },
+    {
+      "bib_key": "banerjee2021exploringalternati",
+      "title": "Exploring Alternatives to Softmax Function",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "exp",
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "franke2023thesoftmaxfunction",
+      "title": "The softmax function: Properties, motivation, and interpretation",
+      "source_tier": "B",
+      "relevance_score": 39,
+      "matched_keywords": [
+        "exp",
+        "softmax",
+        "NPU"
       ]
     },
     {
@@ -107,6 +217,26 @@
       ]
     },
     {
+      "bib_key": "kim2025improvingattention",
+      "title": "Improving Attention Parallelism via Delayed Value Generation and Softmax Offloading",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "chen2022partialdisastercla",
+      "title": "Partial Disaster Classification Based on Attention Mechanism and Balanced Softmax Loss Function",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
       "bib_key": "koohpayegani2024simasimplesoftmaxf",
       "title": "SimA: Simple Softmax-free Attention for Vision Transformers",
       "source_tier": "A",
@@ -120,6 +250,16 @@
       "bib_key": "patil2023streamingbilingual",
       "title": "Streaming Bilingual End-to-End ASR Model Using Attention Over Multiple Softmax",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "lee2023softmaxoutputappro",
+      "title": "Softmax Output Approximation for Activation Memory-Efficient Training of Attention-based Networks",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "softmax",
@@ -157,6 +297,16 @@
       ]
     },
     {
+      "bib_key": "collins2024incontextlearningw",
+      "title": "In-Context Learning with Transformers: Softmax Attention Adapts to Function Lipschitzness",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
       "bib_key": "kim2024alowpowerattention",
       "title": "A Low Power Attention and Softmax Accelerator for Large Language Models Inference",
       "source_tier": "A",
@@ -164,6 +314,36 @@
       "matched_keywords": [
         "softmax",
         "attention"
+      ]
+    },
+    {
+      "bib_key": "han2024bridgingthedivider",
+      "title": "Bridging the Divide: Reconsidering Softmax and Linear Attention",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "softmax",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "anon2026softmax",
+      "title": "Модель рейтинговых оценок с латентными параметрами на базе функции softmax",
+      "source_tier": "B",
+      "relevance_score": 30,
+      "matched_keywords": [
+        "exp",
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "menegaux2025phylohsaphylogenet",
+      "title": "Phylo-HS: A phylogenetic hierarchical softmax for taxonomic classification",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "softmax",
+        "bottleneck"
       ]
     },
     {
@@ -177,6 +357,46 @@
       ]
     },
     {
+      "bib_key": "ganeri2018orientingattention",
+      "title": "Orienting Attention",
+      "source_tier": "B",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "ganeri2018perceptualattentio",
+      "title": "Perceptual Attention",
+      "source_tier": "B",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "ganeri2018empatheticattentio",
+      "title": "Empathetic Attention",
+      "source_tier": "B",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ]
+    },
+    {
+      "bib_key": "ganeri2018narrativeattention",
+      "title": "Narrative Attention",
+      "source_tier": "B",
+      "relevance_score": 28,
+      "matched_keywords": [
+        "exp",
+        "attention"
+      ]
+    },
+    {
       "bib_key": "amd2024xdna",
       "title": "AMD XDNA Architecture",
       "source_tier": "A",
@@ -186,9 +406,108 @@
       ]
     },
     {
+      "bib_key": "kartal2025csoftmaxcontextual",
+      "title": "C-Softmax: Contextual Softmax Operator Incorporating Row and Column Priorities",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "kong2019idsoftmaxasoftmaxl",
+      "title": "ID-Softmax: A Softmax-like Loss for ID Face Recognition",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "yang2023learningdifferenti",
+      "title": "Learning Differentiable Categorical Regions with Gumbel-Softmax for Person Re-Identification",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "choi2020f2softmaxdiversify",
+      "title": "Fˆ2-Softmax: Diversifying Neural Text Generation via Frequency Factorized Softmax",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "ko2024reviewofaerosoftma",
+      "title": "Review of: \"AERO: Softmax-Only LLMs for Efficient Private Inference\"",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "zakamulin2025entropyregularized",
+      "title": "Entropy-Regularized Portfolio Selection via Softmax Sharpe Allocation",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "anon2025logisticandsoftmax",
+      "title": "Logistic and Softmax Regression",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "luo2024causalsoftmaxforou",
+      "title": "Causal Softmax for Out-of-Distribution Generalization",
+      "source_tier": "C",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "anon2021speakerverificatio",
+      "title": "Speaker Verification Analysis Based on Cosine Softmax Loss",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "kim2025designoftensorcore",
+      "title": "Design of Tensor Core Archiecture for Softmax Acceleration",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
       "bib_key": "s2022digitalimplementat",
       "title": "Digital Implementation of the Softmax Activation Function and the Inverse Softmax Function",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "softmax"
+      ]
+    },
+    {
+      "bib_key": "bratischenko2025alatentparametermo",
+      "title": "A LATENT PARAMETER MODEL OF EXAMINATION GRADES BASED ON THE SOFTMAX FUNCTION",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
         "softmax"

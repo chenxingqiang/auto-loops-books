@@ -1,16 +1,57 @@
 {
   "chapter_id": "ch07",
-  "pool_count": 20,
+  "pool_count": 61,
   "bib_keys": [
     "asada2020roadblocksofiopara",
+    "yang2024verticallyresolved",
+    "chi2024essaysonstaticandd",
+    "sakai2026mechanismsofrapide",
+    "mantovani2019mechanismofactiono",
+    "simhi2019dissociatinggaitfr",
+    "maithel2022roleofmoiststatice",
+    "dolader2026determinantsofperf",
+    "pippi2020fromstaticevidence",
+    "vergani2022isolatingtheroleof",
+    "kocaman2020theroleofstaticvar",
     "babati2023theroleofimplement",
+    "anon2022roleofstatictherap",
+    "largavista2026staticwritingstyle",
+    "sohrabi2023rejuvenationbycomp",
+    "dhingra2023roleofthreeparticl",
     "tan2019rolebasedstaticdes",
+    "yulduzkhan2025theroleofsimilesta",
+    "vishwakarma2026roleofanabsorberin",
+    "nakano2020dynamicstictionwit",
+    "anonymous2026topologicalphasetr",
+    "rajput2026astaticbehaviourof",
+    "rgenes2024theroleofconstitut",
+    "taheriledari2022assignmentofstruct",
+    "ahmadi2019thewarshipassignme",
     "masri2021optimalpublicelect",
+    "srivastava2021understandingthero",
+    "tang2023matchinginastatica",
+    "kayum2020efficientstaticwel",
+    "feng2026daytodaydynamicsfo",
+    "salim2022graphkernelsbasedo",
+    "kapetanakis2020assessmentschedule",
     "yirage2026",
     "memoryfloor2026",
+    "simpson2020staticepostersched",
+    "abdelali2024archivemanagements",
+    "mcaleavey2025static",
     "patel2025llminference",
+    "pilon2023networkandschedule",
+    "yan2020choicebasedairline",
+    "anon2018integratedschedule",
     "laguardia2022universityclasssch",
+    "thiemann2023hamiltonianrenorma",
     "david2018linearlypricedtime",
+    "ulrich2021characteristicsofm",
+    "lusher2019doesscheduleirregu",
+    "ghiani2023realtimeschedulead",
+    "elking2025anonperiodicpartic",
+    "guo2024schedulefreerollin",
+    "nagkoulis2022pumpingscheduleass",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -37,9 +78,169 @@
       ]
     },
     {
+      "bib_key": "yang2024verticallyresolved",
+      "title": "Vertically resolved analysis of the Madden-Julian Oscillation highlights the role of convective transport of moist static energy",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production",
+        "surface"
+      ]
+    },
+    {
+      "bib_key": "chi2024essaysonstaticandd",
+      "title": "Essays on Static and Dynamic Preferential Trade Agreement Formation: Role of Political Economy and Scale Economies",
+      "source_tier": "B",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production"
+      ]
+    },
+    {
+      "bib_key": "sakai2026mechanismsofrapide",
+      "title": "Mechanisms of Rapid Entrainment and Acceleration in Landslide-Initiated Debris Flows: The Role of Static Liquefaction",
+      "source_tier": "C",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "surface"
+      ]
+    },
+    {
+      "bib_key": "mantovani2019mechanismofactiono",
+      "title": "Mechanism of Action of Extremely Low Frequency or Static Magnetic Fields on Cells: Role of Oxidative Activation of TRPM2",
+      "source_tier": "B",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "production"
+      ]
+    },
+    {
+      "bib_key": "simhi2019dissociatinggaitfr",
+      "title": "Dissociating gait from static appearance: A virtual reality study of the role of dynamic identity signatures in person recognition",
+      "source_tier": "B",
+      "relevance_score": 73,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "independent"
+      ]
+    },
+    {
+      "bib_key": "maithel2022roleofmoiststatice",
+      "title": "Role of Moist Static Energy Advection in Evolution of Convective Aggregation in Observations",
+      "source_tier": "C",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "dolader2026determinantsofperf",
+      "title": "Determinants of performance in CrossFit benchmarks involving repeated Olympic lifts_the role of neuromuscular capacity and static balance_DATASET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "pippi2020fromstaticevidence",
+      "title": "From static evidence to dynamic reality: the role of diffuse fractures",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "vergani2022isolatingtheroleof",
+      "title": "Isolating the role of bone lacunar morphology on static and fatigue fracture progression through numerical simulations",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "kocaman2020theroleofstaticvar",
+      "title": "THE ROLE OF STATIC VAR COMPENSATOR AT REACTIVE POWER COMPENSATION",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
       "bib_key": "babati2023theroleofimplement",
       "title": "The Role of Implementation-Specific Static Analysis",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "anon2022roleofstatictherap",
+      "title": "Role of Static Therapy Nurses in the Management of Gastrointestinal Tumor Surgery",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "largavista2026staticwritingstyle",
+      "title": "Static Writing Style in Reaction Papers: The Role of Thematic Progression",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "sohrabi2023rejuvenationbycomp",
+      "title": "Rejuvenation by compressive elasto-static loading: The role of static stress on a Zr-based metallic glass",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "dhingra2023roleofthreeparticl",
+      "title": "Role of three particle interactions in the determination of static pair correlation functions",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "static role",
@@ -59,6 +260,94 @@
       ]
     },
     {
+      "bib_key": "yulduzkhan2025theroleofsimilesta",
+      "title": "THE ROLE OF SIMILE, STATIC SIMILE, METAPHOR AND COMPARISON IN UZBEK LINGUISTICS",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "vishwakarma2026roleofanabsorberin",
+      "title": "Role of an absorber in reducing soil pressure on retaining structures under static loading conditions",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "nakano2020dynamicstictionwit",
+      "title": "Dynamic stiction without static friction: The role of friction vector rotation",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "anonymous2026topologicalphasetr",
+      "title": "Topological phase transitions by time-dependent electromagnetic fields in frustrated magnets: Role of dynamical and static magnetic fields",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "rajput2026astaticbehaviourof",
+      "title": "A static behaviour of carbon-CNT-metal composite laminate: Role of interphase and waviness via micromechanics",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "rgenes2024theroleofconstitut",
+      "title": "The Role of Constitutive Models in the Analysis of Static Liquefaction in Tailings Dams",
+      "source_tier": "C",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static"
+      ]
+    },
+    {
+      "bib_key": "taheriledari2022assignmentofstruct",
+      "title": "Assignment of structural domains in proteins using diffusion kernels on graphs",
+      "source_tier": "B",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "assignment",
+        "fusion",
+        "kernels"
+      ]
+    },
+    {
+      "bib_key": "ahmadi2019thewarshipassignme",
+      "title": "THE WARSHIP ASSIGNMENT SCHEDULE USING INTEGER PROGRAMMING MODEL",
+      "source_tier": "B",
+      "relevance_score": 45,
+      "matched_keywords": [
+        "assignment",
+        "constraints",
+        "ship"
+      ]
+    },
+    {
       "bib_key": "masri2021optimalpublicelect",
       "title": "Optimal Public Electric Bus Fleet Charging Schedule with Solar and Energy Storage Considering Static and Dynamic Route Assignment",
       "source_tier": "A",
@@ -66,6 +355,67 @@
       "matched_keywords": [
         "static",
         "assignment"
+      ]
+    },
+    {
+      "bib_key": "srivastava2021understandingthero",
+      "title": "UNDERSTANDING THE ROLE OF MICRO-INTERROGATION FOR FRAMING ASSIGNMENT FREE MICRO-LECTURES",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "role",
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "tang2023matchinginastatica",
+      "title": "Matching in a Static Assignment Model",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "kayum2020efficientstaticwel",
+      "title": "Efficient Static Well Assignment in Parallel Reservoir Simulation",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "static",
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "feng2026daytodaydynamicsfo",
+      "title": "Day-to-Day Dynamics for Schedule-Based Transit Assignment Under Boarding Priority",
+      "source_tier": "C",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "assignment",
+        "constraints",
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "salim2022graphkernelsbasedo",
+      "title": "Graph kernels based on optimal node assignment",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "assignment",
+        "kernels"
+      ]
+    },
+    {
+      "bib_key": "kapetanakis2020assessmentschedule",
+      "title": "Assessment-schedule matching in unanchored indirect treatment comparisons of progression-free survival in cancer studies",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "schedule-free",
+        "treat"
       ]
     },
     {
@@ -89,12 +439,66 @@
       ]
     },
     {
+      "bib_key": "simpson2020staticepostersched",
+      "title": "Static ePoster Schedule Jun 7 2019 1:15 - 2:00",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "static"
+      ]
+    },
+    {
+      "bib_key": "abdelali2024archivemanagements",
+      "title": "Archive Management Schedule And Their Role In Determining The Documents’ Life Cycle:, Management Schedule Of Judicial Archive Documents In Algeria",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "role"
+      ]
+    },
+    {
+      "bib_key": "mcaleavey2025static",
+      "title": "Static",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "static"
+      ]
+    },
+    {
       "bib_key": "patel2025llminference",
       "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "pilon2023networkandschedule",
+      "title": "Network and Schedule Planning, Aircraft Assignment",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "yan2020choicebasedairline",
+      "title": "Choice-Based Airline Schedule Design and Fleet Assignment: A Decomposition Approach",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "anon2018integratedschedule",
+      "title": "Integrated Schedule Design with the Itinerary‐based Fleet Assignment Model (ISD‐IFAM)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
       ]
     },
     {
@@ -107,9 +511,72 @@
       ]
     },
     {
+      "bib_key": "thiemann2023hamiltonianrenorma",
+      "title": "Hamiltonian renormalization. VII. Free fermions and doubler free kernels",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ]
+    },
+    {
       "bib_key": "david2018linearlypricedtime",
       "title": "Linearly priced timed automata for the bus schedule assignment problem",
       "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "ulrich2021characteristicsofm",
+      "title": "Characteristics of Model-Free Pricing Kernels",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ]
+    },
+    {
+      "bib_key": "lusher2019doesscheduleirregu",
+      "title": "Does schedule irregularity affect productivity? Evidence from random assignment into college classes",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "assignment"
+      ]
+    },
+    {
+      "bib_key": "ghiani2023realtimeschedulead",
+      "title": "Real-Time Schedule Adjustments for Conflict-Free Vehicle Routing",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "schedule-free"
+      ]
+    },
+    {
+      "bib_key": "elking2025anonperiodicpartic",
+      "title": "A Non-Periodic Particle Mesh Ewald Method for Radially Symmetric Kernels in Free Space",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "kernels"
+      ]
+    },
+    {
+      "bib_key": "guo2024schedulefreerollin",
+      "title": "Schedule-Free Rolling",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "schedule-free"
+      ]
+    },
+    {
+      "bib_key": "nagkoulis2022pumpingscheduleass",
+      "title": "Pumping schedule assignment using chromatic graphs to reduce groundwater pumping energy consumption",
+      "source_tier": "B",
       "relevance_score": 18,
       "matched_keywords": [
         "assignment"

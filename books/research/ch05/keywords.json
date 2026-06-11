@@ -1,6 +1,6 @@
 [
   {
-    "term": "AMD XDNA/AIE dataflow architecture",
+    "term": "amd xdna/aie dataflow architecture",
     "weight": 18
   },
   {
@@ -8,7 +8,7 @@
     "weight": 14
   },
   {
-    "term": "CUDA XDNA mapping",
+    "term": "cuda xdna mapping",
     "weight": 14
   },
   {
@@ -16,7 +16,7 @@
     "weight": 14
   },
   {
-    "term": "online softmax HW",
+    "term": "online softmax hw",
     "weight": 14
   },
   {
@@ -24,55 +24,55 @@
     "weight": 14
   },
   {
-    "term": "XDNA tiles",
+    "term": "xdna tiles",
     "weight": 14
   },
   {
-    "term": "YiRage XDNA backend",
+    "term": "yirage xdna backend",
     "weight": 14
   },
   {
-    "term": "architecture tradeoffs LLM inference compiler",
+    "term": "architecture tradeoffs llm inference compiler",
     "weight": 13
   },
   {
-    "term": "CUDA XDNA mapping LLM inference compiler",
+    "term": "cuda xdna mapping llm inference compiler",
     "weight": 13
   },
   {
-    "term": "dataflow conclusion LLM inference compiler",
+    "term": "dataflow conclusion llm inference compiler",
     "weight": 13
   },
   {
-    "term": "online softmax HW LLM inference compiler",
+    "term": "online softmax hw llm inference compiler",
     "weight": 13
   },
   {
-    "term": "static dataflow rules LLM inference compiler",
+    "term": "static dataflow rules llm inference compiler",
     "weight": 13
   },
   {
-    "term": "XDNA tiles LLM inference compiler",
+    "term": "xdna tiles llm inference compiler",
     "weight": 13
   },
   {
-    "term": "YiRage XDNA backend LLM inference compiler",
+    "term": "yirage xdna backend llm inference compiler",
     "weight": 13
   },
   {
-    "term": "AI compiler optimization",
+    "term": "ai compiler optimization",
     "weight": 12
   },
   {
-    "term": "AI hardware architecture",
+    "term": "ai hardware architecture",
     "weight": 12
   },
   {
-    "term": "buffer descriptor TMA",
+    "term": "buffer descriptor tma",
     "weight": 12
   },
   {
-    "term": "CUDA XDNA",
+    "term": "cuda xdna",
     "weight": 12
   },
   {
@@ -92,11 +92,11 @@
     "weight": 12
   },
   {
-    "term": "XDNA AIE",
+    "term": "xdna aie",
     "weight": 12
   },
   {
-    "term": "YiRage XDNA",
+    "term": "yirage xdna",
     "weight": 12
   },
   {
@@ -104,7 +104,7 @@
     "weight": 11
   },
   {
-    "term": "CUDA",
+    "term": "cuda",
     "weight": 11
   },
   {
@@ -128,27 +128,27 @@
     "weight": 11
   },
   {
-    "term": "TMA",
+    "term": "tma",
     "weight": 11
   },
   {
-    "term": "vs XDNA",
+    "term": "vs xdna",
     "weight": 11
   },
   {
-    "term": "XDNA",
+    "term": "xdna",
     "weight": 11
   },
   {
-    "term": "XDNA carrier",
+    "term": "xdna carrier",
     "weight": 11
   },
   {
-    "term": "XDNA/AIE",
+    "term": "xdna/aie",
     "weight": 11
   },
   {
-    "term": "AIE",
+    "term": "aie",
     "weight": 10
   },
   {
@@ -172,7 +172,7 @@
     "weight": 10
   },
   {
-    "term": "YiRage",
+    "term": "yirage",
     "weight": 10
   },
   {
@@ -180,11 +180,23 @@
     "weight": 9
   },
   {
-    "term": "bottleneck",
+    "term": "bandwidth",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
+    "term": "buffer",
     "weight": 9
   },
   {
     "term": "bytes",
+    "weight": 9
+  },
+  {
+    "term": "cell",
     "weight": 9
   },
   {
@@ -196,11 +208,7 @@
     "weight": 9
   },
   {
-    "term": "constraints",
-    "weight": 9
-  },
-  {
-    "term": "CPU",
+    "term": "cpu",
     "weight": 9
   },
   {
@@ -208,11 +216,7 @@
     "weight": 9
   },
   {
-    "term": "engineering deep dive",
-    "weight": 9
-  },
-  {
-    "term": "fleets",
+    "term": "flops",
     "weight": 9
   },
   {
@@ -220,19 +224,19 @@
     "weight": 9
   },
   {
-    "term": "GPU",
+    "term": "gemm",
     "weight": 9
   },
   {
-    "term": "independent",
+    "term": "gpu",
     "weight": 9
   },
   {
-    "term": "kernels",
+    "term": "hbm",
     "weight": 9
   },
   {
-    "term": "knobs",
+    "term": "hopper",
     "weight": 9
   },
   {
@@ -240,7 +244,7 @@
     "weight": 9
   },
   {
-    "term": "MegaKernel",
+    "term": "megakernel",
     "weight": 9
   },
   {
@@ -248,23 +252,31 @@
     "weight": 9
   },
   {
-    "term": "NPU",
+    "term": "npu",
     "weight": 9
   },
   {
-    "term": "production",
+    "term": "numa",
     "weight": 9
   },
   {
-    "term": "routinely",
+    "term": "on-chip",
     "weight": 9
   },
   {
-    "term": "ship",
+    "term": "profile",
     "weight": 9
   },
   {
-    "term": "surface",
+    "term": "residency",
+    "weight": 9
+  },
+  {
+    "term": "same",
+    "weight": 9
+  },
+  {
+    "term": "target",
     "weight": 9
   },
   {
@@ -276,7 +288,11 @@
     "weight": 9
   },
   {
-    "term": "treat",
+    "term": "traffic",
+    "weight": 9
+  },
+  {
+    "term": "warp",
     "weight": 9
   }
 ]

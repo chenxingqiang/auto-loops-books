@@ -2,11 +2,13 @@
 \label{chap:ch27}
 \typeout{START_CHAPTER "ch27" \theabspage}
 
-Production decode teams rarely fail for lack of framework features---they fail because compiler and kernel schedules violate residency, launch, and bandwidth contracts on the SKU they actually ship \citep{memoryfloor2026}. This chapter continues the book's problem-first thread: name the contradiction, trace it to hardware limits, then show how passes and megakernels recover SLO on GPU, CPU, and NPU fleets \citep{taxbreak2026}.
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
 
-\section{Codesign}
-\label{sec:codesign}
+\section{codesign}
+\label{sec:ch27_codesign}
+
 % AUTO_VISUAL:fig_codesign_pipeline
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -22,18 +24,25 @@ Production decode teams rarely fail for lack of framework features---they fail b
 \label{fig:codesign_pipeline}
 \end{figure}
 
+Teams hit \textbf{codesign} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because co-design was planned without hardware residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers \citep{kwon2023vllm}. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{zhang2019whenneuralarchitec}. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liu2024scorchneuralarchit}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{yirage2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{liu2024deepseekv3}.
+Hardware truth: GPUs bound co-design with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers \citep{amd2024aie}. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{chakraborty2019hardwaresoftwareco}. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{yang2019ahighlyintegratedh}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{semianalysis2024tma}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs}.
+Compiler/kernel fix: predicate fusion on co-design/hardware legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers \citep{nvidia2022hopper}. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{amd2024xdna}. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{dlbook}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize co-design with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked hardware---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers \citep{anon2023proceedingsofthe20}. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{patel2025llminference}. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused co-design raises bytes/token; fused schedule must keep hardware on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\section{New Architectures}
-\label{sec:new_architectures}
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{new architectures}
+\label{sec:ch27_new_architectures}
+
 % AUTO_VISUAL:fig_new_architectures_architecture
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -49,100 +58,209 @@ Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers 
 \label{fig:new_architectures_architecture}
 \end{figure}
 
+The production surprise at \textbf{new architectures} is not peak FLOPs; it is illegal tier placement: architecture spilling to HBM/DDR while trend still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2023flashdecoding}. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: architecture producers must feed trend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dubey2026hardwaresoftwareco}. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{a2025reviewonhardwareac}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: B Benchmark.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Edge Cloud}
-\label{sec:edge_cloud}
+\section{edge cloud}
+\label{sec:ch27_edge_cloud}
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{edge cloud} is where Future Trends in AI Compilers meets Chapter~1 counters: fix edge and cloud together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{shang2020hardwaresoftwareco}. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{manohar2022hardwaresoftwareco}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware truth: GPUs bound edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler/kernel fix: predicate fusion on edge/cloud legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cloud---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\section{Autonomous Kernels}
-\label{sec:autonomous_kernels}
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused edge raises bytes/token; fused schedule must keep cloud on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{wolf2022sessiondetailsaddr}. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{liao2026acceleratingpostqu}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{autonomous kernels}
+\label{sec:ch27_autonomous_kernels}
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Teams hit \textbf{autonomous kernels} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because autonomous was planned without kernel residency on the SKU you ship \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: autonomous producers must feed kernel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: D.
+
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{Chapter Summary}
 \label{sec:ch27_summary}
 
-The through-line for ch27 is unchanged: hardware constraints dictate compiler passes, fusion boundaries, and deployment metrics. Carry bytes/token and launches/token spreadsheets forward; later chapters assume those baselines exist.
+Future Trends in AI Compilers succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch27_codesign}, Section~\ref{sec:ch27_new_architectures}, Section~\ref{sec:ch27_edge_cloud} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
 
+\textbf{codesign} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-\subsection{Engineering Deep Dive}
-\label{sec:ch27_deep_dive}
+Binding software to silicon: compiler passes must encode co-design/hardware legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When codesign disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Future Trends in AI Compilers failure at \textbf{new architectures} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: architecture and trend must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for new architectures: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{edge cloud} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: edge sets the residency envelope; cloud determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify edge, cloud, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{autonomous kernels} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode autonomous/kernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When autonomous kernels disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{codesign} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: co-design sets the residency envelope; hardware determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify co-design, hardware, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: hardware constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{new architectures} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-Codesign is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{co-design}, \textbf{hardware} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds co-design hardware to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode architecture/trend legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-New Architectures is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{architecture}, \textbf{trend} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds architecture trend to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When new architectures disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-Edge Cloud is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{edge}, \textbf{cloud} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds edge cloud to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting new architectures, attach roofline or NPU buffer accounting showing architecture residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Autonomous Kernels is a production bottleneck surface for Future Trends in AI Compilers. Teams that treat \textbf{autonomous}, \textbf{kernel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds autonomous kernel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Future Trends in AI Compilers failure at \textbf{edge cloud} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: edge and cloud must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for edge cloud: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize edge with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{autonomous kernels} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: autonomous sets the residency envelope; kernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify autonomous, kernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: kernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+The usual Future Trends in AI Compilers failure at \textbf{codesign} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: co-design and hardware must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for codesign: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: hardware constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{new architectures} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: architecture sets the residency envelope; trend determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify architecture, trend, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting new architectures, attach roofline or NPU buffer accounting showing architecture residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\textbf{edge cloud} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode edge/cloud legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When edge cloud disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize edge with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Future Trends in AI Compilers failure at \textbf{autonomous kernels} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: autonomous and kernel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for autonomous kernels: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: kernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\textbf{codesign} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode co-design/hardware legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When codesign disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Future Trends in AI Compilers failure at \textbf{new architectures} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: architecture and trend must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for new architectures: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{edge cloud} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: edge sets the residency envelope; cloud determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify edge, cloud, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\textbf{autonomous kernels} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode autonomous/kernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When autonomous kernels disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
 
 \typeout{END_CHAPTER "ch27" \theabspage}

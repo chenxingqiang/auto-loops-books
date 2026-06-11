@@ -1,23 +1,54 @@
 {
   "chapter_id": "ch09",
-  "pool_count": 29,
+  "pool_count": 60,
   "bib_keys": [
     "zheng2023researchonclocksyn",
     "mahgoli2026ahierarchicalaidri",
+    "luo2025multisystemintegra",
+    "petkoski2020normalizingthebrai",
+    "anon2018securecommunicatio",
+    "luo2025hierarchicalsynchr",
     "hunold2018hierarchicalclocks",
     "klimov2018featuresofsynchron",
+    "argyriou2020secrecyinwirelessc",
     "wiesner2024timesynchronizatio",
+    "anon2022synchronizationand",
+    "kim2025hierarchicalreinfo",
+    "he2026physicallayersecur",
     "volgushev2024integratedcommunic",
     "anon20212021ieeeinternatio",
     "anon20242024ieeeinternatio",
+    "dantas2026subconscioussyncah",
+    "anon2018clocksynchronizati",
+    "blommaert2020commentarychronoto",
     "mkacher2018securetimesynchron",
+    "anon2019synchronization",
     "wiesner2025timesynchronizatio",
     "coleman2021multicoreintraproc",
+    "luo2018ahighreliabilitysu",
+    "louadj2021howtosynchronizean",
     "grunichev2018analysisoftimeforh",
     "yirage2026",
+    "francesco2025similsynclinearsyn",
+    "yan2024insyncoroutofsyncu",
     "memoryfloor2026",
+    "jordheim2022insyncoutofsync",
+    "anon2022syncandswarm",
+    "anon2023lipsyncv",
+    "pickett2026pdfdescargarsyncam",
+    "anon2023postsyncv",
+    "anon2023lipsyncn",
+    "anon2023syncnampv",
     "hu2021plisyncprefetchlos",
+    "delforge2025correctiontoinsync",
+    "anon2023postsyncnampadj",
+    "delforge2025insyncoroutofsync",
     "sviridov2018tosyncornottosyncw",
+    "rowlands2020syncspeed",
+    "johnshoy2020tosyncornottosynct",
+    "bhagat2025routesyncaunifiede",
+    "anon2025outgunningmcrpcwit",
+    "gasparini2022coralpolypsdancens",
     "nakada2024lipsyncmlmachinele",
     "patel2025llminference",
     "dao2023flashdecoding",
@@ -60,6 +91,53 @@
       ]
     },
     {
+      "bib_key": "luo2025multisystemintegra",
+      "title": "Multisystem integration of hierarchical structures underlies individual variability in speech auditory-motor synchronization",
+      "source_tier": "B",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "hierarchical synchronization and communication",
+        "sync",
+        "communication",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "petkoski2020normalizingthebrai",
+      "title": "Normalizing the brain connectome for communication through synchronization",
+      "source_tier": "B",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "miss",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon2018securecommunicatio",
+      "title": "Secure Communication Using Chaos Synchronization",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "luo2025hierarchicalsynchr",
+      "title": "Hierarchical Synchronization and Distortion Scaling in Social Media Networks: A Fractal-Like Topology Theory",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
       "bib_key": "hunold2018hierarchicalclocks",
       "title": "Hierarchical Clock Synchronization in MPI",
       "source_tier": "A",
@@ -82,6 +160,17 @@
       ]
     },
     {
+      "bib_key": "argyriou2020secrecyinwirelessc",
+      "title": "Secrecy in wireless communication through closed-loop receiver de-synchronization",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
       "bib_key": "wiesner2024timesynchronizatio",
       "title": "Time Synchronization Extension for the IO-Link Industrial Communication Protocol",
       "source_tier": "A",
@@ -89,6 +178,39 @@
       "matched_keywords": [
         "sync",
         "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon2022synchronizationand",
+      "title": "Synchronization and Communication Primitives",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "communication",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "kim2025hierarchicalreinfo",
+      "title": "Hierarchical Reinforcement Learning with Optimal Level Synchronization Based on Flow-Based Deep Generative Model",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "hierarchical",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "he2026physicallayersecur",
+      "title": "Physical layer security strategy for network time synchronization message transmission",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "sync",
+        "miss",
         "synchronization"
       ]
     },
@@ -126,9 +248,51 @@
       ]
     },
     {
+      "bib_key": "dantas2026subconscioussyncah",
+      "title": "Subconscious  Sync: A  Human–AI Co-Resonance Framework",
+      "source_tier": "B",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "NPU",
+        "sync",
+        "surface",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon2018clocksynchronizati",
+      "title": "Clock Synchronization in Distributed Systems",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "blommaert2020commentarychronoto",
+      "title": "Commentary: Chronotopes, synchronization and formats",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
       "bib_key": "mkacher2018securetimesynchron",
       "title": "Secure Time Synchronization Protocol",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "anon2019synchronization",
+      "title": "SYNCHRONIZATION",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "sync",
@@ -156,6 +320,27 @@
       ]
     },
     {
+      "bib_key": "luo2018ahighreliabilitysu",
+      "title": "A High-Reliability Sub-Nanosecond Network Time Synchronization Method Enabled by Double-Frequency Distributed Time Synchronization",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "louadj2021howtosynchronizean",
+      "title": "How to synchronize an out of sync system?",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "sync",
+        "constraints",
+        "synchronization"
+      ]
+    },
+    {
       "bib_key": "grunichev2018analysisoftimeforh",
       "title": "Analysis of time for hierarchical distributed updating of location information of subscribers in next-generation mobile communication networks",
       "source_tier": "A",
@@ -176,6 +361,26 @@
       ]
     },
     {
+      "bib_key": "francesco2025similsynclinearsyn",
+      "title": "Simil Sync/Linear Sync",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "sync",
+        "synchronization"
+      ]
+    },
+    {
+      "bib_key": "yan2024insyncoroutofsyncu",
+      "title": "In Sync or Out of Sync? Understanding Stress and Learning Performance in Collaborative Healthcare Simulations through Physiological Synchrony and Arousal",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "sync",
+        "ship"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -183,6 +388,69 @@
       "matched_keywords": [
         "GPU",
         "decode"
+      ]
+    },
+    {
+      "bib_key": "jordheim2022insyncoutofsync",
+      "title": "In sync/Out of sync",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2022syncandswarm",
+      "title": "Sync and Swarm",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2023lipsyncv",
+      "title": "lip-sync, v.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "pickett2026pdfdescargarsyncam",
+      "title": "{pdf descargar} SYNC &amp; SAVOR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2023postsyncv",
+      "title": "post-sync, v.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2023lipsyncn",
+      "title": "lip-sync, n.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2023syncnampv",
+      "title": "sync, n. &amp; v.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
       ]
     },
     {
@@ -195,9 +463,81 @@
       ]
     },
     {
+      "bib_key": "delforge2025correctiontoinsync",
+      "title": "Correction to: In sync or out of sync?",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2023postsyncnampadj",
+      "title": "post-sync, n. &amp; adj.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "delforge2025insyncoroutofsync",
+      "title": "In sync or out of sync?",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
       "bib_key": "sviridov2018tosyncornottosyncw",
       "title": "To Sync or Not to Sync: Why Asynchronous Traffic Control Is Good Enough for Your Data Center",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "rowlands2020syncspeed",
+      "title": "Sync Speed",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "johnshoy2020tosyncornottosynct",
+      "title": "To Sync or Not to Sync, That is the Question: Choosing Between Synchronous and Asynchronous Modes in Remote and Online Language Teaching",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "bhagat2025routesyncaunifiede",
+      "title": "Route-Sync: A Unified Experience",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "anon2025outgunningmcrpcwit",
+      "title": "Outgunning mCRPC with SYNC-T",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "sync"
+      ]
+    },
+    {
+      "bib_key": "gasparini2022coralpolypsdancens",
+      "title": "Coral Polyps Dance ’n Sync",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
         "sync"

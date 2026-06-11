@@ -2,11 +2,15 @@
 \label{chap:ch13}
 \typeout{START_CHAPTER "ch13" \theabspage}
 
-Production decode teams rarely fail for lack of framework features---they fail because compiler and kernel schedules violate residency, launch, and bandwidth contracts on the SKU they actually ship \citep{patel2025llminference}. This chapter continues the book's problem-first thread: name the contradiction, trace it to hardware limits, then show how passes and megakernels recover SLO on GPU, CPU, and NPU fleets \citep{park2026cpugpuworkloaddist}.
+Part~VI treats \emph{Core Theory} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
 
-\section{Tiling Theory}
-\label{sec:tiling_theory}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\section{tiling theory}
+\label{sec:ch13_tiling_theory}
+
 % AUTO_VISUAL:fig_tiling_theory_pipeline
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -22,18 +26,25 @@ Production decode teams rarely fail for lack of framework features---they fail b
 \label{fig:tiling_theory_pipeline}
 \end{figure}
 
+Teams hit \textbf{tiling theory} when Core Theory looks correct in isolation yet decode telemetry disagrees---usually because tiling was planned without tiling residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
 
-Tiling Theory is a production bottleneck surface for Core Theory \citep{jeong2026flowgraphawaretili}. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{taxbreak2026}. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{pronk2026beyondmodeloptimiz}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{yirage2026}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{malaraju2025aiaugmentedcompile}.
+Hardware truth: GPUs bound tiling with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Tiling Theory is a production bottleneck surface for Core Theory \citep{semianalysis2024tma}. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2022flashattention}. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{kwon2023vllm}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{liu2024deepseekv3}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{cummins2022compilergymrobustp}.
+Compiler/kernel fix: predicate fusion on tiling/tiling legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Fusion Theory is a production bottleneck surface for Core Theory \citep{li2025llmpoweredautomate}. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{nvidia2022hopper}. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets \citep{amd2024xdna}. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards \citep{amd2024aie}. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags \citep{nvidia2024cudagraphs}.
+\paragraph{Multi-hardware delta.} Hopper may legalize tiling with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory \citep{dlbook}. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused tiling raises bytes/token; fused schedule must keep tiling on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\section{Fusion Theory}
-\label{sec:fusion_theory}
+\paragraph{Scope.} This section binds tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{fusion theory}
+\label{sec:ch13_fusion_theory}
+
 % AUTO_VISUAL:fig_fusion_theory_architecture
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -49,155 +60,316 @@ Layout Theory is a production bottleneck surface for Core Theory \citep{dlbook}.
 \label{fig:fusion_theory_architecture}
 \end{figure}
 
+The production surprise at \textbf{fusion theory} is not peak FLOPs; it is illegal tier placement: fusion spilling to HBM/DDR while fusion still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: fusion producers must feed fusion consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for fusion on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds fusion to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Layout Theory}
-\label{sec:layout_theory}
+\section{layout theory}
+\label{sec:ch13_layout_theory}
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{layout theory} is where Core Theory meets Chapter~1 counters: fix layout and layout together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware truth: GPUs bound layout with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler/kernel fix: predicate fusion on layout/layout legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Multi-hardware delta.} Hopper may legalize layout with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked layout---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\section{Parallel Scheduling}
-\label{sec:parallel_scheduling}
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused layout raises bytes/token; fused schedule must keep layout on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{dao2023flashdecoding}. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds layout to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{parallel scheduling}
+\label{sec:ch13_parallel_scheduling}
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Teams hit \textbf{parallel scheduling} when Core Theory looks correct in isolation yet decode telemetry disagrees---usually because parallel was planned without parallel residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace residency: parallel producers must feed parallel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\section{GPU CPU NPU Split}
-\label{sec:gpu_cpu_npu_split}
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets \citep{memoryfloor2026}. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Attach roofline or buffer accounting for parallel on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Scope.} This section binds parallel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\section{GPU CPU NPU split}
+\label{sec:ch13_gpu_cpu_npu_split}
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The production surprise at \textbf{GPU CPU NPU split} is not peak FLOPs; it is illegal tier placement: GPU spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
+
+Hardware truth: GPUs bound GPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on GPU/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize GPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused GPU raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{Chapter Summary}
 \label{sec:ch13_summary}
 
-The through-line for ch13 is unchanged: hardware constraints dictate compiler passes, fusion boundaries, and deployment metrics. Carry bytes/token and launches/token spreadsheets forward; later chapters assume those baselines exist.
+Core Theory succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch13_tiling_theory}, Section~\ref{sec:ch13_fusion_theory}, Section~\ref{sec:ch13_layout_theory} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
 
+\textbf{tiling theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-\subsection{Engineering Deep Dive}
-\label{sec:ch13_deep_dive}
+Binding software to silicon: compiler passes must encode tiling/tiling legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When tiling theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Core Theory failure at \textbf{fusion theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: fusion and fusion must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,yirage2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for fusion theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,yirage2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{layout theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: layout sets the residency envelope; layout determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify layout, layout, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{parallel scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode parallel/parallel legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When parallel scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Core Theory failure at \textbf{GPU CPU NPU split} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: GPU and CPU must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for GPU CPU NPU split: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{tiling theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: tiling sets the residency envelope; tiling determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify tiling, tiling, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{fusion theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode fusion/fusion legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When fusion theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Core Theory failure at \textbf{layout theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: layout and layout must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Compiler takeaway for layout theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Production teams misread \textbf{parallel scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Trace the Chapter~2 chain: parallel sets the residency envelope; parallel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Operational checklist---verify parallel, parallel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\textbf{GPU CPU NPU split} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Binding software to silicon: compiler passes must encode GPU/CPU legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-Tiling Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{tiling} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds tiling to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+When GPU CPU NPU split disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
 
-Fusion Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{fusion} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds fusion to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
 
-Layout Theory is a production bottleneck surface for Core Theory. Teams that treat \textbf{layout} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds layout to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
-Parallel Scheduling is a production bottleneck surface for Core Theory. Teams that treat \textbf{parallel} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds parallel to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+The usual Core Theory failure at \textbf{tiling theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-GPU CPU NPU Split is a production bottleneck surface for Core Theory. Teams that treat \textbf{GPU}, \textbf{CPU}, \textbf{NPU} as independent knobs routinely ship kernels that win microbenchmarks yet miss decode SLOs on real fleets. The hardware--software contract here binds GPU CPU NPU to measurable bytes/token and launches/token outcomes across GPU, CPU, and NPU targets. YiRage lowers the same constraints as explicit legality checks before codegen, so illegal fusion fails in CI rather than in customer dashboards. Industrial readers should map each paragraph to the Chapter~3 constraint matrix and record fleet measurements alongside compiler flags.
+Hardware constraint: tiling and tiling must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for tiling theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+Production teams misread \textbf{fusion theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: fusion sets the residency envelope; fusion determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{dao2022flashattention,yirage2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify fusion, fusion, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
+
+\textbf{layout theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode layout/layout legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When layout theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Core Theory failure at \textbf{parallel scheduling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: parallel and parallel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for parallel scheduling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{GPU CPU NPU split} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: GPU sets the residency envelope; CPU determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify GPU, CPU, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\textbf{tiling theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode tiling/tiling legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When tiling theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+The usual Core Theory failure at \textbf{fusion theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: fusion and fusion must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,yirage2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for fusion theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,yirage2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
+
+Production teams misread \textbf{layout theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: layout sets the residency envelope; layout determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify layout, layout, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\textbf{parallel scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode parallel/parallel legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When parallel scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Core Theory failure at \textbf{GPU CPU NPU split} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: GPU and CPU must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for GPU CPU NPU split: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+Production teams misread \textbf{tiling theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: tiling sets the residency envelope; tiling determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify tiling, tiling, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
+
+\textbf{fusion theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode fusion/fusion legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When fusion theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
+
+The usual Core Theory failure at \textbf{layout theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: layout and layout must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for layout theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+Production teams misread \textbf{parallel scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: parallel sets the residency envelope; parallel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify parallel, parallel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\textbf{GPU CPU NPU split} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode GPU/CPU legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When GPU CPU NPU split disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
 \typeout{END_CHAPTER "ch13" \theabspage}

@@ -1,42 +1,48 @@
 {
   "chapter_id": "ch20",
-  "pool_count": 30,
-  "assigned_count": 30,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 3,
-  "unique_keys_in_tex": 28,
+  "sections_with_cites": 7,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch20/citation_pool.json",
   "sections_used": [
-    "Mirage Arch Passes",
-    "Mirage HW Matrix",
+    "Chapter Summary",
+    "Mirage HW matrix",
+    "Mirage arch passes",
+    "Mirage case study",
+    "Mirage codegen",
+    "Mirage tuning",
     "chapter"
   ],
-  "cites_applied": 28,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch20_mirage_emerging.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "saileshwar2023themirageofbreakin",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 36,
       "matched_keywords": [
-        "decode"
+        "emerging",
+        "mirage"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
+      "bib_key": "schoeder2022amodulationbasedra",
       "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
     },
     {
       "sentence_id": "s0003",
       "bib_key": "mujkanovic2020optimisingaitraini",
-      "section": "Mirage HW Matrix",
+      "section": "Mirage HW matrix",
       "relevance_score": 56,
       "matched_keywords": [
         "optim",
@@ -46,56 +52,73 @@
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "saileshwar2023themirageofbreakin",
-      "section": "Mirage HW Matrix",
+      "bib_key": "joshi2026tacitapotentiacoll",
+      "section": "Mirage HW matrix",
       "relevance_score": 36,
       "matched_keywords": [
         "emerging",
-        "Mirage"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "shen2022hardwaredevelopmen",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "mirage"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "koblah2022hardwaremovingtarg",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 64,
+      "bib_key": "amd2024xdna",
+      "section": "Mirage HW matrix",
+      "relevance_score": 18,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "xdna"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "dao2022flashattention",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "memoryfloor2026",
+      "section": "Mirage HW matrix",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "batch-1",
+        "decode"
+      ]
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "kwon2023vllm",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "agarwal2023hardwarebasedimple",
+      "section": "Mirage HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
     },
     {
       "sentence_id": "s0009",
+      "bib_key": "patel2025llminference",
+      "section": "Mirage HW matrix",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "li2025nearfieldtargetloc",
+      "section": "Mirage HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "urbanski2025hardwarebasedcalcu",
+      "section": "Mirage HW matrix",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
       "bib_key": "anon2023proceedingsofthe20",
-      "section": "Mirage HW Matrix",
+      "section": "Mirage arch passes",
       "relevance_score": 36,
       "matched_keywords": [
         "compiler",
@@ -103,35 +126,14 @@
       ]
     },
     {
-      "sentence_id": "s0010",
-      "bib_key": "kern2024virtuallyaugmented",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 64,
+      "sentence_id": "s0013",
+      "bib_key": "mittal2025navigatingthedigit",
+      "section": "Mirage arch passes",
+      "relevance_score": 18,
       "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
+        "mirage"
       ]
-    },
-    {
-      "sentence_id": "s0011",
-      "bib_key": "agarwal2023hardwarebasedimple",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "hardware target",
-        "hardware",
-        "target"
-      ]
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Mirage HW Matrix",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:41.981983"
+  "generated_at": "2026-06-10T09:10:10.283452"
 }

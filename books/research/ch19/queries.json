@@ -5,12 +5,12 @@
   "\"codegen\" AND \"backend\"",
   "\"tun\" AND \"profile\"",
   "\"case\" AND \"benchmark\"",
-  "\"Glow: lightweight AI compiler\" AND \"Glow\"",
-  "\"Glow arch passes\" AND \"Glow case study\"",
-  "\"Glow codegen\" AND \"Glow HW matrix\"",
-  "\"Glow tuning\" AND \"Glow arch passes LLM inference compiler\"",
-  "\"Glow case study LLM inference compiler\" AND \"Glow codegen LLM inference compiler\"",
-  "\"Glow HW matrix LLM inference compiler\" AND \"Glow tuning LLM inference compiler\"",
+  "\"glow: lightweight ai compiler\" AND \"glow\"",
+  "\"glow arch passes\" AND \"glow case study\"",
+  "\"glow codegen\" AND \"glow hw matrix\"",
+  "\"glow tuning\" AND \"glow arch passes llm inference compiler\"",
+  "\"glow case study llm inference compiler\" AND \"glow codegen llm inference compiler\"",
+  "\"glow hw matrix llm inference compiler\" AND \"glow tuning llm inference compiler\"",
   "\"case benchmark\" AND \"codegen backend\"",
   "\"hardware target\" AND \"pass lower\""
 ]

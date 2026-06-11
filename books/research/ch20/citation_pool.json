@@ -1,25 +1,57 @@
 {
   "chapter_id": "ch20",
-  "pool_count": 30,
+  "pool_count": 62,
   "bib_keys": [
+    "zhang2025ahardwareaccelerat",
     "shen2022hardwaredevelopmen",
     "yirage2026",
+    "wang2023anfpgabasedhardwar",
+    "lane2023targetrecognitioni",
+    "grimberg2026stone23voyager1for",
     "koblah2022hardwaremovingtarg",
+    "akbar2019hardwaredesignofco",
+    "anon2026statictargetsnapsh",
+    "panda2023particlefilterbase",
     "kern2024virtuallyaugmented",
+    "schoeder2022amodulationbasedra",
     "agarwal2023hardwarebasedimple",
     "li2025nearfieldtargetloc",
     "urbanski2025hardwarebasedcalcu",
     "du2023sarnasahardwareawa",
+    "silvestrini2024processorandhardwa",
     "roy2019hardwaresoftwareco",
+    "anon2018assessmentofthehar",
+    "lepekhina2019radartargethardwar",
+    "rossi2021basicsettingsseria",
+    "shome2019phasedmimoradarusi",
     "saileshwar2023themirageofbreakin",
     "mujkanovic2020optimisingaitraini",
+    "joshi2026tacitapotentiacoll",
     "anon2023proceedingsofthe20",
     "poudel2026impactofaiassisted",
     "shen2018rethinkingcompiler",
+    "tuleuov2024compilers",
     "memoryfloor2026",
+    "mittal2025navigatingthedigit",
+    "ren2024exploringtheeffect",
+    "zhang2019trajectorypredicti",
     "zhang2018fpgaorientedmoving",
     "jiang2021trrscopeunderstand",
     "patel2025llminference",
+    "mills2025arewetrippingthemi",
+    "lohrasbi2025theroimiragedecons",
+    "lohrasbi2025theroimiragedecons_18",
+    "nelson2026themirageofaidereg",
+    "milani2026themirageofmeaning",
+    "tacelli2025fragmentsoftruthai",
+    "wilson2024isthereanaimetrics",
+    "anon2025vol1no22025aiineme",
+    "khan2025aiandemergingtechn",
+    "wang2026aimiragemedicalalg",
+    "tyssedal2026themirageofabundan",
+    "saha2026aiintheemergingeco",
+    "arnold2021aiaccidentsanemerg",
+    "salmeron2025fromdigitalfacadet",
     "sharma2024decodingthemiragea",
     "dao2023flashdecoding",
     "taxbreak2026",
@@ -34,6 +66,19 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "source_tier": "B",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ]
+    },
     {
       "bib_key": "shen2022hardwaredevelopmen",
       "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
@@ -60,6 +105,40 @@
       ]
     },
     {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "koblah2022hardwaremovingtarg",
       "title": "Hardware Moving Target Defenses against Physical Attacks",
       "source_tier": "A",
@@ -71,9 +150,53 @@
       ]
     },
     {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "kern2024virtuallyaugmented",
       "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -126,9 +249,64 @@
       ]
     },
     {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "roy2019hardwaresoftwareco",
       "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -156,6 +334,17 @@
         "optim",
         "compiler",
         "compilers"
+      ]
+    },
+    {
+      "bib_key": "joshi2026tacitapotentiacoll",
+      "title": "Tacita Potentia: Collective Dominance in India: An Emerging Threat or a Doctrinal Mirage?",
+      "source_tier": "B",
+      "relevance_score": 46,
+      "matched_keywords": [
+        "case",
+        "emerging",
+        "Mirage"
       ]
     },
     {
@@ -189,6 +378,16 @@
       ]
     },
     {
+      "bib_key": "tuleuov2024compilers",
+      "title": "Compilers",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "compilers"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -196,6 +395,34 @@
       "matched_keywords": [
         "decode",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "mittal2025navigatingthedigit",
+      "title": "Navigating the Digital Mirage: The Impact of Deepfakes and AI on Older Adults' Ability to Discern Authentic Content",
+      "source_tier": "B",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "Mirage",
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
       ]
     },
     {
@@ -223,6 +450,132 @@
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "mills2025arewetrippingthemi",
+      "title": "Are We Tripping? The Mirage of AI Hallucinations",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "lohrasbi2025theroimiragedecons",
+      "title": "The ROI Mirage: Deconstructing the Economic Failure of AI in Healthcare",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "lohrasbi2025theroimiragedecons_18",
+      "title": "The ROI Mirage: Deconstructing the Economic Failure of Isolated AI Adoption in Healthcare Enterprises",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "nelson2026themirageofaidereg",
+      "title": "The Mirage of AI deregulation",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "milani2026themirageofmeaning",
+      "title": "The Mirage of Meaning",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "tacelli2025fragmentsoftruthai",
+      "title": "Fragments of Truth: AI-nCLE and the Mirage of Universal Benefit",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "wilson2024isthereanaimetrics",
+      "title": "Is There an AI Metrics Mirage?",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "anon2025vol1no22025aiineme",
+      "title": "Vol. 1 No. 2 (2025): AI in Emerging Fields (Special Issue)",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ]
+    },
+    {
+      "bib_key": "khan2025aiandemergingtechn",
+      "title": "AI and Emerging Technology Domains",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ]
+    },
+    {
+      "bib_key": "wang2026aimiragemedicalalg",
+      "title": "AI Mirage: medical algorithms and the vanishing autopsy",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "tyssedal2026themirageofabundan",
+      "title": "The Mirage of Abundance: Why\n                    <scp>AI</scp>\n                    Cannot End Scarcity and Implications for\n                    <scp>AI</scp>\n                    Risk",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
+      ]
+    },
+    {
+      "bib_key": "saha2026aiintheemergingeco",
+      "title": "AI in the Emerging Economy Integrating Data, Decision, and Development",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ]
+    },
+    {
+      "bib_key": "arnold2021aiaccidentsanemerg",
+      "title": "AI Accidents: An Emerging Threat",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "emerging"
+      ]
+    },
+    {
+      "bib_key": "salmeron2025fromdigitalfacadet",
+      "title": "From Digital Facade To True Transformation: Overcoming The AI Mirage In SMEs",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "Mirage"
       ]
     },
     {

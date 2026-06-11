@@ -1,15 +1,15 @@
 [
   "\"Three Kernel Execution Modes\"",
-  "\"eager\" AND \"PyTorch\"",
-  "\"CUDA Graphs\" LLM inference optimization",
-  "\"MegaKernel\" LLM inference optimization",
+  "\"eager\" AND \"pytorch\"",
+  "\"cuda graph\" LLM inference optimization",
+  "\"megakernel\" LLM inference optimization",
   "\"hardware\" AND \"trade\"",
   "\"three kernel execution modes\" AND \"eager mode\"",
-  "\"graph mode\" AND \"MegaKernel mode\"",
-  "\"mode selection\" AND \"eager mode LLM inference compiler\"",
-  "\"graph mode LLM inference compiler\" AND \"MegaKernel mode LLM inference compiler\"",
-  "\"mode selection LLM inference compiler\" AND \"eager PyTorch\"",
-  "\"hardware trade\" AND \"CUDA Graphs\"",
-  "\"MegaKernel\" AND \"eager\"",
-  "\"hardware\" AND \"PyTorch\""
+  "\"graph mode\" AND \"megakernel mode\"",
+  "\"mode selection\" AND \"eager mode llm inference compiler\"",
+  "\"graph mode llm inference compiler\" AND \"megakernel mode llm inference compiler\"",
+  "\"mode selection llm inference compiler\" AND \"eager pytorch\"",
+  "\"hardware trade\" AND \"cuda graph\"",
+  "\"megakernel\" AND \"eager\"",
+  "\"hardware\" AND \"pytorch\""
 ]

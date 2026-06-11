@@ -1,9 +1,9 @@
 {
   "chapter_id": "ch07",
   "chapter_title": "Static Role Assignment and Schedule-Free Kernels",
-  "timestamp": "2026-06-10 02:33:54",
+  "timestamp": "2026-06-10 09:12:58",
   "keywords_file": "books/research/ch07/keywords.json",
-  "keyword_count": 48,
+  "keyword_count": 53,
   "top_keywords": [
     {
       "term": "static role assignment and schedule-free kernels",
@@ -22,23 +22,23 @@
       "weight": 14
     },
     {
-      "term": "YiRage tiling",
+      "term": "yirage tiling",
       "weight": 14
     },
     {
-      "term": "no runtime sched LLM inference compiler",
+      "term": "no runtime sched llm inference compiler",
       "weight": 13
     },
     {
-      "term": "static roles LLM inference compiler",
+      "term": "static roles llm inference compiler",
       "weight": 13
     },
     {
-      "term": "thread mapping LLM inference compiler",
+      "term": "thread mapping llm inference compiler",
       "weight": 13
     },
     {
-      "term": "YiRage tiling LLM inference compiler",
+      "term": "yirage tiling llm inference compiler",
       "weight": 13
     },
     {
@@ -82,192 +82,1351 @@
       "weight": 10
     },
     {
-      "term": "YiRage",
+      "term": "yirage",
       "weight": 10
+    },
+    {
+      "term": "aie",
+      "weight": 9
     },
     {
       "term": "assignment",
       "weight": 9
     },
     {
-      "term": "bottleneck",
+      "term": "bandwidth",
       "weight": 9
     },
     {
-      "term": "bytes",
-      "weight": 9
-    },
-    {
-      "term": "chapter summary",
+      "term": "batch-1",
       "weight": 9
     }
   ],
-  "citation_count": 12,
+  "citation_count": 59,
   "citations": [
     {
-      "key": "patel2025llminference",
-      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
-      "score": 18,
+      "key": "asada2020roadblocksofiopara",
+      "title": "Roadblocks of I/O Parallelization: Removing H/W Contentions by Static Role Assignment in VNFs",
+      "score": 181,
       "matched_keywords": [
-        "decode"
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "kernels",
+        "launches",
+        "megakernel",
+        "npu",
+        "same",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 108,
+      "matched_keywords": [
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "kernels",
+        "launches",
+        "megakernel",
+        "npu",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "chi2024essaysonstaticandd",
+      "title": "Essays on Static and Dynamic Preferential Trade Agreement Formation: Role of Political Economy and Scale Economies",
+      "score": 151,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
     },
     {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "simpson2020staticepostersched",
+      "title": "Static ePoster Schedule Jun 7 2019 1:15 - 2:00",
+      "score": 160,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "warp",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cpu",
+        "decode",
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "tile",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
       "key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
-      "score": 27,
+      "score": 195,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "warp",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cell",
+        "cpu",
+        "cuda",
+        "decode",
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "tile",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "sakai2026mechanismsofrapide",
+      "title": "Mechanisms of Rapid Entrainment and Acceleration in Landslide-Initiated Debris Flows: The Role of Static Liquefaction",
+      "score": 186,
+      "matched_keywords": [
+        "static roles",
+        "static role",
+        "role",
+        "static",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "target",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ghiani2023realtimeschedulead",
+      "title": "Real-Time Schedule Adjustments for Conflict-Free Vehicle Routing",
+      "score": 172,
+      "matched_keywords": [
+        "static roles",
+        "static role",
+        "role",
+        "static",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "schedule-free",
+        "target",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "masri2021optimalpublicelect",
+      "title": "Optimal Public Electric Bus Fleet Charging Schedule with Solar and Energy Storage Considering Static and Dynamic Route Assignment",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "abdelali2024archivemanagements",
+      "title": "Archive Management Schedule And Their Role In Determining The Documents’ Life Cycle:, Management Schedule Of Judicial Archive Documents In Algeria",
+      "score": 74,
+      "matched_keywords": [
+        "role",
+        "bandwidth",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "guo2024schedulefreerollin",
+      "title": "Schedule-Free Rolling",
+      "score": 54,
       "matched_keywords": [
         "decode",
-        "GPU"
+        "flops",
+        "residency",
+        "schedule-free",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "score": 95,
+      "matched_keywords": [
+        "thread warp",
+        "thread",
+        "warp",
+        "bandwidth",
+        "bytes",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 95,
+      "matched_keywords": [
+        "thread warp",
+        "thread",
+        "warp",
+        "bandwidth",
+        "bytes",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kwon2023vllm",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "score": 95,
+      "matched_keywords": [
+        "thread warp",
+        "thread",
+        "warp",
+        "bandwidth",
+        "bytes",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 41,
+      "matched_keywords": [
+        "thread warp",
+        "thread",
+        "warp",
+        "traffic"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 64,
+      "matched_keywords": [
+        "warp",
+        "bandwidth",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 87,
+      "matched_keywords": [
+        "thread mapping",
+        "thread",
+        "aie",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "simhi2019dissociatinggaitfr",
+      "title": "Dissociating gait from static appearance: A virtual reality study of the role of dynamic identity signatures in person recognition",
+      "score": 228,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "yirage",
+        "assignment",
+        "cpu",
+        "gemm",
+        "gpu",
+        "kernels",
+        "npu",
+        "on-chip",
+        "schedule-free",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ahmadi2019thewarshipassignme",
+      "title": "THE WARSHIP ASSIGNMENT SCHEDULE USING INTEGER PROGRAMMING MODEL",
+      "score": 205,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "yirage",
+        "assignment",
+        "cpu",
+        "gemm",
+        "gpu",
+        "kernels",
+        "npu",
+        "on-chip",
+        "schedule-free",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 196,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "yirage",
+        "assignment",
+        "cpu",
+        "gemm",
+        "gpu",
+        "kernels",
+        "npu",
+        "on-chip",
+        "schedule-free",
+        "target",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "maithel2022roleofmoiststatice",
+      "title": "Role of Moist Static Energy Advection in Evolution of Convective Aggregation in Observations",
+      "score": 240,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "thread warp",
+        "role",
+        "static",
+        "thread",
+        "warp",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 217,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "thread warp",
+        "role",
+        "static",
+        "thread",
+        "warp",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "thread warp",
+        "role",
+        "static",
+        "thread",
+        "warp",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dolader2026determinantsofperf",
+      "title": "Determinants of performance in CrossFit benchmarks involving repeated Olympic lifts\\_the role of neuromuscular capacity and static balance\\_DATASET",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "pippi2020fromstaticevidence",
+      "title": "From static evidence to dynamic reality: the role of diffuse fractures",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "vergani2022isolatingtheroleof",
+      "title": "Isolating the role of bone lacunar morphology on static and fatigue fracture progression through numerical simulations",
+      "score": 242,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
       ],
       "status": "ok"
     },
     {
       "key": "amd2024xdna",
       "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 219,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "kocaman2020theroleofstaticvar",
+      "title": "THE ROLE OF STATIC VAR COMPENSATOR AT REACTIVE POWER COMPENSATION",
+      "score": 215,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cpu",
+        "decode",
+        "gpu",
+        "hbm",
+        "kernels",
+        "npu",
+        "schedule-free",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "mcaleavey2025static",
+      "title": "Static",
+      "score": 193,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cpu",
+        "decode",
+        "gpu",
+        "hbm",
+        "kernels",
+        "npu",
+        "schedule-free",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "babati2023theroleofimplement",
+      "title": "The Role of Implementation-Specific Static Analysis",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2022roleofstatictherap",
+      "title": "Role of Static Therapy Nurses in the Management of Gastrointestinal Tumor Surgery",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "largavista2026staticwritingstyle",
+      "title": "Static Writing Style in Reaction Papers: The Role of Thematic Progression",
+      "score": 242,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "sohrabi2023rejuvenationbycomp",
+      "title": "Rejuvenation by compressive elasto-static loading: The role of static stress on a Zr-based metallic glass",
+      "score": 254,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dhingra2023roleofthreeparticl",
+      "title": "Role of three particle interactions in the determination of static pair correlation functions",
+      "score": 254,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "tan2019rolebasedstaticdes",
+      "title": "Role-based Static Desensitization Protection Method",
+      "score": 240,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "thread warp",
+        "role",
+        "static",
+        "thread",
+        "warp",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yulduzkhan2025theroleofsimilesta",
+      "title": "THE ROLE OF SIMILE, STATIC SIMILE, METAPHOR AND COMPARISON IN UZBEK LINGUISTICS",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "vishwakarma2026roleofanabsorberin",
+      "title": "Role of an absorber in reducing soil pressure on retaining structures under static loading conditions",
+      "score": 208,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "static role",
+        "role",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nakano2020dynamicstictionwit",
+      "title": "Dynamic stiction without static friction: The role of friction vector rotation",
+      "score": 242,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "yirage tiling",
+        "static role",
+        "role",
+        "static",
+        "tiling",
+        "yirage",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anonymous2026topologicalphasetr",
+      "title": "Topological phase transitions by time-dependent electromagnetic fields in frustrated magnets: Role of dynamical and static magnetic fields",
+      "score": 254,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "runtime dispatch",
+        "static role",
+        "dispatch",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "hopper",
+        "kernels",
+        "launches",
+        "residency",
+        "same",
+        "schedule-free",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "rajput2026astaticbehaviourof",
+      "title": "A static behaviour of carbon-CNT-metal composite laminate: Role of interphase and waviness via micromechanics",
+      "score": 100,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "cpu",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "rgenes2024theroleofconstitut",
+      "title": "The Role of Constitutive Models in the Analysis of Static Liquefaction in Tailings Dams",
+      "score": 101,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "yirage",
+        "compiler",
+        "kernels",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "tang2023matchinginastatica",
+      "title": "Matching in a Static Assignment Model",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "srivastava2021understandingthero",
+      "title": "UNDERSTANDING THE ROLE OF MICRO-INTERROGATION FOR FRAMING ASSIGNMENT FREE MICRO-LECTURES",
+      "score": 138,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kayum2020efficientstaticwel",
+      "title": "Efficient Static Well Assignment in Parallel Reservoir Simulation",
+      "score": 147,
+      "matched_keywords": [
+        "static",
+        "thread",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "score": 65,
+      "matched_keywords": [
+        "yirage",
+        "cpu",
+        "cuda",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "thiemann2023hamiltonianrenorma",
+      "title": "Hamiltonian renormalization. VII. Free fermions and doubler free kernels",
+      "score": 70,
+      "matched_keywords": [
+        "yirage tiling",
+        "tiling",
+        "yirage",
+        "compiler",
+        "kernels",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "feng2026daytodaydynamicsfo",
+      "title": "Day-to-Day Dynamics for Schedule-Based Transit Assignment Under Boarding Priority",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "yirage",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ulrich2021characteristicsofm",
+      "title": "Characteristics of Model-Free Pricing Kernels",
+      "score": 78,
+      "matched_keywords": [
+        "static role",
+        "role",
+        "static",
+        "yirage",
+        "compiler",
+        "kernels",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "pilon2023networkandschedule",
+      "title": "Network and Schedule Planning, Aircraft Assignment",
+      "score": 127,
+      "matched_keywords": [
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "taheriledari2022assignmentofstruct",
+      "title": "Assignment of structural domains in proteins using diffusion kernels on graphs",
+      "score": 137,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yan2020choicebasedairline",
+      "title": "Choice-Based Airline Schedule Design and Fleet Assignment: A Decomposition Approach",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "thread",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "elking2025anonperiodicpartic",
+      "title": "A Non-Periodic Particle Mesh Ewald Method for Radially Symmetric Kernels in Free Space",
+      "score": 70,
+      "matched_keywords": [
+        "yirage tiling",
+        "tiling",
+        "yirage",
+        "compiler",
+        "kernels",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2018integratedschedule",
+      "title": "Integrated Schedule Design with the Itinerary‐based Fleet Assignment Model (ISD‐IFAM)",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "yirage",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "laguardia2022universityclasssch",
+      "title": "University Class Schedule Assignment by a Tabu Search Algorithm",
+      "score": 137,
+      "matched_keywords": [
+        "static",
+        "thread",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "salim2022graphkernelsbasedo",
+      "title": "Graph kernels based on optimal node assignment",
+      "score": 137,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "david2018linearlypricedtime",
+      "title": "Linearly priced timed automata for the bus schedule assignment problem",
+      "score": 151,
+      "matched_keywords": [
+        "no runtime sched",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kapetanakis2020assessmentschedule",
+      "title": "Assessment-schedule matching in unanchored indirect treatment comparisons of progression-free survival in cancer studies",
+      "score": 128,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "lusher2019doesscheduleirregu",
+      "title": "Does schedule irregularity affect productivity? Evidence from random assignment into college classes",
+      "score": 127,
+      "matched_keywords": [
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nagkoulis2022pumpingscheduleass",
+      "title": "Pumping schedule assignment using chromatic graphs to reduce groundwater pumping energy consumption",
+      "score": 151,
+      "matched_keywords": [
+        "no runtime sched",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
       "key": "nvidia2024cudagraphs",
       "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "kwon2023vllm",
-      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 128,
+      "matched_keywords": [
+        "static role assignment and schedule-free kernels",
+        "no runtime sched",
+        "static role",
+        "role",
+        "runtime",
+        "static",
+        "assignment",
+        "buffer",
+        "cuda",
+        "kernels",
+        "schedule-free"
+      ],
+      "status": "ok"
     }
   ],
-  "low_relevance_citations": [
-    {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "kwon2023vllm",
-      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    }
-  ],
+  "low_relevance_citations": [],
   "missing_bib_keys": [],
   "literature_rescore": [],
-  "status": "warn",
+  "status": "ok",
   "min_citation_score": 8
 }

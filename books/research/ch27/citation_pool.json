@@ -1,23 +1,60 @@
 {
   "chapter_id": "ch27",
-  "pool_count": 25,
+  "pool_count": 62,
   "bib_keys": [
+    "pasupuleti2026aihardwarecodesign",
     "zhang2019whenneuralarchitec",
     "liu2024scorchneuralarchit",
+    "massolino2020acompactandscalabl",
+    "ghelamallah2024retractedfpgabased",
+    "pasupuleti2025fastfashionvsluxur",
+    "xie2019blackcomb2hardware",
     "chakraborty2019hardwaresoftwareco",
+    "skliarova2019hardwaresoftwareco",
+    "tampouratzis2022handsonhardwaresof",
     "yang2019ahighlyintegratedh",
+    "li2023ahardwareandsoftwa",
+    "anon2021hardwaresoftwareco",
     "dubey2026hardwaresoftwareco",
     "a2025reviewonhardwareac",
+    "schreiber2018blackcomb2hardware",
     "shang2020hardwaresoftwareco",
     "manohar2022hardwaresoftwareco",
+    "morshed2021embeddedsystemsaha",
+    "gao2026topologyoptimizati",
     "wolf2022sessiondetailsaddr",
     "liao2026acceleratingpostqu",
+    "rahman2025cyberaitrends",
+    "vatta2026futuretrendsinaidr",
+    "schiff2025futuretrendsinglob",
+    "catania2021emergingtrendsandf",
+    "p2025currentandfuturetr",
+    "dey2026futuretrendsinaipo",
+    "uthman2025thefutureofexplain",
+    "ranjan2025aiagentsfuturetren",
+    "anon2025futuretrendsingene",
+    "darnell2026aiandfuturetrends",
+    "thakur2026futuretrendsandinn",
+    "berton2026futuretrendsinrhel",
+    "ching2025futureperspectives",
+    "cynthia2025challengesandfutur",
+    "aminabee2025futuretrendsinaipo",
+    "deckker2025theriseofaiindigit",
+    "dhanaraj2025futuretrendsanddir",
     "anon2023proceedingsofthe20",
+    "levendovics2025futuretrendsairobo",
+    "morshed2021hardwaredesign",
+    "chauhan2025designofhardwareac",
+    "anon2023hardwaresoftwareco",
     "yirage2026",
     "memoryfloor2026",
+    "darwish2024geospatialaifuture",
     "nvidia2022hopper",
     "amd2024xdna",
+    "bhargava2023edgeaiempoweredblo",
+    "nijhawan2023edgeaitoolsandtech",
     "patel2025llminference",
+    "dadheech2026theimpactofaionhum",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -29,6 +66,26 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "pasupuleti2026aihardwarecodesign",
+      "title": "AI Hardware Co-Design for Green Computing, Photonic Acceleration and Sustainable Data Centres",
+      "source_tier": "B",
+      "relevance_score": 156,
+      "matched_keywords": [
+        "edge cloud",
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "cloud",
+        "co-design",
+        "edge",
+        "hardware",
+        "constraints",
+        "future",
+        "miss",
+        "treat"
+      ]
+    },
     {
       "bib_key": "zhang2019whenneuralarchitec",
       "title": "When Neural Architecture Search Meets Hardware Implementation: from Hardware Awareness to Co-Design",
@@ -56,6 +113,54 @@
       ]
     },
     {
+      "bib_key": "massolino2020acompactandscalabl",
+      "title": "A Compact and Scalable Hardware/Software Co-design of SIKE",
+      "source_tier": "B",
+      "relevance_score": 86,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "co-design hardware",
+        "architecture",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "ghelamallah2024retractedfpgabased",
+      "title": "RETRACTED: FPGA-based Hardware/Firmware Co-Design for Real-Time Radiometric Correction Onboard Microsatellite",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware",
+        "real"
+      ]
+    },
+    {
+      "bib_key": "pasupuleti2025fastfashionvsluxur",
+      "title": "Fast Fashion vs. Luxury:: AI-Powered Consumer Preferences and Future Trends",
+      "source_tier": "B",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "api",
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "xie2019blackcomb2hardware",
+      "title": "Blackcomb2: Hardware-Software Co-design for Nonvolatile Memory in Exascale Systems",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
       "bib_key": "chakraborty2019hardwaresoftwareco",
       "title": "Hardware-Software Co-Design Based Obfuscation of Hardware Accelerators",
       "source_tier": "A",
@@ -67,9 +172,53 @@
       ]
     },
     {
+      "bib_key": "skliarova2019hardwaresoftwareco",
+      "title": "Hardware/Software Co-design",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "tampouratzis2022handsonhardwaresof",
+      "title": "Hands on Hardware / Software Co-Design",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
       "bib_key": "yang2019ahighlyintegratedh",
       "title": "A Highly Integrated Hardware/Software Co-Design and Co-Verification Platform",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "li2023ahardwareandsoftwa",
+      "title": "A Hardware and Software Co-design Framework for Energy Efficient Neuromorphic Systems",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "anon2021hardwaresoftwareco",
+      "title": "Hardware/Software Co-Design using ZYNQ SoC",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "co-design hardware",
@@ -100,6 +249,17 @@
       ]
     },
     {
+      "bib_key": "schreiber2018blackcomb2hardware",
+      "title": "Blackcomb 2: Hardware-Software Co-design for Non-Volatile Memory in Exascale Systems",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
       "bib_key": "shang2020hardwaresoftwareco",
       "title": "Hardware/Software Co-design for Evolvable Hardware by Genetic Algorithm",
       "source_tier": "A",
@@ -114,6 +274,28 @@
       "bib_key": "manohar2022hardwaresoftwareco",
       "title": "Hardware/software Co-design for Neuromorphic Systems",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "morshed2021embeddedsystemsaha",
+      "title": "Embedded Systems – A Hardware-Software Co-Design Approach",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "co-design hardware",
+        "co-design",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "gao2026topologyoptimizati",
+      "title": "Topology-Optimization-Guided Hardware-Control Co-Design Framework for Lightweight Precision Motion Systems",
+      "source_tier": "C",
       "relevance_score": 64,
       "matched_keywords": [
         "co-design hardware",
@@ -144,6 +326,194 @@
       ]
     },
     {
+      "bib_key": "rahman2025cyberaitrends",
+      "title": "Cyber AI Trends",
+      "source_tier": "B",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "api",
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "vatta2026futuretrendsinaidr",
+      "title": "Future trends in AI-driven misinformation detection and prevention",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "schiff2025futuretrendsinglob",
+      "title": "Future Trends in Global AI Governance",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "catania2021emergingtrendsandf",
+      "title": "Emerging Trends and Future Directions for AI in Immunology",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "p2025currentandfuturetr",
+      "title": "Current and Future Trends in Maritime AI",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "dey2026futuretrendsinaipo",
+      "title": "Future Trends in AI-Powered Language Education",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "uthman2025thefutureofexplain",
+      "title": "The Future of Explainable AI in Cybersecurity: Trends and Innovations",
+      "source_tier": "C",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "ranjan2025aiagentsfuturetren",
+      "title": "AI Agents: Future Trends in Enterprise AI",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "anon2025futuretrendsingene",
+      "title": "Future Trends in Generative AI Security",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "darnell2026aiandfuturetrends",
+      "title": "AI and Future Trends",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "thakur2026futuretrendsandinn",
+      "title": "Future Trends and Innovations in AI",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "berton2026futuretrendsinrhel",
+      "title": "Future Trends in RHEL AI",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "ching2025futureperspectives",
+      "title": "Future Perspectives and Trends in AI-Creative Collaborations",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "cynthia2025challengesandfutur",
+      "title": "Challenges and Future Trends in Implementing AI in Healthcare",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "aminabee2025futuretrendsinaipo",
+      "title": "Future Trends in AI-Powered Drug Discovery",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "deckker2025theriseofaiindigit",
+      "title": "The Rise of AI in Digital Advertising: Trends, Challenges, and Future Directions",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "dhanaraj2025futuretrendsanddir",
+      "title": "Future Trends and Directions in GenAI for Education",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
       "bib_key": "anon2023proceedingsofthe20",
       "title": "Proceedings of the 2023 Workshop on Compilers, Deployment, and Tooling for Edge AI",
       "source_tier": "A",
@@ -152,6 +522,47 @@
         "edge",
         "compiler",
         "compilers"
+      ]
+    },
+    {
+      "bib_key": "levendovics2025futuretrendsairobo",
+      "title": "Future Trends: AI × Robot",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "bib_key": "morshed2021hardwaredesign",
+      "title": "Hardware Design",
+      "source_tier": "B",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "chauhan2025designofhardwareac",
+      "title": "Design of Hardware Accelerated Co-Processor for Neural Inference Computations",
+      "source_tier": "B",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "anon2023hardwaresoftwareco",
+      "title": "Hardware/Software Co‐Design for CNN Acceleration",
+      "source_tier": "B",
+      "relevance_score": 44,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
       ]
     },
     {
@@ -175,6 +586,16 @@
       ]
     },
     {
+      "bib_key": "darwish2024geospatialaifuture",
+      "title": "Geospatial AI Future Perspectives",
+      "source_tier": "B",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "future",
+        "ship"
+      ]
+    },
+    {
       "bib_key": "nvidia2022hopper",
       "title": "NVIDIA Hopper Architecture In-Depth",
       "source_tier": "A",
@@ -193,12 +614,39 @@
       ]
     },
     {
+      "bib_key": "bhargava2023edgeaiempoweredblo",
+      "title": "Edge-AI-empowered blockchain",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "edge"
+      ]
+    },
+    {
+      "bib_key": "nijhawan2023edgeaitoolsandtech",
+      "title": "Edge-AI tools and techniques for healthcare",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "edge"
+      ]
+    },
+    {
       "bib_key": "patel2025llminference",
       "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "dadheech2026theimpactofaionhum",
+      "title": "The Impact of AI on Human-Machine Collaboration: Defining the Future of Work with AI",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "future"
       ]
     },
     {

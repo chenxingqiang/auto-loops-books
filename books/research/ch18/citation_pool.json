@@ -1,31 +1,51 @@
 {
   "chapter_id": "ch18",
-  "pool_count": 35,
+  "pool_count": 55,
   "bib_keys": [
+    "zhang2025ahardwareaccelerat",
     "shen2022hardwaredevelopmen",
+    "silvestrini2024processorandhardwa",
     "zhang2022infraredimagetarge",
+    "kun2024mlirdialectconvers",
     "yirage2026",
+    "wang2023anfpgabasedhardwar",
+    "grimberg2026stone23voyager1for",
+    "lane2023targetrecognitioni",
     "koblah2022hardwaremovingtarg",
+    "anon2026statictargetsnapsh",
+    "akbar2019hardwaredesignofco",
+    "panda2023particlefilterbase",
     "kern2024virtuallyaugmented",
+    "schoeder2022amodulationbasedra",
     "agarwal2023hardwarebasedimple",
     "li2025nearfieldtargetloc",
     "urbanski2025hardwarebasedcalcu",
     "du2023sarnasahardwareawa",
+    "anon2018assessmentofthehar",
     "roy2019hardwaresoftwareco",
+    "lepekhina2019radartargethardwar",
+    "rossi2021basicsettingsseria",
     "gao2023designandimplement",
+    "kun2025mlirusingtraits",
     "he2023profileguidedoptim",
     "curzel2022mlirloopoptimizati",
     "kabrick2020codirtowardsanmlir",
+    "kun2024mlirverifiers",
     "guo2022towardssupportings",
+    "kun2025mlirgettingstarted",
     "gallego2025accelerationofccke",
     "su2024treehouseanmlirbas",
     "memoryfloor2026",
     "boehm2023optimizingtensorco",
+    "ren2024exploringtheeffect",
+    "zhang2019trajectorypredicti",
     "zhang2018fpgaorientedmoving",
     "jiang2021trrscopeunderstand",
     "patel2025llminference",
     "moses2021polygeistraisingct",
     "perez2023leveragingmlirforb",
+    "liu2025mlprofamultilevelr",
+    "kalinowski2025quickrcompilerforr",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -40,6 +60,19 @@
   ],
   "papers": [
     {
+      "bib_key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "source_tier": "B",
+      "relevance_score": 93,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "platform",
+        "target",
+        "GPU"
+      ]
+    },
+    {
       "bib_key": "shen2022hardwaredevelopmen",
       "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
       "source_tier": "A",
@@ -52,6 +85,18 @@
       ]
     },
     {
+      "bib_key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "source_tier": "B",
+      "relevance_score": 82,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "miss"
+      ]
+    },
+    {
       "bib_key": "zhang2022infraredimagetarge",
       "title": "Infrared Image Target Detection Algorithm for Hardware Fittings at Tension Clamp of Qishao UHV Transmission Line",
       "source_tier": "A",
@@ -61,6 +106,20 @@
         "hardware",
         "target",
         "miss"
+      ]
+    },
+    {
+      "bib_key": "kun2024mlirdialectconvers",
+      "title": "MLIR — Dialect Conversion",
+      "source_tier": "B",
+      "relevance_score": 80,
+      "matched_keywords": [
+        "pass lower",
+        "dialect",
+        "lower",
+        "optim",
+        "pass",
+        "MLIR"
       ]
     },
     {
@@ -77,6 +136,40 @@
       ]
     },
     {
+      "bib_key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "lower",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT  Protocol for the Detection of Lattice-14 Resonances  Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "koblah2022hardwaremovingtarg",
       "title": "Hardware Moving Target Defenses against Physical Attacks",
       "source_tier": "A",
@@ -88,9 +181,53 @@
       ]
     },
     {
+      "bib_key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "kern2024virtuallyaugmented",
       "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -143,9 +280,42 @@
       ]
     },
     {
+      "bib_key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
       "bib_key": "roy2019hardwaresoftwareco",
       "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
       "source_tier": "A",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target"
+      ]
+    },
+    {
+      "bib_key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "source_tier": "B",
       "relevance_score": 64,
       "matched_keywords": [
         "hardware target",
@@ -161,6 +331,18 @@
       "matched_keywords": [
         "optim",
         "CPU",
+        "MLIR"
+      ]
+    },
+    {
+      "bib_key": "kun2025mlirusingtraits",
+      "title": "MLIR — Using Traits",
+      "source_tier": "B",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "dialect",
+        "optim",
+        "pass",
         "MLIR"
       ]
     },
@@ -195,6 +377,17 @@
       ]
     },
     {
+      "bib_key": "kun2024mlirverifiers",
+      "title": "MLIR — Verifiers",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dialect",
+        "pass",
+        "MLIR"
+      ]
+    },
+    {
       "bib_key": "guo2022towardssupportings",
       "title": "Towards Supporting Semiring in MLIR-Based COMET Compiler",
       "source_tier": "A",
@@ -202,6 +395,17 @@
       "matched_keywords": [
         "compiler",
         "MLIR"
+      ]
+    },
+    {
+      "bib_key": "kun2025mlirgettingstarted",
+      "title": "MLIR — Getting Started",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "compiler",
+        "MLIR",
+        "production"
       ]
     },
     {
@@ -241,6 +445,24 @@
       "relevance_score": 20,
       "matched_keywords": [
         "optim"
+      ]
+    },
+    {
+      "bib_key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
+      ]
+    },
+    {
+      "bib_key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "target"
       ]
     },
     {
@@ -286,6 +508,24 @@
       "relevance_score": 18,
       "matched_keywords": [
         "MLIR"
+      ]
+    },
+    {
+      "bib_key": "liu2025mlprofamultilevelr",
+      "title": "MLProf: A Multi-Level Runtime Performance Profiling Framework for MLIR Operations",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "MLIR"
+      ]
+    },
+    {
+      "bib_key": "kalinowski2025quickrcompilerforr",
+      "title": "quickr: Compiler for R",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "compiler"
       ]
     },
     {

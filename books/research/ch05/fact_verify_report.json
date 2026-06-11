@@ -1,51 +1,45 @@
 {
   "chapter_id": "ch05",
-  "timestamp": "2026-06-09T17:47:00.699479+00:00",
+  "timestamp": "2026-06-10T13:32:21.238863+00:00",
   "entry_count": 3,
-  "verified_ok_count": 2,
+  "verified_ok_count": 3,
   "entries": [
     {
-      "claim": "ch05 cross-hardware decode metrics use bytes/token methodology",
+      "claim": "Memory-Floor benchmarks bytes/token and decode bandwidth floor on batch-1 LLM decode",
       "bib_key": "memoryfloor2026",
       "source_url": "https://arxiv.org/abs/2605.30571",
       "corroboration_url": "https://arxiv.org/abs/2507.14397",
       "source_fetch_ok": true,
-      "source_content_match": false,
+      "source_content_match": true,
       "source_missing_tokens": [
-        "05",
-        "ch05",
-        "cross-hardware",
-        "metrics",
-        "bytes/token",
-        "methodology"
+        "memory-floor",
+        "benchmarks",
+        "bytes/token"
       ],
       "corroboration_fetch_ok": true,
-      "corroboration_content_match": false,
+      "corroboration_content_match": true,
       "corroboration_missing_tokens": [
-        "05",
-        "ch05",
-        "cross-hardware",
-        "metrics",
-        "use",
+        "memory-floor",
+        "benchmarks",
         "bytes/token",
-        "methodology"
+        "floor",
+        "batch-1"
       ],
-      "verified_ok": false,
+      "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch05/fact_sources/cf0029c11de6d2a0.json"
     },
     {
-      "claim": "ch05 launch overhead context from TaxBreak decode study",
+      "claim": "TaxBreak reports kernel launches per decode token on H100 for Llama and MoE models",
       "bib_key": "taxbreak2026",
       "source_url": "https://arxiv.org/abs/2603.12465",
       "corroboration_url": "https://arxiv.org/abs/2603.12465",
       "source_fetch_ok": true,
       "source_content_match": true,
       "source_missing_tokens": [
-        "05",
-        "ch05",
-        "context",
-        "study"
+        "reports",
+        "launches",
+        "llama"
       ],
       "corroboration_fetch_ok": null,
       "corroboration_content_match": null,
@@ -66,16 +60,16 @@
       "corroboration_content_match": true,
       "corroboration_missing_tokens": [
         "compiler",
-        "CUDA",
-        "CPU",
-        "Triton",
+        "cuda",
+        "cpu",
+        "triton",
         "nki",
-        "MLIR"
+        "mlir"
       ],
       "verified_ok": true,
       "source_method": "craw4ai",
       "source_cache": "/Users/xingqiangchen/auto-loops-books/books/research/ch05/fact_sources/a2a2a677f3414530.json"
     }
   ],
-  "status": "issues"
+  "status": "ok"
 }

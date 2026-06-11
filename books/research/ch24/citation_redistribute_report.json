@@ -1,25 +1,41 @@
 {
   "chapter_id": "ch24",
-  "pool_count": 23,
-  "assigned_count": 23,
+  "pool_count": 58,
+  "assigned_count": 58,
   "unassigned_count": 0,
-  "sections_with_cites": 4,
-  "unique_keys_in_tex": 21,
+  "sections_with_cites": 8,
+  "unique_keys_in_tex": 56,
   "pool_path": "books/research/ch24/citation_pool.json",
   "sections_used": [
-    "Hetero Cluster",
-    "Unified Stack",
-    "YiRage Cluster",
-    "chapter"
+    "Chapter Summary",
+    "YiRage cluster",
+    "chapter",
+    "hetero cluster",
+    "industrial cases",
+    "runtime adapt",
+    "unified stack",
+    "version regression"
   ],
-  "cites_applied": 21,
+  "cites_applied": 56,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch24_heterogeneous_deployment.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "patil2026crossguardazerotru",
+      "section": "chapter",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "hetero",
+        "deployment",
+        "heterogeneous",
+        "multi-hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "patel2025llminference",
       "section": "chapter",
       "relevance_score": 18,
       "matched_keywords": [
@@ -27,19 +43,9 @@
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [
-        "LLM"
-      ],
-      "fallback": true
-    },
-    {
       "sentence_id": "s0003",
       "bib_key": "hu2019multiobjectivecont",
-      "section": "Hetero Cluster",
+      "section": "hetero cluster",
       "relevance_score": 104,
       "matched_keywords": [
         "hetero cluster",
@@ -51,53 +57,80 @@
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "zhao2020theheterogeneousde",
-      "section": "Hetero Cluster",
-      "relevance_score": 56,
+      "bib_key": "nguyen2024ruru2pheterocluste",
+      "section": "hetero cluster",
+      "relevance_score": 68,
       "matched_keywords": [
-        "hetero",
-        "deployment",
-        "heterogeneous"
-      ]
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "beniwal2019lshapedtunnellingf",
-      "section": "Hetero Cluster",
-      "relevance_score": 20,
-      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
         "hetero"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "pindoo2020heterogatedielectr",
-      "section": "Hetero Cluster",
-      "relevance_score": 20,
+      "bib_key": "amd2024xdna",
+      "section": "hetero cluster",
+      "relevance_score": 18,
       "matched_keywords": [
-        "hetero"
+        "xdna"
       ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "dao2022flashattention",
-      "section": "Hetero Cluster",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "memoryfloor2026",
+      "section": "hetero cluster",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "bandwidth",
+        "batch-1",
+        "decode"
+      ]
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "kwon2023vllm",
-      "section": "Hetero Cluster",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "zhang2024hydrogenbondedfram",
+      "section": "hetero cluster",
+      "relevance_score": 68,
+      "matched_keywords": [
+        "hetero cluster",
+        "cluster",
+        "hetero"
+      ]
     },
     {
       "sentence_id": "s0009",
-      "bib_key": "gener2025tutorialcedraholis",
-      "section": "Hetero Cluster",
+      "bib_key": "taxbreak2026",
+      "section": "hetero cluster",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "LLM"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "arone2025tecendoaautohetero",
+      "section": "hetero cluster",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "hetero",
+        "same"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "enrici2019efficientdataflowa",
+      "section": "hetero cluster",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "compilation"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "tork2026chargerdeploymenta",
+      "section": "unified stack",
       "relevance_score": 56,
       "matched_keywords": [
         "hetero",
@@ -106,30 +139,15 @@
       ]
     },
     {
-      "sentence_id": "s0010",
-      "bib_key": "patel2025llminference",
-      "section": "Hetero Cluster",
-      "relevance_score": 18,
+      "sentence_id": "s0013",
+      "bib_key": "dao2023flashdecoding",
+      "section": "unified stack",
+      "relevance_score": 9,
       "matched_keywords": [
         "decode"
-      ]
-    },
-    {
-      "sentence_id": "s0011",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Hetero Cluster",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "nvidia2022hopper",
-      "section": "Hetero Cluster",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      ],
+      "fallback": false
     }
   ],
-  "generated_at": "2026-06-10T03:19:42.841011"
+  "generated_at": "2026-06-10T09:10:14.033252"
 }

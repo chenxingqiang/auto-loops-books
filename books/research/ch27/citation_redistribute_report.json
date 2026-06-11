@@ -1,133 +1,146 @@
 {
   "chapter_id": "ch27",
-  "pool_count": 25,
-  "assigned_count": 25,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 5,
-  "unique_keys_in_tex": 24,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch27/citation_pool.json",
   "sections_used": [
-    "Autonomous Kernels",
-    "Codesign",
-    "Edge Cloud",
-    "New Architectures",
-    "chapter"
+    "Chapter Summary",
+    "autonomous kernels",
+    "chapter",
+    "codesign",
+    "edge cloud",
+    "new architectures"
   ],
-  "cites_applied": 24,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch27_future_trends.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "pasupuleti2025fastfashionvsluxur",
       "section": "chapter",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "sentence_id": "s0002",
+      "bib_key": "yang2019ahighlyintegratedh",
+      "section": "chapter",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "vatta2026futuretrendsinaidr",
+      "section": "codesign",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "schiff2025futuretrendsinglob",
+      "section": "codesign",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "chauhan2025designofhardwareac",
+      "section": "codesign",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "memoryfloor2026",
+      "section": "codesign",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "bandwidth",
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "patel2025llminference",
+      "section": "codesign",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
       ]
     },
     {
-      "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
-      "bib_key": "dao2022flashattention",
-      "section": "Codesign",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0004",
-      "bib_key": "kwon2023vllm",
-      "section": "Codesign",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0005",
-      "bib_key": "zhang2019whenneuralarchitec",
-      "section": "Codesign",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "co-design hardware",
-        "co-design",
-        "hardware"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "liu2024scorchneuralarchit",
-      "section": "Codesign",
-      "relevance_score": 64,
-      "matched_keywords": [
-        "co-design hardware",
-        "co-design",
-        "hardware"
-      ]
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "yirage2026",
-      "section": "Codesign",
-      "relevance_score": 22,
-      "matched_keywords": [
-        "YiRage"
-      ]
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Codesign",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
       "sentence_id": "s0009",
-      "bib_key": "amd2024aie",
-      "section": "Codesign",
+      "bib_key": "anon2023hardwaresoftwareco",
+      "section": "codesign",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "co-design hardware",
+        "hardware"
+      ],
       "fallback": true
     },
     {
       "sentence_id": "s0010",
-      "bib_key": "chakraborty2019hardwaresoftwareco",
-      "section": "Codesign",
-      "relevance_score": 64,
+      "bib_key": "schreiber2018blackcomb2hardware",
+      "section": "codesign",
+      "relevance_score": 38,
       "matched_keywords": [
-        "co-design hardware",
         "co-design",
-        "hardware"
+        "tile"
       ]
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "yang2019ahighlyintegratedh",
-      "section": "Codesign",
-      "relevance_score": 64,
+      "bib_key": "li2023ahardwareandsoftwa",
+      "section": "codesign",
+      "relevance_score": 20,
       "matched_keywords": [
-        "co-design hardware",
-        "co-design",
         "hardware"
       ]
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "semianalysis2024tma",
-      "section": "Codesign",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "catania2021emergingtrendsandf",
+      "section": "new architectures",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "trend",
+        "future",
+        "trends"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "bhargava2023edgeaiempoweredblo",
+      "section": "new architectures",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "edge"
+      ]
     }
   ],
-  "generated_at": "2026-06-10T03:19:43.263571"
+  "generated_at": "2026-06-10T09:10:16.402746"
 }

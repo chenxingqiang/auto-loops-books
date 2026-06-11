@@ -1,18 +1,58 @@
 {
   "chapter_id": "ch22",
-  "pool_count": 22,
+  "pool_count": 62,
   "bib_keys": [
+    "kanchumarthi2026endtoendlinuxadmin",
+    "liu2026performancedrivene",
     "mai2025cimwiseanireebased",
     "avantika2025endtoendsystemperf",
+    "wen2026querymarftquerygui",
+    "mustofa2019analisaprofilbandw",
+    "kobayashi2025pretrainedmodelsan",
+    "rolland2024introductiontopart",
+    "alexopoulou2026investigatinglaser",
     "memoryfloor2026",
+    "mijalkovic2025anendtoendmodeltra",
     "yirage2026",
+    "anon2021rancanganprofillul",
+    "dudov2019profiliakavovzahuk",
     "patel2025llminference",
     "sliwa2019towardsdatadrivens",
+    "turner2026aardvarkweatherend",
     "yang2023cimaxcompileranend",
     "chen2020ahecendtoendcompil",
     "r2026aidrivenendtoendre",
+    "anon2019theendorendofvirtu",
     "sen2024dnndasheracompiler",
+    "behara2022movingbeyondtradit",
     "lou2025adoracompilerendto",
+    "purwakarta2022kompostanamanandal",
+    "meiarti2021profilprofilketera",
+    "milli2025designinganendtoen",
+    "anon2022nigerprofilduproje",
+    "anon2023profildessystmesal",
+    "anon2022profildessystmesal",
+    "anon2022profildessystmesal_44",
+    "anon2023profildessystmesal_45",
+    "anon2022profildessystmesal_46",
+    "anon2023profildessystmesal_47",
+    "anon2023profilperdun",
+    "anon2022profildessystmesal_49",
+    "mukti2025pembuatanstoryboar",
+    "anon2021profildessystmesal",
+    "safitri2023profiloftheinclusi",
+    "anon2022profildessystmesal_53",
+    "official2025profil",
+    "pabst2021ergebnisjuliansthe",
+    "anon2023bandwidth",
+    "anon2022profildessystmesal_58",
+    "anon2023profildelapchecont",
+    "anon2022profildessystmesal_61",
+    "desai2026aidrivencustomeran",
+    "wang2025locomambavisiondri",
+    "wizenty2024modeldrivenendtoen",
+    "chen2024endtoendmicrogridp",
+    "venkatesan2026emtaendtoendmultit",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -26,6 +66,33 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "kanchumarthi2026endtoendlinuxadmin",
+      "title": "End-to-End Linux Administration Support: A Comprehensive Study of Installation, Configuration, Performance Tuning, and Production Reliability Across Heterogeneous Platforms",
+      "source_tier": "B",
+      "relevance_score": 92,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "performance",
+        "production",
+        "tuning"
+      ]
+    },
+    {
+      "bib_key": "liu2026performancedrivene",
+      "title": "Performance-Driven End-to-End Optimization for UAV-Assisted Satellite Downlink with Hybrid NOMA/OMA Transmission",
+      "source_tier": "B",
+      "relevance_score": 83,
+      "matched_keywords": [
+        "bandwidth",
+        "gate",
+        "decode",
+        "end-to-end",
+        "miss",
+        "performance"
+      ]
+    },
     {
       "bib_key": "mai2025cimwiseanireebased",
       "title": "CIMWise: An IREE-based End-To-End AI Compiler with Auto-Tuning for CIM Processors",
@@ -51,6 +118,63 @@
       ]
     },
     {
+      "bib_key": "wen2026querymarftquerygui",
+      "title": "Query-MARFT: Query-Guided Multi-Agent Reinforcement Fine-Tuning for End-to-End Multi-Object Tracking",
+      "source_tier": "C",
+      "relevance_score": 67,
+      "matched_keywords": [
+        "bottleneck",
+        "tun",
+        "end-to-end",
+        "tuning"
+      ]
+    },
+    {
+      "bib_key": "mustofa2019analisaprofilbandw",
+      "title": "ANALISA PROFIL BANDWIDTH  JARINGAN COPPER, FIBER OPTIK DAN MIGRASI SERTA LOSS LINK BUDGET DI PT TELKOM KEDIRI",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "profil bandwidth",
+        "bandwidth",
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "kobayashi2025pretrainedmodelsan",
+      "title": "Pre-Trained Models and Fine-Tuning for Negotiation Strategies with End-to-End Reinforcement Learning",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "tuning"
+      ]
+    },
+    {
+      "bib_key": "rolland2024introductiontopart",
+      "title": "Introduction To Partial Fine-tuning: A Comprehensive Evaluation Of End-to-end Children’s Automatic Speech Recognition Adaptation",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "tun",
+        "end-to-end",
+        "tuning"
+      ]
+    },
+    {
+      "bib_key": "alexopoulou2026investigatinglaser",
+      "title": "Investigating laser-driven pair-production with a fast, end-to-end, analytical model",
+      "source_tier": "C",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "end-to-end",
+        "miss",
+        "production",
+        "treat"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -62,6 +186,18 @@
       ]
     },
     {
+      "bib_key": "mijalkovic2025anendtoendmodeltra",
+      "title": "An End-to-End Model Traceability Framework for Process-Driven Software Development",
+      "source_tier": "B",
+      "relevance_score": 46,
+      "matched_keywords": [
+        "workflow",
+        "end-to-end",
+        "independent",
+        "NPU"
+      ]
+    },
+    {
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
@@ -70,6 +206,26 @@
         "CPU",
         "end-to-end",
         "YiRage"
+      ]
+    },
+    {
+      "bib_key": "anon2021rancanganprofillul",
+      "title": "RANCANGAN PROFIL LULUSAN MASA DEPAN BAGI PENDIDIDIKAN TINGGI AGROINDUSTRI",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "dudov2019profiliakavovzahuk",
+      "title": "Profil žiaka vo vzťahu k učiteľovi Pupil’s Profile and Pupil — Teacher Relationship",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "profil",
+        "ship"
       ]
     },
     {
@@ -89,6 +245,17 @@
       "relevance_score": 36,
       "matched_keywords": [
         "end-to-end",
+        "performance"
+      ]
+    },
+    {
+      "bib_key": "turner2026aardvarkweatherend",
+      "title": "Aardvark weather: end-to-end data-driven weather forecasting",
+      "source_tier": "C",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "NPU",
         "performance"
       ]
     },
@@ -123,6 +290,16 @@
       ]
     },
     {
+      "bib_key": "anon2019theendorendofvirtu",
+      "title": "The End or “End” of Virtuosic Performance",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ]
+    },
+    {
       "bib_key": "sen2024dnndasheracompiler",
       "title": "DNNDaSher: A Compiler Framework for Dataflow Compatible End-to-End Acceleration on IBM AIU",
       "source_tier": "A",
@@ -133,12 +310,268 @@
       ]
     },
     {
+      "bib_key": "behara2022movingbeyondtradit",
+      "title": "Moving beyond traditional KPIs: an end-to-end data driven approach for improved system understanding and performance",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "end-to-end",
+        "performance"
+      ]
+    },
+    {
       "bib_key": "lou2025adoracompilerendto",
       "title": "Adora Compiler: End-to-End Optimization for High-Efficiency Dataflow Acceleration and Task Pipelining on CGRAs",
       "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
         "compiler",
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "purwakarta2022kompostanamanandal",
+      "title": "Kompos Tanamanan Dalam Implementasi Proyek Penguatan Profil Pelajar Pancasila Dan Profil Pelajar Rahmatan Lil’alamin",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "meiarti2021profilprofilketera",
+      "title": "Profil Profil Keterampilan Berpikir Kreatif Peserta Didik SMK",
+      "source_tier": "B",
+      "relevance_score": 29,
+      "matched_keywords": [
+        "profil",
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "milli2025designinganendtoen",
+      "title": "Designing an End-to-End Urban Air Pollution Forecasting Framework: A Data-Driven Pipeline Approach",
+      "source_tier": "B",
+      "relevance_score": 27,
+      "matched_keywords": [
+        "end-to-end",
+        "miss"
+      ]
+    },
+    {
+      "bib_key": "anon2022nigerprofilduproje",
+      "title": "Niger | Profil du projet",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Niger",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Sénégal",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_44",
+      "title": "Profil des systèmes alimentaires - Haïti",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023profildessystmesal_45",
+      "title": "Profil des systèmes alimentaires - Mauritanie",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_46",
+      "title": "Profil des systèmes alimentaires – Burundi",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023profildessystmesal_47",
+      "title": "Profil des systèmes alimentaires - Bénin",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023profilperdun",
+      "title": "profil perdu, n.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_49",
+      "title": "Profil des systèmes alimentaires - Cameroun",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "mukti2025pembuatanstoryboar",
+      "title": "Pembuatan storyboard dalam perancangan Video Profil Komunitas Pena Hitam Malang Pembuatan Storyboard dalam Perancangan Video Profil Komunitas Pena Hitam Malang",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2021profildessystmesal",
+      "title": "Profil des systèmes alimentaires - Madagascar",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "safitri2023profiloftheinclusi",
+      "title": "Profil of The Inclusive Education Program at Sedati Agung Sidoarjo Elementary School",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_53",
+      "title": "Profil des systèmes alimentaires - Mali",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "official2025profil",
+      "title": "Profil",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "pabst2021ergebnisjuliansthe",
+      "title": "Ergebnis: Julians theologisches Profil",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023bandwidth",
+      "title": "Bandwidth",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "bandwidth"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_58",
+      "title": "Profil des systèmes alimentaires - Guinée-Bissau",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2023profildelapchecont",
+      "title": "Profil de la pêche continentale en Guinée",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "anon2022profildessystmesal_61",
+      "title": "Profil des systèmes alimentaires - Côte d'Ivoire",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "profil"
+      ]
+    },
+    {
+      "bib_key": "desai2026aidrivencustomeran",
+      "title": "AI-Driven Customer Analytics for End-to-End Operational Optimization in Retail and Logistics",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "wang2025locomambavisiondri",
+      "title": "LocoMamba: Vision-Driven Locomotion via End-to-End Deep Reinforcement Learning with Mamba",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "wizenty2024modeldrivenendtoen",
+      "title": "Model-Driven End-to-End Resolution of Security Smells in Microservice Architectures",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "chen2024endtoendmicrogridp",
+      "title": "End-to-End Microgrid Protection Using Distributed Data-Driven Methods",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "end-to-end"
+      ]
+    },
+    {
+      "bib_key": "venkatesan2026emtaendtoendmultit",
+      "title": "EMTA: End-to-End Multi-Task Audio-Driven Talking-Head Animation",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
         "end-to-end"
       ]
     },

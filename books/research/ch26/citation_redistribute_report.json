@@ -1,121 +1,158 @@
 {
   "chapter_id": "ch26",
-  "pool_count": 14,
-  "assigned_count": 14,
+  "pool_count": 62,
+  "assigned_count": 62,
   "unassigned_count": 0,
-  "sections_with_cites": 2,
-  "unique_keys_in_tex": 13,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 60,
   "pool_path": "books/research/ch26/citation_pool.json",
   "sections_used": [
-    "Env Packaging",
-    "chapter"
+    "Chapter Summary",
+    "chapter",
+    "env packaging",
+    "multi HW ops",
+    "pitfalls",
+    "scheduling"
   ],
-  "cites_applied": 13,
+  "cites_applied": 60,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch26_production_practices.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "memoryfloor2026",
+      "bib_key": "thomas2026bestpracticesforac",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 129,
       "matched_keywords": [
-        "decode"
+        "production deployment and engineering best practices",
+        "deploy",
+        "production",
+        "best",
+        "deployment",
+        "engineering",
+        "practices",
+        "same"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "taxbreak2026",
-      "section": "chapter",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0003",
-      "bib_key": "dao2022flashattention",
-      "section": "Env Packaging",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0004",
-      "bib_key": "kwon2023vllm",
-      "section": "Env Packaging",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0005",
       "bib_key": "patel2025llminference",
-      "section": "Env Packaging",
+      "section": "chapter",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0003",
+      "bib_key": "kalimuthu2025integratingdevopsp",
+      "section": "env packaging",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "sentence_id": "s0004",
+      "bib_key": "urniaz2024shinywizardaninter",
+      "section": "env packaging",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "deploy packag",
+        "deploy",
+        "packag"
       ]
     },
     {
       "sentence_id": "s0006",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Env Packaging",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
+      "bib_key": "amd2024xdna",
+      "section": "env packaging",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
     },
     {
       "sentence_id": "s0007",
-      "bib_key": "yirage2026",
-      "section": "Env Packaging",
-      "relevance_score": 18,
+      "bib_key": "memoryfloor2026",
+      "section": "env packaging",
+      "relevance_score": 54,
       "matched_keywords": [
-        "YiRage"
+        "bandwidth",
+        "batch-1",
+        "decode"
       ]
     },
     {
       "sentence_id": "s0008",
-      "bib_key": "nvidia2022hopper",
-      "section": "Env Packaging",
+      "bib_key": "modi2021terraformbestpract",
+      "section": "env packaging",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
       "fallback": true
     },
     {
       "sentence_id": "s0009",
-      "bib_key": "amd2024xdna",
-      "section": "Env Packaging",
+      "bib_key": "sabharwal2023tooladministration",
+      "section": "env packaging",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
       "fallback": true
     },
     {
       "sentence_id": "s0010",
-      "bib_key": "dao2023flashdecoding",
-      "section": "Env Packaging",
-      "relevance_score": 9,
+      "bib_key": "anon2023deployn",
+      "section": "env packaging",
+      "relevance_score": 20,
       "matched_keywords": [
-        "decode"
-      ],
-      "fallback": false
+        "deploy"
+      ]
     },
     {
       "sentence_id": "s0011",
-      "bib_key": "amd2024aie",
-      "section": "Env Packaging",
+      "bib_key": "stencel2025bestpracticesinkub",
+      "section": "env packaging",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "best",
+        "practices"
+      ],
       "fallback": true
     },
     {
       "sentence_id": "s0012",
-      "bib_key": "semianalysis2024tma",
-      "section": "Env Packaging",
+      "bib_key": "piridi2025crossenvironmentde",
+      "section": "multi HW ops",
+      "relevance_score": 122,
+      "matched_keywords": [
+        "multi hw ops",
+        "deploy",
+        "production",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "sentence_id": "s0013",
+      "bib_key": "udayakumar2023designanddeployani",
+      "section": "multi HW ops",
       "relevance_score": 1,
-      "matched_keywords": [],
+      "matched_keywords": [
+        "deploy"
+      ],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:43.078612"
+  "generated_at": "2026-06-10T09:10:15.571691"
 }

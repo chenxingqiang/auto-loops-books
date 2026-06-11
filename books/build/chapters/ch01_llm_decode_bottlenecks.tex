@@ -89,7 +89,7 @@ On CPUs the same fragmentation shows up as LLC misses rather than HBM stalls: ea
 Recent microbenchmark studies decompose end-to-end decode latency into compute, memory, and \emph{orchestration} components. TaxBreak reports that for Llama-3.2-1B-class models on H100, decode reduces orchestration time relative to prefill in absolute terms, but because decode issues roughly $10\times$ more launches per step, per-dispatch savings compound more aggressively in decode \citep{wang2025decoupledanalysiso}. For MoE models, decode latency can grow to multiple seconds per token at batch-1 not because GEMMs are huge, but because dispatch dominates: thousands of kernels per token with a per-launch floor on the order of microseconds yields tens of milliseconds of pure launch-path cost before framework overhead.
 
 CUDA Graphs record a static kernel DAG once and replay it with a single submission, amortizing CPU launch and framework dispatch \citep{nvidia2024cudagraphs}.
- ran a controlled CUDA Graphs A/B on Qwen-2 \citep{memoryfloor2026}.5-7B at batch-1, context 2048, across $N{=}10$ independent sessions: H100 speedup is $1.259\times$ (95\% bootstrap CI $[1.253,1.267]$), removing ${\approx}3.05$\,ms of per-step host overhead (${\approx}20.6\%$ of the eager 14.83\,ms median).
+Memory-Floor benchmarks \citep{memoryfloor2026} ran a controlled CUDA Graphs A/B on Qwen-2.5-7B at batch-1, context 2048, across $N{=}10$ independent sessions: H100 speedup is $1.259\times$ (95\% bootstrap CI $[1.253,1.267]$), removing ${\approx}3.05$\,ms of per-step host overhead (${\approx}20.6\%$ of the eager 14.83\,ms median).
 On L4 at the same cell, Graphs yield only $1.028\times$ because the GPU already achieves $R_{\mathrm{floor}}{=}0.81$ of its analytic HBM bandwidth floor---the device waits on memory, not launches.
 
 \begin{table}[t]
@@ -302,9 +302,24 @@ When migrating these lessons across hardware targets, compare normalized metrics
 
 Three optimization anti-patterns recur in decode programs that miss SLOs despite heavy investment. \textbf{(1) Chasing peak FLOPs.} Teams profile GEMMs, tune tile sizes, and declare victory while launch storms and HBM re-reads dominate ms/token. \textbf{(2) Single-hardware tunnel vision.} A CUDA Graphs capture that rescues H100 decode may be irrelevant on L4 (bandwidth-saturated) or illegal on static NPU targets. \textbf{(3) Attention-only myopia.} Replacing SDPA with a flash variant when $R_{\mathrm{floor}}$ is already low on H100 can \emph{slow} decode because attention was never the binding constraint. The corrective workflow is diagnostic-first: measure HDBI and $R_{\mathrm{floor}}$, then select fusion depth, graph capture, quantization kernels, or compile-time dataflow replanning---in that priority order when orchestration dominates. Teams that skip this ordering often re-implement the same matmul tweak quarterly while p99 latency flatlines---because the root cause was never FLOPs, it was residency and dispatch. Industrial deployment cannot copy a single template; hardware class dictates whether graphs, fusion depth, or static NPU graphs come first on the critical path.
 
-\section{Chapter Summary}
-\label{sec:ch01_summary}
+\section{Key Takeaways}
+\label{sec:ch01_key_takeaways}
 
-Decode-phase LLM inference is a systems problem disguised as a modeling problem \citep{nakai2025efficientbatchproc}. Prefill and decode obey different limits; interactive decode at low batch is dominated by memory traffic and orchestration overhead, not peak tensor FLOPs. Mainstream PyTorch and Hugging Face paths fragment layers into many kernels, amplify host launch costs, and under-utilize on-chip storage. GPUs, CPUs, and NPUs each demand different fusion granularities and compilation strategies---there is no portable ``best kernel,'' only hardware-shaped schedules. Industry kernels (FlashAttention, PagedAttention) and serving systems (vLLM) are necessary but insufficient for the extreme fusion pursued in this book \citep{arya2024apreliminaryperfor}. YiRage provides the automated, cross-hardware path from the manual MegaKernel insights developed next. This is the book's recurring thesis: performance is a property of \emph{data movement and orchestration under a specific memory hierarchy}, and compilers must own that schedule end-to-end.
+\begin{itemize}
+\item \textbf{Prefill and decode are different regimes.} Optimize them separately; disaggregated fleets skew capacity toward decode \citep{dao2023flashdecoding,kwon2023vllm,patel2025llminference}.
+\item \textbf{Measure useful decode work (goodput).} Track kernels/token, bytes/token, HDBI, and $R_{\mathrm{floor}}$---not peak tensor FLOPs or utilization alone \citep{taxbreak2026,memoryfloor2026,dlbook}.
+\item \textbf{Mechanical sympathy.} Schedules must match memory hierarchy residency; FlashAttention and vLLM fix slices of the stack, not layer-scale fusion \citep{dao2022flashattention,kwon2023vllm,yirage2026}.
+\item \textbf{Framework fragmentation is a tax.} PyTorch + Hugging Face eager paths amplify launches and HBM round trips at batch-1 \citep{taxbreak2026,memoryfloor2026}.
+\item \textbf{Multi-hardware deltas are mandatory.} GPU graph capture, CPU cache blocking, and NPU static graphs obey different legality rules \citep{amd2024xdna,amd2024aie,nvidia2024cudagraphs}.
+\item \textbf{Diagnostic-first workflow.} Use TaxBreak and Memory-Floor to choose fusion depth vs graph capture vs compile-time replanning \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+\item \textbf{Compiler ownership.} Requirements R1--R5 translate symptoms into YiRage pass gates with measured regression evidence \citep{chen2020compilerbasedhardw,yirage2026}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch01_conclusion}
+
+Decode-phase LLM inference is a systems problem disguised as a modeling problem \citep{nakai2025efficientbatchproc}. Interactive decode at low batch is dominated by memory traffic and orchestration overhead---the book's recurring thesis is that performance is \emph{data movement and dispatch under a specific memory hierarchy}, and compilers must own the schedule end-to-end \citep{memoryfloor2026,taxbreak2026,patel2025llminference}. Industry kernels and serving systems are necessary but insufficient for the MegaKernel and cross-hardware compilation pursued in Parts~IV--VI \citep{dao2022flashattention,arya2024apreliminaryperfor,yirage2026}.
+
+Chapter~2 introduces the dataflow mindset that replaces operator-at-a-time thinking with residency-first planning---the conceptual bridge from Chapter~1 metrics to hardware chapters and YiRage IR \citep{chen2020compilerbasedhardw,dlbook,semianalysis2024tma}. Carry bytes/token and launches/token into every subsequent chapter; they are this book's goodput vocabulary \citep{taxbreak2026,memoryfloor2026}.
 
 \typeout{END_CHAPTER "ch01" \theabspage}

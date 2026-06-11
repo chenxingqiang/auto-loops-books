@@ -1,6 +1,6 @@
 {
   "chapter_id": "ch20",
-  "timestamp": "2026-06-09T17:49:21.601473+00:00",
+  "timestamp": "2026-06-10T13:35:05.536622+00:00",
   "entry_count": 3,
   "verified_ok_count": 2,
   "entries": [
@@ -19,13 +19,10 @@
         "methodology"
       ],
       "corroboration_fetch_ok": true,
-      "corroboration_content_match": false,
+      "corroboration_content_match": true,
       "corroboration_missing_tokens": [
-        "20",
         "ch20",
         "cross-hardware",
-        "metrics",
-        "use",
         "bytes/token",
         "methodology"
       ],
@@ -64,11 +61,11 @@
       "corroboration_content_match": true,
       "corroboration_missing_tokens": [
         "compiler",
-        "CUDA",
-        "CPU",
-        "Triton",
+        "cuda",
+        "cpu",
+        "triton",
         "nki",
-        "MLIR"
+        "mlir"
       ],
       "verified_ok": true,
       "source_method": "craw4ai",

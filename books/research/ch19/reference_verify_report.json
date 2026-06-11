@@ -1,56 +1,56 @@
 {
   "chapter_id": "ch19",
   "chapter_title": "Glow: Lightweight AI Compiler",
-  "timestamp": "2026-06-10 02:33:54",
+  "timestamp": "2026-06-10 09:13:01",
   "keywords_file": "books/research/ch19/keywords.json",
-  "keyword_count": 63,
+  "keyword_count": 69,
   "top_keywords": [
     {
-      "term": "Glow: lightweight AI compiler",
+      "term": "glow: lightweight ai compiler",
       "weight": 18
     },
     {
-      "term": "Glow",
+      "term": "glow",
       "weight": 17
     },
     {
-      "term": "Glow arch passes",
+      "term": "glow arch passes",
       "weight": 14
     },
     {
-      "term": "Glow case study",
+      "term": "glow case study",
       "weight": 14
     },
     {
-      "term": "Glow codegen",
+      "term": "glow codegen",
       "weight": 14
     },
     {
-      "term": "Glow HW matrix",
+      "term": "glow hw matrix",
       "weight": 14
     },
     {
-      "term": "Glow tuning",
+      "term": "glow tuning",
       "weight": 14
     },
     {
-      "term": "Glow arch passes LLM inference compiler",
+      "term": "glow arch passes llm inference compiler",
       "weight": 13
     },
     {
-      "term": "Glow case study LLM inference compiler",
+      "term": "glow case study llm inference compiler",
       "weight": 13
     },
     {
-      "term": "Glow codegen LLM inference compiler",
+      "term": "glow codegen llm inference compiler",
       "weight": 13
     },
     {
-      "term": "Glow HW matrix LLM inference compiler",
+      "term": "glow hw matrix llm inference compiler",
       "weight": 13
     },
     {
-      "term": "Glow tuning LLM inference compiler",
+      "term": "glow tuning llm inference compiler",
       "weight": 13
     },
     {
@@ -102,172 +102,1016 @@
       "weight": 10
     }
   ],
-  "citation_count": 12,
+  "citation_count": 46,
   "citations": [
     {
-      "key": "patel2025llminference",
-      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
-      "score": 18,
+      "key": "amit2024tldetectaibasedapp",
+      "title": "‘TLDetect’ – AI-based Application for the Detection and Correction of Anomalous TLD Glow Curves",
+      "score": 187,
       "matched_keywords": [
-        "decode"
+        "glow",
+        "glow arch passes",
+        "cross-hardware",
+        "gpu cpu npu",
+        "hardware",
+        "pass",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "megakernel",
+        "npu",
+        "passes",
+        "same",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "pasupuleti2025aiguidedquantumcom",
+      "title": "AI-Guided Quantum Compiler Design Using Superalgebraic Symmetries",
+      "score": 148,
+      "matched_keywords": [
+        "cross-hardware",
+        "gpu cpu npu",
+        "hardware",
+        "pass",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "megakernel",
+        "npu",
+        "passes",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "ford2023glowinthedarklabel",
+      "title": "Glow-in-the-dark labels accelerate AI-assisted animal motion tracking",
+      "score": 52,
+      "matched_keywords": [
+        "glow",
+        "buffer",
+        "cuda"
+      ],
+      "status": "ok"
     },
     {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "score": 168,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "optim",
+        "target",
+        "aie",
+        "batch-1",
+        "buffer",
+        "cpu",
+        "decode",
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
       "key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
-      "score": 27,
+      "score": 205,
       "matched_keywords": [
+        "hardware target",
+        "cross-hardware",
+        "hardware",
+        "optim",
+        "target",
+        "aie",
+        "batch-1",
+        "buffer",
+        "cell",
+        "cpu",
+        "cuda",
         "decode",
-        "GPU"
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
       ],
       "status": "ok"
     },
     {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "schoeder2022amodulationbasedra",
+      "title": "A Modulation-Based Radar Target Simulator and Its Hardware Nonidealities",
+      "score": 255,
+      "matched_keywords": [
+        "glow",
+        "glow hw matrix",
+        "hardware target",
+        "pass lower",
+        "gpu cpu npu",
+        "hardware",
+        "lower",
+        "matrix",
+        "pass",
+        "target",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "passes",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 223,
+      "matched_keywords": [
+        "glow",
+        "glow hw matrix",
+        "glow hw matrix llm inference compiler",
+        "pass lower",
+        "gpu cpu npu",
+        "lower",
+        "matrix",
+        "pass",
+        "target",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "passes",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "agarwal2023hardwarebasedimple",
+      "title": "Hardware-Based Implementation of Target Tracking in Unmanned Aerial Vehicles (UAVs)",
+      "score": 172,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
     },
     {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "li2025nearfieldtargetloc",
+      "title": "Near-field Target Localization under Hardware Impairments",
+      "score": 109,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
     },
     {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "kwon2023vllm",
-      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    }
-  ],
-  "low_relevance_citations": [
-    {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 36,
+      "matched_keywords": [
+        "decode",
+        "flops",
+        "residency",
+        "teams"
+      ],
+      "status": "ok"
     },
     {
       "key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 105,
+      "matched_keywords": [
+        "pass lower",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "dao2022flashattention",
       "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 105,
+      "matched_keywords": [
+        "pass lower",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "kwon2023vllm",
       "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 105,
+      "matched_keywords": [
+        "pass lower",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "laevi2024detectionofaigener",
+      "title": "Detection of AI-Generated Synthetic Images with a Lightweight CNN",
+      "score": 91,
+      "matched_keywords": [
+        "pass lower",
+        "dialect",
+        "emit",
+        "lower",
+        "pass",
+        "pitfall",
+        "platform",
+        "tun",
+        "traffic"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "score": 55,
+      "matched_keywords": [
+        "lower",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kern2024virtuallyaugmented",
+      "title": "Virtually Augmented Radar Measurements With Hardware Radar Target Simulators for Machine Learning Applications",
+      "score": 159,
+      "matched_keywords": [
+        "glow",
+        "glow arch passes",
+        "hardware target",
+        "hardware",
+        "pass",
+        "target",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "passes",
+        "residency"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "score": 228,
+      "matched_keywords": [
+        "glow",
+        "glow codegen",
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "cross-hardware",
+        "gpu cpu npu",
+        "hardware",
+        "optim",
+        "target",
+        "yirage",
+        "cpu",
+        "cuda",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "urbanski2025hardwarebasedcalcu",
+      "title": "Hardware-Based Calculation of Mean Square Error for Automatic Target Recognition in SAR Images",
+      "score": 221,
+      "matched_keywords": [
+        "glow",
+        "glow codegen",
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "cross-hardware",
+        "gpu cpu npu",
+        "hardware",
+        "optim",
+        "target",
+        "yirage",
+        "cpu",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 198,
+      "matched_keywords": [
+        "glow",
+        "glow codegen",
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "cross-hardware",
+        "gpu cpu npu",
+        "hardware",
+        "optim",
+        "target",
+        "yirage",
+        "aie",
+        "cpu",
+        "gemm",
+        "gpu",
+        "npu",
+        "on-chip",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "leong2025assuringcorrectnes",
+      "title": "Assuring Correctness in AI-Assisted Development with LLM Diversity and Compiler Techniques",
+      "score": 195,
+      "matched_keywords": [
+        "glow",
+        "pass lower",
+        "benchmark",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 195,
+      "matched_keywords": [
+        "glow",
+        "pass lower",
+        "benchmark",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 186,
+      "matched_keywords": [
+        "glow",
+        "pass lower",
+        "benchmark",
+        "lower",
+        "pass",
+        "profile",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "bhatnagar2025mitigatingaillmpro",
+      "title": "Mitigating AI LLM Prompt Injection, Hallucination, and Security Risks using Semantically Encoded Compiler Stage Watermarks",
+      "score": 185,
+      "matched_keywords": [
+        "glow",
+        "case benchmark",
+        "benchmark",
+        "case",
+        "profile",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dlbook",
+      "title": "Deep Learning",
+      "score": 176,
+      "matched_keywords": [
+        "glow",
+        "case benchmark",
+        "benchmark",
+        "case",
+        "profile",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "du2023sarnasahardwareawa",
+      "title": "SARNas: A Hardware-Aware SAR Target Detection Algorithm via Multi-Objective Neural Architecture Search",
+      "score": 204,
+      "matched_keywords": [
+        "glow",
+        "hardware target",
+        "tun profile",
+        "gpu cpu npu",
+        "hardware",
+        "profile",
+        "target",
+        "tun",
+        "buffer",
+        "bytes",
+        "cpu",
+        "decode",
+        "gpu",
+        "hbm",
+        "npu",
+        "static",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "shen2022hardwaredevelopmen",
+      "title": "Hardware Development for Joint Sparse Decentralized Heterogeneous Data Fusion for Target Estimation",
+      "score": 227,
+      "matched_keywords": [
+        "glow",
+        "hardware target",
+        "benchmark",
+        "hardware",
+        "profile",
+        "target",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "silvestrini2024processorandhardwa",
+      "title": "Processor and Hardware in the Loop GNC Testing for e.Inspector Mission: Multi-Spectral Image Processing for Uncooperative Target Inspection",
+      "score": 218,
+      "matched_keywords": [
+        "glow",
+        "hardware target",
+        "benchmark",
+        "hardware",
+        "profile",
+        "target",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2018assessmentofthehar",
+      "title": "ASSESSMENT OF THE HARDWARE-SOFTWARE COMPLEXES SURVIVABILITY ON AVERAGE VALUES EFFICIENCY TARGET",
+      "score": 128,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "pass",
+        "target",
+        "bytes",
+        "compiler",
+        "fusion",
+        "launches",
+        "passes",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wang2023anfpgabasedhardwar",
+      "title": "An FPGA-based Hardware Low-cost, Low-consumption Target Recognition and Sorting System",
+      "score": 218,
+      "matched_keywords": [
+        "glow",
+        "hardware target",
+        "benchmark",
+        "hardware",
+        "profile",
+        "target",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "residency",
+        "same",
+        "teams",
+        "token",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "roy2019hardwaresoftwareco",
+      "title": "Hardware Software Co-Design for Real Time Detection of Small Target in IR Video",
+      "score": 110,
+      "matched_keywords": [
+        "hardware target",
+        "cross-hardware",
+        "hardware",
+        "target",
+        "cpu",
+        "hopper",
+        "same",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "lane2023targetrecognitioni",
+      "title": "TARGET RECOGNITION IN SAR IMAGES WITH LOW-SWAP PROCESSING HARDWARE",
+      "score": 134,
+      "matched_keywords": [
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "hardware",
+        "pass",
+        "target",
+        "yirage",
+        "compiler",
+        "passes"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "rossi2021basicsettingsseria",
+      "title": "Basic Settings: Serial Communication COM and Hardware Target",
+      "score": 134,
+      "matched_keywords": [
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "hardware",
+        "pass",
+        "target",
+        "yirage",
+        "compiler",
+        "passes"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "grimberg2026stone23voyager1for",
+      "title": "STONE 23: VOYAGER 1 FORENSIC AUDIT Protocol for the Detection of Lattice-14 Resonances Target Frequency: 12.84 Hz | Framework: k=0 Hardware Paradigm",
+      "score": 150,
+      "matched_keywords": [
+        "glow",
+        "glow hw matrix",
+        "hardware target",
+        "hardware",
+        "matrix",
+        "target",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "lepekhina2019radartargethardwar",
+      "title": "Radar target hardware-in-the-loop simulation in carrier frequencies for SAR tests",
+      "score": 172,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "target",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "traffic",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 44,
+      "matched_keywords": [
+        "glow",
+        "buffer",
+        "cuda"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "huang2023highperformanceand",
+      "title": "High-Performance and Lightweight AI Model for Robot Vacuum Cleaners with Low Bitwidth Strong Non-Uniform Quantization",
+      "score": 169,
+      "matched_keywords": [
+        "pass lower",
+        "hardware",
+        "lower",
+        "optim",
+        "pass",
+        "aie",
+        "batch-1",
+        "buffer",
+        "cpu",
+        "decode",
+        "gemm",
+        "gpu",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp",
+        "xdna"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "shome2019phasedmimoradarusi",
+      "title": "PHASED MIMO RADAR USING RECONFIGURABLE HARDWARE FOR TARGET CHARACTERIZATION",
+      "score": 245,
+      "matched_keywords": [
+        "glow",
+        "glow arch passes",
+        "hardware target",
+        "pass lower",
+        "gpu cpu npu",
+        "hardware",
+        "lower",
+        "pass",
+        "target",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "passes",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ren2024exploringtheeffect",
+      "title": "Exploring the effect of fingertip aero-haptic feedforward cues in directing eyes-free target acquisition in VR",
+      "score": 106,
+      "matched_keywords": [
+        "glow",
+        "glow codegen",
+        "codegen",
+        "target",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "zhang2019trajectorypredicti",
+      "title": "Trajectory prediction model for crossing-based target selection",
+      "score": 122,
+      "matched_keywords": [
+        "codegen backend",
+        "tun profile",
+        "backend",
+        "codegen",
+        "pass",
+        "profile",
+        "target",
+        "tun",
+        "yirage",
+        "compiler",
+        "passes"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "zhang2018fpgaorientedmoving",
+      "title": "FPGA-oriented moving target defense against security threats from malicious FPGA tools",
+      "score": 106,
+      "matched_keywords": [
+        "glow",
+        "glow tuning",
+        "target",
+        "tun",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "jiang2021trrscopeunderstand",
+      "title": "TRRScope: Understanding Target Row Refresh Mechanism for Modern DDR Protection",
+      "score": 211,
+      "matched_keywords": [
+        "glow",
+        "glow case study",
+        "pass lower",
+        "case",
+        "gpu cpu npu",
+        "lower",
+        "pass",
+        "target",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "gpu",
+        "launches",
+        "npu",
+        "passes",
+        "residency",
+        "same",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "koblah2022hardwaremovingtarg",
+      "title": "Hardware Moving Target Defenses against Physical Attacks",
+      "score": 134,
+      "matched_keywords": [
+        "codegen backend",
+        "hardware target",
+        "backend",
+        "codegen",
+        "hardware",
+        "pass",
+        "target",
+        "yirage",
+        "compiler",
+        "passes"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2026statictargetsnapsh",
+      "title": "Static Target Snapshot Using Monocular PTZ Cameras: A Brief Review of Hardware Challenges and Observation Strategies",
+      "score": 168,
+      "matched_keywords": [
+        "glow",
+        "glow hw matrix",
+        "hardware target",
+        "hardware",
+        "matrix",
+        "target",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency",
+        "static"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "akbar2019hardwaredesignofco",
+      "title": "Hardware design of correlation filters for target detection",
+      "score": 137,
+      "matched_keywords": [
+        "hardware target",
+        "hardware",
+        "profile",
+        "target",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "zhang2025ahardwareaccelerat",
+      "title": "A Hardware Accelerator for Real-Time Processing Platforms Used in Synthetic Aperture Radar Target Detection Tasks",
+      "score": 165,
+      "matched_keywords": [
+        "hardware target",
+        "pass lower",
+        "dialect",
+        "emit",
+        "hardware",
+        "lower",
+        "pass",
+        "pitfall",
+        "platform",
+        "target",
+        "tun",
+        "traffic"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "panda2023particlefilterbase",
+      "title": "Particle Filter Based Video Object Tracking Scheme With Target Remodeling and Reinitialization and its Hardware Implementation Using Raspberry Pi",
+      "score": 150,
+      "matched_keywords": [
+        "glow",
+        "glow hw matrix",
+        "hardware target",
+        "hardware",
+        "matrix",
+        "target",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency"
+      ],
+      "status": "ok"
     }
   ],
+  "low_relevance_citations": [],
   "missing_bib_keys": [],
   "literature_rescore": [],
-  "status": "warn",
+  "status": "ok",
   "min_citation_score": 8
 }

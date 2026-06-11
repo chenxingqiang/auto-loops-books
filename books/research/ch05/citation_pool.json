@@ -1,23 +1,55 @@
 {
   "chapter_id": "ch05",
-  "pool_count": 25,
+  "pool_count": 57,
   "bib_keys": [
     "alves2023distributedcheckpo",
     "yirage2026",
+    "luo2024hadaprototypeofdat",
     "memoryfloor2026",
+    "hentrich2025parallelsortimplem",
     "amd2024xdna",
     "rico2024amdxdnanpuinryzena",
     "delaye2022cgra4hpc2022invite",
     "vilim2021aurochsanarchitect",
+    "miheli2018experimentalcompar",
+    "gioiosa2023navierdataflowarch",
+    "miheli2019matrixbasedalgorit",
     "weng2020ahybridsystolicdat",
     "narayanan2020spinalflowanarchit",
     "krichene2024adataflowarchitect",
+    "ratto2024adataflowbasedarch",
+    "hofmann2022multichipdataflowa",
+    "chen2025ahybridcnngcnarchi",
     "steffen20254thgenamdcdnasuptm",
     "dao2023flashdecoding",
     "nvidia2024cudagraphs",
+    "jia2025responsivexdnaasse",
     "taxbreak2026",
     "bouaziz2025benchmarkingfloati",
+    "bouaziz2025adataflowoverlayfo",
     "heinz2024tapascoaieanopenso",
+    "renaud2024automatedlevelbase",
+    "castrillon2022dataflowmodelsofco",
+    "mehndiratta2024fluidbiomarkersina",
+    "cametti2022aieactivesupramole",
+    "pucci2022aieactivematerials",
+    "shimizu2022aieactiveraremetal",
+    "liou2022electrofluorochrom",
+    "gao2022aiebioconjugatesfo",
+    "dong2022mechanochromiclumi",
+    "mei2022photochromicandthe",
+    "li2022aiebasedchemosenso",
+    "peng2022computationalmodel",
+    "han2022fundamentalprincip",
+    "zhou2022aieactivepolymersf",
+    "wong2022aiemolecularprobes",
+    "anon2023aieint",
+    "anon2025reviewforaiepolyme",
+    "anon2022aggregationinduced",
+    "abarca2026aiecanda",
+    "anon2020aieregimen",
+    "sabouri2022recentadvancesofag",
+    "anon2018reviewofaieeffects",
     "patel2025llminference",
     "nvidia2022hopper",
     "smith2024amdinstinctmi300xg",
@@ -53,6 +85,18 @@
       ]
     },
     {
+      "bib_key": "luo2024hadaprototypeofdat",
+      "title": "HAD:A Prototype Of Dataflow Compute Architecture",
+      "source_tier": "B",
+      "relevance_score": 59,
+      "matched_keywords": [
+        "AI hardware architecture",
+        "dataflow",
+        "architecture",
+        "microbenchmarks"
+      ]
+    },
+    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
@@ -62,6 +106,17 @@
         "inference",
         "decode",
         "GPU"
+      ]
+    },
+    {
+      "bib_key": "hentrich2025parallelsortimplem",
+      "title": "Parallel Sort Implementation and Evaluation in a Dataflow-Based Polymorphic Computing Architecture",
+      "source_tier": "B",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "dataflow",
+        "architecture",
+        "kernels"
       ]
     },
     {
@@ -105,6 +160,36 @@
       ]
     },
     {
+      "bib_key": "miheli2018experimentalcompar",
+      "title": "EXPERIMENTAL COMPARISON OF MATRIX ALGORITHMS FOR DATAFLOW COMPUTER ARCHITECTURE",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "gioiosa2023navierdataflowarch",
+      "title": "Navier: Dataflow Architecture for Computation Chemistry",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "miheli2019matrixbasedalgorit",
+      "title": "Matrix-Based Algorithms for DataFlow Computer Architecture: An Overview and Comparison",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
       "bib_key": "weng2020ahybridsystolicdat",
       "title": "A Hybrid Systolic-Dataflow Architecture for Inductive Matrix Algorithms",
       "source_tier": "A",
@@ -128,6 +213,36 @@
       "bib_key": "krichene2024adataflowarchitect",
       "title": "A dataflow architecture with distributed control for DNN acceleration",
       "source_tier": "A",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "ratto2024adataflowbasedarch",
+      "title": "A Dataflow-Based Architecture and Design Methodology for Multi-Thread Reconfigurable Coprocessors on Fpga Socs",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "hofmann2022multichipdataflowa",
+      "title": "Multi-Chip Dataflow Architecture for Massive Scale Biophyscially Accurate Neuron Simulation",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "dataflow",
+        "architecture"
+      ]
+    },
+    {
+      "bib_key": "chen2025ahybridcnngcnarchi",
+      "title": "A Hybrid CNN-GCN Architecture with Sparsity and Dataflow Optimization for Mobile AR",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
         "dataflow",
@@ -164,6 +279,15 @@
       ]
     },
     {
+      "bib_key": "jia2025responsivexdnaasse",
+      "title": "Responsive XDNA Assembly-Actuated Transient Dissipative Dual-Recycling Circuit for Amplifiable Fluorescence Biosensing",
+      "source_tier": "C",
+      "relevance_score": 22,
+      "matched_keywords": [
+        "XDNA"
+      ]
+    },
+    {
       "bib_key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
       "source_tier": "A",
@@ -182,9 +306,216 @@
       ]
     },
     {
+      "bib_key": "bouaziz2025adataflowoverlayfo",
+      "title": "A Dataflow Overlay for Monte Carlo Multi-Asset Option Pricing on AMD Versal AI Engines",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
       "bib_key": "heinz2024tapascoaieanopenso",
       "title": "TaPaSCo-AIE: An Open-Source Framework for Streaming-Based Heterogeneous Acceleration Using AMD AI Engines",
       "source_tier": "A",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "renaud2024automatedlevelbase",
+      "title": "Automated level-based clustering of dataflow actors for controlled scheduling complexity",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "castrillon2022dataflowmodelsofco",
+      "title": "Dataflow Models of Computation for Programming Heterogeneous Multicores",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "dataflow"
+      ]
+    },
+    {
+      "bib_key": "mehndiratta2024fluidbiomarkersina",
+      "title": "Fluid Biomarkers in Autoimmune Encephalitis (AIE)-Expanding Horizons",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "cametti2022aieactivesupramole",
+      "title": "AIE-active supramolecular gel systems",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "pucci2022aieactivematerials",
+      "title": "AIE-active materials for photovoltaics",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "shimizu2022aieactiveraremetal",
+      "title": "AIE-active rare-metal-free phosphorescent materials",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "liou2022electrofluorochrom",
+      "title": "Electrofluorochromism in AIE luminogens",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "gao2022aiebioconjugatesfo",
+      "title": "AIE bio-conjugates for biomedical applications",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "dong2022mechanochromiclumi",
+      "title": "Mechanochromic luminescence in AIE luminogens",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "mei2022photochromicandthe",
+      "title": "Photochromic and thermochromic luminescence in AIE luminogens",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "li2022aiebasedchemosenso",
+      "title": "AIE-based chemosensors for vapor sensing",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "peng2022computationalmodel",
+      "title": "Computational modeling of AIE luminogens",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "han2022fundamentalprincip",
+      "title": "Fundamental principles of AIE",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "zhou2022aieactivepolymersf",
+      "title": "AIE-active polymers for explosive detection",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "wong2022aiemolecularprobes",
+      "title": "AIE molecular probes for biomedical applications",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "anon2023aieint",
+      "title": "AIE, int.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "anon2025reviewforaiepolyme",
+      "title": "Review for \"AIE Polymers for Biosensing Applications\"",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "anon2022aggregationinduced",
+      "title": "Aggregation-Induced Emission (AIE)",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "abarca2026aiecanda",
+      "title": "AIE canda",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "anon2020aieregimen",
+      "title": "AIE Regimen",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "sabouri2022recentadvancesofag",
+      "title": "Recent advances of aggregation-induced emission nanoparticles (AIE-NPs) in biomedical applications",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "AIE"
+      ]
+    },
+    {
+      "bib_key": "anon2018reviewofaieeffects",
+      "title": "Review of AIE effects with preindustrial oxidants",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
         "AIE"

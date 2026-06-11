@@ -1,9 +1,9 @@
 {
   "chapter_id": "ch10",
   "chapter_title": "Attention Online Softmax Optimization",
-  "timestamp": "2026-06-10 02:33:54",
+  "timestamp": "2026-06-10 09:12:59",
   "keywords_file": "books/research/ch10/keywords.json",
-  "keyword_count": 48,
+  "keyword_count": 54,
   "top_keywords": [
     {
       "term": "attention online softmax optimization",
@@ -26,27 +26,27 @@
       "weight": 14
     },
     {
-      "term": "cross hardware LLM inference compiler",
+      "term": "cross hardware llm inference compiler",
       "weight": 13
     },
     {
-      "term": "fusion boundary LLM inference compiler",
+      "term": "fusion boundary llm inference compiler",
       "weight": 13
     },
     {
-      "term": "numerical stability LLM inference compiler",
+      "term": "numerical stability llm inference compiler",
       "weight": 13
     },
     {
-      "term": "online softmax LLM inference compiler",
+      "term": "online softmax llm inference compiler",
       "weight": 13
     },
     {
-      "term": "fuse MegaKernel",
+      "term": "fuse megakernel",
       "weight": 12
     },
     {
-      "term": "GPU XDNA",
+      "term": "gpu xdna",
       "weight": 12
     },
     {
@@ -62,11 +62,11 @@
       "weight": 10
     },
     {
-      "term": "GPU",
+      "term": "gpu",
       "weight": 10
     },
     {
-      "term": "MegaKernel",
+      "term": "megakernel",
       "weight": 10
     },
     {
@@ -82,178 +82,1207 @@
       "weight": 10
     },
     {
-      "term": "XDNA",
+      "term": "xdna",
       "weight": 10
+    },
+    {
+      "term": "aie",
+      "weight": 9
     },
     {
       "term": "attention",
       "weight": 9
     },
     {
-      "term": "bottleneck",
+      "term": "bandwidth",
       "weight": 9
     },
     {
-      "term": "bytes",
-      "weight": 9
-    },
-    {
-      "term": "chapter summary",
+      "term": "batch-1",
       "weight": 9
     }
   ],
-  "citation_count": 12,
+  "citation_count": 53,
   "citations": [
     {
-      "key": "patel2025llminference",
-      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
-      "score": 38,
+      "key": "hirayae2025hardwareorientedan",
+      "title": "Hardware-Oriented and Precisely Approximated Online Softmax for Deep Learning Models",
+      "score": 174,
       "matched_keywords": [
-        "exp",
-        "decode"
+        "cross hardware",
+        "online softmax",
+        "gpu",
+        "megakernel",
+        "online",
+        "softmax",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "launches",
+        "npu",
+        "same",
+        "token"
       ],
       "status": "ok"
     },
     {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "memoryfloor2026",
-      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
-      "score": 28,
+      "key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "score": 124,
       "matched_keywords": [
-        "GPU",
-        "decode"
+        "cross hardware",
+        "gpu",
+        "megakernel",
+        "attention",
+        "bytes",
+        "compiler",
+        "cpu",
+        "decode",
+        "launches",
+        "npu",
+        "same",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kim2019personalizedonline",
+      "title": "Personalized Online Live Video Streaming Using Softmax-Based Multinomial Classification",
+      "score": 132,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
       ],
       "status": "ok"
     },
     {
       "key": "amd2024xdna",
       "title": "AMD XDNA Architecture",
-      "score": 20,
+      "score": 184,
       "matched_keywords": [
-        "XDNA"
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cpu",
+        "decode",
+        "gemm",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp"
       ],
       "status": "ok"
     },
     {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dlbook",
-      "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "score": 18,
+      "key": "memoryfloor2026",
+      "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
+      "score": 233,
       "matched_keywords": [
-        "attention"
+        "cross hardware",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "aie",
+        "bandwidth",
+        "batch-1",
+        "buffer",
+        "cell",
+        "cpu",
+        "cuda",
+        "decode",
+        "gemm",
+        "means",
+        "numa",
+        "static",
+        "tile",
+        "warp"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2026softmax",
+      "title": "Модель рейтинговых оценок с латентными параметрами на базе функции softmax",
+      "score": 153,
+      "matched_keywords": [
+        "online softmax",
+        "gpu",
+        "online",
+        "softmax",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "target",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "dao2023flashdecoding",
+      "title": "Flash-Decoding for Long-Context Inference",
+      "score": 152,
+      "matched_keywords": [
+        "online softmax",
+        "gpu",
+        "online",
+        "softmax",
+        "attention",
+        "bytes",
+        "cell",
+        "compiler",
+        "cpu",
+        "decode",
+        "launches",
+        "npu",
+        "residency",
+        "same",
+        "target",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patel2025llminference",
+      "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
+      "score": 148,
+      "matched_keywords": [
+        "exp",
+        "online",
+        "xdna",
+        "buffer",
+        "bytes",
+        "cell",
+        "decode",
+        "flops",
+        "hopper",
+        "same",
+        "static",
+        "tile",
+        "token",
+        "traffic"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "menegaux2025phylohsaphylogenet",
+      "title": "Phylo-HS: A phylogenetic hierarchical softmax for taxonomic classification",
+      "score": 84,
+      "matched_keywords": [
+        "fuse",
+        "softmax",
+        "bandwidth",
+        "batch-1",
+        "decode",
+        "launches",
+        "teams",
+        "token"
       ],
       "status": "ok"
     },
     {
       "key": "kwon2023vllm",
       "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
-      "score": 18,
+      "score": 54,
       "matched_keywords": [
-        "attention"
+        "attention",
+        "decode",
+        "flops",
+        "residency",
+        "teams"
       ],
       "status": "ok"
-    }
-  ],
-  "low_relevance_citations": [
-    {
-      "key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
     },
     {
       "key": "taxbreak2026",
       "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "amd2024aie",
-      "title": "AI Engine Technology",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
-    },
-    {
-      "key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 114,
+      "matched_keywords": [
+        "stable exp",
+        "exp",
+        "fuse",
+        "stable",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "liu2024deepseekv3",
       "title": "DeepSeek-V3 Technical Report",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 114,
+      "matched_keywords": [
+        "stable exp",
+        "exp",
+        "fuse",
+        "stable",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "amd2024aie",
+      "title": "AI Engine Technology",
+      "score": 123,
+      "matched_keywords": [
+        "stable exp",
+        "exp",
+        "fuse",
+        "stable",
+        "aie",
+        "bandwidth",
+        "bytes",
+        "fusion",
+        "hbm",
+        "launches",
+        "on-chip",
+        "residency",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "score": 41,
+      "matched_keywords": [
+        "stable exp",
+        "exp",
+        "stable",
+        "traffic"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "score": 92,
+      "matched_keywords": [
+        "exp",
+        "fuse",
+        "bandwidth",
+        "batch-1",
+        "cuda",
+        "decode",
+        "launches",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
     },
     {
       "key": "dlbook",
       "title": "Deep Learning",
-      "score": 0,
-      "matched_keywords": [],
-      "status": "low_relevance"
+      "score": 78,
+      "matched_keywords": [
+        "numerical stability",
+        "stable",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "jyothi2026fuzzyattentionsegn",
+      "title": "Fuzzy Attention SegNet Model with Serval Ablation Optimization and Log-Cosh Softmax Loss for Effective Brain Tumor Segmentation Using MRI Imaging",
+      "score": 207,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "cross hardware",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "cpu",
+        "gemm",
+        "npu",
+        "on-chip",
+        "optimization",
+        "target",
+        "teams",
+        "yirage"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yirage2026",
+      "title": "YiRage: Multi-Backend LLM Inference Optimization",
+      "score": 206,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "cross hardware",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "cpu",
+        "cuda",
+        "gemm",
+        "npu",
+        "on-chip",
+        "optimization",
+        "target",
+        "teams",
+        "yirage"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "lee2021gatedrecurrentcont",
+      "title": "Gated Recurrent Context: Softmax-Free Attention for Online Encoder-Decoder Speech Recognition",
+      "score": 272,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "stable exp",
+        "exp",
+        "online",
+        "softmax",
+        "stable",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "score": 229,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "stable exp",
+        "exp",
+        "online",
+        "softmax",
+        "stable",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "li2020gumbelsoftmaxbased",
+      "title": "Gumbel-softmax-based Optimization: A Simple General Framework for Optimization Problems on Graphs",
+      "score": 207,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kartal2025csoftmaxcontextual",
+      "title": "C-Softmax: Contextual Softmax Operator Incorporating Row and Column Priorities",
+      "score": 198,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "curry2025diffusionattention",
+      "title": "Diffusion Attention: Replacing Softmax with Heat Kernel Dynamics",
+      "score": 248,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "fuse megakernel",
+        "fuse",
+        "megakernel",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "banerjee2021exploringalternati",
+      "title": "Exploring Alternatives to Softmax Function",
+      "score": 214,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "fuse megakernel",
+        "exp",
+        "fuse",
+        "gpu",
+        "megakernel",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "bytes",
+        "cpu",
+        "decode",
+        "hbm",
+        "npu",
+        "optimization",
+        "static",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "deng2025whysoftmaxattentio",
+      "title": "Why Softmax Attention Outperforms Linear Attention",
+      "score": 207,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kong2019idsoftmaxasoftmaxl",
+      "title": "ID-Softmax: A Softmax-like Loss for ID Face Recognition",
+      "score": 198,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "cho2021filterpruningviaso",
+      "title": "Filter Pruning Via Softmax Attention",
+      "score": 239,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "fuse megakernel",
+        "fuse",
+        "megakernel",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kim2025improvingattention",
+      "title": "Improving Attention Parallelism via Delayed Value Generation and Softmax Offloading",
+      "score": 229,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "chen2022partialdisastercla",
+      "title": "Partial Disaster Classification Based on Attention Mechanism and Balanced Softmax Loss Function",
+      "score": 229,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "koohpayegani2024simasimplesoftmaxf",
+      "title": "SimA: Simple Softmax-free Attention for Vision Transformers",
+      "score": 239,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "stable exp",
+        "exp",
+        "online",
+        "softmax",
+        "stable",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "patil2023streamingbilingual",
+      "title": "Streaming Bilingual End-to-End ASR Model Using Attention Over Multiple Softmax",
+      "score": 207,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "yang2023learningdifferenti",
+      "title": "Learning Differentiable Categorical Regions with Gumbel-Softmax for Person Re-Identification",
+      "score": 198,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "lee2023softmaxoutputappro",
+      "title": "Softmax Output Approximation for Activation Memory-Efficient Training of Attention-based Networks",
+      "score": 239,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "fuse megakernel",
+        "fuse",
+        "megakernel",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "wang2021escapingthegradien",
+      "title": "Escaping the Gradient Vanishing: Periodic Alternatives of Softmax in Attention Mechanism",
+      "score": 229,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "gpu xdna",
+        "gpu",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "bhola2024securingindustrial",
+      "title": "Securing Industrial IoT Networks Using Conv2D-Attention Approach with Softmax Classifier",
+      "score": 239,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "stable exp",
+        "exp",
+        "online",
+        "softmax",
+        "stable",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "koca2023hardwareefficients",
+      "title": "Hardware-efficient Softmax Approximation for Self-Attention Networks",
+      "score": 207,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "choi2020f2softmaxdiversify",
+      "title": "Fˆ2-Softmax: Diversifying Neural Text Generation via Frequency Factorized Softmax",
+      "score": 198,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "collins2024incontextlearningw",
+      "title": "In-Context Learning with Transformers: Softmax Attention Adapts to Function Lipschitzness",
+      "score": 239,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "fuse megakernel",
+        "fuse",
+        "megakernel",
+        "online",
+        "softmax",
+        "xdna",
+        "attention",
+        "bytes",
+        "compiler",
+        "decode",
+        "flops",
+        "fusion",
+        "hopper",
+        "launches",
+        "microbenchmarks",
+        "optimization",
+        "residency",
+        "same",
+        "teams",
+        "token"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "franke2023thesoftmaxfunction",
+      "title": "The softmax function: Properties, motivation, and interpretation",
+      "score": 91,
+      "matched_keywords": [
+        "cross hardware",
+        "exp",
+        "fuse",
+        "softmax",
+        "xdna",
+        "cpu",
+        "hopper",
+        "same"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ko2024reviewofaerosoftma",
+      "title": "Review of: \"AERO: Softmax-Only LLMs for Efficient Private Inference\"",
+      "score": 84,
+      "matched_keywords": [
+        "online softmax",
+        "online softmax llm inference compiler",
+        "online",
+        "softmax",
+        "compiler",
+        "target",
+        "yirage"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "zakamulin2025entropyregularized",
+      "title": "Entropy-Regularized Portfolio Selection via Softmax Sharpe Allocation",
+      "score": 62,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "microbenchmarks",
+        "tile"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2025logisticandsoftmax",
+      "title": "Logistic and Softmax Regression",
+      "score": 98,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kim2024alowpowerattention",
+      "title": "A Low Power Attention and Softmax Accelerator for Large Language Models Inference",
+      "score": 117,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "luo2024causalsoftmaxforou",
+      "title": "Causal Softmax for Out-of-Distribution Generalization",
+      "score": 91,
+      "matched_keywords": [
+        "cross hardware",
+        "exp",
+        "fuse",
+        "softmax",
+        "xdna",
+        "cpu",
+        "hopper",
+        "same"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "anon2021speakerverificatio",
+      "title": "Speaker Verification Analysis Based on Cosine Softmax Loss",
+      "score": 71,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "compiler",
+        "target",
+        "yirage"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "kim2025designoftensorcore",
+      "title": "Design of Tensor Core Archiecture for Softmax Acceleration",
+      "score": 62,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "microbenchmarks",
+        "tile"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "s2022digitalimplementat",
+      "title": "Digital Implementation of the Softmax Activation Function and the Inverse Softmax Function",
+      "score": 98,
+      "matched_keywords": [
+        "online softmax",
+        "online",
+        "softmax",
+        "buffer",
+        "compiler",
+        "npu",
+        "on-chip",
+        "residency",
+        "target"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "han2024bridgingthedivider",
+      "title": "Bridging the Divide: Reconsidering Softmax and Linear Attention",
+      "score": 117,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "bratischenko2025alatentparametermo",
+      "title": "A LATENT PARAMETER MODEL OF EXAMINATION GRADES BASED ON THE SOFTMAX FUNCTION",
+      "score": 56,
+      "matched_keywords": [
+        "softmax",
+        "decode",
+        "flops",
+        "residency",
+        "teams"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ganeri2018orientingattention",
+      "title": "Orienting Attention",
+      "score": 107,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ganeri2018perceptualattentio",
+      "title": "Perceptual Attention",
+      "score": 107,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ganeri2018empatheticattentio",
+      "title": "Empathetic Attention",
+      "score": 107,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
+    },
+    {
+      "key": "ganeri2018narrativeattention",
+      "title": "Narrative Attention",
+      "score": 107,
+      "matched_keywords": [
+        "attention online softmax optimization",
+        "online softmax",
+        "exp",
+        "online",
+        "softmax",
+        "attention",
+        "buffer",
+        "cuda",
+        "optimization"
+      ],
+      "status": "ok"
     }
   ],
+  "low_relevance_citations": [],
   "missing_bib_keys": [],
   "literature_rescore": [],
-  "status": "warn",
+  "status": "ok",
   "min_citation_score": 8
 }

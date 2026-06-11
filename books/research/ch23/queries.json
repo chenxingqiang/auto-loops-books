@@ -1,15 +1,15 @@
 [
   "\"LLM and MoE Specialized Compilation\"",
-  "\"LLM\" AND \"decode\"",
+  "\"llm\" AND \"decode\"",
   "\"moe\" AND \"expert\"",
   "\"kv\" AND \"cache\"",
   "\"hetero\" AND \"load\"",
-  "\"LLM and moe specialized compilation\" AND \"hetero moe\"",
-  "\"kv hardware\" AND \"LLM decode compile\"",
-  "\"moe scheduling\" AND \"hetero moe LLM inference compiler\"",
-  "\"kv hardware LLM inference compiler\" AND \"LLM decode compile LLM inference compiler\"",
-  "\"moe scheduling LLM inference compiler\" AND \"hetero load\"",
-  "\"kv cache\" AND \"LLM decode\"",
+  "\"llm and moe specialized compilation\" AND \"hetero moe\"",
+  "\"kv hardware\" AND \"llm decode compile\"",
+  "\"moe scheduling\" AND \"hetero moe llm inference compiler\"",
+  "\"kv hardware llm inference compiler\" AND \"llm decode compile llm inference compiler\"",
+  "\"moe scheduling llm inference compiler\" AND \"hetero load\"",
+  "\"kv cache\" AND \"llm decode\"",
   "\"moe expert\" AND \"cache\"",
   "\"decode\" AND \"expert\""
 ]

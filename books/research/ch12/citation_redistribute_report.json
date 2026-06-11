@@ -1,55 +1,129 @@
 {
   "chapter_id": "ch12",
-  "pool_count": 22,
-  "assigned_count": 22,
+  "pool_count": 57,
+  "assigned_count": 57,
   "unassigned_count": 0,
-  "sections_with_cites": 3,
-  "unique_keys_in_tex": 20,
+  "sections_with_cites": 6,
+  "unique_keys_in_tex": 55,
   "pool_path": "books/research/ch12/citation_pool.json",
   "sections_used": [
-    "Eager Mode",
-    "Graph Mode",
-    "chapter"
+    "Chapter Summary",
+    "MegaKernel mode",
+    "chapter",
+    "eager mode",
+    "graph mode",
+    "mode selection"
   ],
-  "cites_applied": 20,
+  "cites_applied": 55,
   "dry_run": false,
   "updated": true,
   "tex_path": "books/build/chapters/ch12_execution_modes.tex",
   "assignment_samples": [
     {
       "sentence_id": "s0001",
-      "bib_key": "patel2025llminference",
+      "bib_key": "khairy2019sstgpuanexecutiond",
       "section": "chapter",
-      "relevance_score": 18,
+      "relevance_score": 72,
       "matched_keywords": [
-        "decode"
+        "execution",
+        "gpu",
+        "kernel",
+        "mode"
       ]
     },
     {
       "sentence_id": "s0002",
-      "bib_key": "alizadeh2020machinelearningbas",
+      "bib_key": "johannesmeye2022kasperscanningforg",
       "section": "chapter",
-      "relevance_score": 36,
+      "relevance_score": 18,
       "matched_keywords": [
-        "GPU",
         "kernel"
       ]
     },
     {
       "sentence_id": "s0003",
-      "bib_key": "yamazaki2024acceleratinganover",
-      "section": "Eager Mode",
-      "relevance_score": 54,
+      "bib_key": "zhang2025threemodelingformu",
+      "section": "eager mode",
+      "relevance_score": 72,
       "matched_keywords": [
         "execution",
-        "kernel",
-        "mode"
+        "mode",
+        "modes",
+        "three"
       ]
     },
     {
       "sentence_id": "s0004",
-      "bib_key": "fukumura2024visuallyrepresenti",
-      "section": "Eager Mode",
+      "bib_key": "akkarighazou2020kineticandkinemati",
+      "section": "eager mode",
+      "relevance_score": 72,
+      "matched_keywords": [
+        "execution",
+        "mode",
+        "modes",
+        "three"
+      ]
+    },
+    {
+      "sentence_id": "s0006",
+      "bib_key": "amd2024xdna",
+      "section": "eager mode",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ]
+    },
+    {
+      "sentence_id": "s0007",
+      "bib_key": "patel2025llminference",
+      "section": "eager mode",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "decode"
+      ]
+    },
+    {
+      "sentence_id": "s0008",
+      "bib_key": "kwon2023vllm",
+      "section": "eager mode",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ]
+    },
+    {
+      "sentence_id": "s0009",
+      "bib_key": "yetter2024atruenarrativeofth",
+      "section": "eager mode",
+      "relevance_score": 1,
+      "matched_keywords": [
+        "execution",
+        "three"
+      ],
+      "fallback": true
+    },
+    {
+      "sentence_id": "s0010",
+      "bib_key": "nvidia2022hopper",
+      "section": "eager mode",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "hopper"
+      ]
+    },
+    {
+      "sentence_id": "s0011",
+      "bib_key": "mishra2019finetuningdeeplear",
+      "section": "eager mode",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pytorch"
+      ]
+    },
+    {
+      "sentence_id": "s0012",
+      "bib_key": "yamazaki2024acceleratinganover",
+      "section": "graph mode",
       "relevance_score": 54,
       "matched_keywords": [
         "execution",
@@ -58,75 +132,16 @@
       ]
     },
     {
-      "sentence_id": "s0005",
-      "bib_key": "kirchheim2022pytorchoodalibrary",
-      "section": "Eager Mode",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "sentence_id": "s0006",
-      "bib_key": "taxbreak2026",
-      "section": "Eager Mode",
+      "sentence_id": "s0013",
+      "bib_key": "belev2022federalbudgetexecu",
+      "section": "graph mode",
       "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0007",
-      "bib_key": "yirage2026",
-      "section": "Eager Mode",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "YiRage"
-      ]
-    },
-    {
-      "sentence_id": "s0008",
-      "bib_key": "dao2022flashattention",
-      "section": "Eager Mode",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0009",
-      "bib_key": "chen2019crstateinkernelche",
-      "section": "Eager Mode",
-      "relevance_score": 36,
       "matched_keywords": [
         "execution",
-        "kernel"
-      ]
-    },
-    {
-      "sentence_id": "s0010",
-      "bib_key": "dao2023flashdecoding",
-      "section": "Eager Mode",
-      "relevance_score": 19,
-      "matched_keywords": [
-        "PyTorch",
-        "decode"
-      ]
-    },
-    {
-      "sentence_id": "s0011",
-      "bib_key": "liu2024deepseekv3",
-      "section": "Eager Mode",
-      "relevance_score": 1,
-      "matched_keywords": [],
-      "fallback": true
-    },
-    {
-      "sentence_id": "s0012",
-      "bib_key": "nvidia2022hopper",
-      "section": "Eager Mode",
-      "relevance_score": 1,
-      "matched_keywords": [],
+        "three"
+      ],
       "fallback": true
     }
   ],
-  "generated_at": "2026-06-10T03:19:39.799226"
+  "generated_at": "2026-06-10T09:10:02.581370"
 }

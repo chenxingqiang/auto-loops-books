@@ -1,20 +1,42 @@
 {
   "chapter_id": "ch21",
-  "pool_count": 23,
+  "pool_count": 45,
   "bib_keys": [
     "ludmir2024parallaxacompilerf",
+    "shibakov2026multimodelclinical",
+    "awab2026comparativeanalysi",
     "schmidt2024phdprojectcompiler",
+    "khandelwal2022offloadingcompiler",
     "yang2025automaticpowerelec",
     "bernardo2025compilerawareaihar",
     "schmalhofer2025nnhcaneuralnetwork",
+    "baglio2026crossplatformhardw",
+    "shuo2025acomparativestudyo",
+    "li2022crossmodalobjecttr",
+    "pinkston2026defenseindepthaigo",
+    "pasupuleti2024indiastatebenchmar",
+    "salunkhe2026intentwithoutenfor",
+    "anon2026crosscompilern",
+    "stuck2024usinglikwidandbyfl",
     "mantowsky2021proaianefficientem",
+    "stuck2024usinglikwidandbyfl_31",
+    "melnyk2019easyuniversaltrans",
+    "mssenbck2025thecompilergenerat",
+    "biggar2022buildingssainacomp",
     "cummins2025llmcompilerfoundat",
     "amarasinghe2019thesparsetensoralg",
+    "mzid2022useofcompilerinter",
+    "viszkok2025unifiedsastbenchma",
+    "he2025aunifiedmetricarch",
+    "cyranka2024unifiedlongtermtim",
     "yan2024uniguardaunifiedha",
     "yirage2026",
     "memoryfloor2026",
     "taxbreak2026",
+    "park2023softwareoverviewfo",
+    "diniz2022hardwarecompilatio",
     "patel2025llminference",
+    "n2025smartmailhubanaipo",
     "kwon2023vllm",
     "dao2023flashdecoding",
     "dao2022flashattention",
@@ -40,9 +62,47 @@
       ]
     },
     {
+      "bib_key": "shibakov2026multimodelclinical",
+      "title": "Multi-Model Clinical Validation of an AI-Powered Biomarker Analysis Framework: A Cross-Vendor Benchmark on 4,018 NHANES Patients",
+      "source_tier": "B",
+      "relevance_score": 75,
+      "matched_keywords": [
+        "benchmark",
+        "rating",
+        "analysis",
+        "independent",
+        "NPU",
+        "ship"
+      ]
+    },
+    {
+      "bib_key": "awab2026comparativeanalysi",
+      "title": "Comparative Analysis of the Energy, Water and Carbon Costs of AI Hardware",
+      "source_tier": "C",
+      "relevance_score": 65,
+      "matched_keywords": [
+        "hardware",
+        "analysis",
+        "GPU",
+        "NPU",
+        "production"
+      ]
+    },
+    {
       "bib_key": "schmidt2024phdprojectcompiler",
       "title": "Ph.D. Project: Compiler-Driven Hardware/Software Co- Design for Embedded AI",
       "source_tier": "A",
+      "relevance_score": 60,
+      "matched_keywords": [
+        "compile",
+        "compiler",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "khandelwal2022offloadingcompiler",
+      "title": "Offloading compiler to reduce pipeline dependencies through hardware interlocking by rebuilding MIPS",
+      "source_tier": "B",
       "relevance_score": 60,
       "matched_keywords": [
         "compile",
@@ -84,6 +144,94 @@
       ]
     },
     {
+      "bib_key": "baglio2026crossplatformhardw",
+      "title": "Cross-platform hardware benchmark of style-based quantum GANs for data augmentation on superconducting and trapped-ion processors",
+      "source_tier": "B",
+      "relevance_score": 58,
+      "matched_keywords": [
+        "benchmark",
+        "hardware",
+        "cross-hardware"
+      ]
+    },
+    {
+      "bib_key": "shuo2025acomparativestudyo",
+      "title": "A Comparative Study on the Axial Compression Stability Performance of CFST Columns with Different Cross-Sections: A Meta-Analysis Based on a Unified Benchmark",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "benchmark",
+        "analysis",
+        "unified"
+      ]
+    },
+    {
+      "bib_key": "li2022crossmodalobjecttr",
+      "title": "Cross-Modal Object Tracking: Modality-Aware Representations and A Unified Benchmark",
+      "source_tier": "B",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "benchmark",
+        "search",
+        "unified"
+      ]
+    },
+    {
+      "bib_key": "pinkston2026defenseindepthaigo",
+      "title": "Defense-in-Depth AI Governance Combining Pre-Inference and Post-Inference Detection for Robust Safety Assurance Empirical Cross-Model Benchmark Results 3 Frontier Models • Red Team Corpus • CyberGym Exploit Benchmark",
+      "source_tier": "C",
+      "relevance_score": 48,
+      "matched_keywords": [
+        "benchmark",
+        "rating",
+        "analysis",
+        "NPU"
+      ]
+    },
+    {
+      "bib_key": "pasupuleti2024indiastatebenchmar",
+      "title": "India State Benchmark of Healthcare AI: A Comparative Cross-Layer Study with G20 And BRICS Reference Pathways",
+      "source_tier": "B",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "benchmark",
+        "analysis",
+        "fusion",
+        "miss"
+      ]
+    },
+    {
+      "bib_key": "salunkhe2026intentwithoutenfor",
+      "title": "Intent Without Enforcement: A Regulatory Gap Analysis of AI Hardware Circularity",
+      "source_tier": "C",
+      "relevance_score": 47,
+      "matched_keywords": [
+        "hardware",
+        "analysis",
+        "cross-hardware"
+      ]
+    },
+    {
+      "bib_key": "anon2026crosscompilern",
+      "title": "cross-compiler, n.",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "stuck2024usinglikwidandbyfl",
+      "title": "Using Likwid and Byfl to Benchmark Hardware Performance",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "benchmark",
+        "hardware"
+      ]
+    },
+    {
       "bib_key": "mantowsky2021proaianefficientem",
       "title": "ProAI: An Efficient Embedded AI Hardware for Automotive Applications – a Benchmark Study",
       "source_tier": "A",
@@ -91,6 +239,46 @@
       "matched_keywords": [
         "benchmark",
         "hardware"
+      ]
+    },
+    {
+      "bib_key": "stuck2024usinglikwidandbyfl_31",
+      "title": "Using Likwid and Byfl to Benchmark Hardware Performance [Poster]",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "benchmark",
+        "hardware"
+      ]
+    },
+    {
+      "bib_key": "melnyk2019easyuniversaltrans",
+      "title": "Easy Universal Translator as an Alternative Compiler-Compiler",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "mssenbck2025thecompilergenerat",
+      "title": "The Compiler Generator Coco/R",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "biggar2022buildingssainacomp",
+      "title": "Building SSA in a Compiler for PHP",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
       ]
     },
     {
@@ -111,6 +299,46 @@
       "matched_keywords": [
         "compile",
         "compiler"
+      ]
+    },
+    {
+      "bib_key": "mzid2022useofcompilerinter",
+      "title": "Use of Compiler Intermediate Representation for Reverse Engineering: A Case Study for GCC Compiler and UML Activity Diagram",
+      "source_tier": "B",
+      "relevance_score": 40,
+      "matched_keywords": [
+        "compile",
+        "compiler"
+      ]
+    },
+    {
+      "bib_key": "viszkok2025unifiedsastbenchma",
+      "title": "Unified Sast Benchmark: Compare AI-Driven and Traditional Static Analyzers",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "benchmark",
+        "unified"
+      ]
+    },
+    {
+      "bib_key": "he2025aunifiedmetricarch",
+      "title": "A Unified Metric Architecture for AI Infrastructure: A Cross-Layer Taxonomy Integrating Economics, Performance, and Efficiency",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "rating",
+        "unified"
+      ]
+    },
+    {
+      "bib_key": "cyranka2024unifiedlongtermtim",
+      "title": "Unified Long-Term Time Series Forecasting  Benchmark",
+      "source_tier": "C",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "benchmark",
+        "unified"
       ]
     },
     {
@@ -153,12 +381,39 @@
       ]
     },
     {
+      "bib_key": "park2023softwareoverviewfo",
+      "title": "Software Overview for On-Device AI and ML Benchmark in Smartphones",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "benchmark"
+      ]
+    },
+    {
+      "bib_key": "diniz2022hardwarecompilatio",
+      "title": "Hardware Compilation Using SSA",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "hardware"
+      ]
+    },
+    {
       "bib_key": "patel2025llminference",
       "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "n2025smartmailhubanaipo",
+      "title": "SmartMail Hub: An AI-Powered Unified Interface for Cross-Platform Email Management",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "unified"
       ]
     },
     {

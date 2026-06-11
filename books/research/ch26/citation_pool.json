@@ -1,10 +1,58 @@
 {
   "chapter_id": "ch26",
-  "pool_count": 14,
+  "pool_count": 62,
   "bib_keys": [
+    "maafri2025successfuldeployme",
+    "thomas2026bestpracticesforac",
+    "piridi2025crossenvironmentde",
+    "kalimuthu2025integratingdevopsp",
+    "jayabalan2025endtoend5gnetworkd",
+    "payyambally2025aiguardrailsandbes",
+    "bagai2024bestpracticesforse",
+    "sanni2025multicloudcontaine",
+    "bhatia2026aiguardrailsbestpr",
+    "varma2025optimizingmachinel",
+    "anon2019deploymentbestprac",
+    "islavath2021jenkinsforcontinuo",
+    "zhang2021bestpracticesofclo",
+    "menon2018analogizinghybridr",
+    "yadav2024aisystemsengineeri",
+    "kadiyala2023hybridclouddeploym",
+    "anon2021caribbeannetherlan",
+    "anon2023analyticalplatform",
+    "urniaz2024shinywizardaninter",
+    "doe2023sustainabilityinpr",
+    "wurster2020cloudnativedeploya",
+    "modi2021terraformbestpract",
+    "sabharwal2023tooladministration",
+    "stencel2025bestpracticesinkub",
     "memoryfloor2026",
     "yirage2026",
+    "anon2023deployn",
+    "ifrah2019deployacontaineriz",
+    "anon2020deploy",
+    "udayakumar2023designanddeployare",
+    "mattson2024deploytheenterpris",
+    "anon2023deployv",
+    "ifrah2021deploycontainerize",
+    "ifrah2020deploydockercontai",
+    "ifrah2021deploycontainerswi",
+    "ifrah2020deploycontainerize",
+    "anon2020failuretodeploy",
+    "mattson2024thechallengetodepl",
+    "udayakumar2024deploymicrosoftdef",
+    "udayakumar2023designanddeployade",
+    "udayakumar2023designanddeployare_54",
+    "ifrah2020deploycontainerize_55",
+    "udayakumar2023designanddeployani",
+    "ifrah2021deploydockercontai",
+    "udayakumar2023designanddeploysec",
+    "luraschi2019tfdeploydeploytens",
+    "udayakumar2023designanddeployapr",
+    "udayakumar2023designanddeployapr_61",
+    "udayakumar2023designanddeployapr_63",
     "patel2025llminference",
+    "anon2024frontmatterforbrid",
     "dao2023flashdecoding",
     "taxbreak2026",
     "dao2022flashattention",
@@ -18,6 +66,305 @@
     "dlbook"
   ],
   "papers": [
+    {
+      "bib_key": "maafri2025successfuldeployme",
+      "title": "Successful Deployment of Stiff Lower Completion Assembly in Harsh Drilling Environment: Engineering Analysis, Best Practices, and Lessons Learned",
+      "source_tier": "B",
+      "relevance_score": 171,
+      "matched_keywords": [
+        "production deployment and engineering best practices",
+        "operation production",
+        "deploy",
+        "lesson",
+        "operation",
+        "production",
+        "best",
+        "deployment",
+        "engineering",
+        "practices",
+        "treat"
+      ]
+    },
+    {
+      "bib_key": "thomas2026bestpracticesforac",
+      "title": "Best Practices for Accelerated Screening and Deployment of Polymer Flooding: Engineering Workflows and Field Learnings",
+      "source_tier": "B",
+      "relevance_score": 156,
+      "matched_keywords": [
+        "production deployment and engineering best practices",
+        "deploy",
+        "production",
+        "best",
+        "constraints",
+        "deployment",
+        "engineering",
+        "miss",
+        "practices",
+        "surface",
+        "treat"
+      ]
+    },
+    {
+      "bib_key": "piridi2025crossenvironmentde",
+      "title": "Cross-Environment Deployment Strategies for Power Platform Solutions – Investigating best practices for managing multi-environment deployments, from development to production, using managed environments and DevOps",
+      "source_tier": "B",
+      "relevance_score": 144,
+      "matched_keywords": [
+        "multi HW ops",
+        "operation production",
+        "deploy",
+        "operation",
+        "production",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "kalimuthu2025integratingdevopsp",
+      "title": "Integrating DevOps Principles into the Deployment Lifecycle of Distributed IoT Systems: Challenges and Best Practices",
+      "source_tier": "B",
+      "relevance_score": 97,
+      "matched_keywords": [
+        "multi HW ops",
+        "deploy",
+        "best",
+        "deployment",
+        "practices",
+        "surface"
+      ]
+    },
+    {
+      "bib_key": "jayabalan2025endtoend5gnetworkd",
+      "title": "End-to-End 5G network deployment on public cloud challenges and best practices",
+      "source_tier": "B",
+      "relevance_score": 84,
+      "matched_keywords": [
+        "deploy",
+        "operation",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "payyambally2025aiguardrailsandbes",
+      "title": "AI Guardrails and Best Practices for Ethical, Safe, and Effective AI Deployment",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "bagai2024bestpracticesforse",
+      "title": "Best Practices for Secure Model Deployment on AWS",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "sanni2025multicloudcontaine",
+      "title": "Multi-cloud Container Deployment: An Investigation into Strategies, Challenges and Best Practices",
+      "source_tier": "C",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "bhatia2026aiguardrailsbestpr",
+      "title": "AI Guardrails: Best Practices for Ethical, Safe, and Effective Deployment",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "varma2025optimizingmachinel",
+      "title": "Optimizing Machine Learning Pipelines: Best Practices for Scalable and Efficient Model Deployment",
+      "source_tier": "C",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "anon2019deploymentbestprac",
+      "title": "Deployment Best Practices",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "islavath2021jenkinsforcontinuo",
+      "title": "Jenkins for Continuous Integration and Deployment in DevOps Engineer: A Deep Dive into Features and Best Practices",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "zhang2021bestpracticesofclo",
+      "title": "Best Practices of Cloud DCN Deployment",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "menon2018analogizinghybridr",
+      "title": "Analogizing Hybrid Reservoirs Reservoir Engineering and Production Best Practices",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "production",
+        "best",
+        "engineering",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "yadav2024aisystemsengineeri",
+      "title": "AI Systems Engineering: Infrastructure Design Principles, Serving Optimization, and Production Best Practices",
+      "source_tier": "C",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "production",
+        "best",
+        "engineering",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "kadiyala2023hybridclouddeploym",
+      "title": "Hybrid Cloud Deployment: Best Practices for Application Engineers",
+      "source_tier": "C",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "anon2021caribbeannetherlan",
+      "title": "Caribbean Netherlands System Deployment Best Practices",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "anon2023analyticalplatform",
+      "title": "Analytical platform PolyAnalyst: architecture, functionality, deployment, best practices",
+      "source_tier": "B",
+      "relevance_score": 74,
+      "matched_keywords": [
+        "deploy",
+        "best",
+        "deployment",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "urniaz2024shinywizardaninter",
+      "title": "ShinyWizard: An Interactive Wizard to Design, Build, and Deploy R Packages Demo Presentation",
+      "source_tier": "B",
+      "relevance_score": 64,
+      "matched_keywords": [
+        "deploy packag",
+        "deploy",
+        "packag"
+      ]
+    },
+    {
+      "bib_key": "doe2023sustainabilityinpr",
+      "title": "Sustainability in Production Systems: A Systematic Review of Best Practices",
+      "source_tier": "B",
+      "relevance_score": 56,
+      "matched_keywords": [
+        "production",
+        "best",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "wurster2020cloudnativedeploya",
+      "title": "Cloud-native Deploy-ability: An Analysis of Required Features of Deployment Technologies to Deploy Arbitrary Cloud-native Applications",
+      "source_tier": "B",
+      "relevance_score": 38,
+      "matched_keywords": [
+        "deploy",
+        "deployment"
+      ]
+    },
+    {
+      "bib_key": "modi2021terraformbestpract",
+      "title": "Terraform Best Practices",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "sabharwal2023tooladministration",
+      "title": "Tool Administration and Best Practices",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ]
+    },
+    {
+      "bib_key": "stencel2025bestpracticesinkub",
+      "title": "Best Practices in Kubernetes",
+      "source_tier": "B",
+      "relevance_score": 36,
+      "matched_keywords": [
+        "best",
+        "practices"
+      ]
+    },
     {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
@@ -39,12 +386,228 @@
       ]
     },
     {
+      "bib_key": "anon2023deployn",
+      "title": "deploy, n.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2019deployacontaineriz",
+      "title": "Deploy a Containerized Application with Amazon EKS",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "anon2020deploy",
+      "title": "Deploy",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployare",
+      "title": "Design and Deploy a Respond Solution",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "mattson2024deploytheenterpris",
+      "title": "Deploy the Enterprise System",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "anon2023deployv",
+      "title": "deploy, v.",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2021deploycontainerize",
+      "title": "Deploy Containerized Applications with Google Kubernetes Engine (GKE)",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2020deploydockercontai",
+      "title": "Deploy Docker Container Host on Azure Virtual Machine",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2021deploycontainerswi",
+      "title": "Deploy Containers with Cloud Run",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2020deploycontainerize",
+      "title": "Deploy Containerized Applications with Azure Kubernetes Service (AKS)",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "anon2020failuretodeploy",
+      "title": "Failure to Deploy",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "mattson2024thechallengetodepl",
+      "title": "The Challenge to Deploy Enterprise Systems",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2024deploymicrosoftdef",
+      "title": "Deploy Microsoft Defender for IoT",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployade",
+      "title": "Design and Deploy a Detect Solution",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployare_54",
+      "title": "Design and Deploy a Recovery Solution",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2020deploycontainerize_55",
+      "title": "Deploy Containerized Applications with Azure Container Instances (ACI)",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployani",
+      "title": "Design and Deploy an Identify Solution",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "ifrah2021deploydockercontai",
+      "title": "Deploy Docker Containers on GCP Compute Engine",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeploysec",
+      "title": "Design and Deploy Security for Infrastructure, Data, and Applications",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "luraschi2019tfdeploydeploytens",
+      "title": "tfdeploy: Deploy 'TensorFlow' Models",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr",
+      "title": "Design and Deploy a Protect Solution: Part 2",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr_61",
+      "title": "Design and Deploy a Protect Solution: Part 3",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
+      "bib_key": "udayakumar2023designanddeployapr_63",
+      "title": "Design and Deploy a Protect Solution: Part 1",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "deploy"
+      ]
+    },
+    {
       "bib_key": "patel2025llminference",
       "title": "LIMINAL: Exploring The Frontiers of LLM Decode Performance",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
+      ]
+    },
+    {
+      "bib_key": "anon2024frontmatterforbrid",
+      "title": "Front matter for Bridge Demolition Engineering",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "engineering"
       ]
     },
     {
