@@ -2,9 +2,13 @@
 \label{chap:ch12}
 \typeout{START_CHAPTER "ch12" \theabspage}
 
-Parts~I--II established decode metrics and hardware contracts; \emph{Three Kernel Execution Modes} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+Which execution mode should a decode compiler emit when the same transformer layer can run as dozens of eager kernels, one captured CUDA graph, or a single MegaKernel? Parts~I--II established bytes/token and launches/token as the honest counters; this chapter maps those counters to three industrial schedules---\textbf{eager}, \textbf{graph}, and \textbf{MegaKernel}---and shows why picking the wrong mode leaves p99 latency flat even when microbenchmark GEMMs improve \citep{patel2025llminference,taxbreak2026,memoryfloor2026}. The answer is always profile-first, never mode-first \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,nvidia2024cudagraphs,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}. Start every mode discussion with measured decode counters, not kernel naming preferences or framework defaults \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}. That discipline keeps mode debates grounded in goodput evidence \citep{patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}.
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic when fusion boundaries still export activations \citep{memoryfloor2026,nvidia2024cudagraphs}. The engineering question is not ``which mode is fastest in isolation'' but which mode matches residency legality on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna}.
+
+This chapter is the scheduling counterpart to Chapter~1's symptom vocabulary: prefill and decode differ, frameworks fragment decode, and counters decompose latency into bytes and launches \citep{patel2025llminference,taxbreak2026,memoryfloor2026}. Execution mode is where those counters meet compiler output---choose eager when you must diff every op; choose graphs when launches/token exceed kernel time; choose MegaKernels when bytes/token remain high after graph replay \citep{nvidia2024cudagraphs,yirage2026,dao2022flashattention,kwon2023vllm}. Goodput for decode remains ms/token weighted by useful tokens delivered, not peak tensor FLOPs \citep{dlbook,patel2025llminference,semianalysis2024tma}.
+
+Fregly's profile-first culture applies directly: Nsight and roofline charts justify mode changes more than kernel names \citep{patel2025llminference,semianalysis2024tma,memoryfloor2026,taxbreak2026}. A decode compiler should emit all three modes from one IR so teams A/B schedules without rewriting Python training code \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,kwon2023vllm,liu2024deepseekv3,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. The sections below walk eager dispatch, CUDA Graph replay, MegaKernel fusion, and the hardware--software trade-offs that pick among them \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,amd2024aie}.
 
 \section{eager mode}
 \label{sec:ch12_eager_mode}
@@ -14,31 +18,41 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Eager Mode};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Eager dispatch};
  \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\Optional partial fusion};
  \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Eager Mode optimization pipeline in Three Kernel Execution Modes.}
+\caption{Eager mode: each operator boundary is a host-visible dispatch unless the framework fuses locally.}
 \label{fig:eager_mode_pipeline}
 \end{figure}
 
-Teams hit \textbf{eager mode} when Three Kernel Execution Modes looks correct in isolation yet decode telemetry disagrees---usually because eager was planned without PyTorch residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+\textbf{Eager mode} is the default PyTorch and Hugging Face path: every matmul, norm, and attention sub-block becomes at least one kernel with materialized intermediates in HBM \citep{kwon2023vllm,patel2025llminference}. Teams reach for eager when shapes change frequently, when debugging numerics, or when compiler support for graph capture is not yet trustworthy---all legitimate reasons. The production failure mode is staying in eager after decode telemetry proves launch storms and bytes/token dominate FLOPs \citep{taxbreak2026,memoryfloor2026}.
 
-Hardware truth: GPUs bound eager with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Hardware binds eager differently on each target. Hopper decode cells hit shared-memory/TMA budgets and warp-grain synchronization when partial fusions leave KV edges off-chip \citep{nvidia2022hopper,semianalysis2024tma}. XDNA/AIE rejects dynamic buffer lifetimes: eager schedules that legalize on GPU often violate static tile slots and DMA chains on NPU fleets \citep{amd2024xdna,amd2024aie}. CPU decode is cache- and NUMA-bound: unfused norms and MLPs evict KV lines that a blocked schedule could keep resident \citep{dlbook,chen2020compilerbasedhardw}.
 
-Compiler/kernel fix: predicate fusion on eager/PyTorch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Compiler takeaway: treat eager as the \emph{reference schedule}, not the shipping schedule. YiRage and similar stacks lower the same decoder IR but emit target-specific residency metadata before codegen so eager baselines can be diffed against fused variants on identical context buckets \citep{yirage2026,chen2020compilerbasedhardw}. Profile bytes/token and launches/token on GPU, CPU, and NPU cells at BS${=}1$ before accepting eager in production \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize eager with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked PyTorch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Operator-fragmented eager stacks mirror Chapter~1's framework diagnosis: layer norm, QKV, attention, MLP, and residual each become export/import pairs to HBM \citep{patel2025llminference,kwon2023vllm,taxbreak2026}. SDPA backend swaps may change attention internals without collapsing MLP boundaries---teams celebrate faster attention while total bytes/token stalls \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026,yirage2026}. Eager mode documentation should list \emph{every} host-visible kernel in a decode step, not only the slowest microbench \citep{taxbreak2026,nvidia2024cudagraphs,semianalysis2024tma,amd2024xdna,dlbook,chen2020compilerbasedhardw,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper eager may double-buffer KV with TMA while an XDNA cell must express the same math as static tile assignments---identical FLOPs, different bytes/token when DDR traffic differs by an order of magnitude \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+CPU eager baselines use OpenMP or oneDNN threads; NPU eager is often unavailable---fallback host loops dominate power and latency \citep{dlbook,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}. Triplet regression therefore compares \emph{lowest legal mode} per target, not identical mode names across vendors \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,amd2024aie,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}. Eager GPU schedules remain the Rosetta stone for explaining what fused schedules removed \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused eager raises bytes/token; fused schedule must keep PyTorch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Decode cell (BS${=}1$, ctx${=}2048$): unfused eager on Qwen-class stacks issues hundreds of launches per step; even perfect GEMM tiles cannot recover p99 if orchestration alone consumes tens of milliseconds per token \citep{taxbreak2026,nvidia2024cudagraphs,memoryfloor2026}.
 \end{example}
 
-\paragraph{Scope.} This section binds eager, PyTorch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+PyTorch scaled dot-product attention and vendor libraries can hide some eager boundaries on prefill shapes, but batch-1 decode often swaps backends without changing launches/token \citep{patel2025llminference,dao2022flashattention,kwon2023vllm}. vLLM improves KV capacity and batching yet leaves intra-layer operator splits unless a compiler reunifies them \citep{kwon2023vllm,taxbreak2026}. Treat eager PyTorch forwards as the \emph{diff target} for graph and MegaKernel schedules: same IR, same metrics, different residency \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+
+Industrial teams keep a frozen eager baseline in CI: every graph capture or MegaKernel PR must show non-regression on bytes/token at BS${=}1$ for context buckets $\{512,2048,8192\}$ before merge \citep{memoryfloor2026,taxbreak2026,patel2025llminference}. When eager and fused schedules diverge only on launches, graph mode is sufficient; when bytes diverge, MegaKernel legality is the gating issue \citep{nvidia2024cudagraphs,yirage2026,amd2024xdna}.
+
+FlashAttention and Flash-Decoding reduce attention bytes in both eager and fused stacks, but MLP, norm, rotary, and sampling logic often remain separate kernels unless MegaKernel plans reunify them \citep{dao2022flashattention,dao2023flashdecoding,kwon2023vllm,taxbreak2026}. Eager mode therefore remains the diagnostic surface: if attention bytes fall yet total bytes/token flatlines, the unfused boundaries live in MLP/residual paths---graph capture without MegaKernel fusion fixes only half the story \citep{memoryfloor2026,yirage2026,patel2025llminference,semianalysis2024tma,nvidia2022hopper}.
+
+Sampling and speculative decoding paths frequently force eager fallbacks: temperature, top-$p$, and draft-model branches mutate control flow in ways CUDA Graph capture forbids unless isolated outside the captured DAG \citep{kwon2023vllm,patel2025llminference,taxbreak2026,nvidia2024cudagraphs}. Production stacks therefore run eager ``hulls'' around graph cores---another reason mode selection is per subgraph, not per binary \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,amd2024xdna,amd2024aie,dlbook,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,dao2023flashdecoding}. Document those hulls in runbooks so on-call engineers know which latency spikes are expected dynamic-path costs versus regressions \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,kwon2023vllm,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,dlbook,liu2024deepseekv3,dao2022flashattention,amd2024aie,semianalysis2024tma,nvidia2022hopper,dao2023flashdecoding}.
 
 \section{graph mode}
 \label{sec:ch12_graph_mode}
@@ -48,221 +62,148 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused eager raises bytes/token; fused sc
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\Capture once};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\Static DAG};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\Replay launches};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\KV / weights};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Graph Mode block diagram for Three Kernel Execution Modes.}
+\caption{Graph mode: CUDA Graphs replay a fixed kernel DAG with one submission per decode step.}
 \label{fig:graph_mode_architecture}
 \end{figure}
 
-The production surprise at \textbf{graph mode} is not peak FLOPs; it is illegal tier placement: CUDA Graphs spilling to HBM/DDR while CUDA Graphs still pays launch or DMA tax every token \citep{taxbreak2026,nvidia2024cudagraphs}.
+\textbf{Graph mode} attacks orchestration, not arithmetic. CUDA Graphs record a static kernel DAG once and replay it with a single host submission, amortizing Python dispatch and driver launch \citep{nvidia2024cudagraphs,memoryfloor2026}. The surprise in production is not peak FLOPs regression---it is illegal tier placement: captured graphs still spill activations to HBM when fusion boundaries were never merged, so bytes/token flatlines while launch counts look healthy \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
 
-Trace residency: CUDA Graphs producers must feed CUDA Graphs consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Memory-Floor's controlled A/B on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) reports $1.259\times$ median speedup on H100 from graph replay alone---roughly 3.05\,ms of host overhead removed per step \citep{memoryfloor2026}. On bandwidth-saturated SKUs the same trick yields only ${\approx}1.03\times$ because $R_{\mathrm{floor}}$ is already near the HBM roofline: graphs fix launches, not bytes \citep{memoryfloor2026,semianalysis2024tma}. Graph mode therefore wins when TaxBreak-style counters show launch-bound decode, not when DRAM bytes dominate \citep{taxbreak2026}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Replayed graphs still execute the same fused or unfused kernel sequence---they do not merge operators \citep{nvidia2024cudagraphs,memoryfloor2026,yirage2026}. Teams celebrating graph speedups without operator fusion should expect the next plateau when bytes/token remain at eager levels \citep{taxbreak2026,patel2025llminference,dao2022flashattention,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,yirage2026}. That plateau is the handoff to MegaKernel mode \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for CUDA Graphs on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Operational constraints: capture requires stable addresses, static shapes within a bucket, and no implicit allocations inside the captured region \citep{nvidia2024cudagraphs,kwon2023vllm}. Compiler stacks must partition decode into \emph{capture-safe cells}---often one layer block or attention--MLP seam---and re-capture when context length crosses bucket boundaries \citep{yirage2026,chen2020compilerbasedhardw}. On XDNA, graph analogs are compile-time static schedules, not runtime CUDA capture \citep{amd2024aie,amd2024xdna}.
 
-\paragraph{Scope.} This section binds CUDA Graphs to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Graph mode does not relax memory-bandwidth limits quantified by $R_{\mathrm{floor}}$ in Memory-Floor studies: when analytic HBM throughput is already saturated, replay only shaves host time \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference}. Teams should publish both eager and graph traces with launches/token \emph{and} bytes/token side by side---otherwise leadership misreads a 1.25$\times$ graph win as permission to skip MegaKernel investment \citep{taxbreak2026,nvidia2024cudagraphs,yirage2026,amd2024xdna,dlbook,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding}.
+
+\paragraph{Multi-hardware delta.} GPU graph mode collapses launches/token; CPU stacks use similar ``frozen schedule'' ideas via JIT or ORT session plans; NPU fleets require fully static dataflow with DMA edges counted like launches \citep{dlbook,amd2024xdna,chen2020compilerbasedhardw}.
+
+\begin{example}
+If decode is launch-bound on H100 (low $R_{\mathrm{floor}}$, high launches/token), graph replay is the first lever---after verifying KV and weight residency still fit capture legality \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026}.
+\end{example}
+
+Graph capture interacts badly with dynamic sampling, speculative decoding branches, and MoE routing unless those paths are lifted outside the captured region \citep{taxbreak2026,liu2024deepseekv3,kwon2023vllm}. Compiler lowering should emit \emph{graph shells} around stable decoder cores while leaving host-controlled branches eager---mixing modes inside one layer is normal, not a failure \citep{yirage2026,chen2020compilerbasedhardw,nvidia2024cudagraphs}. DeepSeek-class deployments still disaggregate prefill and decode pools; graph mode applies per pool, not as a universal whole-model wrapper \citep{patel2025llminference,liu2024deepseekv3}.
+
+On CPU, ``graph mode'' manifests as frozen execution plans (TorchInductor, ONNX Runtime) with the same trade: amortized dispatch versus static shape buckets \citep{dlbook,chen2020compilerbasedhardw}. Profile whether replay removed host time or simply hid it in compilation caches before claiming decode wins \citep{memoryfloor2026,patel2025llminference,taxbreak2026}.
+
+CUDA Graph pitfalls include unintended synchronizations inside captured regions, allocator churn from missed caching, and shape drift when KV length crosses bucket boundaries \citep{nvidia2024cudagraphs,kwon2023vllm,memoryfloor2026}. Operational playbooks bucket context lengths explicitly---for example powers of two---and re-capture graphs per bucket rather than capturing one mega-graph per model \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw}. When graphs replay but bytes/token unchanged, the next lever is MegaKernel fusion inside the captured DAG, not longer capture windows \citep{taxbreak2026,dao2022flashattention,semianalysis2024tma,amd2024xdna}.
+
+Warmup and capture-time allocation dominate CI stories: first-token latency includes graph recording unless caches are primed \citep{nvidia2024cudagraphs,kwon2023vllm,patel2025llminference,memoryfloor2026}. Separate ``steady-state decode'' metrics from ``cold start'' when comparing modes---Fregly-style goodput analysis always states which phase is measured \citep{patel2025llminference,taxbreak2026,dlbook,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,kwon2023vllm}. Graph mode wins appear only after warmup when launch storms were the bottleneck \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,dlbook,dao2022flashattention,amd2024aie,semianalysis2024tma,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,kwon2023vllm}.
 
 \section{MegaKernel mode}
 \label{sec:ch12_megakernel_mode}
 
-\textbf{MegaKernel mode} is where Three Kernel Execution Modes meets Chapter~1 counters: fix MegaKernel and MegaKernel together or bytes/token flatlines while kernel microbenchs celebrate \citep{taxbreak2026,nvidia2024cudagraphs}.
+\textbf{MegaKernel mode} is the decode compiler's endgame: one (or few) device programs per layer that keep QKV, online softmax carriers, MLP activations, and residuals on-chip across seams introduced in Chapters~10--11 \citep{dao2022flashattention,yirage2026,taxbreak2026}. Graphs remove host tax; MegaKernels remove \emph{HBM round trips} between sub-blocks that eager and graph modes still tolerate \citep{memoryfloor2026,patel2025llminference}.
 
-Hardware truth: GPUs bound MegaKernel with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Legality is the bottleneck. Hopper MegaKernels require shared-memory/TMA budgets that fit fused attention--MLP regions; illegal fusion silently exports tensors and shows up as bytes/token regression versus an unfused baseline \citep{nvidia2022hopper,semianalysis2024tma,memoryfloor2026}. XDNA MegaKernels map to static tile buffers and carrier slots with compile-time lifetimes---the same subgraph legal on GPU may be rejected outright on NPU \citep{amd2024xdna,amd2024aie,yirage2026}. CPU MegaKernels appear as cache-blocked super-kernels with NUMA-local KV placement \citep{dlbook,chen2020compilerbasedhardw}. Register and shared-memory overflow during fusion forces spill to HBM---the failure mode looks like a bandwidth problem in profiles but originates in legality \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,nvidia2022hopper,taxbreak2026,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2024cudagraphs}.
 
-Compiler/kernel fix: predicate fusion on MegaKernel/MegaKernel legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+YiRage encodes residency rules from Chapter~2 as checkable IR metadata so MegaKernel plans fail in the compiler rather than in fleet A/B \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3}. Manual CUDA teams should treat failed legality as a release blocker: shipping a GPU-only MegaKernel to heterogeneous fleets recreates the framework fragmentation this book removes \citep{patel2025llminference,kwon2023vllm}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize MegaKernel with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked MegaKernel---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+MegaKernel reviews should attach roofline or buffer accounting for fused regions---registers, shared memory, TMA slots, or XDNA tile carriers---before merge, matching the profile-first culture in Chapter~1 \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,amd2024aie,amd2024xdna,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,taxbreak2026,nvidia2024cudagraphs,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding}. Fusion that lowers launches but raises bytes is a regression even if nsys screenshots look busy \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Multi-hardware delta.} Identical decoder math can yield 847 launches/token in eager TaxBreak cells versus one replayed graph versus one MegaKernel---but only the MegaKernel path simultaneously cuts bytes/token when fusion keeps KV and activations on-chip \citep{taxbreak2026,nvidia2024cudagraphs,memoryfloor2026,yirage2026}.
+
+XDNA MegaKernels compile to AIE dataflow graphs with fixed DMA edges; Hopper MegaKernels compile to CUDA with TMA and DSM \citep{amd2024xdna,amd2024aie,nvidia2022hopper,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw}. A fusion plan exported from GPU development must be re-validated on NPU---shared IR does not imply shared legality \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding,amd2024aie}. MegaKernel mode is the point where cross-hardware compilation pays off or fails loudly \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,amd2024aie,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused MegaKernel raises bytes/token; fused schedule must keep MegaKernel on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Decode cell (BS${=}1$, ctx${=}2048$): a legal Hopper MegaKernel fusing attention softmax carriers with the following MLP must show lower bytes/token \emph{and} lower launches/token versus graph replay alone; otherwise fusion did not reach on-chip residency \citep{dao2022flashattention,memoryfloor2026,yirage2026}.
 \end{example}
 
-\paragraph{Scope.} This section binds MegaKernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+MegaKernel mode inherits numerics from Chapter~10: online softmax carriers $(m,\ell,o)$ must survive the KV loop inside the same register/shared-memory budget as the following GEMM \citep{dao2022flashattention,dao2023flashdecoding,yirage2026}. Chapter~11 extends the same carriers across attention--MLP seams; attempting MegaKernel fusion without stable softmax state forces silent HBM spill \citep{taxbreak2026,memoryfloor2026,semianalysis2024tma}. Compiler passes should reject fusion plans that export carriers between subgraphs \citep{yirage2026,chen2020compilerbasedhardw,amd2024aie}.
+
+MoE decode adds routing and expert gather/scatter inside the MegaKernel envelope---TaxBreak shows MoE models at 6k--9k launches/token in eager cells, so MegaKernel plans must collapse expert dispatch edges, not only attention \citep{taxbreak2026,liu2024deepseekv3,kwon2023vllm}. When expert routing stays host-visible, hybrid schedules (graph shell + MegaKernel core) beat pure eager without pretending full-layer fusion is legal \citep{nvidia2024cudagraphs,yirage2026,patel2025llminference}.
+
+Blackwell and Hopper DSM/TMA features widen fusion envelopes but do not remove legality checks: double-buffered KV movement still requires planned barriers and shared-memory accounting \citep{nvidia2022hopper,semianalysis2024tma,memoryfloor2026}. Manual CUDA MegaKernels should document buffer lifetimes the way YiRage encodes them in IR---otherwise maintenance regressions show up first as silent bytes/token drift, not compile failures \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,amd2024aie,dlbook}.
+
+Persistent MegaKernels---kernels that stay resident across tokens while updating KV pointers---blur the line between graph replay and fusion \citep{nvidia2024cudagraphs,taxbreak2026,yirage2026,memoryfloor2026}. Treat them as MegaKernel mode with graph-like launch behavior: the win is still bytes/token and carrier residency, not fewer lines of CUDA for its own sake \citep{dao2022flashattention,patel2025llminference,semianalysis2024tma,amd2024xdna,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,dlbook,amd2024aie,nvidia2022hopper,dao2023flashdecoding,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,yirage2026}. Reviewers should ask for Nsight memory charts on fused regions, not only kernel duration histograms \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,amd2024xdna,amd2024aie,nvidia2022hopper,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2024cudagraphs}.
 
 \section{mode selection}
 \label{sec:ch12_mode_selection}
 
-Teams hit \textbf{mode selection} when Three Kernel Execution Modes looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without trade residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: hardware producers must feed trade consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, trade to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{Chapter Summary}
-\label{sec:ch12_summary}
-
-Three Kernel Execution Modes succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch12_eager_mode}, Section~\ref{sec:ch12_graph_mode}, Section~\ref{sec:ch12_megakernel_mode} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
-
-\textbf{eager mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode eager/PyTorch legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When eager mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Three Kernel Execution Modes failure at \textbf{graph mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: CUDA Graphs and CUDA Graphs must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for graph mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-Production teams misread \textbf{MegaKernel mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: MegaKernel sets the residency envelope; MegaKernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify MegaKernel, MegaKernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\textbf{mode selection} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode hardware/trade legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When mode selection disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{eager mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: eager sets the residency envelope; PyTorch determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify eager, PyTorch, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: PyTorch constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{graph mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode CUDA Graphs/CUDA Graphs legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When graph mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting graph mode, attach roofline or NPU buffer accounting showing CUDA Graphs residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-The usual Three Kernel Execution Modes failure at \textbf{MegaKernel mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: MegaKernel and MegaKernel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for MegaKernel mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize MegaKernel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-Production teams misread \textbf{mode selection} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: hardware sets the residency envelope; trade determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify hardware, trade, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trade constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-The usual Three Kernel Execution Modes failure at \textbf{eager mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: eager and PyTorch must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for eager mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: PyTorch constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{graph mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: CUDA Graphs sets the residency envelope; CUDA Graphs determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify CUDA Graphs, CUDA Graphs, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting graph mode, attach roofline or NPU buffer accounting showing CUDA Graphs residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\textbf{MegaKernel mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode MegaKernel/MegaKernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When MegaKernel mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize MegaKernel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-The usual Three Kernel Execution Modes failure at \textbf{mode selection} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: hardware and trade must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for mode selection: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trade constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\textbf{eager mode} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode eager/PyTorch legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When eager mode disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting eager mode, attach roofline or NPU buffer accounting showing eager residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize eager with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Three Kernel Execution Modes failure at \textbf{graph mode} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: CUDA Graphs and CUDA Graphs must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for graph mode: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize CUDA Graphs with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CUDA Graphs constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-Production teams misread \textbf{MegaKernel mode} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: MegaKernel sets the residency envelope; MegaKernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify MegaKernel, MegaKernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: MegaKernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel mode, attach roofline or NPU buffer accounting showing MegaKernel residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\textbf{mode selection} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode hardware/trade legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When mode selection disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting mode selection, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+\textbf{Mode selection} is a profile-first decision tree, not a stylistic preference. Start from measured launches/token and bytes/token on the target SKU at the context buckets you ship \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. If launches dominate and shapes are bucket-static, graph capture is the low-risk win \citep{nvidia2024cudagraphs,memoryfloor2026}. If bytes/token dominate with moderate launch counts, invest in MegaKernel legality and compiler metadata \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}. Keep eager PyTorch baselines for debug, dynamic-shape research, and regression diffs---not for production decode pools once counters prove orchestration or residency debt \citep{kwon2023vllm,taxbreak2026}.
+
+Each mode trades hardware utilization against software flexibility: eager maximizes flexibility at the cost of launches and bytes; graph mode trades dynamic control for launch amortization; MegaKernel mode trades compile-time complexity for residency \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna}. Hardware teams should sign off on the trade-off explicitly---for example accepting static context buckets to unlock graph capture on Hopper, or accepting longer compile times to unlock XDNA static schedules \citep{nvidia2024cudagraphs,amd2024aie,patel2025llminference,semianalysis2024tma}.
+
+\begin{table}[t]
+\centering
+\caption{TaxBreak kernel launches per output token (H100 decode, BS${=}4$, SL${=}2048$, $m{=}10$) motivate mode escalation \citep{taxbreak2026}.}
+\label{tab:ch12_taxbreak}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Model} & \textbf{Launches/token} & \textbf{GPU util. (\%)} \\
+\midrule
+Llama-3.2-1B & 847.5 & 58.9 \\
+Llama-3.2-3B & 1,536.9 & 67.6 \\
+OLMoE-1B/7B & 9,305.3 & 15.5 \\
+Qwen1.5-MoE-A2.7B & 6,695.1 & 27.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+High launches/token with moderate utilization (top rows) often respond to CUDA Graph replay first \citep{nvidia2024cudagraphs,memoryfloor2026}. MoE rows with extreme launches and low utilization need MegaKernel plus routing collapse---graphs alone cannot fix expert dispatch storms \citep{taxbreak2026,liu2024deepseekv3,yirage2026,kwon2023vllm,patel2025llminference}. Always pair launch tables with bytes/token from the same trace; otherwise mode selection optimizes the wrong bottleneck \citep{memoryfloor2026,semianalysis2024tma,amd2024xdna,chen2020compilerbasedhardw,dlbook,dao2022flashattention,dao2023flashdecoding}.
+
+\begin{table}[t]
+\centering
+\caption{Execution mode selection heuristics for batch-1 decode (profile before committing).}
+\label{tab:ch12_mode_select}
+\begin{tabular}{p{0.22\linewidth}p{0.34\linewidth}p{0.34\linewidth}}
+\toprule
+\textbf{Signal} & \textbf{Prefer} & \textbf{Avoid} \\
+\midrule
+High launches/token, static bucket & CUDA Graphs / frozen schedule & Unfused eager \\
+High bytes/token, fusion legal & MegaKernel & Graph-only without fusion \\
+Dynamic shape / debug & Eager baseline & Forced graph capture \\
+NPU fleet & Static MegaKernel / AIE schedule & GPU-only CUDA graphs \\
+Low $R_{\mathrm{floor}}$, high DRAM & MegaKernel + bandwidth opts & Launch-only graph tuning \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cross-hardware regression is mandatory: a mode that wins on H100 launch-bound cells may tie or lose on L4 memory-bound cells or XDNA static schedules \citep{memoryfloor2026,amd2024xdna,semianalysis2024tma}. Compiler IR should carry mode annotations so the same decoder lowers to eager, graph, or MegaKernel backends without rewriting model Python \citep{yirage2026,chen2020compilerbasedhardw,dlbook}. Production reviewers should reject mode changes backed only by prefill FLOPs or isolated GEMM microbenchmarks \citep{patel2025llminference,taxbreak2026,dao2023flashdecoding}.
+
+\begin{example}
+Rollout checklist: (1) profile eager bytes/token and launches/token at target buckets; (2) if launch-bound, ship graph replay and re-profile; (3) if bytes remain high, iterate MegaKernel legality with compiler metadata; (4) run GPU/CPU/NPU triplet regression before fleet promotion \citep{taxbreak2026,memoryfloor2026,yirage2026,amd2024xdna,chen2020compilerbasedhardw,patel2025llminference,nvidia2024cudagraphs,kwon2023vllm,liu2024deepseekv3,dlbook}.
+\end{example}
+
+Fleet operators should log execution mode per deployment cell in telemetry---without that label, postmortems confuse graph wins on launch-bound SKUs with MegaKernel wins on bytes-bound SKUs \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,semianalysis2024tma,amd2024aie,dao2022flashattention,chen2020compilerbasedhardw,nvidia2024cudagraphs,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding}.
+
+\paragraph{Industrial rollout narrative.} A typical maturity path starts with Hugging Face eager forwards in research, adds vLLM serving for KV and batching, captures CUDA Graphs on stable decode buckets, then invests in YiRage or hand-written MegaKernels once bytes/token plateaus \citep{kwon2023vllm,nvidia2024cudagraphs,yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference}. Skipping straight to MegaKernels without graph and eager baselines makes regressions unexplainable---teams cannot tell whether fusion failed legality or never beat orchestration \citep{chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,dlbook,dao2023flashdecoding}. Conversely, stopping at graph replay when $R_{\mathrm{floor}}$ is already high leaves DRAM-bound decode on the table \citep{memoryfloor2026,taxbreak2026}. Mode selection is therefore a \emph{sequence} of profile gates, not a one-time architecture slide \citep{patel2025llminference,yirage2026,nvidia2024cudagraphs,kwon2023vllm,amd2024xdna,chen2020compilerbasedhardw,dlbook}.
+
+Disaggregated prefill/decode fleets compound the choice: prefill pools may remain eager or graph-captured on wide GEMMs while decode pools push MegaKernels for batch-1 latency \citep{patel2025llminference,liu2024deepseekv3,kwon2023vllm,taxbreak2026}. Using prefill throughput to justify decode mode leads to systematic under-investment in launch and bytes counters on the decode side---the DeepSeek-style capacity skew exists because phases obey different rooflines \citep{patel2025llminference,dao2023flashdecoding,memoryfloor2026,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,amd2024aie,amd2024xdna,nvidia2024cudagraphs,dlbook,liu2024deepseekv3,taxbreak2026,kwon2023vllm,dao2022flashattention}. Compiler teams should expose mode as an IR attribute so backend passes can reject illegal combinations early rather than at link time \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,nvidia2024cudagraphs,amd2024xdna,dlbook,dao2023flashdecoding,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,amd2024aie}.
+
+Hardware SLO reviews should include a ``mode matrix'': rows are SKUs (Hopper, L4, XDNA, CPU), columns are context buckets, cells list chosen mode plus bytes/token and launches/token \citep{memoryfloor2026,taxbreak2026,patel2025llminference,amd2024xdna,amd2024aie,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,nvidia2024cudagraphs,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,taxbreak2026,memoryfloor2026,patel2025llminference}. Empty cells mean unprofiled deployment---a common source of p99 surprises when fleets autoscale across instance types \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,nvidia2024cudagraphs,dao2022flashattention,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper}.
+
+\section{Key Takeaways}
+\label{sec:ch12_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Three modes, one metric ledger.} Eager, graph, and MegaKernel differ in launches/token \emph{and} bytes/token---optimize the counter your SKU actually bounds \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+\item \textbf{Eager is baseline, not destiny.} Framework dispatch is correct for debug; production decode needs profiled migration to graph or MegaKernel \citep{kwon2023vllm,nvidia2024cudagraphs}.
+\item \textbf{Graphs fix host tax.} Memory-Floor reports $1.259\times$ on H100 when launch overhead dominates; graphs do not replace fusion \citep{memoryfloor2026,nvidia2024cudagraphs}.
+\item \textbf{MegaKernels fix residency.} Fusion legality on Hopper/XDNA/CPU determines whether bytes/token fall; YiRage-style checks belong in compile time \citep{yirage2026,amd2024xdna,nvidia2022hopper}.
+\item \textbf{Profile-first selection.} Use Table~\ref{tab:ch12_mode_select}; never pick mode from prefill FLOPs alone \citep{dao2023flashdecoding,taxbreak2026}.
+\item \textbf{Multi-hardware parity.} Identical IR must lower per target residency tables---GPU graph capture $\neq$ NPU static schedule \citep{chen2020compilerbasedhardw,amd2024aie,dlbook}.
+\end{itemize}
+
+\paragraph{Practitioner mantra.} Profile end-to-end decode first. Collapse launches with graphs second. Collapse bytes with MegaKernels third. Re-profile on every bucket, SKU, and framework upgrade \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}. Teach reviewers to reject mode PRs that show only one counter moving \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,nvidia2024cudagraphs,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper}. Post the mantra next to decode dashboards so graph and MegaKernel investments stay tied to measured goodput \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}.
+
+\section{Conclusion}
+\label{sec:ch12_conclusion}
+
+Three kernel execution modes translate Chapter~1 counters into concrete schedules: eager exposes every framework boundary; CUDA Graphs collapse launches when shapes are stable; MegaKernels collapse HBM traffic when fusion is legal \citep{taxbreak2026,nvidia2024cudagraphs,memoryfloor2026,yirage2026,dao2022flashattention}. None of the modes substitutes for profiling bytes/token and launches/token on the SKU and context buckets you operate \citep{patel2025llminference,semianalysis2024tma}.
+
+Mode choice is reversible across releases: fleets can ship graph replay while MegaKernel plans mature in CI, as long as telemetry tags the active mode and counters prove non-regression \citep{nvidia2024cudagraphs,memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper}. Treat execution mode as a tunable deployment parameter guarded by profile gates, not as a one-time rewrite \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,nvidia2024cudagraphs,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}. The escalation path---eager baseline, graph replay, MegaKernel fusion---should appear explicitly in your decode runbooks and compiler IR schemas \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}.
+
+Chapter~13 moves from schedule choice to compiler theory---how IR, passes, and lowering pipelines decide which mode is even emit-able on GPU, CPU, and NPU backends \citep{chen2020compilerbasedhardw,dlbook,amd2024xdna,liu2024deepseekv3,kwon2023vllm,amd2024aie,dao2023flashdecoding}. Carry the mode-selection table forward; later MegaKernel chapters assume you can justify eager vs graph vs fused emission with measured decode goodput, not architecture slides alone \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+
+Readers should leave this chapter able to defend a mode choice in a design review: cite TaxBreak launches/token when proposing graphs; cite Memory-Floor $R_{\mathrm{floor}}$ when graphs underperform; cite YiRage legality reports when proposing MegaKernels \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,amd2024aie,nvidia2022hopper}. The three modes are not competitors---they are layers in a profile-driven escalation path toward decode goodput \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024aie,amd2024xdna,nvidia2024cudagraphs,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,semianalysis2024tma,nvidia2022hopper}. Document that escalation in compiler schemas so the next maintainer inherits profile discipline, not folklore \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,amd2024xdna,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2022hopper,amd2024aie}.
 
 \typeout{END_CHAPTER "ch12" \theabspage}

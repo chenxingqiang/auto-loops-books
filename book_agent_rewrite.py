@@ -33,7 +33,7 @@ from book_prose_upgrade import (  # noqa: E402
 )
 from research_tools import chapter_number, extract_outline_bullets  # noqa: E402
 
-AGENT_SKIP = frozenset({"ch01", "ch02", "ch03", "ch04", "ch05", "ch10", "ch11", "ch14"})
+AGENT_SKIP = frozenset({"ch01", "ch02", "ch03", "ch04", "ch05", "ch10", "ch11", "ch12", "ch14"})
 
 SECTION_RE = re.compile(
     r"\\section\{[^}]+\}\s*\n\\label\{([^}]+)\}\s*\n(.*?)"

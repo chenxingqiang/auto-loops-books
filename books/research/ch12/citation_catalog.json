@@ -1,298 +1,31 @@
 {
   "chapter_id": "ch12",
-  "timestamp": "2026-06-10T02:45:47.254263",
+  "timestamp": "2026-06-12T07:15:22.797208",
   "min_papers": 25,
-  "paper_count": 57,
-  "sentence_count": 226,
-  "binding_count": 181,
+  "paper_count": 49,
+  "sentence_count": 151,
+  "binding_count": 127,
   "papers": [
-    {
-      "bib_key": "adepoju2026threemodesofdataba",
-      "title": "Three Modes of Database-Kernel Integration via eBPF: Observability, Policy Injection, and Kernel-Resident State",
-      "link": "https://doi.org/10.20944/preprints202602.0959.v1",
-      "year": 2026,
-      "source": "crossref",
-      "relevance_score": 100,
-      "matched_keywords": [
-        "trade",
-        "constraints",
-        "kernel",
-        "kernels",
-        "mode",
-        "modes",
-        "three"
-      ],
-      "reference": "Sheriff Adefolarin Adepoju, Mildred Aiwanno-Ose Adepoju (2026). Three Modes of Database-Kernel Integration via eBPF: Observability, Policy Injection, and Kernel-Resident State. Retrieved from https://doi.org/10.20944/preprints202602.0959.v1",
-      "abstract": "eBPF is increasingly used around databases, but prior systems and papers often conflate goals and therefore blur the trade space: instrumentation versus control versus in-kernel state. This impedes principled comparisons and hides the kernel constraints that determine feasibility. We present a unified analysis organized into three modes of database–kernel integration via eBPF: observability (deriving DB-relevant signals from kernel and user-space hooks), policy injection (installing workload-specific cache and networking policies at kernel choke points), and kernel-resident state (providing safe transactional state semantics for eBPF programs beyond raw maps). For each mode, we characterized the hook placement, state model, and verifier/synchronization/portability constraints that shape fe",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "khairy2019sstgpuanexecutiond",
-      "title": "SST-GPU: An Execution -Driven CUDA Kernel Scheduler and Streaming-Multiprocessor Compute Model",
-      "link": "https://doi.org/10.2172/1497416",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "CUDA",
-        "execution",
-        "GPU",
-        "kernel",
-        "mode"
-      ],
-      "reference": "Mahmoud Khairy, Mengchi Zhang, et al. (2019). SST-GPU: An Execution -Driven CUDA Kernel Scheduler and Streaming-Multiprocessor Compute Model. Retrieved from https://doi.org/10.2172/1497416",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "raju2021performanceenhance",
-      "title": "PERFORMANCE ENHANCEMENT OF CUDA APPLICATIONS BY OVERLAPPING DATA TRANSFER AND KERNEL EXECUTION",
-      "link": "https://doi.org/10.35784/acs-2021-17",
-      "year": 2021,
-      "source": "crossref",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "bottleneck",
-        "CPU",
-        "CUDA",
-        "execution",
-        "GPU",
-        "kernel",
-        "NPU"
-      ],
-      "reference": "K. Raju, Niranjan N Chiplunkar (2021). PERFORMANCE ENHANCEMENT OF CUDA APPLICATIONS BY OVERLAPPING DATA TRANSFER AND KERNEL EXECUTION. Retrieved from https://doi.org/10.35784/acs-2021-17",
-      "abstract": "The CPU-GPU combination is a widely used heterogeneous computing system in which the CPU and GPU have different address spaces. Since the GPU cannot directly access the CPU memory, prior to invoking the GPU function the input data must be available on the GPU memory. On completion of GPU function, the results of computation are transferred to CPU memory. The CPU-GPU data transfer happens through PCI-Express bus. The PCI-E bandwidth is much lesser than that of GPU memory. The speed at which the data is transferred is limited by the PCI-E bandwidth. Hence, the PCI-E acts as a performance bottleneck. In this paper two approaches are discussed to minimize the overhead of data transfer, namely, performing the data transfer while the GPU function is being executed and reducing the amount of data",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "yamazaki2024acceleratinganover",
-      "title": "Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion",
-      "link": "https://doi.org/10.1109/scw63240.2024.00216",
-      "year": 2024,
-      "source": "crossref",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "execution",
-        "fusion",
-        "GPU",
-        "kernel",
-        "mode"
-      ],
-      "reference": "Kazuya Yamazaki (2024). Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion. Retrieved from https://doi.org/10.1109/scw63240.2024.00216",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "zhang2025threemodelingformu",
-      "title": "Three modeling formulations and computational complexity analysis for project scheduling with multiple execution modes",
-      "link": "https://doi.org/10.1088/1742-6596/3119/1/012009",
-      "year": 2025,
-      "source": "crossref",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes",
-        "three"
-      ],
-      "reference": "Hongling Zhang, Jun Cao, Zheng Gao (2025). Three modeling formulations and computational complexity analysis for project scheduling with multiple execution modes. Retrieved from https://doi.org/10.1088/1742-6596/3119/1/012009",
-      "abstract": "Abstract\nThe multi-mode resource-constrained project scheduling problem (MRCPSP) is a major branch of combinatorial optimization. Effectively and accurately solving this problem has posed significant challenges for managers. To address this, the work first develops two mixed-integer linear programming (MILP) models to solve it. Then, combining the strengths of both MILP models, a constraint programming (CP) model is constructed to achieve more efficient solutions. Moreover, the proposed models are validated and analyzed using existing benchmark instances. Experimental results show that the CP model has shorter computation times and higher solving efficiency. Compared to the MILP models, the CP model is several to dozens of times faster, offering promising solutions for tackling medium to l",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "akkarighazou2020kineticandkinemati",
-      "title": "KINETIC AND KINEMATIC ANALYSIS OF THREE DIFFERENT EXECUTION MODES OF STAG LEAP WITH AND WITHOUT THROW- CATCH BALL IN RHYTHMIC GYMNASTICS",
-      "link": "https://doi.org/10.52165/sgj.12.3.255-264",
-      "year": 2020,
-      "source": "crossref",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes",
-        "three"
-      ],
-      "reference": "Hounaida Akkari-Ghazouani, Bessem Mkaouer, et al. (2020). KINETIC AND KINEMATIC ANALYSIS OF THREE DIFFERENT EXECUTION MODES OF STAG LEAP WITH AND WITHOUT THROW- CATCH BALL IN RHYTHMIC GYMNASTICS. Retrieved from https://doi.org/10.52165/sgj.12.3.255-264",
-      "abstract": "Visual analysis of rhythmic gymnastics shows that the greatest difficulty lies in jumps. Performing jump with optimal speed, great amplitude, and better coordination and without any mistakes, does not depend only on the gymnast's capacity but also on the apparatus used, the jump made and the applied momentum. The objective was to study the qualities of strength, speed and flexibility developed during the three execution modes of stag leap with ring with and without throw-catch ball. Seven gymnasts from the national rhythmic gymnastics team aged between 15 to 21 years participated in this study. The protocol in making three stag leaps with rings consist of the following: the first without apparatus, the second with throwing ball during the chasse step, and the third with throwing ball at th",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "fukumura2024visuallyrepresenti",
-      "title": "Visually Representing CPU Execution with the KERNEL Educational Computer Model",
-      "link": "https://doi.org/10.1109/itc-cscc62988.2024.10628130",
-      "year": 2024,
-      "source": "crossref",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "CPU",
-        "execution",
-        "kernel",
-        "mode"
-      ],
-      "reference": "Ryuto Fukumura, Yoshihiro Yasutake, et al. (2024). Visually Representing CPU Execution with the KERNEL Educational Computer Model. Retrieved from https://doi.org/10.1109/itc-cscc62988.2024.10628130",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "anon2019comparisonofthreem",
-      "title": "Comparison of Three Modes of Ventilation During Robot-assisted Hysterectomy in Trendelenburg Position",
-      "link": "https://doi.org/10.31525/ct1-nct03887949",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "mode",
-        "modes",
-        "three"
-      ],
-      "reference": " (2019). Comparison of Three Modes of Ventilation During Robot-assisted Hysterectomy in Trendelenburg Position. Retrieved from https://doi.org/10.31525/ct1-nct03887949",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "alizadeh2020machinelearningbas",
-      "title": "Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution",
-      "link": "https://doi.org/10.1109/csicc49403.2020.9050074",
-      "year": 2020,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ],
-      "reference": "Negar Sadat Alizadeh, Mahmoud Momtazpour (2020). Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution. Retrieved from https://doi.org/10.1109/csicc49403.2020.9050074",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "hung2021exploringthediffer",
-      "title": "Exploring the Difference in Horror Movie Execution Modes",
-      "link": "https://doi.org/10.1142/9789811238727_0039",
-      "year": 2021,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes"
-      ],
-      "reference": "Tzu-Han Hung, Kuo-Kuang Fan (2021). Exploring the Difference in Horror Movie Execution Modes. Retrieved from https://doi.org/10.1142/9789811238727_0039",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "huang2025optimizationofmult",
-      "title": "Optimization of Multi-Execution Modes and Resource-Constrained Complex System Development Project Scheduling Based on Digital Design Structure Matrix",
-      "link": "https://doi.org/10.2139/ssrn.5218405",
-      "year": 2025,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes"
-      ],
-      "reference": "Zhanjun Huang, Yuxuan Yang, et al. (2025). Optimization of Multi-Execution Modes and Resource-Constrained Complex System Development Project Scheduling Based on Digital Design Structure Matrix. Retrieved from https://doi.org/10.2139/ssrn.5218405",
-      "abstract": "",
-      "source_tier": "C"
-    },
-    {
-      "bib_key": "kwon2019rootkitinsidegpuke",
-      "title": "Rootkit inside GPU Kernel Execution",
-      "link": "https://doi.org/10.1587/transinf.2019edl8104",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ],
-      "reference": "Ohmin KWON, Hyun KWON, Hyunsoo YOON (2019). Rootkit inside GPU Kernel Execution. Retrieved from https://doi.org/10.1587/transinf.2019edl8104",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "ebrahim2022citybasedapproachf",
-      "title": "City-based approach for GPU kernel execution trace visualisation",
-      "link": "https://doi.org/10.1049/icp.2022.0360",
-      "year": 2022,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ],
-      "reference": "A. Ebrahim, M. Hammad, et al. (2022). City-based approach for GPU kernel execution trace visualisation. Retrieved from https://doi.org/10.1049/icp.2022.0360",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "liu2018akernelstackprotec",
-      "title": "A kernel stack protection model against attacks from kernel execution units",
-      "link": "https://doi.org/10.1016/j.cose.2017.09.008",
-      "year": 2018,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "kernel",
-        "mode"
-      ],
-      "reference": "Wangtong Liu, Senlin Luo, et al. (2018). A kernel stack protection model against attacks from kernel execution units. Retrieved from https://doi.org/10.1016/j.cose.2017.09.008",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "chen2019crstateinkernelche",
-      "title": "CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU",
-      "link": "https://doi.org/10.1109/icpads47876.2019.00054",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ],
-      "reference": "Genlang Chen, Jiajian Zhang, et al. (2019). CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU. Retrieved from https://doi.org/10.1109/icpads47876.2019.00054",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "beaton20212amu4tuningidiopho",
-      "title": "2aMU4 - Tuning idiophone bar torsional modes with three-dimensional cutaway geometries",
-      "link": "https://doi.org/10.26226/morressier.606f15dd30a2e980041f2411",
-      "year": 2021,
-      "source": "crossref",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "mode",
-        "modes",
-        "three"
-      ],
-      "reference": "Douglas Beaton (2021). 2aMU4 - Tuning idiophone bar torsional modes with three-dimensional cutaway geometries. Retrieved from https://doi.org/10.26226/morressier.606f15dd30a2e980041f2411",
-      "abstract": "",
-      "source_tier": "B"
-    },
     {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "link": "",
       "year": "2026",
       "source": "book.bib",
-      "relevance_score": 47,
+      "source_tier": "A",
+      "relevance_score": 101,
       "matched_keywords": [
-        "CUDA Graphs",
-        "CUDA",
+        "cuda graph",
+        "bandwidth",
+        "batch-1",
+        "cell",
+        "cuda",
         "decode",
-        "GPU"
+        "gpu",
+        "graphs"
       ],
       "reference": "Chen, Josef (2026). Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode. ",
-      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  ",
-      "source_tier": "A"
+      "abstract": "44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4 arXiv preprint arXiv:2605.30571  "
     },
     {
       "bib_key": "nvidia2024cudagraphs",
@@ -300,14 +33,49 @@
       "link": "",
       "year": "2024",
       "source": "book.bib",
-      "relevance_score": 40,
+      "source_tier": "A",
+      "relevance_score": 58,
       "matched_keywords": [
-        "CUDA Graphs",
-        "CUDA"
+        "cuda graph",
+        "cuda",
+        "graphs"
       ],
       "reference": "NVIDIA (2024). CUDA Graphs. ",
-      "abstract": "   CUDA Programming Guide",
-      "source_tier": "A"
+      "abstract": "   CUDA Programming Guide"
+    },
+    {
+      "bib_key": "khairy2019sstgpuanexecutiond",
+      "title": "SST-GPU: An Execution -Driven CUDA Kernel Scheduler and Streaming-Multiprocessor Compute Model",
+      "link": "https://doi.org/10.2172/1497416",
+      "year": 2019,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "cuda",
+        "gpu",
+        "mode"
+      ],
+      "reference": "Mahmoud Khairy, Mengchi Zhang, et al. (2019). SST-GPU: An Execution -Driven CUDA Kernel Scheduler and Streaming-Multiprocessor Compute Model. Retrieved from https://doi.org/10.2172/1497416",
+      "abstract": ""
+    },
+    {
+      "bib_key": "raju2021performanceenhance",
+      "title": "PERFORMANCE ENHANCEMENT OF CUDA APPLICATIONS BY OVERLAPPING DATA TRANSFER AND KERNEL EXECUTION",
+      "link": "https://doi.org/10.35784/acs-2021-17",
+      "year": 2021,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 54,
+      "matched_keywords": [
+        "bandwidth",
+        "cpu",
+        "cuda",
+        "gpu",
+        "npu"
+      ],
+      "reference": "K. Raju, Niranjan N Chiplunkar (2021). PERFORMANCE ENHANCEMENT OF CUDA APPLICATIONS BY OVERLAPPING DATA TRANSFER AND KERNEL EXECUTION. Retrieved from https://doi.org/10.35784/acs-2021-17",
+      "abstract": "The CPU-GPU combination is a widely used heterogeneous computing system in which the CPU and GPU have different address spaces. Since the GPU cannot directly access the CPU memory, prior to invoking the GPU function the input data must be available on the GPU memory. On completion of GPU function, the results of computation are transferred to CPU memory. The CPU-GPU data transfer happens through PCI-Express bus. The PCI-E bandwidth is much lesser than that of GPU memory. The speed at which the data is transferred is limited by the PCI-E bandwidth. Hence, the PCI-E acts as a performance bottleneck. In this paper two approaches are discussed to minimize the overhead of data transfer, namely, performing the data transfer while the GPU function is being executed and reducing the amount of data"
     },
     {
       "bib_key": "mishra2019finetuningdeeplear",
@@ -315,14 +83,14 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_6",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
-        "PyTorch",
+        "pytorch",
         "mode"
       ],
       "reference": "Pradeepta Mishra (2019). Fine-Tuning Deep Learning Models Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_6",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2023distributedpytorch",
@@ -330,14 +98,14 @@
       "link": "https://doi.org/10.1007/978-1-4842-8925-9_8",
       "year": 2023,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
-        "PyTorch",
+        "pytorch",
         "mode"
       ],
       "reference": "Pradeepta Mishra (2023). Distributed PyTorch Modelling, Model Optimization, and Deployment. Retrieved from https://doi.org/10.1007/978-1-4842-8925-9_8",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2023pytorchmodelinterp",
@@ -345,14 +113,14 @@
       "link": "https://doi.org/10.1007/978-1-4842-8925-9_10",
       "year": 2023,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 38,
       "matched_keywords": [
-        "PyTorch",
+        "pytorch",
         "mode"
       ],
       "reference": "Pradeepta Mishra (2023). PyTorch Model Interpretability and Interface to Sklearn. Retrieved from https://doi.org/10.1007/978-1-4842-8925-9_10",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "yirage2026",
@@ -360,120 +128,60 @@
       "link": "",
       "year": "2026",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "CPU",
-        "CUDA",
-        "YiRage"
+        "cpu",
+        "cuda",
+        "yirage"
       ],
       "reference": "Chen, Xingqiang and YiRage Contributors (2026). YiRage: Multi-Backend LLM Inference Optimization. ",
-      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage",
-      "source_tier": "A"
+      "abstract": "Yield Revolutionary AGile Engine; extends Mirage with CUDA, CPU, MPS, Triton, NKI, and MLIR backends   https://github.com/chenxingqiang/YiRage"
     },
     {
-      "bib_key": "antonov2021inferringcustomsyn",
-      "title": "Inferring Custom Synthesizable Kernel for Generation of Coprocessors with Out-of-Order Execution",
-      "link": "https://doi.org/10.1109/meco52532.2021.9460265",
-      "year": 2021,
-      "source": "crossref",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ],
-      "reference": "Alexander Antonov (2021). Inferring Custom Synthesizable Kernel for Generation of Coprocessors with Out-of-Order Execution. Retrieved from https://doi.org/10.1109/meco52532.2021.9460265",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "pitigalaarac2024symbolicexecutionf",
-      "title": "Symbolic Execution for Dynamic Kernel Analysis",
-      "link": "https://doi.org/10.1145/3658644.3690860",
+      "bib_key": "fukumura2024visuallyrepresenti",
+      "title": "Visually Representing CPU Execution with the KERNEL Educational Computer Model",
+      "link": "https://doi.org/10.1109/itc-cscc62988.2024.10628130",
       "year": 2024,
       "source": "crossref",
+      "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "execution",
-        "kernel"
+        "cpu",
+        "mode"
       ],
-      "reference": "Pansilu Pitigalaarachchi (2024). Symbolic Execution for Dynamic Kernel Analysis. Retrieved from https://doi.org/10.1145/3658644.3690860",
-      "abstract": "",
-      "source_tier": "A"
+      "reference": "Ryuto Fukumura, Yoshihiro Yasutake, et al. (2024). Visually Representing CPU Execution with the KERNEL Educational Computer Model. Retrieved from https://doi.org/10.1109/itc-cscc62988.2024.10628130",
+      "abstract": ""
     },
     {
-      "bib_key": "meneguele2020securekernelexecut",
-      "title": "Secure Kernel Execution with Intel SGX",
-      "link": "https://doi.org/10.5753/sbesc_estendido.2020.13108",
-      "year": 2020,
-      "source": "crossref",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ],
-      "reference": "Bruno Meneguele, Keiko Fonseca, Marcelo Rosa (2020). Secure Kernel Execution with Intel SGX. Retrieved from https://doi.org/10.5753/sbesc_estendido.2020.13108",
-      "abstract": "Intel SGX is not accessible from the most privileged execution level, known as ring zero, where the operating system kernel is placed. However, it is possible to split the execution responsibility between kernel and userspace by creating a dependency among these two levels that allow internal kernel data to be stored or processed within SGX private enclaves. In this paper we present SKEEN, an enhanced way to isolate internal operating system components and structures with Intel SGX technology, preventing information leak to different components of the same operating system. A proof-of-concept is provided to exemplify its usage.",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "yetter2024atruenarrativeofth",
-      "title": "A True Narrative Of The Confession And Execution Of The Three [Illegible Text] At Tyburn",
-      "link": "https://doi.org/10.4324/9781003549208-19",
+      "bib_key": "yamazaki2024acceleratinganover",
+      "title": "Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion",
+      "link": "https://doi.org/10.1109/scw63240.2024.00216",
       "year": 2024,
       "source": "crossref",
+      "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "execution",
-        "three"
+        "gpu",
+        "mode"
       ],
-      "reference": "Leigh Yetter (2024). A True Narrative Of The Confession And Execution Of The Three [Illegible Text] At Tyburn. Retrieved from https://doi.org/10.4324/9781003549208-19",
-      "abstract": "",
-      "source_tier": "B"
+      "reference": "Kazuya Yamazaki (2024). Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion. Retrieved from https://doi.org/10.1109/scw63240.2024.00216",
+      "abstract": ""
     },
     {
-      "bib_key": "johannesmeye2022kasperscanningforg",
-      "title": "Kasper: Scanning for Generalized Transient Execution Gadgets in the Linux Kernel",
-      "link": "https://doi.org/10.14722/ndss.2022.24221",
-      "year": 2022,
+      "bib_key": "adepoju2026threemodesofdataba",
+      "title": "Three Modes of Database-Kernel Integration via eBPF: Observability, Policy Injection, and Kernel-Resident State",
+      "link": "https://doi.org/10.20944/preprints202602.0959.v1",
+      "year": 2026,
       "source": "crossref",
-      "relevance_score": 36,
+      "source_tier": "B",
+      "relevance_score": 28,
       "matched_keywords": [
-        "execution",
-        "kernel"
+        "trade",
+        "mode"
       ],
-      "reference": "Brian Johannesmeyer, Jakob Koschel, et al. (2022). Kasper: Scanning for Generalized Transient Execution Gadgets in the Linux Kernel. Retrieved from https://doi.org/10.14722/ndss.2022.24221",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "hong2021anoveldynamicanaly",
-      "title": "A Novel Dynamic Analysis Infrastructure to Instrument Untrusted Execution Flow Across User-Kernel Spaces",
-      "link": "https://doi.org/10.1109/sp40001.2021.00024",
-      "year": 2021,
-      "source": "crossref",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ],
-      "reference": "Jiaqi Hong, Xuhua Ding (2021). A Novel Dynamic Analysis Infrastructure to Instrument Untrusted Execution Flow Across User-Kernel Spaces. Retrieved from https://doi.org/10.1109/sp40001.2021.00024",
-      "abstract": "",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "belev2022federalbudgetexecu",
-      "title": "Federal Budget Execution for Three Quarters of 2021",
-      "link": "https://doi.org/10.2139/ssrn.3983555",
-      "year": 2022,
-      "source": "crossref",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "three"
-      ],
-      "reference": "Sergei Belev, Tatiana Tischenko (2022). Federal Budget Execution for Three Quarters of 2021. Retrieved from https://doi.org/10.2139/ssrn.3983555",
-      "abstract": "",
-      "source_tier": "C"
+      "reference": "Sheriff Adefolarin Adepoju, Mildred Aiwanno-Ose Adepoju (2026). Three Modes of Database-Kernel Integration via eBPF: Observability, Policy Injection, and Kernel-Resident State. Retrieved from https://doi.org/10.20944/preprints202602.0959.v1",
+      "abstract": "eBPF is increasingly used around databases, but prior systems and papers often conflate goals and therefore blur the trade space: instrumentation versus control versus in-kernel state. This impedes principled comparisons and hides the kernel constraints that determine feasibility. We present a unified analysis organized into three modes of database–kernel integration via eBPF: observability (deriving DB-relevant signals from kernel and user-space hooks), policy injection (installing workload-specific cache and networking policies at kernel choke points), and kernel-resident state (providing safe transactional state semantics for eBPF programs beyond raw maps). For each mode, we characterized the hook placement, state model, and verifier/synchronization/portability constraints that shape fe"
     },
     {
       "bib_key": "mishra2019probabilitydistrib",
@@ -481,13 +189,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_2",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). Probability Distributions Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_2",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2019introductiontopyto",
@@ -495,13 +203,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_1",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). Introduction to PyTorch, Tensors, and Tensor Operations. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_1",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2019naturallanguagepro",
@@ -509,13 +217,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_7",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). Natural Language Processing Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_7",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "chaubal2025audioclassificatio",
@@ -523,13 +231,13 @@
       "link": "https://doi.org/10.1007/979-8-8688-2117-2_7",
       "year": 2025,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Siddhesh Prashant Chaubal (2025). Audio Classification with PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_7",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2019introductiontoneur",
@@ -537,27 +245,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_4",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). Introduction to Neural Networks Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_4",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "chaubal2025tensorsinpytorch",
-      "title": "Tensors in PyTorch",
-      "link": "https://doi.org/10.1007/979-8-8688-2117-2_2",
-      "year": 2025,
-      "source": "crossref",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ],
-      "reference": "Siddhesh Prashant Chaubal (2025). Tensors in PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_2",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "mishra2019supervisedlearning",
@@ -565,13 +259,27 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_5",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). Supervised Learning Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_5",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
+    },
+    {
+      "bib_key": "chaubal2025tensorsinpytorch",
+      "title": "Tensors in PyTorch",
+      "link": "https://doi.org/10.1007/979-8-8688-2117-2_2",
+      "year": 2025,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pytorch"
+      ],
+      "reference": "Siddhesh Prashant Chaubal (2025). Tensors in PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_2",
+      "abstract": ""
     },
     {
       "bib_key": "mishra2019cnnandrnnusingpyto",
@@ -579,13 +287,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-4258-2_3",
       "year": 2019,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Pradeepta Mishra (2019). CNN and RNN Using PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-4258-2_3",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "chaubal2025imagecaptioningwit",
@@ -593,13 +301,13 @@
       "link": "https://doi.org/10.1007/979-8-8688-2117-2_9",
       "year": 2025,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Siddhesh Prashant Chaubal (2025). Image Captioning with PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_9",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "ketkar2021introductiontopyto",
@@ -607,13 +315,13 @@
       "link": "https://doi.org/10.1007/978-1-4842-5364-9_2",
       "year": 2021,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Nikhil Ketkar, Jojo Moolayil (2021). Introduction to PyTorch. Retrieved from https://doi.org/10.1007/978-1-4842-5364-9_2",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "han2023torchactcollection",
@@ -621,41 +329,13 @@
       "link": "https://doi.org/10.31224/2988",
       "year": 2023,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Seungwoo Han (2023). TorchAct, collection of activation function for PyTorch.. Retrieved from https://doi.org/10.31224/2988",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "chaubal2025recommendersystems",
-      "title": "Recommender Systems with PyTorch",
-      "link": "https://doi.org/10.1007/979-8-8688-2117-2_8",
-      "year": 2025,
-      "source": "crossref",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ],
-      "reference": "Siddhesh Prashant Chaubal (2025). Recommender Systems with PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_8",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "reyes2019rtorchrbindingstop",
-      "title": "rTorch: R Bindings to 'PyTorch'",
-      "link": "https://doi.org/10.32614/cran.package.rtorch",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ],
-      "reference": "Alfonso R. Reyes (2019). rTorch: R Bindings to 'PyTorch'. Retrieved from https://doi.org/10.32614/cran.package.rtorch",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "zai2020anhangmathematikde",
@@ -663,13 +343,13 @@
       "link": "https://doi.org/10.3139/9783446466081.012",
       "year": 2020,
       "source": "crossref",
+      "source_tier": "B",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Alexander Zai, Brandon Brown (2020). Anhang: Mathematik, Deep Learning, PyTorch. Retrieved from https://doi.org/10.3139/9783446466081.012",
-      "abstract": "",
-      "source_tier": "B"
+      "abstract": ""
     },
     {
       "bib_key": "kirchheim2022pytorchoodalibrary",
@@ -677,13 +357,41 @@
       "link": "https://doi.org/10.1109/cvprw56347.2022.00481",
       "year": 2022,
       "source": "crossref",
+      "source_tier": "A",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ],
       "reference": "Konstantin Kirchheim, Marco Filax, Frank Ortmeier (2022). PyTorch-OOD: A Library for Out-of-Distribution Detection based on PyTorch. Retrieved from https://doi.org/10.1109/cvprw56347.2022.00481",
-      "abstract": "",
-      "source_tier": "A"
+      "abstract": ""
+    },
+    {
+      "bib_key": "reyes2019rtorchrbindingstop",
+      "title": "rTorch: R Bindings to 'PyTorch'",
+      "link": "https://doi.org/10.32614/cran.package.rtorch",
+      "year": 2019,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pytorch"
+      ],
+      "reference": "Alfonso R. Reyes (2019). rTorch: R Bindings to 'PyTorch'. Retrieved from https://doi.org/10.32614/cran.package.rtorch",
+      "abstract": ""
+    },
+    {
+      "bib_key": "chaubal2025recommendersystems",
+      "title": "Recommender Systems with PyTorch",
+      "link": "https://doi.org/10.1007/979-8-8688-2117-2_8",
+      "year": 2025,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 20,
+      "matched_keywords": [
+        "pytorch"
+      ],
+      "reference": "Siddhesh Prashant Chaubal (2025). Recommender Systems with PyTorch. Retrieved from https://doi.org/10.1007/979-8-8688-2117-2_8",
+      "abstract": ""
     },
     {
       "bib_key": "dao2023flashdecoding",
@@ -691,14 +399,14 @@
       "link": "",
       "year": "2023",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 19,
       "matched_keywords": [
-        "PyTorch",
+        "pytorch",
         "decode"
       ],
       "reference": "Dao, Tri and others (2023). Flash-Decoding for Long-Context Inference. ",
-      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report",
-      "source_tier": "A"
+      "abstract": "Parallelizes attention along KV sequence; up to $8\\times$ decode speedup at long context   PyTorch blog and Stanford CRFM technical report"
     },
     {
       "bib_key": "patel2025llminference",
@@ -706,13 +414,13 @@
       "link": "",
       "year": "2025",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "decode"
       ],
       "reference": "Davies, Mark and others (2025). LIMINAL: Exploring The Frontiers of LLM Decode Performance. ",
-      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  ",
-      "source_tier": "A"
+      "abstract": "Limit study; DeepSeek-V3 provisions $10\\times$ more decode than prefill nodes arXiv preprint arXiv:2507.14397  "
     },
     {
       "bib_key": "kwon2023vllm",
@@ -720,77 +428,13 @@
       "link": "",
       "year": "2023",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "mode"
       ],
       "reference": "Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E and Zhang, Hao and Stoica, Ion (2023). Efficient Memory Management for Large Language Model Serving with PagedAttention. ",
-      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  ",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "anon2019studyofcomprehensi",
-      "title": "Study of Comprehension and Execution of Medication Prescriptions in Parkinsonian Patients and Healthy Volunteers",
-      "link": "https://doi.org/10.31525/ct1-nct03976505",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "execution"
-      ],
-      "reference": " (2019). Study of Comprehension and Execution of Medication Prescriptions in Parkinsonian Patients and Healthy Volunteers. Retrieved from https://doi.org/10.31525/ct1-nct03976505",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "anon2019partthreeremovingd",
-      "title": "PART THREE. Removing Distractions",
-      "link": "https://doi.org/10.3138/9781487518745-005",
-      "year": 2019,
-      "source": "crossref",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "three"
-      ],
-      "reference": " (2019). PART THREE. Removing Distractions. Retrieved from https://doi.org/10.3138/9781487518745-005",
-      "abstract": "",
-      "source_tier": "B"
-    },
-    {
-      "bib_key": "taxbreak2026",
-      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
-      "link": "",
-      "year": "2026",
-      "source": "book.bib",
-      "relevance_score": 0,
-      "matched_keywords": [],
-      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
-      "abstract": " arXiv preprint arXiv:2603.12465  ",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "dao2022flashattention",
-      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
-      "link": "",
-      "year": "2022",
-      "source": "book.bib",
-      "relevance_score": 0,
-      "matched_keywords": [],
-      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
-      "abstract": "  Advances in Neural Information Processing Systems ",
-      "source_tier": "A"
-    },
-    {
-      "bib_key": "liu2024deepseekv3",
-      "title": "DeepSeek-V3 Technical Report",
-      "link": "",
-      "year": "2024",
-      "source": "book.bib",
-      "relevance_score": 0,
-      "matched_keywords": [],
-      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
-      "abstract": " arXiv preprint arXiv:2412.19437  ",
-      "source_tier": "A"
+      "abstract": " Proceedings of the 29th Symposium on Operating Systems Principles  "
     },
     {
       "bib_key": "nvidia2022hopper",
@@ -798,11 +442,13 @@
       "link": "",
       "year": "2022",
       "source": "book.bib",
-      "relevance_score": 0,
-      "matched_keywords": [],
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "hopper"
+      ],
       "reference": "NVIDIA (2022). NVIDIA Hopper Architecture In-Depth. ",
-      "abstract": "   NVIDIA Technical Blog",
-      "source_tier": "A"
+      "abstract": "   NVIDIA Technical Blog"
     },
     {
       "bib_key": "amd2024xdna",
@@ -810,11 +456,217 @@
       "link": "",
       "year": "2024",
       "source": "book.bib",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "xdna"
+      ],
+      "reference": "AMD (2024). AMD XDNA Architecture. ",
+      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html"
+    },
+    {
+      "bib_key": "anon2019comparisonofthreem",
+      "title": "Comparison of Three Modes of Ventilation During Robot-assisted Hysterectomy in Trendelenburg Position",
+      "link": "https://doi.org/10.31525/ct1-nct03887949",
+      "year": 2019,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": " (2019). Comparison of Three Modes of Ventilation During Robot-assisted Hysterectomy in Trendelenburg Position. Retrieved from https://doi.org/10.31525/ct1-nct03887949",
+      "abstract": ""
+    },
+    {
+      "bib_key": "zhang2025threemodelingformu",
+      "title": "Three modeling formulations and computational complexity analysis for project scheduling with multiple execution modes",
+      "link": "https://doi.org/10.1088/1742-6596/3119/1/012009",
+      "year": 2025,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Hongling Zhang, Jun Cao, Zheng Gao (2025). Three modeling formulations and computational complexity analysis for project scheduling with multiple execution modes. Retrieved from https://doi.org/10.1088/1742-6596/3119/1/012009",
+      "abstract": "Abstract\nThe multi-mode resource-constrained project scheduling problem (MRCPSP) is a major branch of combinatorial optimization. Effectively and accurately solving this problem has posed significant challenges for managers. To address this, the work first develops two mixed-integer linear programming (MILP) models to solve it. Then, combining the strengths of both MILP models, a constraint programming (CP) model is constructed to achieve more efficient solutions. Moreover, the proposed models are validated and analyzed using existing benchmark instances. Experimental results show that the CP model has shorter computation times and higher solving efficiency. Compared to the MILP models, the CP model is several to dozens of times faster, offering promising solutions for tackling medium to l"
+    },
+    {
+      "bib_key": "akkarighazou2020kineticandkinemati",
+      "title": "KINETIC AND KINEMATIC ANALYSIS OF THREE DIFFERENT EXECUTION MODES OF STAG LEAP WITH AND WITHOUT THROW- CATCH BALL IN RHYTHMIC GYMNASTICS",
+      "link": "https://doi.org/10.52165/sgj.12.3.255-264",
+      "year": 2020,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Hounaida Akkari-Ghazouani, Bessem Mkaouer, et al. (2020). KINETIC AND KINEMATIC ANALYSIS OF THREE DIFFERENT EXECUTION MODES OF STAG LEAP WITH AND WITHOUT THROW- CATCH BALL IN RHYTHMIC GYMNASTICS. Retrieved from https://doi.org/10.52165/sgj.12.3.255-264",
+      "abstract": "Visual analysis of rhythmic gymnastics shows that the greatest difficulty lies in jumps. Performing jump with optimal speed, great amplitude, and better coordination and without any mistakes, does not depend only on the gymnast's capacity but also on the apparatus used, the jump made and the applied momentum. The objective was to study the qualities of strength, speed and flexibility developed during the three execution modes of stag leap with ring with and without throw-catch ball. Seven gymnasts from the national rhythmic gymnastics team aged between 15 to 21 years participated in this study. The protocol in making three stag leaps with rings consist of the following: the first without apparatus, the second with throwing ball during the chasse step, and the third with throwing ball at th"
+    },
+    {
+      "bib_key": "alizadeh2020machinelearningbas",
+      "title": "Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution",
+      "link": "https://doi.org/10.1109/csicc49403.2020.9050074",
+      "year": 2020,
+      "source": "crossref",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
+      ],
+      "reference": "Negar Sadat Alizadeh, Mahmoud Momtazpour (2020). Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution. Retrieved from https://doi.org/10.1109/csicc49403.2020.9050074",
+      "abstract": ""
+    },
+    {
+      "bib_key": "hung2021exploringthediffer",
+      "title": "Exploring the Difference in Horror Movie Execution Modes",
+      "link": "https://doi.org/10.1142/9789811238727_0039",
+      "year": 2021,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Tzu-Han Hung, Kuo-Kuang Fan (2021). Exploring the Difference in Horror Movie Execution Modes. Retrieved from https://doi.org/10.1142/9789811238727_0039",
+      "abstract": ""
+    },
+    {
+      "bib_key": "huang2025optimizationofmult",
+      "title": "Optimization of Multi-Execution Modes and Resource-Constrained Complex System Development Project Scheduling Based on Digital Design Structure Matrix",
+      "link": "https://doi.org/10.2139/ssrn.5218405",
+      "year": 2025,
+      "source": "crossref",
+      "source_tier": "C",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Zhanjun Huang, Yuxuan Yang, et al. (2025). Optimization of Multi-Execution Modes and Resource-Constrained Complex System Development Project Scheduling Based on Digital Design Structure Matrix. Retrieved from https://doi.org/10.2139/ssrn.5218405",
+      "abstract": ""
+    },
+    {
+      "bib_key": "kwon2019rootkitinsidegpuke",
+      "title": "Rootkit inside GPU Kernel Execution",
+      "link": "https://doi.org/10.1587/transinf.2019edl8104",
+      "year": 2019,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
+      ],
+      "reference": "Ohmin KWON, Hyun KWON, Hyunsoo YOON (2019). Rootkit inside GPU Kernel Execution. Retrieved from https://doi.org/10.1587/transinf.2019edl8104",
+      "abstract": ""
+    },
+    {
+      "bib_key": "liu2018akernelstackprotec",
+      "title": "A kernel stack protection model against attacks from kernel execution units",
+      "link": "https://doi.org/10.1016/j.cose.2017.09.008",
+      "year": 2018,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Wangtong Liu, Senlin Luo, et al. (2018). A kernel stack protection model against attacks from kernel execution units. Retrieved from https://doi.org/10.1016/j.cose.2017.09.008",
+      "abstract": ""
+    },
+    {
+      "bib_key": "ebrahim2022citybasedapproachf",
+      "title": "City-based approach for GPU kernel execution trace visualisation",
+      "link": "https://doi.org/10.1049/icp.2022.0360",
+      "year": 2022,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
+      ],
+      "reference": "A. Ebrahim, M. Hammad, et al. (2022). City-based approach for GPU kernel execution trace visualisation. Retrieved from https://doi.org/10.1049/icp.2022.0360",
+      "abstract": ""
+    },
+    {
+      "bib_key": "chen2019crstateinkernelche",
+      "title": "CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU",
+      "link": "https://doi.org/10.1109/icpads47876.2019.00054",
+      "year": 2019,
+      "source": "crossref",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
+      ],
+      "reference": "Genlang Chen, Jiajian Zhang, et al. (2019). CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU. Retrieved from https://doi.org/10.1109/icpads47876.2019.00054",
+      "abstract": ""
+    },
+    {
+      "bib_key": "beaton20212amu4tuningidiopho",
+      "title": "2aMU4 - Tuning idiophone bar torsional modes with three-dimensional cutaway geometries",
+      "link": "https://doi.org/10.26226/morressier.606f15dd30a2e980041f2411",
+      "year": 2021,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "mode"
+      ],
+      "reference": "Douglas Beaton (2021). 2aMU4 - Tuning idiophone bar torsional modes with three-dimensional cutaway geometries. Retrieved from https://doi.org/10.26226/morressier.606f15dd30a2e980041f2411",
+      "abstract": ""
+    },
+    {
+      "bib_key": "meneguele2020securekernelexecut",
+      "title": "Secure Kernel Execution with Intel SGX",
+      "link": "https://doi.org/10.5753/sbesc_estendido.2020.13108",
+      "year": 2020,
+      "source": "crossref",
+      "source_tier": "B",
+      "relevance_score": 9,
+      "matched_keywords": [
+        "same"
+      ],
+      "reference": "Bruno Meneguele, Keiko Fonseca, Marcelo Rosa (2020). Secure Kernel Execution with Intel SGX. Retrieved from https://doi.org/10.5753/sbesc_estendido.2020.13108",
+      "abstract": "Intel SGX is not accessible from the most privileged execution level, known as ring zero, where the operating system kernel is placed. However, it is possible to split the execution responsibility between kernel and userspace by creating a dependency among these two levels that allow internal kernel data to be stored or processed within SGX private enclaves. In this paper we present SKEEN, an enhanced way to isolate internal operating system components and structures with Intel SGX technology, preventing information leak to different components of the same operating system. A proof-of-concept is provided to exemplify its usage."
+    },
+    {
+      "bib_key": "taxbreak2026",
+      "title": "TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition",
+      "link": "",
+      "year": "2026",
+      "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": [],
-      "reference": "AMD (2024). AMD XDNA Architecture. ",
-      "abstract": "   https://www.AMD.com/en/technologies/XDNA.html",
-      "source_tier": "A"
+      "reference": "Vellaisamy, Prabhu and Tripathi, Shreesh and Natarajan, Vignesh and Thenarasu, Surya Santhan and Blanton, Shawn and Shen, John P. (2026). TaxBreak: Unmasking the Hidden Costs of LLM Inference Through Overhead Decomposition. ",
+      "abstract": " arXiv preprint arXiv:2603.12465  "
+    },
+    {
+      "bib_key": "dao2022flashattention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "link": "",
+      "year": "2022",
+      "source": "book.bib",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R\\'e, Christopher (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. ",
+      "abstract": "  Advances in Neural Information Processing Systems "
+    },
+    {
+      "bib_key": "liu2024deepseekv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "link": "",
+      "year": "2024",
+      "source": "book.bib",
+      "source_tier": "A",
+      "relevance_score": 0,
+      "matched_keywords": [],
+      "reference": "Liu, Aixin and others (2024). DeepSeek-V3 Technical Report. ",
+      "abstract": " arXiv preprint arXiv:2412.19437  "
     },
     {
       "bib_key": "amd2024aie",
@@ -822,11 +674,11 @@
       "link": "",
       "year": "2024",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": [],
       "reference": "AMD (2024). AI Engine Technology. ",
-      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html",
-      "source_tier": "A"
+      "abstract": "   https://www.AMD.com/en/products/adaptive-socs-and-fpgas/technologies/AI-engine.html"
     },
     {
       "bib_key": "semianalysis2024tma",
@@ -834,11 +686,11 @@
       "link": "",
       "year": "2024",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": [],
       "reference": "SemiAnalysis (2024). NVIDIA Tensor Core Evolution: From Volta To Blackwell. ",
-      "abstract": "   Newsletter",
-      "source_tier": "A"
+      "abstract": "   Newsletter"
     },
     {
       "bib_key": "dlbook",
@@ -846,17 +698,17 @@
       "link": "",
       "year": "2016",
       "source": "book.bib",
+      "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": [],
       "reference": "Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron (2016). Deep Learning. ",
-      "abstract": "   ",
-      "source_tier": "A"
+      "abstract": "   "
     }
   ],
   "tier_counts": {
-    "B": 33,
-    "A": 22,
-    "C": 2
+    "A": 19,
+    "B": 29,
+    "C": 1
   },
-  "tiers_enriched_at": "2026-06-10T09:10:02.123220"
+  "tiers_enriched_at": "2026-06-12T07:15:23.313800"
 }
