@@ -36,7 +36,7 @@
 
 | 层级 | 标准 |
 |------|------|
-| **书稿终态** | 27 章 **Fregly-ready**（非仅 `chapter_ready`） |
+| **书稿终态** | **30** 章 **Fregly-ready**（非仅 `chapter_ready`）；Part VIII = runtime + 推理框架 + YiRage 协同 |
 | **样章对照** | [`reference-chapter-1.pdf`](reference-chapter-1.pdf) — mechanical sympathy、goodput、profile-first、**Key Takeaways → Conclusion** |
 | **文风契约** | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §I–§VIII，§七 Fregly 映射 |
 | **Harness 终态** | Agent 少猜、少重复劳动：`book-loop` 一步产出完整 `agent_tasks` + 可复现 gate；协议单源、路径一致 |
@@ -113,6 +113,8 @@ uv run book-loop status
 | [`book_loop.py`](book_loop.py) | CLI shim |  rarely | — |
 | `books/build/chapters/*.tex` | **正文主路径** |  prose / structure | 模板 infra |
 | [`book_content.md`](book_content.md) | 中文目录 spec（**intent 源**） | **增删改章/节、模块划分、写作意图** | 改后必须同步 OUTLINE + tex |
+| [`deps/YiRage`](deps/YiRage) | **YiRage 上游子模块**（runtime/compiler 工程锚点） | pin 版本、文档引用路径 | 勿手改 vendor 树（在 upstream 改） |
+| [`deps/README.md`](deps/README.md) | 子模块 init / build 说明 | 随 submodule 流程更新 | — |
 | `books/research/<id>/` | 研究 + `verified_facts.jsonl` | 核验日志 | 捏造 URL |
 | `books/visuals/<id>/` | 图表 plan + generated | plan / snippets | — |
 | [`research_tools.py`](research_tools.py) | 文献检索 | 用户点名修 harness | loop 中默认不动 |
@@ -402,7 +404,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Gold endings**：ch01 / ch04 / ch10 / ch11 / **ch12** / **ch13** — Key Takeaways + Conclusion。
 - **Loop R1（2026-06-10，内容轨）**：ch12 Fregly 深度改写 — 剥离模板污染；Key Takeaways + Conclusion；`python3 book_prepare.py --chapter ch12` → cov=100% words=3003 q=94.0 ready。
 - **Loop R3（2026-06-10，内容轨）**：ch13 compiler theory — 剥离模板；五柱理论 + Table；§5.5 将 `outline_extended.json` ch13 `min_words` 4500→3000（对齐 ch12 密度）；`python3 book_prepare.py --chapter ch13` → cov=100% words=3000 q=94.0 ready。
-- **内容 R-next**：ch14 MLIR（已在 AGENT_SKIP，deep-rewrite）；批量迁移其余 ~21 章 `Chapter Summary` → Takeaways。
+- **Loop R4（2026-06-10，目录+主题轨）**：Part VIII 新增 ch28–ch30（推理框架 / YiRage runtime / 三方 co-design）；`git submodule add` → `deps/YiRage`；`book_content.md` + `outline_extended.json` 三层同步；ch28 初稿 + ch29/30 stub。
+- **内容 R-next**：ch28 Fregly 扩写至 ready；ch29–ch30 深度改写；Part VII ch22/24/26 交叉引用 Part VIII；批量 `Chapter Summary` → Takeaways（~21 章）。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。

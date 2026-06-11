@@ -1,0 +1,3 @@
+[submodule "deps/YiRage"]
+	path = deps/YiRage
+	url = https://github.com/chenxingqiang/YiRage.git

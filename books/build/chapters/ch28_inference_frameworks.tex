@@ -1,0 +1,66 @@
+\chapter{LLM Inference Frameworks and Serving Runtimes}
+\label{chap:ch28}
+\typeout{START_CHAPTER "ch28" \theabspage}
+
+Who owns decode goodput---the inference \emph{framework} that batches requests and manages KV, or the \emph{compiler/runtime} that fuses kernels and cuts bytes/token? The industry default splits responsibility badly: frameworks optimize scheduling and capacity; compilers optimize isolated GEMMs; neither measures the same counters on batch-1 decode \citep{patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,yirage2026}. Part~VIII opens by naming what frameworks \emph{must} keep (request lifecycle, paging, sampling policy) versus what YiRage and MegaKernel stacks can absorb (intra-step residency, launches/token) \citep{chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook}.
+
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100---often before framework-level batching helps at BS${=}1$ \citep{taxbreak2026}. vLLM-style serving reduces KV fragmentation and raises fleet utilization, but leaves operator boundaries inside the decoder step unless a compiler reunifies them \citep{kwon2023vllm,patel2025llminference,memoryfloor2026,yirage2026}. This chapter maps framework layers to Chapter~1 counters so Part~VI--VII compiler theory lands in a deployable stack, not a slide \citep{chen2020compilerbasedhardw,taxbreak2026,semianalysis2024tma,amd2024xdna,amd2024aie}.
+
+\section{framework landscape}
+\label{sec:ch28_framework_landscape}
+
+\textbf{Framework landscape} spans HuggingFace \emph{eager} paths, vLLM/SGLang \emph{continuous-batching} servers, TensorRT-LLM/ONNX Runtime \emph{compiled} deployments, and custom C++ runtimes \citep{kwon2023vllm,patel2025llminference,dlbook,chen2020compilerbasedhardw,yirage2026}. Each makes different fusion depth assumptions: TRT-LLM may fuse within exported regions; HF PyTorch often does not; vLLM optimizes KV and batching while reusing framework attention backends \citep{patel2025llminference,dao2022flashattention,dao2023flashdecoding,memoryfloor2026,taxbreak2026}.
+
+Compiler engineers should classify any deployment into three buckets: (1) \emph{framework-native} decode (Python loop + vendor libs); (2) \emph{partial export} (compiled attention or MLP only); (3) \emph{compiler-owned decode core} (YiRage PersistentKernel or MegaKernel inside a thin framework shell) \citep{yirage2026,chen2020compilerbasedhardw,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}. Bucket choice determines whether your lever is batching policy or bytes/token \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026}.
+
+\paragraph{Multi-hardware delta.} Framework support matrices differ: CUDA-first servers dominate cloud; CPU/OpenVINO paths serve edge; Ascend/MACA stacks require vendor runtimes \citep{amd2024aie,amd2024xdna,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dlbook}. YiRage targets the same decode core across backends---framework integration must not reintroduce GPU-only assumptions at the API boundary \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,liu2024deepseekv3,kwon2023vllm,taxbreak2026,memoryfloor2026,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
+
+\begin{example}
+A team runs vLLM for KV paging but keeps PyTorch-eager MLP boundaries: paging wins capacity while launches/token stay TaxBreak-high---framework choice fixed scheduling, not fusion \citep{kwon2023vllm,taxbreak2026,patel2025llminference,yirage2026,memoryfloor2026}.
+\end{example}
+
+\section{continuous batching}
+\label{sec:ch28_continuous_batching}
+
+\textbf{Continuous batching} interleaves prefill and decode requests to raise GPU occupancy \citep{kwon2023vllm,patel2025llminference,liu2024deepseekv3,dlbook}. It improves \emph{fleet} goodput (tokens/s per GPU) but does not automatically cut \emph{per-request} bytes/token at BS${=}1$ \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw}. Compiler integration must preserve batching invariants: dynamic sequence lengths, slot assignment, and cancellation---while still allowing graph capture or MegaKernel regions for steady decode cells \citep{nvidia2024cudagraphs,yirage2026,kwon2023vllm,liu2024deepseekv3,taxbreak2026,memoryfloor2026,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,dlbook,amd2024xdna,amd2024aie,nvidia2022hopper}.
+
+Framework schedulers expose \emph{when} a decode step runs; compilers decide \emph{what} executes inside the step \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,semianalysis2024tma,dlbook}. Profile both: scheduler queue time vs in-step ms/token \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{kv paging serv}
+\label{sec:ch28_kv_paging_serv}
+
+\textbf{KV paging serv} (PagedAttention and descendants) treats KV as allocatable blocks---framework memory management, not compiler math \citep{kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2023flashdecoding,liu2024deepseekv3,dlbook,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,nvidia2022hopper,nvidia2024cudagraphs}. Compilers must consume page tables as layout IR (Chapter~13), not fight them with contiguous-KV-only fusion plans \citep{yirage2026,chen2020compilerbasedhardw,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}.
+
+Block size trades fragmentation vs attention tile efficiency: smaller blocks reduce waste; larger blocks improve vectorized loads \citep{kwon2023vllm,dao2022flashattention,dao2023flashdecoding,patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,dlbook,liu2024deepseekv3,amd2024xdna,amd2024aie,nvidia2022hopper,nvidia2024cudagraphs}. Co-tune block policy with compiler tile search on the same context buckets \citep{yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,dlbook}.
+
+\section{framework bottlenecks}
+\label{sec:ch28_framework_bottlenecks}
+
+\textbf{Framework bottlenecks} mirror Chapter~1: launches/token, bytes/token, and orchestration tax---often introduced \emph{above} the decoder kernel by Python loops, dispatcher churn, and unfused vendor op sequences \citep{taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dao2023flashdecoding,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,nvidia2022hopper}. Framework A/B that reports only tokens/s without per-step byte ledgers misattributes compiler regressions to ``scheduling'' \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\paragraph{Multi-hardware delta.} CPU-served frameworks hit GIL and memcpy costs; GPU frameworks hit launch storms; NPU frameworks hit static-shape bucket misses \citep{dlbook,amd2024aie,amd2024xdna,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}.
+
+\section{compiler integration hooks}
+\label{sec:ch28_compiler_integration_hooks}
+
+\textbf{Compiler integration hooks} are the seams where YiRage attaches: exported FX/ONNX regions, custom op \emph{plugin} registration, CUDA graph capture buckets, and PersistentKernel call sites \citep{yirage2026,chen2020compilerbasedhardw,nvidia2024cudagraphs,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,nvidia2022hopper}. Hooks should preserve numerics carriers from Chapter~10 and residency metadata from Chapter~6---exporting a subgraph without those invariants recreates silent HBM spill \citep{dao2022flashattention,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dlbook,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,amd2024xdna,dao2023flashdecoding,nvidia2022hopper}.
+
+Design rule: frameworks own \emph{request and KV lifecycle}; compilers own \emph{decode-step residency}; runtime owns \emph{launch and synchronization} inside the compiled core (Chapter~29) \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook,semianalysis2024tma,amd2024aie,amd2024xdna,dao2023flashdecoding,nvidia2022hopper}. Chapter~30 formalizes the split for production stacks \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+
+\section{Key Takeaways}
+\label{sec:ch28_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Frameworks schedule; compilers fuse.} Continuous batching raises fleet utilization without fixing BS${=}1$ bytes/token \citep{kwon2023vllm,taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026}.
+\item \textbf{Paged KV is framework layout.} Compilers must lower page tables as first-class IR \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+\item \textbf{Measure both layers.} Queue time and in-step ms/token/bytes/token \citep{patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}.
+\item \textbf{Integration hooks are contracts.} Export regions must preserve softmax carriers and capture legality \citep{dao2022flashattention,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw}.
+\item \textbf{Multi-hardware parity.} Framework defaults are CUDA-centric; YiRage backends require explicit triplet tests \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,patel2025llminference}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch28_conclusion}
+
+Inference frameworks solve fleet scheduling and KV capacity; they do not replace compiler-side fusion and runtime-side launch collapse \citep{kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook,semianalysis2024tma,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. Chapter~29 descends into YiRage Layer~5 Persistent Kernel runtime (\texttt{deps/YiRage} submodule); Chapter~30 stitches framework, compiler, and runtime into one decode goodput workflow \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,dlbook}.
+
+\typeout{END_CHAPTER "ch28" \theabspage}

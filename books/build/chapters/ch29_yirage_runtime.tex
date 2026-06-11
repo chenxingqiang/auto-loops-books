@@ -1,0 +1,46 @@
+\chapter{YiRage Runtime Layer and Persistent Kernel Execution}
+\label{chap:ch29}
+\typeout{START_CHAPTER "ch29" \theabspage}
+
+Chapter~28 placed inference \emph{frameworks} above the decode step; this chapter covers YiRage \emph{below} exported graphs---the C++ runtime, Persistent Kernel launcher, and backend registry that turn \texttt{superoptimize()} results into repeatable decode cells \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook}. Source tree: git submodule \texttt{deps/YiRage} (upstream: \citep{yirage2026}); init via \texttt{git submodule update --init --recursive deps/YiRage} (see \texttt{deps/README.md} in repo root).
+
+\section{yirage stack layers}
+\label{sec:ch29_yirage_stack_layers}
+
+\textbf{YiRage stack layers} follow the five-layer model: Python API $\rightarrow$ Backend Manager $\rightarrow$ Search/Strategy $\rightarrow$ Threadblock ops $\rightarrow$ \textbf{Persistent Kernel runtime} \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}. Parts~IV--VI focused on compiler passes; Part~VIII completes the stack with execution and device memory management \citep{yirage2026,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,chen2020compilerbasedhardw}.
+
+\section{persistent kernel decode}
+\label{sec:ch29_persistent_kernel_decode}
+
+\textbf{Persistent kernel decode} uses \texttt{yr.PersistentKernel(mode="decode", backend=..., fallback\_backends=[...])} to select backend execution with graceful CPU/NPU fallbacks \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,liu2024deepseekv3,nvidia2024cudagraphs,amd2024xdna,amd2024aie,dlbook,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper}. Same-backend rule: search and execute on the installed target---do not profile on CPU and ship CUDA kernels without re-search \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+
+\section{superoptimize handoff}
+\label{sec:ch29_superoptimize_handoff}
+
+\textbf{Superoptimize handoff} bridges \texttt{graph.superoptimize(backend=...)} outputs to runtime launch: fused $\mu$Graphs, fingerprint verification, and cached kernel configs \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,amd2024xdna,amd2024aie,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding,dlbook}. Framework hooks (Chapter~28) must not strip metadata required for capture or MegaKernel legality \citep{yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}.
+
+\section{hw registry runtime}
+\label{sec:ch29_hw_registry_runtime}
+
+\textbf{Hw registry runtime} (\texttt{HardwareRegistry}, \texttt{detect\_current\_chip()}) supplies chip models for search configs---Hopper vs XDNA vs M3 Max tile candidates \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,patel2025llminference,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,taxbreak2026,memoryfloor2026,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. Runtime detection must align with fleet labels used in framework schedulers \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{deps build native}
+\label{sec:ch29_deps_build_native}
+
+\textbf{Deps build native}: \texttt{import yirage} requires \texttt{yirage.core} + \texttt{libyirage\_runtime}---no Python-only native build path \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}. Submodule init: \texttt{git submodule update --init --recursive deps/YiRage}; build via \texttt{YIRAGE\_BACKEND=cuda pip install -e deps/YiRage} (see upstream \texttt{docs/INSTALLATION.md}) \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,patel2025llminference,dlbook}.
+
+\section{Key Takeaways}
+\label{sec:ch29_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Runtime is Layer~5.} Compilers emit; Persistent Kernels execute with device memory discipline \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+\item \textbf{Same-backend search.} Profile and ship on the target SKU \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+\item \textbf{Submodule is source of truth.} `deps/YiRage` for APIs and build \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch29_conclusion}
+
+YiRage runtime closes the gap between fused IR and fleet decode---Chapter~30 integrates this layer with vLLM-class frameworks and Chapter~12 execution modes \citep{yirage2026,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,dlbook,semianalysis2024tma,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}.
+
+\typeout{END_CHAPTER "ch29" \theabspage}

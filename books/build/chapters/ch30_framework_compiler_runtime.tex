@@ -1,0 +1,46 @@
+\chapter{Framework, Compiler, and Runtime Co-Design for Decode Goodput}
+\label{chap:ch30}
+\typeout{START_CHAPTER "ch30" \theabspage}
+
+Production decode is a \emph{three-way} contract: the inference \textbf{framework} schedules requests and owns KV paging; the \textbf{compiler} (YiRage middle-end + \texttt{superoptimize}) owns intra-step fusion and layout; the \textbf{runtime} (Persistent Kernel Layer~5) owns launches, device memory, and backend fallbacks \citep{yirage2026,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook,semianalysis2024tma,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. When p99 latency stalls, teams that optimize only one leg recreate Chapter~1's framework fragmentation at warehouse scale \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{responsibility split}
+\label{sec:ch30_responsibility_split}
+
+\textbf{Responsibility split} table (framework / compiler / runtime) must appear in every production runbook \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,taxbreak2026,memoryfloor2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,dlbook,semianalysis2024tma,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. Framework: batching, paging, routing, sampling policy. Compiler: tiling, fusion, layout, legality. Runtime: PK launch, sync, JIT, backend registry \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+
+\section{decode pipeline handoff}
+\label{sec:ch30_decode_pipeline_handoff}
+
+\textbf{Decode pipeline handoff}: prefill often stays framework-orchestrated; decode steps enter compiler-owned cores when bytes/token dominate \citep{patel2025llminference,dao2022flashattention,dao2023flashdecoding,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,nvidia2022hopper}. Sampling and speculative branches remain \emph{eager hulls} outside capture (Chapter~12) \citep{nvidia2024cudagraphs,kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,dlbook}.
+
+\section{vllm yirage stack}
+\label{sec:ch30_vllm_yirage_stack}
+
+\textbf{Vllm yirage stack} pattern: vLLM scheduler + paged KV + YiRage fused decode core invoked per step---measure queue wait and in-step counters separately \citep{kwon2023vllm,yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. DeepSeek-class disaggregation extends the pattern to prefill/decode pools \citep{liu2024deepseekv3,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{mode selection fleet}
+\label{sec:ch30_mode_selection_fleet}
+
+\textbf{Mode selection fleet}: eager for debug; CUDA Graph for launch-bound cells; MegaKernel/PK for byte-bound cells---chosen per subgraph, not per binary (Chapter~12) \citep{nvidia2024cudagraphs,yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. Fleet configs bucket context lengths and backend SKUs consistently \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{production regression}
+\label{sec:ch30_production_regression}
+
+\textbf{Production regression}: triplet bytes/token + launches/token on GPU/CPU/NPU; framework-level tokens/s; version pins for \texttt{deps/YiRage} submodule \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,dlbook}. Submodule bumps require re-run of search caches and PK warmup profiles \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+
+\section{Key Takeaways}
+\label{sec:ch30_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Three-way co-design.} Framework + compiler + runtime; optimize the leg that moves your counter \citep{patel2025llminference,yirage2026,kwon2023vllm,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,dlbook}.
+\item \textbf{Handoffs are APIs.} Paging, capture buckets, PK entry points documented \citep{kwon2023vllm,nvidia2024cudagraphs,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+\item \textbf{Submodule in CI.} Pin \texttt{deps/YiRage}; regression on bump \citep{yirage2026,chen2020compilerbasedhardw,dlbook}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch30_conclusion}
+
+This chapter closes Part~VIII and the book's industrial arc: hardware constraints (Part~II--III), MegaKernel craft (Part~IV--V), compiler theory and stacks (Part~VI), production tuning (Part~VII), and now \emph{deployable} framework--compiler--runtime cooperation anchored on YiRage \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,semianalysis2024tma,amd2024xdna,amd2024aie,dao2023flashdecoding,nvidia2022hopper,dlbook}. Future work tracks autonomous search (Chapter~25) and new hardware in `HardwareRegistry`---always profiled on decode goodput, never on FLOPs alone \citep{yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,dlbook}.
+
+\typeout{END_CHAPTER "ch30" \theabspage}

@@ -9,6 +9,8 @@ Two autonomous research loops in one repo:
 
 Both follow [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) pattern: a fixed harness scores each experiment; the agent keeps wins and reverts regressions via git.
 
+**Cloud Agents:** operating manual — [`AGENTS.md`](AGENTS.md) (dual-track PSIVE loop: book content + loops harness; commit/push every round).
+
 ---
 
 ## Loops a Book — autonomous technical book writing
@@ -60,6 +62,13 @@ uv run book_prepare.py --chapter ch01
 
 Point a coding agent at [`program_books.md`](program_books.md) and alternate **`book-loop step`** with completing **`agent_tasks`** in [`loops/loop_state.json`](loops/loop_state.json).
 
+**YiRage submodule** (Part VIII runtime chapters):
+
+```bash
+git submodule update --init --recursive deps/YiRage
+# see deps/README.md
+```
+
 ### Repository map (autobooks)
 
 | Path | Role |
@@ -72,7 +81,9 @@ Point a coding agent at [`program_books.md`](program_books.md) and alternate **`
 | [`book_visuals.py`](book_visuals.py) | Figure/table plan, TikZ render, audit |
 | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) | Unified voice — engineer-narrative; gold standard = ch01 |
 | [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md) | Fact gate — web-verify numbers/examples; `verified_facts.jsonl` + URLs |
-| [`AI Compiler Performance Engineering.md`](AI%20Compiler%20Performance%20Engineering.md) | Chinese outline spec (目录); English output in `.tex` |
+| [`AGENTS.md`](AGENTS.md) | Infinite book loop — Fregly alignment, Cloud Agent checklist |
+| [`reference-chapter-1.pdf`](reference-chapter-1.pdf) | Fregly style north star (*AI Systems Performance Engineering*, Ch.1 sample) |
+| [`book_content.md`](book_content.md) | Chinese outline spec (目录); English output in `.tex` |
 | [`books/chapters/*.tex`](books/chapters/) | Mutable manuscript |
 | [`books/main.tex`](books/main.tex) | Book skeleton + `\input` order |
 | [`book_results.tsv`](book_results.tsv) | Append-only experiment log |

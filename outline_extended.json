@@ -68,6 +68,15 @@
         "ch26",
         "ch27"
       ]
+    ],
+    [
+      "part08",
+      "Runtime, Inference Frameworks & YiRage Co-Design",
+      [
+        "ch28",
+        "ch29",
+        "ch30"
+      ]
     ]
   ],
   "compiler_section_template": [
@@ -904,6 +913,158 @@
           [
             "autonomous",
             "kernel"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch28",
+      "file": "ch28_inference_frameworks.tex",
+      "title": "LLM Inference Frameworks and Serving Runtimes",
+      "min_words": 3500,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "framework_landscape",
+          [
+            "framework",
+            "vllm",
+            "huggingface"
+          ]
+        ],
+        [
+          "continuous_batching",
+          [
+            "continuous",
+            "batch",
+            "schedul"
+          ]
+        ],
+        [
+          "kv_paging_serv",
+          [
+            "paged",
+            "kv",
+            "vllm"
+          ]
+        ],
+        [
+          "framework_bottlenecks",
+          [
+            "launch",
+            "bytes",
+            "orchestr"
+          ]
+        ],
+        [
+          "compiler_integration_hooks",
+          [
+            "export",
+            "plugin",
+            "integrat"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch29",
+      "file": "ch29_yirage_runtime.tex",
+      "title": "YiRage Runtime Layer and Persistent Kernel Execution",
+      "min_words": 4000,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "yirage_stack_layers",
+          [
+            "layer",
+            "persistent",
+            "backend"
+          ]
+        ],
+        [
+          "persistent_kernel_decode",
+          [
+            "PersistentKernel",
+            "decode",
+            "mode"
+          ]
+        ],
+        [
+          "superoptimize_handoff",
+          [
+            "superoptimize",
+            "graph",
+            "kernel"
+          ]
+        ],
+        [
+          "hw_registry_runtime",
+          [
+            "HardwareRegistry",
+            "detect",
+            "chip"
+          ]
+        ],
+        [
+          "deps_build_native",
+          [
+            "submodule",
+            "native",
+            "yirage"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch30",
+      "file": "ch30_framework_compiler_runtime.tex",
+      "title": "Framework, Compiler, and Runtime Co-Design for Decode Goodput",
+      "min_words": 4000,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "responsibility_split",
+          [
+            "framework",
+            "compiler",
+            "runtime",
+            "boundary"
+          ]
+        ],
+        [
+          "decode_pipeline_handoff",
+          [
+            "prefill",
+            "decode",
+            "sampling"
+          ]
+        ],
+        [
+          "vllm_yirage_stack",
+          [
+            "vllm",
+            "yirage",
+            "integrat"
+          ]
+        ],
+        [
+          "mode_selection_fleet",
+          [
+            "eager",
+            "graph",
+            "megakernel",
+            "fleet"
+          ]
+        ],
+        [
+          "production_regression",
+          [
+            "regression",
+            "triplet",
+            "bytes"
           ]
         ]
       ]
