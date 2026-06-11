@@ -372,7 +372,7 @@
 
 ### 第八篇 Runtime、推理框架与 YiRage 协同（第 28–30 章·新增）
 
-> **工程锚点**：[`deps/YiRage`](deps/YiRage) git submodule → https://github.com/chenxingqiang/YiRage
+> **工程锚点**：[`deps/`](deps/) git submodules — YiRage + MLIR (llvm-project), XLA, TVM, Triton, IREE, Glow；见 [`deps/README.md`](deps/README.md)
 
 #### 第28章 LLM Inference Frameworks and Serving Runtimes
 

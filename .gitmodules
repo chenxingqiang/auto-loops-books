@@ -1,3 +1,21 @@
 [submodule "deps/YiRage"]
 	path = deps/YiRage
 	url = https://github.com/chenxingqiang/YiRage.git
+[submodule "deps/llvm-project"]
+	path = deps/llvm-project
+	url = https://github.com/llvm/llvm-project.git
+[submodule "deps/xla"]
+	path = deps/xla
+	url = https://github.com/openxla/xla.git
+[submodule "deps/tvm"]
+	path = deps/tvm
+	url = https://github.com/apache/tvm.git
+[submodule "deps/triton"]
+	path = deps/triton
+	url = https://github.com/triton-lang/triton.git
+[submodule "deps/iree"]
+	path = deps/iree
+	url = https://github.com/iree-org/iree.git
+[submodule "deps/glow"]
+	path = deps/glow
+	url = https://github.com/pytorch/glow.git

@@ -69,6 +69,13 @@ git submodule update --init --recursive deps/YiRage
 # see deps/README.md
 ```
 
+**Compiler submodules** (Part VI ch14–ch19 — MLIR, XLA, TVM, Triton, IREE, Glow):
+
+```bash
+git submodule update --init --depth 1 deps/llvm-project deps/xla deps/tvm deps/triton deps/iree deps/glow
+# MLIR sources: deps/llvm-project/mlir/
+```
+
 ### Repository map (autobooks)
 
 | Path | Role |
