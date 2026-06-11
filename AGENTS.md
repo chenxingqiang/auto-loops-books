@@ -408,7 +408,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R4（2026-06-10，目录+主题轨）**：Part VIII 新增 ch28–ch30（推理框架 / YiRage runtime / 三方 co-design）；`git submodule add` → `deps/YiRage`；`book_content.md` + `outline_extended.json` 三层同步；ch28 初稿 + ch29/30 stub。
 - **Loop R4b（deps 扩展）**：`deps/` 增 shallow 子模块 — `llvm-project`（MLIR/ch14）、`xla`、`tvm`、`triton`、`iree`、`glow`（ch15–19）；[`deps/README.md`](deps/README.md) 章节对照表。
 - **Loop R4c（DeepSeek 推理 deps）**：`deps/` 增 DeepSeek 已开源推理组件 — `FlashMLA`、`DeepEP`、`DeepGEMM`、`eplb`、`3FS`、`DualPipe`、`profile-data`、`open-infra-index`；完整推理引擎仍闭源，文档在 `open-infra-index/OpenSourcing_DeepSeek_Inference_Engine/`。
-- **内容 R-next**：ch28 Fregly 扩写至 ready；ch29–ch30 深度改写；Part VII ch22/24/26 交叉引用 Part VIII；批量 `Chapter Summary` → Takeaways（~21 章）。
+- **Loop R5（2026-06-10，内容轨）**：ch28 Fregly 扩写 — 600→3500 words；framework buckets 表 + 2 fig（`books/visuals/ch28/`）；`python3 book_prepare.py --chapter ch28` → cov=100% words=3500 q=94.0 ready；**28/30** ready。
+- **内容 R-next**：ch29 YiRage runtime 深度改写；ch30 co-design；Part VII 交叉引用；批量 `Chapter Summary` → Takeaways（~21 章）。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
