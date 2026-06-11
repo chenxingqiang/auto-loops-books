@@ -356,6 +356,8 @@
 
 - 24.6 YiRage ClusterTopology多硬件集群管理与异构编译落地
 
+- 24.7 DeepSeek 推理基建 deps：`FlashMLA` / `DeepEP` / `DeepGEMM` / `eplb` / `3FS`（`deps/` 子模块；完整推理引擎见 `open-infra-index` 文档，尚未全量开源）
+
 #### 第25章 Auto-Optimization & AI-Assisted Compiler Technology
 
 **新增核心**：多硬件下RL自动调优搜索空间差异化、硬件感知奖励函数设计、YiRage跨硬件智能优化实战

@@ -114,7 +114,7 @@ uv run book-loop status
 | `books/build/chapters/*.tex` | **正文主路径** |  prose / structure | 模板 infra |
 | [`book_content.md`](book_content.md) | 中文目录 spec（**intent 源**） | **增删改章/节、模块划分、写作意图** | 改后必须同步 OUTLINE + tex |
 | [`deps/YiRage`](deps/YiRage) | **YiRage 上游子模块**（runtime/compiler 工程锚点） | pin 版本、文档引用路径 | 勿手改 vendor 树（在 upstream 改） |
-| [`deps/`](deps/) | **编译器上游子模块**（MLIR/llvm, XLA, TVM, Triton, IREE, Glow） | pin SHA、ch14–ch19 对照 | 见 [`deps/README.md`](deps/README.md) |
+| [`deps/`](deps/) | **编译器 + DeepSeek 推理基建子模块** | pin SHA、ch14–19 / ch23–24 对照 | 见 [`deps/README.md`](deps/README.md)；**完整 DeepSeek 推理引擎未开源** |
 | [`deps/README.md`](deps/README.md) | 子模块 init / build 说明 | 随 submodule 流程更新 | — |
 | `books/research/<id>/` | 研究 + `verified_facts.jsonl` | 核验日志 | 捏造 URL |
 | `books/visuals/<id>/` | 图表 plan + generated | plan / snippets | — |
@@ -407,6 +407,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R3（2026-06-10，内容轨）**：ch13 compiler theory — 剥离模板；五柱理论 + Table；§5.5 将 `outline_extended.json` ch13 `min_words` 4500→3000（对齐 ch12 密度）；`python3 book_prepare.py --chapter ch13` → cov=100% words=3000 q=94.0 ready。
 - **Loop R4（2026-06-10，目录+主题轨）**：Part VIII 新增 ch28–ch30（推理框架 / YiRage runtime / 三方 co-design）；`git submodule add` → `deps/YiRage`；`book_content.md` + `outline_extended.json` 三层同步；ch28 初稿 + ch29/30 stub。
 - **Loop R4b（deps 扩展）**：`deps/` 增 shallow 子模块 — `llvm-project`（MLIR/ch14）、`xla`、`tvm`、`triton`、`iree`、`glow`（ch15–19）；[`deps/README.md`](deps/README.md) 章节对照表。
+- **Loop R4c（DeepSeek 推理 deps）**：`deps/` 增 DeepSeek 已开源推理组件 — `FlashMLA`、`DeepEP`、`DeepGEMM`、`eplb`、`3FS`、`DualPipe`、`profile-data`、`open-infra-index`；完整推理引擎仍闭源，文档在 `open-infra-index/OpenSourcing_DeepSeek_Inference_Engine/`。
 - **内容 R-next**：ch28 Fregly 扩写至 ready；ch29–ch30 深度改写；Part VII ch22/24/26 交叉引用 Part VIII；批量 `Chapter Summary` → Takeaways（~21 章）。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。

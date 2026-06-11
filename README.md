@@ -76,6 +76,13 @@ git submodule update --init --depth 1 deps/llvm-project deps/xla deps/tvm deps/t
 # MLIR sources: deps/llvm-project/mlir/
 ```
 
+**DeepSeek inference building blocks** (engine itself not fully open; ch10 MLA, ch23 MoE, ch24 KV/disagg):
+
+```bash
+git submodule update --init --depth 1 \
+  deps/open-infra-index deps/FlashMLA deps/DeepEP deps/DeepGEMM deps/eplb deps/3FS
+```
+
 ### Repository map (autobooks)
 
 | Path | Role |

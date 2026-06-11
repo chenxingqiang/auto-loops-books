@@ -19,3 +19,27 @@
 [submodule "deps/glow"]
 	path = deps/glow
 	url = https://github.com/pytorch/glow.git
+[submodule "deps/open-infra-index"]
+	path = deps/open-infra-index
+	url = https://github.com/deepseek-ai/open-infra-index.git
+[submodule "deps/FlashMLA"]
+	path = deps/FlashMLA
+	url = https://github.com/deepseek-ai/FlashMLA.git
+[submodule "deps/DeepEP"]
+	path = deps/DeepEP
+	url = https://github.com/deepseek-ai/DeepEP.git
+[submodule "deps/DeepGEMM"]
+	path = deps/DeepGEMM
+	url = https://github.com/deepseek-ai/DeepGEMM.git
+[submodule "deps/eplb"]
+	path = deps/eplb
+	url = https://github.com/deepseek-ai/eplb.git
+[submodule "deps/3FS"]
+	path = deps/3FS
+	url = https://github.com/deepseek-ai/3FS.git
+[submodule "deps/DualPipe"]
+	path = deps/DualPipe
+	url = https://github.com/deepseek-ai/DualPipe.git
+[submodule "deps/profile-data"]
+	path = deps/profile-data
+	url = https://github.com/deepseek-ai/profile-data.git

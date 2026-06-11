@@ -14,6 +14,27 @@ Git **submodules** (shallow, `--depth 1`) for compiler/runtime upstream trees re
 | [`iree/`](iree/) | [iree-org/iree](https://github.com/iree-org/iree) | **ch18** | MLIR-native runtime + compiler |
 | [`glow/`](glow/) | [pytorch/glow](https://github.com/pytorch/glow) | **ch19** | Glow (legacy CPU/edge compiler) |
 
+### DeepSeek inference infrastructure (partial open source)
+
+DeepSeek’s **production inference engine is not fully open source**; the repos below are the **battle-tested building blocks** released during [Open Source Week](https://github.com/deepseek-ai/open-infra-index) and the [path-to-open-sourcing docs](deps/open-infra-index/OpenSourcing_DeepSeek_Inference_Engine/). Pin them for ch10 (MLA), ch23 (MoE/EP), ch24 (disagg/KV), ch30 (framework–runtime).
+
+| Path | Upstream | Role in inference stack |
+|------|----------|-------------------------|
+| [`open-infra-index/`](open-infra-index/) | [deepseek-ai/open-infra-index](https://github.com/deepseek-ai/open-infra-index) | Index + V3/R1 inference system overview docs |
+| [`FlashMLA/`](FlashMLA/) | [deepseek-ai/FlashMLA](https://github.com/deepseek-ai/FlashMLA) | Hopper MLA decode kernels; paged KV (block 64) |
+| [`DeepEP/`](DeepEP/) | [deepseek-ai/DeepEP](https://github.com/deepseek-ai/DeepEP) | MoE expert-parallel dispatch/combine (train + decode) |
+| [`DeepGEMM/`](DeepGEMM/) | [deepseek-ai/DeepGEMM](https://github.com/deepseek-ai/DeepGEMM) | FP8 GEMM (dense + MoE layouts); JIT kernels |
+| [`eplb/`](eplb/) | [deepseek-ai/eplb](https://github.com/deepseek-ai/eplb) | Expert-parallel load balancing (V3/R1) |
+| [`3FS/`](3FS/) | [deepseek-ai/3FS](https://github.com/deepseek-ai/3FS) | Fire-Flyer FS; KVCache lookup / disagg storage |
+| [`DualPipe/`](DualPipe/) | [deepseek-ai/DualPipe](https://github.com/deepseek-ai/DualPipe) | Bidirectional PP overlap (train; disagg patterns) |
+| [`profile-data/`](profile-data/) | [deepseek-ai/profile-data](https://github.com/deepseek-ai/profile-data) | V3/R1 compute–communication overlap analysis |
+
+```bash
+git submodule update --init --depth 1 \
+  deps/open-infra-index deps/FlashMLA deps/DeepEP deps/DeepGEMM \
+  deps/eplb deps/3FS deps/DualPipe deps/profile-data
+```
+
 ## Clone / update
 
 From repo root:
@@ -62,3 +83,7 @@ python -c "import yirage as yr; print(yr.get_available_backends())"
 | Triton kernels | `deps/triton/python/triton/` |
 | IREE flow / VMVX / HAL | `deps/iree/compiler/`, `deps/iree/runtime/` |
 | Glow graph lowering | `deps/glow/lib/` |
+| DeepSeek MLA decode | `deps/FlashMLA/` |
+| MoE EP / dispatch | `deps/DeepEP/` |
+| FP8 MoE GEMM | `deps/DeepGEMM/` |
+| Inference overview (closed engine + open blocks) | `deps/open-infra-index/` |
