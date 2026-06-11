@@ -15,6 +15,8 @@
 9. [当前轮次笔记](#9-当前轮次笔记)
 10. [环境与 Gotchas](#10-环境与-gotchas)
 
+（§5.5 [目录迭代](#55-目录迭代agent-可改--内容不足时必用)）
+
 ---
 
 ## 1. 仓库使命与双轨目标
@@ -72,7 +74,8 @@ flowchart LR
 | **最小 diff** | 匹配现有命名与结构；不 over-engineer 辅助脚本 |
 | **验证后沉淀** | 结论写入 `AGENTS.md` / `WRITING_STYLE.md` / `program_books.md` 后再 commit |
 | **每轮 commit + push** | push 成功 → 扫描 backlog → 自动下一轮（用户喊停除外） |
-| **评分冻结** | loop 期间不改 `book_prepare.py` **权重**；仅扩 `OUTLINE` |
+| **评分冻结** | loop 期间不改 `book_prepare.py` **权重**；**可**扩/改 `OUTLINE` 与目录 spec |
+| **目录可迭代** | 内容不够、结构不合理、spec 与正文不对齐时，**Agent 可改目录**（见 §5.5）；须三层同步 |
 | **保护深度章** | `AGENT_SKIP` 章禁 batch；用 `deep-rewrite` + 手改 |
 
 ### 终止条件（仅此停止）
@@ -94,7 +97,8 @@ uv run book-loop status
 |------|-----|------|
 | 未 ready / compile 失败 / fact 失败 | 内容 | `book-loop step` 或 `deep-rewrite` |
 | 已 ready 但 `Chapter Summary` / 模板污染 | 内容 | Fregly 章末迁移 + 手改 |
-| `quality_score` < 85 核心章 | 内容 | `deep-rewrite` + brief |
+| **内容不够 / 目录与正文脱节** | 内容 | **改目录**（§5.5）→ 再写/扩章 |
+| `quality_score` < 85 核心章 | 内容 | `deep-rewrite` + brief；必要时 **增删 `\section` 或调整 OUTLINE** |
 | Agent 重复劳动、路径/doc 漂移、task 噪声 | Harness | 改 `iterate.py` / agent_tasks / README 对齐 |
 | 新 gate 可机器化（lint、rg 规则） | Harness | 并入 `build_agent_tasks` 或 evaluate，**不改权重** |
 
@@ -108,7 +112,7 @@ uv run book-loop status
 | [`book_prepare.py`](book_prepare.py) | 评分 harness | **仅 `OUTLINE`** | 权重、`word_score`、compile 逻辑 |
 | [`book_loop.py`](book_loop.py) | CLI shim |  rarely | — |
 | `books/build/chapters/*.tex` | **正文主路径** |  prose / structure | 模板 infra |
-| [`book_content.md`](book_content.md) | 中文目录 spec | 目录变更 | — |
+| [`book_content.md`](book_content.md) | 中文目录 spec（**intent 源**） | **增删改章/节、模块划分、写作意图** | 改后必须同步 OUTLINE + tex |
 | `books/research/<id>/` | 研究 + `verified_facts.jsonl` | 核验日志 | 捏造 URL |
 | `books/visuals/<id>/` | 图表 plan + generated | plan / snippets | — |
 | [`research_tools.py`](research_tools.py) | 文献检索 | 用户点名修 harness | loop 中默认不动 |
@@ -188,7 +192,7 @@ uv run book_prepare.py --chapter ch01
 
 **四轮自问**（策略卡片 1～2 句/问）：
 
-1. **层级**：outline / scaffold / 深度 prose / 事实·引用 / 图表？
+1. **层级**：outline / scaffold / 深度 prose / 事实·引用 / 图表？**是否需要改目录？**
 2. **Fregly 差距**：goodput 数字、multi-HW、Key Takeaways、profile-first？
 3. **证据**：数字进 `verified_facts.jsonl`？图表行有 `\citep{}`？
 4. **机会成本**：`status` 里是否有更高 priority 项？
@@ -226,9 +230,9 @@ cd books && bash make.sh
 
 #### 落地（可改 / 禁止）
 
-**可改：** `books/build/chapters/*.tex`、`book.bib`、`books/research/`、`books/visuals/`、`book_content.md` + `OUTLINE`、`main.tex` `\input` 顺序。
+**可改：** `books/build/chapters/*.tex`、`book.bib`、`books/research/`、`books/visuals/`、**`book_content.md`（全书目录 spec）**、**`book_prepare.py` → `OUTLINE` only**（章 id、section patterns、`min_words`/`min_citations`）、**`books/main.tex` `\input` 顺序**、章内 `\section`/`\subsection` 结构。
 
-**禁止：** 评分权重、LaTeX 模板 infra、无 JSONL 的数字、深度章章末 filler、`git add -A`。
+**禁止：** 评分权重、LaTeX 模板 infra、无 JSONL 的数字、深度章章末 filler、`git add -A`、**只改 `.tex` 不改 spec/OUTLINE 的「幽灵章节」**。
 
 **深度单章流程：**
 
@@ -262,6 +266,51 @@ Fregly 清单见 `WRITING_STYLE.md` §七.5–§七.6。
 |------|------|
 | `chapter_ready` | 机器 rubric 全绿 |
 | **Fregly-ready** | ready + 样章级 narrative / 章末 / 事实链 |
+
+### 5.5 目录迭代（Agent 可改 — 内容不足时必用）
+
+**Agent 在 loop 中有权且应主动修改全书目录**，当 prose 无法在不改结构的前提下达到 Fregly 密度或 gate 要求时。目录不是冻结物；[`program_books.md`](program_books.md)「Outline iteration」与本文一致。
+
+#### 何时改目录（触发条件，满足任一即可）
+
+| 信号 | 典型目录动作 |
+|------|----------------|
+| 单章 **`word_count` 长期低于 `min_words`**，且已排除模板 padding | 在 spec 中**增节**（新 `SectionSpec` + `\section`）；或**拆章** |
+| **`coverage_pct` < 100%**，缺 OUTLINE section | 补 spec bullet + OUTLINE patterns + tex `\section`；或**删去不再需要的 section** 并同步三层 |
+| 调研发现**新主题**应独立成节/成章 | 在 `book_content.md` 增 bullet；扩展 `OUTLINE`；stub tex + `main.tex` |
+| 两节**内容重复**或某节无法写满且无独立 goodput 角度 | **合并 section** 或**合并章节**（更新 id/文件名/`\input` 顺序） |
+| Fregly 叙事需要**新小节**（如 Worked Example、Multi-HW 对比表） | 增 `\subsection` 或新 `\section`；同步 spec 与 `SectionSpec.patterns` |
+| spec bullet 与已写 `\section` **标题/意图不一致** | **优先改 spec 与 OUTLINE** 对齐正文，或改 tex 标题以 match intent |
+| 篇章顺序影响叙事（如 mode selection 应在 implementation 之前） | 调整 `book_content.md` 模块表 + `main.tex` `\input` 顺序（章 id 可不变） |
+
+**不要**用 `ensure_min_words()` 或重复模板段凑字数来规避目录调整。
+
+#### 三层同步（改目录后必做）
+
+与 [`program_books.md` §Outline iteration](program_books.md#outline-iteration目录与结构同步) 相同：
+
+| 层 | 文件 | 动作 |
+|----|------|------|
+| 1 Spec | [`book_content.md`](book_content.md) | `#### 第N章`、bullets、模块/Part 表、中文写作意图 |
+| 2 Rubric | [`book_prepare.py`](book_prepare.py) → **`OUTLINE` only** | `ChapterSpec` / `SectionSpec`（patterns、`min_words`、`min_citations`） |
+| 3 Book | `books/build/chapters/*.tex` + [`books/main.tex`](books/main.tex) | 新建/重命名章文件；`\chapter`/`\section`；`\input{}` 顺序 |
+
+**验证命令（目录轮）：**
+
+```bash
+uv run book_prepare.py --list
+uv run book_prepare.py --chapter <id>    # 每章 coverage / words
+cd books && bash make.sh
+uv run research_tools.py --chapter <new_id> --dry-run   # 新章/新节
+```
+
+**同轮一并 stage：** `book_content.md`、`book_prepare.py`（仅 OUTLINE 段）、`books/main.tex`、受影响 `books/build/chapters/`、`book_results.tsv`（`description` 注明 `outline: …`）。
+
+#### 目录变更 vs 评分 harness
+
+- **允许：** 增删改 `OUTLINE` 中的章/节、`min_words`/`min_citations`、section coverage regex  
+- **禁止：** 修改 `word_score` 权重表、`evaluate_chapter` 公式、`compile_book` 逻辑  
+- **原则：** 用结构解决「写不满 / 写不深」，不用降低 rubric 逃避
 
 ---
 
@@ -312,7 +361,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 ## 7. 单轮检查清单
 
 ```
-[ ] 0. 分流：内容轨 or Harness 轨？闸门/四轮自问已完成
+[ ] 0. 分流：内容 / harness / **目录**？闸门已完成；若 words/coverage 卡住 → 先 §5.5
 [ ] 1. 感知：book-loop status + book_prepare + loop_state.json
 [ ] 2. 策略：1 主攻点；选定 step / deep-rewrite / harness patch
 [ ] 3. 落地：最小 diff；AGENT_SKIP 禁 batch
@@ -355,6 +404,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **内容 R-next**：ch13 compiler theory；批量迁移其余 22 章 `Chapter Summary` → Takeaways。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
+- **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
 ---
 
