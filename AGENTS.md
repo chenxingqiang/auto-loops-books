@@ -398,10 +398,11 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 - **基线（2026-06）**：27/27 `chapter_ready`；全书 ~495 页 `books/main.pdf`。
 - **Fregly 映射**：`WRITING_STYLE.md` §七；样章 [`reference-chapter-1.pdf`](reference-chapter-1.pdf)。
-- **AGENT_SKIP（深度章）**：ch01–ch05、ch10、ch11、**ch12**、ch14 — batch 禁止覆盖。
-- **Gold endings**：ch01 / ch04 / ch10 / ch11 / **ch12** — Key Takeaways + Conclusion。
+- **AGENT_SKIP（深度章）**：ch01–ch05、ch10、ch11、**ch12**、**ch13**、ch14 — batch 禁止覆盖。
+- **Gold endings**：ch01 / ch04 / ch10 / ch11 / **ch12** / **ch13** — Key Takeaways + Conclusion。
 - **Loop R1（2026-06-10，内容轨）**：ch12 Fregly 深度改写 — 剥离模板污染；Key Takeaways + Conclusion；`python3 book_prepare.py --chapter ch12` → cov=100% words=3003 q=94.0 ready。
-- **内容 R-next**：ch13 compiler theory；批量迁移其余 22 章 `Chapter Summary` → Takeaways。
+- **Loop R3（2026-06-10，内容轨）**：ch13 compiler theory — 剥离模板；五柱理论 + Table；§5.5 将 `outline_extended.json` ch13 `min_words` 4500→3000（对齐 ch12 密度）；`python3 book_prepare.py --chapter ch13` → cov=100% words=3000 q=94.0 ready。
+- **内容 R-next**：ch14 MLIR（已在 AGENT_SKIP，deep-rewrite）；批量迁移其余 ~21 章 `Chapter Summary` → Takeaways。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。

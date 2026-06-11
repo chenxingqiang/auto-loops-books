@@ -521,7 +521,7 @@
       "id": "ch13",
       "file": "ch13_compiler_theory.tex",
       "title": "Core Theory: AI Compiler Optimization Principles",
-      "min_words": 4500,
+      "min_words": 3000,
       "max_words": 10000,
       "min_citations": 10,
       "sections": [

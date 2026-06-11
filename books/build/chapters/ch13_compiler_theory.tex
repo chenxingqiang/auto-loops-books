@@ -2,9 +2,15 @@
 \label{chap:ch13}
 \typeout{START_CHAPTER "ch13" \theabspage}
 
-Part~VI treats \emph{Core Theory} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+What makes an AI compiler ``correct'' for production decode---pass ordering that looks elegant on a whiteboard, or schedules that measurably cut bytes/token and launches/token on the SKU you ship? Part~VI opens with \emph{Core Theory}: the optimization principles that sit \emph{below} Chapter~12 execution modes and \emph{above} dialect-specific backends (MLIR, Glow, TVM) \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. Every section binds IR transforms to residency on GPU, CPU, and NPU---not abstract big-O \citep{patel2025llminference,amd2024xdna,amd2024aie,dlbook}.
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor reports $1.259\times$ median speedup on H100 from CUDA Graph replay alone at BS${=}1$, ctx${=}2048$---orchestration relief that tiling and fusion must extend into bytes, not replace \citep{memoryfloor2026,nvidia2024cudagraphs}. Compiler theory is how those counters move together: tile so data stays on-chip, fuse so boundaries disappear, layout so hardware reads coalesce, parallelize so batch-1 decode still saturates memory paths, and split backends so one IR lowers per target without forking model code \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding}.
+
+This chapter is deliberately \emph{theory-first}: no MLIR syntax yet (Chapter~14), no manual CUDA (Part~VII). The goal is a shared vocabulary for pass designers---when someone proposes a new fusion rule or tile heuristic, Table~\ref{tab:ch13_pillars} names which counter must move and which prior chapter constraint applies \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}. Industrial teams that skip this layer debate dialect patches for weeks while bytes/token flatlines because layout and tiling were never co-designed \citep{memoryfloor2026,taxbreak2026,kwon2023vllm}.
+
+Fregly-style goodput analysis applies throughout: every transform is judged on batch-1 decode at representative context buckets, not on square GEMM microbenchmarks or prefill-only traces \citep{patel2025llminference,memoryfloor2026,taxbreak2026}. The five sections mirror how production compilers order concerns---tile shapes constrain fusion legality; layout determines whether fused regions can load coalesced data; parallel axes decide whether extra blocks help bandwidth; backend split decides which target owns each residency class \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook}.
+
+Readers coming from classic optimizing-compiler courses should expect different objectives: decode LLM compilers optimize \emph{moved bytes} and \emph{launches} under numerics constraints, not loop nest locality alone \citep{taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,dlbook}. When in doubt, re-run the Chapter~1 counter worksheet on the same model checkpoint before and after a pass change---theory without measurement is slideware \citep{patel2025llminference,taxbreak2026,memoryfloor2026,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,dlbook}.
 
 \section{tiling theory}
 \label{sec:ch13_tiling_theory}
@@ -14,31 +20,39 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Tiling Theory};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Global tensor\\HBM/DDR};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Tile scheduler\\block sizes};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize On-chip tile\\SMEM / L2 / AIE};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Compute\\MMA / vector};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Tiling Theory optimization pipeline in Core Theory: AI Compiler Optimization Principles.}
+\caption{Tiling theory: map global decode tensors into on-chip tiles before compute.}
 \label{fig:tiling_theory_pipeline}
 \end{figure}
 
-Teams hit \textbf{tiling theory} when Core Theory looks correct in isolation yet decode telemetry disagrees---usually because tiling was planned without tiling residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
+\textbf{Tiling theory} asks which sub-blocks of weights, activations, and KV cache fit in registers, shared memory, L2, or NPU tile SRAM for each decode step \citep{dao2022flashattention,semianalysis2024tma,nvidia2022hopper}. FlashAttention is the canonical IO-aware tiling result for attention: recomputation and block-wise softmax avoid materializing $P$ in HBM \citep{dao2022flashattention,dao2023flashdecoding}. The compiler question is general---every matmul, norm, and MLP in decode needs a tile shape that respects bandwidth and capacity, not only MMA convenience \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
 
-Hardware truth: GPUs bound tiling with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+On Hopper, tiling couples to TMA: async copies move KV tiles while MMA consumes prior tiles \citep{nvidia2022hopper,semianalysis2024tma}. Wrong tile sizes leave TMA underutilized or spill partial outputs to HBM, showing up as bytes/token regression versus a smaller but legal tile \citep{memoryfloor2026,yirage2026}. On XDNA/AIE, tiling is static: DMA chains and tile slots are fixed at compile time; ``dynamic'' GPU tiles do not lower verbatim \citep{amd2024xdna,amd2024aie,chen2020compilerbasedhardw}. CPU decode tiling is cache blocking---NUMA-local KV and blocked GEMMs keep lines hot across norm--matmul chains \citep{dlbook,kwon2023vllm}.
 
-Compiler/kernel fix: predicate fusion on tiling/tiling legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\textbf{Analytic tile sizing.} A first-principles decode tile budget starts from hidden size $d$, head count $h$, KV dtype bytes $b_{kv}$, and context length $L$: bytes moved per token scale with reading prior KV plus writing new KV slots \citep{kwon2023vllm,dao2022flashattention,patel2025llminference}. Tile width along $L$ trades SMEM for trip count; tile width along $d$ trades MMA efficiency for reload width \citep{dao2023flashdecoding,semianalysis2024tma,memoryfloor2026}. Compilers should expose these trade-offs in IR annotations so autotuners search a \emph{legal} polytope rather than all factorizations of $L$ \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,dlbook}. When analytic estimates disagree with profiles by more than a few percent, trust profiles---roofline models omit allocator, paging, and framework overhead \citep{memoryfloor2026,patel2025llminference,taxbreak2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize tiling with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Compiler passes should emit tile metadata in IR (tile sizes, double-buffer depth, residency class) so backends reject illegal schedules before codegen \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3}. Autotuners that search FLOPs-only tile shapes without bytes/token feedback recreate prefill wins and decode losses \citep{patel2025llminference,taxbreak2026,memoryfloor2026}. Profile each candidate tile on BS${=}1$ decode cells, not only square GEMM microbenchmarks \citep{taxbreak2026,semianalysis2024tma}.
+
+\textbf{Prefill vs decode tiling.} Prefill benefits from large token-parallel tiles that amortize weight loads across many queries; decode at BS${=}1$ reuses weights once per step and instead fights KV reload along the sequence axis \citep{dao2022flashattention,dao2023flashdecoding,patel2025llminference}. A tile policy tuned on prefill shapes often selects block sizes that maximize MMA occupancy while increasing KV trips---exactly the regression Memory-Floor documents when bytes/token stay high despite faster attention kernels \citep{memoryfloor2026,taxbreak2026}. Compiler tile search must therefore tag phases explicitly: prefill buckets, decode buckets, and speculative-draft buckets when applicable \citep{kwon2023vllm,yirage2026}.
+
+\textbf{Double buffering and pipeline depth.} Hopper pipelines pair TMA loads with MMA compute; tile theory includes how many stages fit in shared memory without spilling partial softmax or norm statistics \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention}. Shallow pipelines underutilize memory bandwidth; deep pipelines overflow SMEM and force silent HBM spill \citep{memoryfloor2026,yirage2026}. On AIE, pipeline depth is fixed at compile time---there is no runtime knob to ``add another buffer'' when decode context grows \citep{amd2024xdna,amd2024aie,chen2020compilerbasedhardw}.
+
+\textbf{Autotuning discipline.} TVM-style autotuners historically optimized for peak FLOPs on convolution and dense GEMM shapes \citep{dlbook,chen2020compilerbasedhardw}. LLM decode autotuning must swap the objective: minimize bytes/token subject to numerics and legality constraints from Chapters~10--11 \citep{dao2022flashattention,yirage2026,patel2025llminference}. Every autotune candidate should log tile dimensions \emph{and} measured HBM traffic per token---otherwise teams ship tiles that win on roofline FLOPs charts and lose on fleet p99 \citep{taxbreak2026,memoryfloor2026,semianalysis2024tma}.
+
+\paragraph{Multi-hardware delta.} Identical FLOP count with different tile policies can differ by an order of magnitude in DDR traffic on XDNA versus TMA-backed Hopper tiles \citep{amd2024xdna,nvidia2022hopper,semianalysis2024tma,dlbook}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tiling raises bytes/token; fused schedule must keep tiling on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Decode cell (BS${=}1$, ctx${=}2048$): shrinking attention block size to fit shared memory may \emph{increase} loop iterations and bytes/token if KV reloads dominate---tile theory must co-optimize residency and trip count \citep{dao2022flashattention,memoryfloor2026,taxbreak2026,yirage2026}.
 \end{example}
 
-\paragraph{Scope.} This section binds tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Industrial tile review checklists include: SMEM/TMA budget worksheet, KV bytes per trip, prefill vs decode bucket tags, and autotune objective function \citep{semianalysis2024tma,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference}. Teams that approve tile changes without decode profiles often ship kernels that win on nsys ``compute'' rows and lose on ``dram'' rows \citep{taxbreak2026,memoryfloor2026,dao2022flashattention,amd2024xdna,dlbook}.
 
 \section{fusion theory}
 \label{sec:ch13_fusion_theory}
@@ -48,328 +62,157 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused tiling raises bytes/token; fused s
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Op A\\};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Op B\\};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize Fused AB\\on-chip};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize HBM\\if illegal};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Fusion Theory block diagram for Core Theory: AI Compiler Optimization Principles.}
+\caption{Fusion theory: merge producer--consumer ops when residency allows; else spill.}
 \label{fig:fusion_theory_architecture}
 \end{figure}
 
-The production surprise at \textbf{fusion theory} is not peak FLOPs; it is illegal tier placement: fusion spilling to HBM/DDR while fusion still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
+\textbf{Fusion theory} governs when operator boundaries may disappear into MegaKernels or fused subgraphs \citep{yirage2026,dao2022flashattention,taxbreak2026}. Each unfused boundary exports activations to HBM; Chapter~1 counted the result as launches/token and bytes/token \citep{taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm}. Fusion is not ``always on''---it is constrained by register/shared-memory budgets, softmax carrier lifetimes (Chapter~10), and graph capture legality (Chapter~12) \citep{dao2022flashattention,nvidia2024cudagraphs,yirage2026,semianalysis2024tma}.
 
-Trace residency: fusion producers must feed fusion consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Greedy fusion (merge any adjacent ops) often illegalizes attention--MLP seams: online softmax state $(m,\ell,o)$ must survive inside the fused region or bytes explode silently \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}. Compiler cost models should penalize HBM round trips and launches, not only instruction count \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,taxbreak2026}. YiRage-style legality checks encode Chapter~2 iron rules as IR predicates so fusion plans fail in compile time rather than in fleet A/B \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+\textbf{Fusion boundaries as contracts.} Treat each candidate fusion edge as a contract between producer and consumer: the producer promises not to materialize to HBM; the consumer promises register/SMEM budget to consume in-place \citep{yirage2026,memoryfloor2026,dao2022flashattention}. When either side breaks the contract---for example LayerNorm statistics exported because the following GEMM needs a different layout---fusion must split \citep{taxbreak2026,patel2025llminference}. Graph capture (Chapter~12) records whatever fusion boundaries exist; it cannot invent new ones \citep{nvidia2024cudagraphs,memoryfloor2026}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for fusion on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+\textbf{Horizontal vs vertical fusion.} \emph{Horizontal} fusion merges operators at the same tensor rank (norm + linear + activation). \emph{Vertical} fusion merges stages along the decode pipeline (attention block + MLP block into one MegaKernel region) \citep{yirage2026,dao2022flashattention,taxbreak2026}. Vertical fusion delivers the largest bytes/token wins but hits legality first; horizontal fusion is easier but may leave launches/token high \citep{taxbreak2026,nvidia2024cudagraphs,patel2025llminference}. Compiler heuristics should attempt vertical plans only after horizontal plans pass carrier and layout checks \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma}.
 
-\paragraph{Scope.} This section binds fusion to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\textbf{Fusion and execution modes.} Chapter~12 maps eager, graph, and MegaKernel modes to launch and byte counters; fusion theory explains \emph{which} boundaries each mode can erase \citep{nvidia2024cudagraphs,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference}. Graph capture records existing fusion; MegaKernel mode requires fusion plans that satisfy carrier legality \citep{dao2022flashattention,dao2023flashdecoding,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,amd2024aie,amd2024xdna,dlbook,kwon2023vllm,liu2024deepseekv3}. Teams stuck in graph mode with high bytes/token are blocked by fusion theory, not by CUDA Graph APIs \citep{memoryfloor2026,taxbreak2026,nvidia2024cudagraphs,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,dlbook}. Document fusion-closed regions in runbooks so on-call engineers know whether to tune capture buckets or rewrite fusion plans \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+
+\textbf{Cost model sketch.} A minimal fusion cost model scores each plan as $\alpha \cdot \mathrm{bytes} + \beta \cdot \mathrm{launches} + \gamma \cdot \mathrm{spill\_penalty}$, with spill penalty derived from residency metadata rather than FLOPs \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026}. Tuning $(\alpha,\beta,\gamma)$ per SKU is acceptable; tuning without bytes/token telemetry is not \citep{semianalysis2024tma,dlbook}.
+
+\paragraph{Multi-hardware delta.} Hopper may fuse QKV+softmax+proj when shared memory permits; XDNA may require separate static subgraphs linked by DMA; CPU fusion is often cache-scope fusion across norm--linear chains \citep{nvidia2022hopper,amd2024xdna,dlbook,chen2020compilerbasedhardw,kwon2023vllm}.
+
+\begin{example}
+Fusing LayerNorm with the following GEMM removes one full-width activation write/read per layer per token---often larger decode win than tuning MMA tile width alone \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference}.
+\end{example}
+
+MoE layers add gather/scatter fusion constraints: expert routing may remain host-visible while MLP experts fuse internally---fusion theory must specify \emph{which} subgraph is fusion-closed \citep{taxbreak2026,liu2024deepseekv3,kwon2023vllm,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,amd2024aie,patel2025llminference,memoryfloor2026}.
+
+Fusion regression tests should diff IR fusion boundaries against a golden eager graph: any new HBM edge between previously fused ops is a release blocker unless documented as intentional \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,nvidia2024cudagraphs,semianalysis2024tma,dlbook}. This is how compiler teams prevent ``silent unfusion'' when dialect refactors reorder passes \citep{chen2020compilerbasedhardw,yirage2026,liu2024deepseekv3,amd2024aie,amd2024xdna}.
 
 \section{layout theory}
 \label{sec:ch13_layout_theory}
 
-\textbf{layout theory} is where Core Theory meets Chapter~1 counters: fix layout and layout together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+\textbf{Layout theory} decides how tensors are stored and traversed: contiguous vs blocked layouts, KV cache page tables, head/interleaved formats, and alignment for TMA/vector loads \citep{kwon2023vllm,patel2025llminference,semianalysis2024tma,nvidia2022hopper}. A perfect fusion plan fails if layout forces strided HBM access---bytes/token rise while kernels look ``fused'' in the IR \citep{memoryfloor2026,yirage2026,taxbreak2026,chen2020compilerbasedhardw}.
 
-Hardware truth: GPUs bound layout with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+PagedAttention (vLLM) is layout engineering for KV capacity: non-contiguous physical pages with logical continuity reduce fragmentation without changing model math \citep{kwon2023vllm,patel2025llminference,taxbreak2026}. Compilers must treat page table indirection as a first-class layout transform, not an runtime hack outside IR \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3}. On NPU backends, layout often \emph{is} the schedule---static DMA descriptors replace pointer chasing \citep{amd2024xdna,amd2024aie,dlbook}.
 
-Compiler/kernel fix: predicate fusion on layout/layout legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\textbf{Phase-specific layouts.} Some teams store KV in a layout optimized for prefill writes (wide vector stores along sequence) and transposes for decode reads (head-local access) \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}. Transpose costs bytes; the compiler must charge them in the cost model and prefer layouts that avoid per-token transposes when ctx grows \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,dlbook,amd2024xdna,amd2024aie,liu2024deepseekv3,dao2022flashattention,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}. When a layout pass cannot prove decode legality, split layouts per phase rather than forcing one format \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dlbook}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize layout with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked layout---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Layout passes interact with tiling: blocked weights pair with blocked GEMM tiles; NHWC vs NCHW choices change vectorization on CPU and GPU differently \citep{dlbook,chen2020compilerbasedhardw,semianalysis2024tma,patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,amd2024xdna,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie}. Decode compilers should log layout transforms in pass metadata so regressions trace to reorder vs fusion vs tile changes \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
+
+\textbf{KV layout and paging.} Decode throughput scales with how cheaply each new token reads historical KV \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}. Contiguous KV is simple but fragments GPU memory at long context; paged layouts add indirection cost that must be amortized by fewer reallocations and higher batch utilization \citep{kwon2023vllm,taxbreak2026}. Compiler layout passes should lower page-table updates into explicit IR ops so backends can fuse gather/scatter with attention tiles where legal \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\textbf{Weight layout and quantization.} INT4/FP8 weight layouts (block scales, interleaved scales) are layout transforms before they are ``quantization features'' \citep{liu2024deepseekv3,patel2025llminference,semianalysis2024tma}. A fusion plan that assumes FP16 contiguous weights will fail silently when weights are block-scaled---loads become gather-bound and bytes/token rise \citep{memoryfloor2026,yirage2026}. Layout legalization must run \emph{before} fusion search, not as a post-pass patch \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}.
+
+\textbf{Alignment and vector width.} TMA and vector units prefer aligned 128-byte lines; misaligned KV or activation tensors force uncoalesced access patterns that no tile size fixes \citep{semianalysis2024tma,nvidia2022hopper,dlbook}. CPU decode benefits from cache-line alignment across head dimensions; NPU backends often require fixed stride multiples baked into DMA descriptors \citep{amd2024xdna,amd2024aie,chen2020compilerbasedhardw}. Layout theory therefore includes alignment as a first-class constraint in IR, not a codegen afterthought \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Multi-hardware delta.} GPU layouts optimize for coalesced 128B lines; CPU layouts optimize for cache line reuse across batch-1 thin GEMMs; NPU layouts fix byte addresses at compile time \citep{nvidia2022hopper,amd2024xdna,dlbook,patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,semianalysis2024tma,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,amd2024aie}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused layout raises bytes/token; fused schedule must keep layout on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Switching KV layout to improve prefill vectorization can regress decode if batch-1 attention loads become gather-bound---layout theory requires phase-specific profiling \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dlbook,liu2024deepseekv3,dao2022flashattention,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie}.
 \end{example}
 
-\paragraph{Scope.} This section binds layout to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Layout CI should snapshot tensor strides and alignment for KV, QKV weights, and MLP weights at each context bucket \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference,semianalysis2024tma,liu2024deepseekv3,memoryfloor2026,taxbreak2026,dlbook,amd2024xdna,amd2024aie}. Stride drift without corresponding fusion changes is a common source of ``mysterious'' bytes/token regressions across compiler versions \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
 
 \section{parallel scheduling}
 \label{sec:ch13_parallel_scheduling}
 
-Teams hit \textbf{parallel scheduling} when Core Theory looks correct in isolation yet decode telemetry disagrees---usually because parallel was planned without parallel residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+\textbf{Parallel scheduling} maps work to SMs, cores, or AIE arrays---including Flash-Decoding's parallelization over KV sequence length at batch-1 \citep{dao2023flashdecoding,patel2025llminference,taxbreak2026}. Prefill parallelizes over tokens; decode parallelizes over heads, KV blocks, or expert routes while issuing one new token per step \citep{kwon2023vllm,dlbook,dao2022flashattention,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,amd2024xdna,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie,taxbreak2026,patel2025llminference}.
 
-Trace residency: parallel producers must feed parallel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The failure mode is ``parallelism for idle hardware'': launching extra blocks that contend for HBM bandwidth without increasing useful bytes delivered per ms/token \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,taxbreak2026}. Schedulers should be bandwidth-aware---when $R_{\mathrm{floor}}$ is high, additional parallel splits hurt \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs,semianalysis2024tma,patel2025llminference}. When launches/token dominate (TaxBreak regime), parallel capture inside CUDA Graphs or fused kernels may help even at moderate bandwidth \citep{taxbreak2026,nvidia2024cudagraphs,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,amd2024aie}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+\textbf{Prefill/decode scheduler split.} Prefill schedulers maximize token-parallel work; decode schedulers maximize memory efficiency per new token \citep{patel2025llminference,dao2022flashattention,dao2023flashdecoding,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook,amd2024xdna,amd2024aie,semianalysis2024tma,liu2024deepseekv3,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}. Sharing one scheduler heuristic across phases is a common source of decode regressions after prefill optimizations \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for parallel on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Compiler IR should expose parallel axes (batch, head, KV block, expert) so backends legalize splits per target \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie,amd2024xdna,nvidia2022hopper,semianalysis2024tma,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs}. Static NPU schedules often fix parallelism at compile time; GPU schedules retain dynamic grid sizing within capture buckets \citep{amd2024xdna,nvidia2024cudagraphs,chen2020compilerbasedhardw,yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,amd2024aie}.
 
-\paragraph{Scope.} This section binds parallel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\textbf{Occupancy vs bandwidth.} GPU textbooks emphasize occupancy; decode compilers must ask whether extra warps increase \emph{useful} bytes delivered per cycle or merely contend for the same HBM port \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,taxbreak2026}. When $R_{\mathrm{floor}}$ is near unity, the scheduler should prefer fewer, wider memory transactions (better fusion, better layout) over more parallel blocks \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
+
+\textbf{Wave quantization and tail effects.} Parallel splits that do not divide sequence length evenly leave tail waves with low utilization---common when KV blocks do not align with context length \citep{dao2023flashdecoding,kwon2023vllm,patel2025llminference}. Compiler scheduling should pad or bucket context lengths explicitly so tail penalties appear in CI, not only at customer ctx${=}8192$ \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw}.
+
+\textbf{MoE and expert parallelism.} MoE layers introduce a routing axis: experts parallelize differently from attention heads \citep{liu2024deepseekv3,taxbreak2026,kwon2023vllm}. Schedulers must avoid launching all experts when only top-$k$ activate---parallel theory includes \emph{conditional} parallelism gated on router output, which complicates graph capture and static NPU schedules alike \citep{taxbreak2026,nvidia2024cudagraphs,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+
+\paragraph{Multi-hardware delta.} GPU parallel scheduling uses grids/warps; CPU uses thread pools with cache affinity; NPU uses spatial arrays with fixed slot counts \citep{nvidia2022hopper,amd2024xdna,dlbook,chen2020compilerbasedhardw,yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2024cudagraphs,amd2024aie}.
+
+\begin{example}
+Flash-Decoding reports large speedups at long context by parallelizing KV---the scheduler must still respect on-chip softmax carrier residency from Chapter~10 or parallel blocks reintroduce HBM traffic \citep{dao2023flashdecoding,dao2022flashattention,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,amd2024xdna,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie}.
+\end{example}
+
+Parallel scheduling reviews should attach Nsight ``memory throughput'' and ``SM busy'' together---high SM busy with flat bytes/token indicates useless parallelism \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,dao2023flashdecoding,dlbook,amd2024xdna,amd2024aie,kwon2023vllm,liu2024deepseekv3,nvidia2022hopper,nvidia2024cudagraphs}. Decode schedulers that only maximize occupancy violate the bandwidth-aware principle this section states \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
 
 \section{GPU CPU NPU split}
 \label{sec:ch13_gpu_cpu_npu_split}
 
-The production surprise at \textbf{GPU CPU NPU split} is not peak FLOPs; it is illegal tier placement: GPU spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
+\textbf{GPU CPU NPU split} is how one decoder IR lowers to CUDA/HIP, CPU oneDNN/OpenMP paths, and XDNA/AIE static dataflow without rewriting model Python \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. Heterogeneous fleets fail when the GPU schedule is copied to NPU---illegal DMA edges and tile overflows appear as silent CPU fallbacks or wrong results \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
 
-Hardware truth: GPUs bound GPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Backend split should share high-level passes (fusion legality, layout, tiling metadata) and fork only at emit \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024xdna,amd2024aie,nvidia2022hopper,semianalysis2024tma,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs}. Triplet regression---same model, same context buckets, GPU vs CPU vs NPU---is the acceptance test for split correctness \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. Metrics remain bytes/token and launches/token per target; FLOPs parity is irrelevant \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
 
-Compiler/kernel fix: predicate fusion on GPU/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\textbf{Version skew.} GPU and NPU toolchains release on different cadences; shared IR must pin legality rules so a middle-end upgrade cannot silently break NPU emit while GPU CI stays green \citep{yirage2026,chen2020compilerbasedhardw,amd2024aie,amd2024xdna,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize GPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+CPU backends often serve hybrid pipelines: dynamic shapes, sampling, and small ops stay on host while GPU/NPU run fused decode cores \citep{kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,dlbook,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. NPU backends require upfront static shape buckets; GPU backends tolerate bucketed graph capture \citep{nvidia2024cudagraphs,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper}. Document which ops each backend owns so mode selection (Chapter~12) maps cleanly to emit paths \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,amd2024xdna,amd2024aie,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper}.
+
+\textbf{Shared middle-end, forked back-end.} The durable pattern is a shared middle-end (fusion/layout/tiling metadata) and forked backends that interpret residency classes per target \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook}. Glow and TVM historically split early; LLM decode stacks should delay fork until after decode-specific legality checks \citep{chen2020compilerbasedhardw,patel2025llminference,yirage2026,taxbreak2026}.
+
+\textbf{Fallback paths.} When NPU legality fails, frameworks silently fall back to CPU loops---correct but catastrophically slow \citep{amd2024xdna,amd2024aie,yirage2026,patel2025llminference}. Production compilers must treat fallback as an explicit compile error unless a documented degraded mode is enabled \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026,taxbreak2026}. Triplet CI should fail when GPU bytes/token improve but NPU emits empty kernels \citep{patel2025llminference,amd2024aie,amd2024xdna}.
+
+\textbf{Heterogeneous single-node pipelines.} Some deployments run attention on GPU and MLP on NPU, or prefill on GPU and decode on CPU \citep{patel2025llminference,liu2024deepseekv3,kwon2023vllm}. Split theory then includes \emph{partition} passes that cut the graph at device boundaries with explicit copy ops whose bytes count toward goodput \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,dlbook}. Hidden host-device copies dominate when partition points are chosen for convenience rather than residency \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{Multi-hardware delta.} GPU emphasizes TMA+MMA and graphs; CPU emphasizes cache blocking and NUMA; NPU emphasizes static DMA+tiles---same IR, three residency models \citep{nvidia2022hopper,amd2024xdna,dlbook,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2024cudagraphs,amd2024aie}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused GPU raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+A fusion plan legal on Hopper shared memory may be rejected on XDNA---split backends must surface legality errors at compile time, not as empty NPU binaries in production \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
 \end{example}
 
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{Chapter Summary}
-\label{sec:ch13_summary}
-
-Core Theory succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch13_tiling_theory}, Section~\ref{sec:ch13_fusion_theory}, Section~\ref{sec:ch13_layout_theory} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
-
-\textbf{tiling theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode tiling/tiling legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When tiling theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
-
-The usual Core Theory failure at \textbf{fusion theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: fusion and fusion must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,yirage2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for fusion theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,yirage2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
-
-Production teams misread \textbf{layout theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: layout sets the residency envelope; layout determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify layout, layout, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{parallel scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode parallel/parallel legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When parallel scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Core Theory failure at \textbf{GPU CPU NPU split} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: GPU and CPU must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for GPU CPU NPU split: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-Production teams misread \textbf{tiling theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: tiling sets the residency envelope; tiling determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify tiling, tiling, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
-
-\textbf{fusion theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode fusion/fusion legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When fusion theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
-
-The usual Core Theory failure at \textbf{layout theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: layout and layout must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for layout theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{parallel scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: parallel sets the residency envelope; parallel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify parallel, parallel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{GPU CPU NPU split} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode GPU/CPU legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When GPU CPU NPU split disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-The usual Core Theory failure at \textbf{tiling theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: tiling and tiling must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for tiling theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
-
-Production teams misread \textbf{fusion theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: fusion sets the residency envelope; fusion determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{dao2022flashattention,yirage2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify fusion, fusion, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
-
-\textbf{layout theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode layout/layout legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When layout theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Core Theory failure at \textbf{parallel scheduling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: parallel and parallel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for parallel scheduling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{GPU CPU NPU split} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: GPU sets the residency envelope; CPU determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify GPU, CPU, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\textbf{tiling theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode tiling/tiling legality before codegen, not as comments in hand-written kernels \citep{nvidia2022hopper,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When tiling theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize tiling with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
-
-The usual Core Theory failure at \textbf{fusion theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: fusion and fusion must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,yirage2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for fusion theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,yirage2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,yirage2026}.
-
-Production teams misread \textbf{layout theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: layout sets the residency envelope; layout determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify layout, layout, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting layout theory, attach roofline or NPU buffer accounting showing layout residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{parallel scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode parallel/parallel legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When parallel scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize parallel with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Core Theory failure at \textbf{GPU CPU NPU split} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: GPU and CPU must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for GPU CPU NPU split: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: CPU constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-Production teams misread \textbf{tiling theory} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: tiling sets the residency envelope; tiling determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{nvidia2022hopper,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify tiling, tiling, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tiling constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tiling theory, attach roofline or NPU buffer accounting showing tiling residency fits on-chip for the target SKU \citep{nvidia2022hopper,amd2024aie}.
-
-\textbf{fusion theory} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode fusion/fusion legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,yirage2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When fusion theory disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting fusion theory, attach roofline or NPU buffer accounting showing fusion residency fits on-chip for the target SKU \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize fusion with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,yirage2026}.
-
-The usual Core Theory failure at \textbf{layout theory} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: layout and layout must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for layout theory: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize layout with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: layout constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{parallel scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: parallel sets the residency envelope; parallel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify parallel, parallel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: parallel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting parallel scheduling, attach roofline or NPU buffer accounting showing parallel residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{GPU CPU NPU split} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode GPU/CPU legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When GPU CPU NPU split disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting GPU CPU NPU split, attach roofline or NPU buffer accounting showing GPU residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize GPU with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+Release gates for heterogeneous builds should require artifact parity: every target emits a non-empty binary, passes numerics smoke tests, and reports bytes/token within agreed triplet tolerance \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. GPU-only green CI is insufficient for books and products that claim cross-hardware compilation \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,amd2024xdna,dlbook}.
+
+\begin{table}[t]
+\centering
+\caption{Core theory pillars mapped to decode counters (profile per SKU).}
+\label{tab:ch13_pillars}
+\begin{tabular}{p{0.18\linewidth}p{0.38\linewidth}p{0.32\linewidth}}
+\toprule
+\textbf{Pillar} & \textbf{Compiler question} & \textbf{Primary counter} \\
+\midrule
+Tiling & Which blocks stay on-chip? & bytes/token \\
+Fusion & Which boundaries can vanish? & bytes/token, launches/token \\
+Layout & How are KV/weights traversed? & bytes/token \\
+Parallel & Which axes saturate bandwidth? & ms/token, SM util. \\
+GPU/CPU/NPU split & Where does each op emit? & triplet parity \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Key Takeaways}
+\label{sec:ch13_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Tiling is IO theory.} FlashAttention-style blocks exist to cut HBM traffic; tile search must use decode bytes/token, not GEMM FLOPs alone \citep{dao2022flashattention,memoryfloor2026,taxbreak2026,yirage2026}.
+\item \textbf{Fusion has legality.} Greedy fusion without carrier/residency checks silently regresses decode \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+\item \textbf{Layout enables fusion.} Paged KV and blocked weights are compiler transforms, not runtime afterthoughts \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+\item \textbf{Parallelism is bandwidth-aware.} Flash-Decoding parallel axes help only when on-chip residency holds \citep{dao2023flashdecoding,memoryfloor2026,semianalysis2024tma,patel2025llminference}.
+\item \textbf{Split backends, shared IR.} GPU/CPU/NPU emit differs; triplet regression is mandatory \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dlbook}.
+\item \textbf{Theory serves goodput.} Every pass must trace to bytes/token or launches/token on batch-1 decode \citep{taxbreak2026,memoryfloor2026,patel2025llminference,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+\item \textbf{Pass order matters.} Layout before fusion; tiling metadata before autotune; legality before graph capture \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,taxbreak2026,amd2024xdna,amd2024aie,dlbook}.
+\item \textbf{CI mirrors theory.} Golden IR diffs, stride snapshots, and triplet bytes/token gates turn principles into merge blockers \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna}.
+\end{itemize}
+
+The pillars are not independent knobs---a layout change can illegalize a fusion plan; a fusion plan can force new tile sizes; a parallel split can break graph capture \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,taxbreak2026,dao2022flashattention,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper}. Treat compiler development as co-design across all five, profiled on decode counters, not as a sequence of isolated dialect tickets \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+\section{Conclusion}
+\label{sec:ch13_conclusion}
+
+Core compiler theory---tiling, fusion, layout, parallel scheduling, and heterogeneous split---is the machinery behind Chapter~12 execution modes and the MegaKernel chapters that follow \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,amd2024xdna,amd2024aie,dao2022flashattention,dao2023flashdecoding,kwon2023vllm,liu2024deepseekv3,nvidia2022hopper,semianalysis2024tma,nvidia2024cudagraphs,dlbook}. Pass ordering slides are insufficient; profiled decode counters justify every transform \citep{patel2025llminference,taxbreak2026,memoryfloor2026,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dao2022flashattention,dao2023flashdecoding,kwon2023vllm,liu2024deepseekv3,nvidia2022hopper,nvidia2024cudagraphs,dlbook}.
+
+Reviewers should ask five questions before approving any compiler PR: (1) Which pillar moves? (2) Which counter must improve on BS${=}1$ decode? (3) Which Chapter~10--11 constraint applies? (4) Does layout legalize before fusion? (5) Does triplet regression pass on GPU, CPU, and NPU? \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,dlbook}. If any answer is ``unknown,'' defer the patch until telemetry exists \citep{patel2025llminference,taxbreak2026,memoryfloor2026}. These questions take minutes in review and prevent weeks of fleet debugging on batch-1 decode cells at production context buckets in CI gates \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dlbook}.
+
+Chapter~14 instantiates these principles in MLIR dialects and pass pipelines---where tiling, fusion, and layout become rewrite patterns you can test in CI \citep{chen2020compilerbasedhardw,yirage2026,liu2024deepseekv3,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,kwon2023vllm,nvidia2022hopper,nvidia2024cudagraphs,dlbook}. Carry Table~\ref{tab:ch13_pillars} forward: if a dialect change cannot name which pillar moves which counter, defer the patch \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
+
+Until then, run one decode profile per proposed pass---BS${=}1$, ctx buckets $\{512,2048,8192\}$, bytes/token and launches/token on GPU and at least one non-GPU target \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,semianalysis2024tma,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}. That habit converts abstract compiler theory into the measurable goodput improvements Part~VI promises \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dlbook}. Part~VI continues with dialect-level mechanics; carry these pillars as the acceptance language for every rewrite pattern \citep{chen2020compilerbasedhardw,yirage2026,liu2024deepseekv3,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,semianalysis2024tma,dlbook,kwon2023vllm,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,nvidia2024cudagraphs}.
 
 \typeout{END_CHAPTER "ch13" \theabspage}
