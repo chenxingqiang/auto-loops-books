@@ -28,6 +28,7 @@ from book_prepare import (  # noqa: E402
     section_covered,
 )
 from loops.iterate import chapter_ready, style_violations  # noqa: E402
+from book_pad_dedup import audit_chapter as pad_audit_chapter  # noqa: E402
 
 COMPILER_CHAPTERS = frozenset({"ch14", "ch15", "ch16", "ch17", "ch18", "ch19", "ch20"})
 COMPILER_SECTION_SUFFIXES = (
@@ -236,6 +237,30 @@ def audit_facts_and_style(report: AuditReport) -> None:
                 report.add("P2", "style", f"{spec.chapter_id}: {issue}")
 
 
+def audit_pad_residual(report: AuditReport) -> None:
+    """P2 hint: chapters whose pad tail strip would drop below deep-rewrite floor."""
+    residual: list[str] = []
+    for spec in OUTLINE:
+        tex = read_chapter_text(spec)
+        if not tex.strip():
+            continue
+        row = pad_audit_chapter(spec)
+        if not row["changed"]:
+            continue
+        if row["words_after"] < 1000:
+            residual.append(
+                f"{spec.chapter_id} strip→{row['words_after']}w (min={row['min_words']})"
+            )
+    if residual:
+        report.add(
+            "P2",
+            "pad",
+            "Residual pad blocks need Fregly deep-rewrite (not strip-only)",
+            "; ".join(residual[:12]),
+        )
+    report.stats["pad_residual_count"] = len(residual)
+
+
 def audit_chapter_gates(report: AuditReport) -> None:
     compile_ok = compile_book()
     if not compile_ok:
@@ -306,6 +331,7 @@ def run_audit() -> AuditReport:
     audit_appendices(report)
     audit_book_themes(report)
     audit_facts_and_style(report)
+    audit_pad_residual(report)
     audit_chapter_gates(report)
     audit_main_tex(report)
     return report
