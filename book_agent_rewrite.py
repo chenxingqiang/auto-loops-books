@@ -271,8 +271,35 @@ def rewrite_chapter_text(spec: ChapterSpec) -> str:
     return text
 
 
+def has_pad_tail_block(spec: ChapterSpec, text: str) -> bool:
+    if "\\section{Key Takeaways}" not in text or not spec.sections:
+        return False
+    before = text.split("\\section{Key Takeaways}", 1)[0]
+    return pad_restart_index(before, spec) is not None
+
+
+def pad_restart_index(before: str, spec: ChapterSpec) -> int | None:
+    first_title = section_title(spec.sections[0].label)
+    signatures = (
+        f"Teams hit \\textbf{{{first_title}}}",
+        f"The production surprise at \\textbf{{{first_title}}}",
+        f"\\textbf{{{first_title}}} is where ",
+    )
+    cut = None
+    for sig in signatures:
+        pos = before.find(sig)
+        if pos < 0:
+            continue
+        pos2 = before.find(sig, pos + len(sig))
+        if pos2 > 0:
+            cut = pos2 if cut is None else min(cut, pos2)
+    return cut
+
+
 def pad_agent_chapter(spec: ChapterSpec, text: str) -> str:
     """Expand with section_body variants before Key Takeaways (avoid prose-upgrade template spam)."""
+    if has_pad_tail_block(spec, text):
+        return text
     insert_before = "\\section{Key Takeaways}"
     for round_idx in range(10):
         if count_words(text) >= spec.min_words:

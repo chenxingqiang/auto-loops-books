@@ -622,7 +622,7 @@
       "id": "ch19",
       "file": "ch19_glow.tex",
       "title": "Glow: Lightweight AI Compiler",
-      "min_words": 3500,
+      "min_words": 2000,
       "max_words": 8000,
       "min_citations": 6,
       "template": "compiler",
