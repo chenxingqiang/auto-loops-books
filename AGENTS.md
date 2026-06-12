@@ -415,9 +415,10 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R9（2026-06-09，内容/harness 轨）**：Part VII→VIII 桥接 — ch26/ch27 Conclusion 指向 Ch28–30；ch28 开篇回指 Ch27；`book_spec_audit.py` 27→30 章、7→8 Part、`CH_DIR` 路径对齐 `build/chapters`、事实门禁改查 `WRITING_STYLE.md` §八；gold 章 audit：ch01/04/10/12/13 Key Takeaways 无 pad 模板；ch11 保留 intentional `\paragraph{Review gate.}`；`python3 book_spec_audit.py` → PASS 30/30（P0=0）；compile 仍 blocked（无 pdflatex）。
 - **Loop R10（2026-06-09，harness 轨）**：ch28–30 补 `verified_facts.jsonl`（audit P1→0）；`iterate.py`/`loops/README.md`/`program_books.md`/`books/README.md`/`research_tools.py` 事实引用统一到 `WRITING_STYLE.md` §八；`OUTLINE_SPEC`→`book_content.md`；`python3 book_spec_audit.py` → PASS 30/30 facts P1=0；compile 仍 blocked。
 - **Loop R11（2026-06-09，harness 轨）**：`.github/workflows/book.yml` CI compile（TeX Live + `make.sh` + PDF artifact）；根 `README.md` 路径/FACT 引用对齐 `build/chapters` + `WRITING_STYLE.md` §八；`iterate.py` 增 `chapter_ending_violations`（Fregly 章末 lint）；已 push。
-- **Loop R12（2026-06-09，harness+内容轨）**：`program_books.md`/`loops/README.md`/`WRITING_STYLE.md` 路径 → `build/chapters`；`compile_book` timeout 180→900s；ch30 Conclusion 回指 Ch26 runbook + Ch27 baselines；CI run #1 **success** (~30s)；`python3 book_prepare.py --chapter ch30` 待验。
-- **内容 R-next**：pad 章正文去重（ch14–27）；Part VIII 生产 worksheet 示例 JSON（可选）。
-- **Harness R-next**：`books/README.md` 章路径表；AGENTS §10 增 CI compile 说明；`main.pdf` git 策略（artifact vs tracked）。
+- **Loop R12（2026-06-09，harness+内容轨）**：`program_books.md`/`loops/README.md` 路径 → `build/chapters`；`compile_book` timeout 180→900s；ch30 Conclusion 回指 Ch26 runbook + Ch27 baselines；CI run #1 **success** (~30s)。
+- **Loop R13（2026-06-09，harness 轨）**：`books/README.md` 重写（build/chapters、30/30 Part 表、CI badge）；根 `README.md` CI badge；`WRITING_STYLE.md` Fregly §七 章骨架 + `reference-chapter-1.pdf` 双 gold 标准；AGENTS §10 CI artifact 说明；pad 去重调研：ch19/ch26 exact dedup 会跌破 min_words → 下轮 selective 模板剥离。
+- **内容 R-next**：ch14–27 selective pad 模板剥离（保留 coverage + min_words）；Part VIII worksheet JSON 示例（可选）。
+- **Harness R-next**：`book_pad_dedup.py` selective 模式；citation-loop 范围更新 ch01–ch30。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
@@ -428,7 +429,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 ### 依赖
 
 - Python 3.10+，`uv sync`
-- LaTeX：`pdflatex`、`bibtex`
+- LaTeX（本地可选）：`pdflatex`、`bibtex` — 无本地 TeX 时用 **GitHub Actions** [Build book PDF](https://github.com/chenxingqiang/auto-loops-books/actions/workflows/book.yml) 下载 `main-pdf` artifact
 - 可选：`SERPAPI_KEY` 启用 live search
 
 ### 常用命令
@@ -439,7 +440,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 | 一步 | `uv run book-loop step [--chapter chXX]` |
 | 深度 | `uv run book-loop deep-rewrite --chapter chXX` |
 | 评估 | `uv run book_prepare.py --chapter chXX` |
-| 编译 | `cd books && bash make.sh` |
+| 编译 | `cd books && bash make.sh`（或 CI artifact） |
 
 ### Gotchas
 
@@ -448,6 +449,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **`loop_state.json`** — 本地；读 `agent_tasks` 再写
 - **GateGuard** — 必要时 `ECC_GATEGUARD=off` 或 shell heredoc 写 tex
 - **Simplicity** — 一段 strong paragraph > 三段 filler
+- **`main.pdf`** — CI 每 push 重建；仓库内 tracked 副本可能滞后，以 Actions artifact 为准
+- **Pad 去重** — ch14–27 含 `pad_agent_chapter` 近似重复段；盲目 exact dedup 会跌破 `min_words`（需 selective 模板剥离，非 R13）
 
 ### 相关文档
 

@@ -11,6 +11,8 @@ Both follow [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) 
 
 **Cloud Agents:** operating manual — [`AGENTS.md`](AGENTS.md) (dual-track PSIVE loop: book content + loops harness; commit/push every round).
 
+[![Build book PDF](https://github.com/chenxingqiang/auto-loops-books/actions/workflows/book.yml/badge.svg)](https://github.com/chenxingqiang/auto-loops-books/actions/workflows/book.yml)
+
 ---
 
 ## Loops a Book — autonomous technical book writing
