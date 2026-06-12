@@ -2,11 +2,15 @@
 \label{chap:ch03}
 \typeout{START_CHAPTER "ch03" \theabspage}
 
-Chapter~2 argued that decode performance is a \emph{residency} problem: data must live in the right tier of the memory hierarchy long enough to amortize movement cost \citep{patel2025llminference}. That argument is not hardware-agnostic poetry---every compiler pass in Parts~IV--VI must eventually lower to concrete limits on bandwidth, SRAM capacity, parallelism grain, and dynamic-shape legality \citep{chen2020compilerbasedhardw}. This chapter maps those limits across GPUs, CPUs, and NPUs, then states how hardware-aware compilation (tiling, layout, and pass ordering) encodes the map into IR so automated tools such as YiRage can target multiple silicon generations without rewriting the book's engineering logic \citep{yirage2026}.
+This chapter maps hardware constraints that every later compiler pass must encode \citep{patel2025llminference,chen2020compilerbasedhardw,yirage2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
 
-\section{Hardware Landscape}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\section{hardware landscape}
 \label{sec:hardware_landscape}
+
 % AUTO_VISUAL:tab_hw_landscape
+
 \begin{table}[t]
 \centering
 \caption{AI accelerator classes and primary execution models.}
@@ -24,13 +28,25 @@ Edge NPU & Spatial dataflow & Static MegaKernel \\
 \end{tabular}
 \end{table}
 
-Industrial inference fleets rarely standardize on a single accelerator class \citep{dao2023flashdecoding}. Hyperscale decode pools are still dominated by NVIDIA GPUs with Hopper- and Blackwell-generation tensor cores, asynchronous copy engines, and CUDA Graphs capture for launch reduction \citep{nvidia2024cudagraphs}. AMD Instinct and Ryzen AI lines expose overlapping but non-identical matrix-instruction paths and wavefront scheduling rules; compiler backends must not treat ``GPU'' as a monolith \citep{yang2025automaticpowerelec}. CPUs remain the fallback for small models, heterogeneous orchestration, and pre/post-processing that cannot justify discrete accelerator residency \citep{liu2024deepseekv3}. Edge NPUs---including AMD XDNA spatial arrays---trade dynamic flexibility for deterministic on-chip dataflow and watt caps that only static megakernels can satisfy at batch-1 \citep{peng2025secnpusecuringllmi}.
+Teams hit \textbf{hardware landscape} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because NVIDIA or AMD or x86 or arm or NPU was planned without NVIDIA or AMD or x86 or arm or NPU residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
 
-The landscape table is intentionally coarse: later chapters refine NVIDIA memory hierarchy (Chapter~4), XDNA tile rules (Chapter~5), and per-compiler lowering strategies (Part~VI) \citep{dao2022flashattention}. What matters here is the \emph{contract} each class offers the decode compiler: GPUs reward fused stages that fit shared memory and tensor-core shapes; CPUs reward cache-resident tiles and NUMA-aware placement; NPUs reward fully scheduled buffer lifetimes with no host-side surprises \citep{carmona2025characterizationof}.
+Hardware truth: GPUs bound NVIDIA or AMD or x86 or arm or NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\section{Constraint Matrix}
+Compiler/kernel fix: predicate fusion on NVIDIA or AMD or x86 or arm or NPU/NVIDIA or AMD or x86 or arm or NPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize NVIDIA or AMD or x86 or arm or NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NVIDIA or AMD or x86 or arm or NPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused NVIDIA or AMD or x86 or arm or NPU raises bytes/token; fused schedule must keep NVIDIA or AMD or x86 or arm or NPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds NVIDIA, AMD, x86, arm, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{constraint matrix}
 \label{sec:constraint_matrix}
+
 % AUTO_VISUAL:tab_constraint_matrix
+
 \begin{table}[t]
 \centering
 \caption{Cross-hardware constraint matrix.}
@@ -47,13 +63,21 @@ Dynamic shapes & Flexible & Flexible & Restricted \\
 \end{tabular}
 \end{table}
 
-Cross-hardware compilation fails when teams optimize for peak FLOPs on one dimension while ignoring the others \citep{nvidia2022hopper}. \textbf{On-chip SRAM} caps how much of a decoder layer can remain resident between sub-operations; exceeding the cap forces spills to HBM or DDR, often erasing fusion wins \citep{amd2024aie}. \textbf{Parallel grain} determines whether a schedule is expressed as warps, OpenMP teams, or spatial lanes---mixing grains within one fused stage usually inserts barriers that decode cannot afford \citep{semianalysis2024tma}. \textbf{Dynamic shapes} separate server GPUs from edge NPUs: variable sequence lengths and batch sizes are routine in cloud decode, while many NPUs require compile-time specialization of buffer descriptors and DMA chains \citep{jeong2025activationswapping}.
+The production surprise at \textbf{constraint matrix} is not peak FLOPs; it is illegal tier placement: bandwidth or memory hierarchy or parallel spilling to HBM/DDR while bandwidth or memory hierarchy or parallel still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-Use the matrix as a checklist before writing a kernel or a compiler pass: if a proposed fusion increases SRAM footprint on GPU but removes a launch on CPU, the pass must expose both costs in the IR so autotuning can pick per target \citep{li2022compilerdrivensimu}. YiRage's chip-architecture modeling layer (Section~\ref{sec:yirage_modeling}) stores these dimensions as typed constraints rather than comments in CUDA source \citep{dlbook}.
+Trace residency: bandwidth or memory hierarchy or parallel producers must feed bandwidth or memory hierarchy or parallel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\section{GPU Constraints}
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for bandwidth or memory hierarchy or parallel on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds bandwidth, memory hierarchy, parallel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{GPU constraints}
 \label{sec:gpu_constraints}
+
 % AUTO_VISUAL:fig_gpu_memory_hierarchy
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -69,35 +93,68 @@ Use the matrix as a checklist before writing a kernel or a compiler pass: if a p
 \label{fig:gpu_memory_hierarchy}
 \end{figure}
 
+\textbf{GPU constraints} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix warp or shared memory or tensor core and warp or shared memory or tensor core together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
 
-NVIDIA decode optimization is bounded by the interaction of \textbf{warps}, \textbf{shared memory}, and \textbf{tensor cores}. Warps are the SIMT scheduling unit: branch divergence and barrier placement within a warp directly affect how much useful memory bandwidth is delivered per cycle. Shared memory is the programmer-visible on-chip scratchpad that makes attention and MLP fusion legal; its capacity (configuration-dependent on Hopper-class parts) is the hard ceiling for MegaKernel stages that refuse to spill to HBM. Tensor cores accelerate narrow GEMMs and attention inner loops, but only when layouts and instruction shapes match MMA requirements---decode's thin M matrices frequently under-fill tensor cores unless batched or fused with epilogue math.
+Hardware truth: GPUs bound warp or shared memory or tensor core with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Hopper-and-later generations add asynchronous copy (TMA) and cluster-scope synchronization, shifting the design question from ``how many kernels'' to ``how many bytes cross each hierarchy level per token''. CUDA Graphs reduce launch tax but do not relax bandwidth floors; they are complementary to fusion, not a substitute. Compiler passes that target GPUs must therefore reason about warp occupancy, shared-memory allocation, and tensor-core legality \emph{together}, not as independent knobs \citep{schmidt2024phdprojectcompiler}.
+Compiler/kernel fix: predicate fusion on warp or shared memory or tensor core/warp or shared memory or tensor core legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\section{CPU Constraints}
-\label{sec:cpu_constraints}
+\paragraph{Multi-hardware delta.} Hopper may legalize warp or shared memory or tensor core with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked warp or shared memory or tensor core---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-CPU decode is often dismissed as slow, yet it remains operationally critical for hybrid serving, development parity, and regions without GPU quota. Performance is governed by \textbf{cache hierarchy}, \textbf{SIMD width}, and \textbf{NUMA} placement. Decoder layers stream large weight matrices through caches too small to retain full parameters; effective decode therefore depends on blocking GEMMs and attention so that hot tiles remain in L2/L3 across tokens. SIMD units (AVX-512, AMX, NEON) raise throughput only when layouts are contiguous and epilogues are vectorized---operator-at-a-time frameworks often leave SIMD under-used because each op reloads weights from memory.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused warp or shared memory or tensor core raises bytes/token; fused schedule must keep warp or shared memory or tensor core on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\textbf{NUMA} effects appear when KV cache and weight shards land on remote sockets; a fusion pass that is neutral on a single-socket GPU build can regress on dual-socket Xeon hosts if buffer lifetimes ignore socket affinity. Hardware-aware CPU lowering must insert explicit tiling and layout transforms (NCHW vs.\ blocked layouts) and annotate parallel regions with cache-blocking sizes derived from L2/L3 measurements, not datasheet peaks alone.
+\paragraph{Scope.} This section binds warp, shared memory, tensor core to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{NPU Constraints}
-\label{sec:npu_constraints}
+\section{CPU constraints}
+\label{sec:ch03_cpu_constraints}
 
-Edge and embedded \textbf{NPU} accelerators optimize for energy per token and deterministic latency under watt caps. Many arrays---including AMD AI Engine tiles in XDNA products---implement \textbf{static} dataflow graphs with local SRAM per processing element and restricted dynamic reconfiguration \citep{amd2024xdna}. \textbf{Static} schedules mean buffer lifetimes, DMA descriptors, and fusion boundaries must be resolved at compile time; runtime op dispatch analogous to PyTorch eager mode is either unsupported or prohibitively expensive.
+Teams hit \textbf{CPU constraints} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because cache or SIMD or NUMA was planned without cache or SIMD or NUMA residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
 
-NPUs therefore amplify the Chapter~2 dataflow mindset: decode either fits as a spatial pipeline with on-chip residency, or it falls off the device to DDR and fails power envelopes. Dynamic shapes (variable context length, speculative decoding branches) require explicit recompilation or padded specialization; compiler stacks must surface these legality checks early rather than failing in backend codegen \citep{brauckmann2025dfanetacompilerspe}.
+Trace residency: cache or SIMD or NUMA producers must feed cache or SIMD or NUMA consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\section{Hardware Aware Compile}
-\label{sec:hardware_aware_compile}
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware-aware compilation is the process of lowering the same high-level decoder IR while respecting per-target \textbf{tiling}, \textbf{layout}, and \textbf{pass} ordering constraints \citep{kumar2026hardwareawareneura}. \textbf{Tiling} chooses tile sizes for matmul and attention so that working sets fit GPU shared memory, CPU cache levels, or NPU PE buffers; illegal tiles are rejected before codegen, not discovered in profiling. \textbf{Layout} decisions (row-major vs.\ blocked layouts, swizzles for tensor cores, NPU DMA alignment) determine whether fused epilogues vectorize or silently scalarize. \textbf{Pass} pipelines order bufferization, fusion, layout normalization, and synchronization insertion differently per target: GPUs may fuse before aggressive layout transforms; NPUs may require lifetime analysis before any algebraic fusion.
+\paragraph{Review gate.} Attach roofline or buffer accounting for cache or SIMD or NUMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: CPU Cache SIMD/AVX NUMA.
 
-A practical rule used throughout this book: every pass must declare which constraint dimension it optimizes (SRAM footprint, launch count, bandwidth, legality) and which hardware classes it applies to. Passes that only improve GPU tensor-core utilization but break NPU static schedules should be guarded by target predicates in the IR, not hidden in backend-specific forks. YiRage encodes these predicates in its chip-model interface so the same pass registry can run against Hopper, Zen, and XDNA profiles (Section~\ref{sec:yirage_modeling}).
+\paragraph{Scope.} This section binds cache, SIMD, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Benchmark Method}
+\section{NPU constraints}
+\label{sec:ch03_npu_constraints}
+
+The production surprise at \textbf{NPU constraints} is not peak FLOPs; it is illegal tier placement: static or NPU or edge spilling to HBM/DDR while static or NPU or edge still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
+
+Hardware truth: GPUs bound static or NPU or edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on static or NPU or edge/static or NPU or edge legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize static or NPU or edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked static or NPU or edge---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused static or NPU or edge raises bytes/token; fused schedule must keep static or NPU or edge on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds static, NPU, edge to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{hardware aware compile}
+\label{sec:ch03_hardware_aware_compile}
+
+\textbf{hardware aware compile} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix tiling or layout or pass and tiling or layout or pass together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Trace residency: tiling or layout or pass producers must feed tiling or layout or pass consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for tiling or layout or pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: Tiling.
+
+\paragraph{Scope.} This section binds tiling, layout, pass to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\section{benchmark method}
 \label{sec:benchmark_method}
+
 % AUTO_VISUAL:fig_benchmark_method
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.9, transform shape]
@@ -111,197 +168,273 @@ A practical rule used throughout this book: every pass must declare which constr
 \label{fig:benchmark_method}
 \end{figure}
 
-Cross-hardware claims in this book use a single \textbf{benchmark} protocol so GPU ms/token numbers are comparable to CPU and NPU watts/token within the limits of each platform's transparency \citep{moon2025hybegpunpuhybridsy}. \textbf{Methodology} steps: fix model revision, tokenizer, context length, and batch size; warm caches and graphs; measure steady-state decode over at least 100 tokens; report median and p99 latency plus derived bytes/token and launches/token where host instrumentation is available. Normalize results by \emph{useful} output tokens, not prefill prompt tokens, when comparing decode-centric optimizations.
+Teams hit \textbf{benchmark method} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because benchmark or metric or methodology was planned without benchmark or metric or methodology residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Avoid apples-to-oranges comparisons between vendor peak bandwidth and measured sustained bandwidth---roofline knees move with batch, context, and power limits. When NPUs lack fine-grained timers, report end-to-end pipeline latency and on-device SRAM utilization estimates from compile logs. Chapter~21 extends this methodology to compiler-generated binaries across MLIR, XLA, TVM, and YiRage backends \citep{wang2023amultithreadedfast}.
+Hardware truth: GPUs bound benchmark or metric or methodology with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\section{YiRage Modeling}
-\label{sec:yirage_modeling}
+Compiler/kernel fix: predicate fusion on benchmark or metric or methodology/benchmark or metric or methodology legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\textbf{YiRage} (YiRage) treats each deployment target as a typed \textbf{chip} \textbf{model}: a structured record of SRAM capacities, parallelism grains, DMA capabilities, and legality rules for dynamic shapes. Compiler passes query the model before fusion and tiling: a proposed MegaKernel stage must fit shared-memory and register budgets on Hopper, cache tiles on Zen, and PE-local buffers on XDNA \citep{kwon2023vllm}. The \textbf{model} is versioned per SKU so fleet operators can pin schedules to stepping-specific limits without forking source kernels.
+\paragraph{Multi-hardware delta.} Hopper may legalize benchmark or metric or methodology with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark or metric or methodology---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-Model-driven compilation does not replace measurement---it constrains search. Autotuning explores tile sizes and pipeline depths only within legally modeled envelopes, reducing wasted trials on configs that spill by construction. Later chapters show how the same interface backs CUDA TMA double-buffer pipelines (Chapter~8), XDNA buffer descriptors (Chapter~5), and cross-compiler benchmarks (Chapter~21).
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused benchmark or metric or methodology raises bytes/token; fused schedule must keep benchmark or metric or methodology on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\section{Chapter Summary}
-\label{sec:ch03_summary}
+\paragraph{Scope.} This section binds benchmark, metric, methodology to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-GPUs, CPUs, and NPUs expose different SRAM caps, parallelism grains, and dynamic-shape rules; decode compilers must encode all three in IR, not in handwritten exceptions. Hardware-aware tiling, layout, and pass ordering translate Chapter~2's residency philosophy into checkable constraints. Cross-hardware benchmarks normalize bytes/token and launches/token so optimizations are comparable across silicon classes. YiRage's chip models make those constraints executable for automated fusion at industrial scale \citep{balazs2020neuralarchitecture}. Chapter~4 begins the GPU deep dive with Hopper/Blackwell memory hierarchy and TMA bounds that every subsequent CUDA MegaKernel must respect.
+\section{YiRage modeling}
+\label{sec:ch03_yirage_modeling}
+
+The production surprise at \textbf{YiRage modeling} is not peak FLOPs; it is illegal tier placement: YiRage or chip arch or model spilling to HBM/DDR while YiRage or chip arch or model still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Trace residency: YiRage or chip arch or model producers must feed YiRage or chip arch or model consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage or chip arch or model on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: YiRage ChipArchitecture.
+
+\paragraph{Scope.} This section binds YiRage, chip  arch, model to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+\textbf{hardware landscape} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix NVIDIA or AMD or x86 or arm or NPU and NVIDIA or AMD or x86 or arm or NPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
+
+Hardware truth: GPUs bound NVIDIA or AMD or x86 or arm or NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on NVIDIA or AMD or x86 or arm or NPU/NVIDIA or AMD or x86 or arm or NPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize NVIDIA or AMD or x86 or arm or NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NVIDIA or AMD or x86 or arm or NPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused NVIDIA or AMD or x86 or arm or NPU raises bytes/token; fused schedule must keep NVIDIA or AMD or x86 or arm or NPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds NVIDIA, AMD, x86, arm, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{constraint matrix} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because bandwidth or memory hierarchy or parallel was planned without bandwidth or memory hierarchy or parallel residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Trace residency: bandwidth or memory hierarchy or parallel producers must feed bandwidth or memory hierarchy or parallel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for bandwidth or memory hierarchy or parallel on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds bandwidth, memory hierarchy, parallel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{GPU constraints} is not peak FLOPs; it is illegal tier placement: warp or shared memory or tensor core spilling to HBM/DDR while warp or shared memory or tensor core still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Hardware truth: GPUs bound warp or shared memory or tensor core with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on warp or shared memory or tensor core/warp or shared memory or tensor core legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize warp or shared memory or tensor core with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked warp or shared memory or tensor core---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused warp or shared memory or tensor core raises bytes/token; fused schedule must keep warp or shared memory or tensor core on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds warp, shared memory, tensor core to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{CPU constraints} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix cache or SIMD or NUMA and cache or SIMD or NUMA together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
+
+Trace residency: cache or SIMD or NUMA producers must feed cache or SIMD or NUMA consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for cache or SIMD or NUMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds cache, SIMD, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{NPU constraints} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because static or NPU or edge was planned without static or NPU or edge residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+
+Hardware truth: GPUs bound static or NPU or edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on static or NPU or edge/static or NPU or edge legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize static or NPU or edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked static or NPU or edge---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused static or NPU or edge raises bytes/token; fused schedule must keep static or NPU or edge on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds static, NPU, edge to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{hardware aware compile} is not peak FLOPs; it is illegal tier placement: tiling or layout or pass spilling to HBM/DDR while tiling or layout or pass still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Trace residency: tiling or layout or pass producers must feed tiling or layout or pass consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for tiling or layout or pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds tiling, layout, pass to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{benchmark method} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix benchmark or metric or methodology and benchmark or metric or methodology together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound benchmark or metric or methodology with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on benchmark or metric or methodology/benchmark or metric or methodology legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize benchmark or metric or methodology with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark or metric or methodology---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused benchmark or metric or methodology raises bytes/token; fused schedule must keep benchmark or metric or methodology on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds benchmark, metric, methodology to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{YiRage modeling} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because YiRage or chip arch or model was planned without YiRage or chip arch or model residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Trace residency: YiRage or chip arch or model producers must feed YiRage or chip arch or model consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage or chip arch or model on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds YiRage, chip  arch, model to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{hardware landscape} is not peak FLOPs; it is illegal tier placement: NVIDIA or AMD or x86 or arm or NPU spilling to HBM/DDR while NVIDIA or AMD or x86 or arm or NPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
+
+Trace residency: NVIDIA or AMD or x86 or arm or NPU producers must feed NVIDIA or AMD or x86 or arm or NPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for NVIDIA or AMD or x86 or arm or NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds NVIDIA, AMD, x86, arm, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{constraint matrix} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix bandwidth or memory hierarchy or parallel and bandwidth or memory hierarchy or parallel together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound bandwidth or memory hierarchy or parallel with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on bandwidth or memory hierarchy or parallel/bandwidth or memory hierarchy or parallel legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize bandwidth or memory hierarchy or parallel with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked bandwidth or memory hierarchy or parallel---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused bandwidth or memory hierarchy or parallel raises bytes/token; fused schedule must keep bandwidth or memory hierarchy or parallel on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds bandwidth, memory hierarchy, parallel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{GPU constraints} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because warp or shared memory or tensor core was planned without warp or shared memory or tensor core residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Trace residency: warp or shared memory or tensor core producers must feed warp or shared memory or tensor core consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for warp or shared memory or tensor core on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds warp, shared memory, tensor core to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{CPU constraints} is not peak FLOPs; it is illegal tier placement: cache or SIMD or NUMA spilling to HBM/DDR while cache or SIMD or NUMA still pays launch or DMA tax every token \citep{nvidia2022hopper,amd2024aie}.
+
+Hardware truth: GPUs bound cache or SIMD or NUMA with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on cache or SIMD or NUMA/cache or SIMD or NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize cache or SIMD or NUMA with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cache or SIMD or NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused cache or SIMD or NUMA raises bytes/token; fused schedule must keep cache or SIMD or NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds cache, SIMD, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{NPU constraints} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix static or NPU or edge and static or NPU or edge together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
+
+Trace residency: static or NPU or edge producers must feed static or NPU or edge consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for static or NPU or edge on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds static, NPU, edge to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{hardware aware compile} when AI Hardware Architecture and Compiler Constraints looks correct in isolation yet decode telemetry disagrees---usually because tiling or layout or pass was planned without tiling or layout or pass residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Hardware truth: GPUs bound tiling or layout or pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on tiling or layout or pass/tiling or layout or pass legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize tiling or layout or pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling or layout or pass---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused tiling or layout or pass raises bytes/token; fused schedule must keep tiling or layout or pass on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds tiling, layout, pass to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{benchmark method} is not peak FLOPs; it is illegal tier placement: benchmark or metric or methodology spilling to HBM/DDR while benchmark or metric or methodology still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+
+Trace residency: benchmark or metric or methodology producers must feed benchmark or metric or methodology consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for benchmark or metric or methodology on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds benchmark, metric, methodology to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{YiRage modeling} is where AI Hardware Architecture and Compiler Constraints meets Chapter~1 counters: fix YiRage or chip arch or model and YiRage or chip arch or model together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Hardware truth: GPUs bound YiRage or chip arch or model with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on YiRage or chip arch or model/YiRage or chip arch or model legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize YiRage or chip arch or model with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked YiRage or chip arch or model---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage or chip arch or model raises bytes/token; fused schedule must keep YiRage or chip arch or model on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds YiRage, chip  arch, model to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\section{Key Takeaways}
+\label{sec:ch03_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Hardware Landscape.} Tie hardware landscape to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Constraint Matrix.} Tie constraint matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{GPU Constraints.} Tie GPU constraints to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{CPU Constraints.} Tie CPU constraints to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{NPU Constraints.} Tie NPU constraints to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch03_conclusion}
+
+AI Hardware Architecture and Compiler Constraints is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume AI Hardware Architecture and Compiler Constraints baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
 \typeout{END_CHAPTER "ch03" \theabspage}
-
-\subsection{Worked Example: Layer Footprint on Hopper}
-\label{sec:ch03_worked_hopper}
-
-Consider a single decoder layer with hidden size 4096, batch-1, and FP16 weights. A naive operator schedule reads Q/K/V projection weights (${\sim}$48\,MiB combined), attention intermediates, and MLP matrices (${\sim}$96\,MiB) from HBM each token. Shared memory on a Hopper SM cannot hold the full footprint; fusion therefore targets \emph{slices}: a QKV stage that retains activations in shared memory while streaming one weight tile at a time through TMA. If the fused stage exceeds available shared memory after padding and barrier reservations, the compiler must split the stage---reintroducing launches---or accept HBM spill. This arithmetic is the GPU-side realization of Chapter~2's iron rules: registers and shared memory are contracts, not hints.
-
-\subsection{CPU Roofline Sanity Check}
-\label{sec:ch03_cpu_roofline}
-
-On a dual-socket server CPU, decode GEMMs are often memory-bound at batch-1 even when L3 bandwidth looks ample on paper \citep{memoryfloor2026}. A roofline sanity check before enabling a CPU backend pass: estimate bytes moved per token (weights + KV + activations) and divide by measured L3/L2 throughput from \texttt{likwid} or vendor tools. If arithmetic intensity falls left of the roofline knee, SIMD widening alone cannot fix latency---tiling must increase reuse across tokens or fuse epilogues to cut reloads. NUMA-aware allocation matters when tensor parallel shards place half the weights on each socket: a ``fast'' kernel on socket 0 becomes slow if KV cache pages migrate to socket 1 mid-session.
-
-\subsection{NPU Legality Gates}
-\label{sec:ch03_npu_gates}
-
-NPU compilation pipelines should expose explicit \textbf{legality gates} before codegen:
-(1)~buffer descriptor alignment and maximum burst length,
-(2)~static loop bounds for spatial arrays,
-(3)~maximum on-chip buffer lifetime overlap,
-(4)~supported element types for matrix units. Failing any gate must surface as a compile-time diagnostic with suggested padding or specialization strategies---not as a silent DDR spill at runtime. Edge products often ship with fixed model zoos; industrial compilers still need these gates for OEM variants that change SRAM sizes without changing the marketing SKU name.
-
-\subsection{Pass Ordering Template}
-\label{sec:ch03_pass_template}
-
-Table~\ref{tab:pass_order_template} summarizes a hardware-aware \textbf{pass} ordering template used as a starting point in later YiRage chapters. GPU paths favor early algebraic fusion followed by layout normalization for tensor cores; CPU paths interleave layout and cache-blocking earlier; NPU paths run lifetime and DMA planning before fusion because illegal fusion can destroy static schedules.
-
-\begin{table}[t]
-\centering
-\caption{Illustrative pass-order differences across hardware classes.}
-\label{tab:pass_order_template}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Pass stage} & \textbf{GPU} & \textbf{CPU} & \textbf{NPU} \\
-\midrule
-Lifetime / bufferization & Early & Early & First \\
-Algebraic fusion & Before layout & Selective & After lifetime \\
-Layout / tiling & Tensor-core swizzle & Cache blocks & DMA alignment \\
-Sync insertion & Warp/block & OpenMP barriers & FIFO / cascade \\
-Codegen & PTX / SASS & Intrinsics & AIE graph \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Anti-Patterns in Cross-Hardware Ports}
-\label{sec:ch03_anti_patterns}
-
-Three recurring anti-patterns destroy cross-hardware compiler credibility:
-\textbf{(1)}~porting CUDA tile sizes directly to NPU PE arrays without remeasuring on-chip SRAM;
-\textbf{(2)}~assuming CPU decode can reuse GPU fusion boundaries when weight layouts differ;
-\textbf{(3)}~benchmarking only ms/token on GPUs while ignoring launches/token and bytes/token on all targets. Each anti-pattern is a residency failure expressed as a methodology failure---the fix is always to re-derive the dataflow contract for the target class before tuning instructions.
-
-\subsection{Fleet Operations: Versioning Chip Models}
-\label{sec:ch03_fleet_ops}
-
-Production fleets mix GPU steppings, CPU generations, and NPU firmware revisions. YiRage-style \textbf{chip models} should be versioned in the same artifact registry as model weights: a decode graph compiled against Hopper-sm90 must not silently run on sm80 parts with narrower shared memory. Continuous integration should compile golden decoder snippets against every supported model profile and fail when legality checks regress. This operational discipline is what separates demo kernels from industrial inference platforms that survive silicon refresh cycles without rewriting megakernels by hand.
-
-\subsection{Memory Hierarchy as a Compiler IR Problem}
-\label{sec:ch03_memory_ir}
-
-Treat memory hierarchy levels as \emph{address spaces} in compiler IR, not as comments in CUDA source. Global (HBM/DDR), shared (GPU) or L2/L3 hot sets (CPU), register files, and NPU tile memories each have distinct capacity, latency, and alignment rules. A hardware-aware lowering pass annotates each tensor value with a \texttt{memory.space} attribute and a proof obligation: ``this value remains in space S for N consumer ops without spill''. When the proof fails, the pass must either split fusion, change tiling, or reject the schedule---never silently rely on ``the runtime allocator will fix it''. This is how Chapter~2's residency philosophy becomes machine-checkable before any PTX or AIE graph is emitted.
-
-GPU global memory is high bandwidth but high latency; shared memory is low latency but tiny; registers are fastest but drive occupancy cliffs. CPU caches are implicit---programmers do not name L2 explicitly---so CPU-oriented passes must infer residency from loop structure and tile sizes. NPUs expose intermediate buffers as explicit FIFOs between PE columns; residency is a schedule, not a cache. Cross-hardware stacks that unify these spaces behind one abstraction still need target-specific legality rules; pretending all memories are ``just buffers'' recreates the operator-first trap at IR level.
-
-\subsection{Bandwidth Floors and Decode}
-\label{sec:ch03_bandwidth_floors}
-
-Decode at batch-1 repeatedly revisits the same weight tensors and growing KV cache for every output token. The \textbf{bandwidth} floor is therefore set by total bytes moved per token divided by achievable sustained HBM or DDR throughput---not by peak TFLOPs marketed on slide decks. Independent limit studies show that many decoder configurations are memory-bound across GPU generations even when tensor cores sit idle. Compiler optimizations that only reshape compute (e.g., different MMA shapes) without reducing bytes moved rarely move p99 latency once orchestration costs are counted.
-
-Quantifying bytes/token requires consistent accounting: include KV read/write traffic, weight reads, activation spill traffic, and collective shards in tensor-parallel deployments. Large MoE models add expert routing metadata and conditional weight reads; the constraint matrix must extend with ``conditional bandwidth'' rows in those chapters. Hardware-aware compilers should emit byte estimates alongside schedules so fleet planners can compare silicon options before buying accelerators \citep{bernardo2025compilerawareaihar}.
-
-\subsection{Parallelism Grain and Occupancy}
-\label{sec:ch03_parallel_grain}
-
-\textbf{Parallelism} grain determines how work maps to hardware threads. GPUs use warps of 32 lanes; CPUs use cores and SIMD lanes; NPUs use spatially placed PEs with fixed throughput per cycle. Decode kernels with tiny per-token M/N dimensions often launch wide grids where most lanes idle---effective occupancy collapses even when ``GPU utilization'' dashboards show non-zero values. Fusion raises arithmetic intensity per launch but tightens shared-memory occupancy; the compiler must co-optimize grain and footprint.
-
-On CPUs, grain choices interact with OpenMP scheduling and hyperthreads; on NPUs, grain is frequently fixed at compile time. A portable IR should represent parallel dimensions explicitly so backends can remap grains rather than baking warp assumptions into target-independent passes. YiRage's chip models include a \texttt{parallel.grain} field consumed by tiling heuristics in Chapters~6--9.
-
-\subsection{Dynamic Shapes and Specialization}
-\label{sec:ch03_dynamic_shapes}
-
-Cloud decode workloads exhibit \textbf{dynamic shapes}: variable context length, variable batch from continuous batching, and speculative decoding branches. GPUs and CPUs tolerate dynamic shapes with runtime kernel selection, CUDA Graphs updates, or recompilation caches. Many NPUs require shape specialization or upper-bound padding encoded in buffer descriptors. Hardware-aware compilers therefore need two pipelines: a \emph{legalize dynamic shapes} pass for flexible targets and a \emph{specialize bounds} pass for static targets.
-
-Specialization interacts with fleet operations: over-specializing to one context length improves peak performance but explodes compile-matrix size. Industrial systems cap specialization fanout and fall back to padded shapes with masked compute---the constraint matrix should record which targets support masking efficiently. Chapter~12 compares eager, graph, and MegaKernel execution modes through this specialization lens.
-
-\subsection{Tensor Cores vs Memory: When MMA Helps Decode}
-\label{sec:ch03_tensor_core_decode}
-
-Tensor cores accelerate GEMM-like primitives but decode GEMMs are often ``thin''. Hardware-aware layout passes exist to reshape decode matmuls into MMA-friendly tiles; without them, frameworks may still call tensor-core libraries yet achieve CPU-like effective throughput because epilogues and reductions scalarize. The compiler must fuse epilogues (bias, activation, residual) into the same stage that issues MMA instructions; otherwise bandwidth dominates regardless of core type.
-
-Hopper-and-later TMA paths move data asynchronously into shared memory while MMA units work on the previous tile---double-buffer pipelines in Chapter~8 depend on the constraints documented here. Blackwell-era evolutions continue widening MMA shapes and cluster scopes; chip models must version these fields so autotuning does not explore illegal instruction forms.
-
-\subsection{Synchronization Cost in Constraint Planning}
-\label{sec:ch03_sync_preview}
-
-Every fusion decision trades bytes moved against \textbf{sync} introduced. GPU block barriers, CPU fences, and NPU cascade stalls have different magnitudes; a fusion legal on GPU may be illegal on NPU if it requires global barriers between PE columns. Hardware-aware passes should estimate sync overhead alongside memory traffic---Chapter~9 formalizes hierarchical sync design; this chapter records why sync belongs in the constraint matrix, not as an afterthought.
-
-Launch orchestration on the host is itself a synchronization tax: thousands of kernels per token imply thousands of implicit host-device sync points unless graphs or megakernels collapse them. Constraint-aware compilation targets \emph{launch count} as a first-class metric equal to bytes/token.
-
-\subsection{Reading Vendor Documentation Critically}
-\label{sec:ch03_vendor_docs}
-
-Silicon vendors document peaks: TFLOPs, TB/s, ``AI TOPS.'' Production decode rarely sits at peaks. Compiler engineers should translate datasheet peaks into sustained bounds using microbenchmarks on their fleet SKUs, then store results in chip models. Second-source validation (academic limit studies, independent roofline analyses) prevents single-vendor optimism from leaking into pass heuristics.
-
-When documentation omits constraints (exact shared-memory banking rules, DMA alignment minima), derive them empirically and check them into versioned model files rather than scattering magic numbers through kernels. This discipline is especially important for NPUs where public documentation is thinner than CUDA's.
-
-\subsection{Connecting Constraints to Later Chapters}
-\label{sec:ch03_roadmap}
-
-The rest of Part~II (Chapters~4--5) instantiates GPU and XDNA constraints in architecture-specific depth. Part~III (Chapters~6--9) shows how MegaKernel techniques---on-chip residency, static roles, TMA pipelines, hierarchical sync---are responses to the matrix in Table~\ref{tab:constraint_matrix}. Part~V--VI translate the same matrix into compiler passes and cross-hardware benchmarks. Readers should return to this chapter when a later optimization ``works on GPU but fails on NPU'': the failure is almost always a violated row in the constraint matrix, not a mysterious backend bug.
-
-\subsection{Quantitative Constraint Checklist}
-\label{sec:ch03_checklist}
-
-Before merging any hardware-aware pass, answer the following quantitatively on \emph{each} target SKU:
-\begin{enumerate}
-\item What is the on-chip SRAM budget per fused stage (bytes) and does the schedule include barrier/shared-memory padding overhead ? \item What is estimated HBM/DDR bytes per output token after fusion, including KV traffic at the deployment context length ? \item How many host-visible launches remain per token after graph capture or MegaKernel lowering ? \item Does the schedule require dynamic shapes illegal on NPU, and if so, what specialization or padding strategy is selected ? \item What sync points exist between parallel grains, and can any be moved inside on-chip residency regions ? \end{enumerate}
-Passes that cannot answer these five questions should remain behind feature flags until chip models supply defaults.
-
-\subsection{Industrial Case Patterns}
-\label{sec:ch03_case_patterns}
-
-\textbf{Case A — GPU decode pool:} Operators see high HBM utilization but flat ms/token; constraint analysis shows launches/token in the thousands. Fix path: graph capture plus shared-memory fusion guided by chip model shared-memory caps. \textbf{Case B — Hybrid CPU+GPU:} CPU preprocessing becomes tail-latency outlier due to NUMA-remote KV pages. Fix path: NUMA-aware bufferization pass pinning KV shards. \textbf{Case C — Edge NPU:} Model fits in marketing TOPS claims but misses real-time factor at batch-1. Fix path: static MegaKernel with explicit DMA schedule and reduced DDR touches. These patterns recur in Part~VI case studies; documenting them here gives readers a failure-mode index before diving into compiler-specific chapters.
-
-\subsection{Tooling Interfaces for Chip Models}
-\label{sec:ch03_tooling}
-
-Chip models should be consumable by three tools: autotuners, legality checkers, and benchmark harnesses. Autotuners read SRAM and register caps to bound tile search. Legality checkers validate DMA alignment and static-loop requirements before codegen. Benchmark harnesses attach bytes/token and launches/token calculators to every timed configuration. Human-readable YAML or JSON models checked into git beat ad-hoc spreadsheets because they version alongside compiler passes in CI. When a new GPU stepping ships, update the model file first, rerun golden tests second, and only then re-open autotuning campaigns \citep{malbaa2024modelinferenceusin}.
-
-\subsection{Pedagogical Summary for Compiler Engineers}
-\label{sec:ch03_pedagogy}
-
-Students of AI compilers should memorize the constraint matrix before memorizing MMA instruction shapes \citep{ludmir2024parallaxacompilerf}. The exam question is not ``write a FlashAttention kernel'' but ``given a decoder layer and three silicon profiles, which fusions are legal and which metrics will move''. That question format mirrors production design reviews and prevents teams from shipping GPU-only wins that break NPU deployments. Carry this chapter's tables into every later pass review until hardware-aware compilation becomes reflex, not ceremony.
-
-\subsection{Energy and Power as First-Class Constraints}
-\label{sec:ch03_energy}
-
-Edge \textbf{NPU} deployments add \textbf{energy} per token and thermal caps that GPUs in datacenters can ignore at batch-1. A schedule that minimizes HBM bytes often minimizes energy as well; schedules that thrash DDR due to spills can exceed TDP even when latency looks acceptable in lab tests. Hardware-aware compilers for edge should therefore log estimated off-chip bytes and DMA activations alongside latency. Datacenter GPUs are not immune---power caps throttle clock when sustained memory traffic keeps memory controllers busy.
-
-\subsection{Security and Multi-Tenant Interactions}
-\label{sec:ch03_security}
-
-Multi-tenant GPU fleets introduce constraints unrelated to FLOPs: partitioned SM quotas, encrypted KV regions, and orchestration policies that forbid certain persistent kernels. A MegaKernel optimized for bare-metal may be illegal under MIG or certain confidential-computing modes. Hardware-aware passes should accept policy flags in chip models (e.g., ``graph capture allowed'', ``persistent kernels allowed'') so optimizations do not violate serving security contracts. These flags are operational realities in industrial inference, not edge cases \citep{surez2025energyefficientinf}.
-
-\subsection{Final Integration with Chapter~2 Mindset}
-\label{sec:ch03_integration}
-
-Chapter~2 asked teams to draw dataflow before profiling kernels; this chapter asks them to attach numeric hardware bounds to every edge in that drawing. When those bounds are explicit, operator-first regressions become visible during code review rather than after quarterly fleet re-benchmarks. When bounds are encoded in YiRage chip models, automated passes inherit the same discipline without heroic engineers re-deriving limits per SKU. That closed loop---mindset, measurement, model, pass---is the foundation for every MegaKernel and compiler chapter that follows. Readers who internalize the loop can skip re-learning vendor buzzwords each silicon generation; they only update model files and re-run legality checks.
-
-\subsection{Glossary Hooks for Cross-Chapter Indexing}
-\label{sec:ch03_glossary}
-
-This chapter introduces terms reused throughout the book: \textbf{constraint matrix}, \textbf{chip model}, \textbf{bytes/token}, \textbf{launches/token}, and \textbf{legality gate}. Index entries point forward to MegaKernel techniques (Part~III), handwritten CUDA case studies (Part~V), and compiler benchmarks (Part~VI). Consistent vocabulary prevents teams from relabeling the same residency failure as ``kernel issue'' in one chapter and ``compiler issue'' in another.
-
-\subsection{Practice Audits (Hardware)}
-\label{sec:ch03_practice}
-
-Apply these audits after reading:
-\begin{enumerate}
-\item Fill the constraint matrix for your deployment SKU with measured—not peak—bandwidth and on-chip SRAM sizes. \item Compute bytes/token and launches/token for one decoder layer at your production context length. \item List dynamic-shape features you rely on (continuous batching, speculative decoding) and mark NPU legality for each. \item Draft a chip model JSON stub for two targets you operate; include shared-memory or tile-buffer caps. \end{enumerate}
-Audits mirror Chapter~2 practice problems but ground them in silicon limits. Completing them before Chapter~4 saves time: Hopper-specific detail lands faster when the cross-hardware matrix is already filled with your fleet numbers.
-
-\subsection{Handoff to Chapter~4}
-\label{sec:ch03_handoff}
-
-Chapter~4 narrows the lens to NVIDIA Hopper and Blackwell: TMA, cluster shared memory, and tensor-core evolution. Readers should enter that chapter with a completed constraint matrix for at least one NVIDIA SKU and one non-GPU target. The Hopper deep dive is not a departure from cross-hardware thinking---it is the reference GPU implementation against which CPU and NPU schedules are compared in later parts. Keep bytes/token and launches/token on the same spreadsheet as you read forward; Chapters~4--5 add mechanism, not new success metrics.
-
-Industrial teams sometimes treat hardware chapters as ``for kernel engineers only.''
-That separation fails in practice: compiler passes encode the same SRAM and bandwidth limits documented here. When compiler and kernel teams share one chip model repository, regressions surface as legality check failures instead of week-long email threads about mystery slowdowns. Invest up front in shared constraint artifacts; it is cheaper than reconciling divergent assumptions after a silicon refresh.
-
-\textbf{Closing metric reminder:} decode optimization is judged on sustained bytes/token, launches/token, and p99 latency under your real batching policy---not on kernel-local microbenchmarks. Hardware-aware compilation exists to keep those fleet metrics inside SLO as models, context lengths, and silicon generations change.
-
-Fleet operators should snapshot constraint matrices per SKU quarterly: stepping changes, firmware updates, and driver releases can shift achievable sustained bandwidth without changing product names. Treat those snapshots as inputs to chip models, not as slide-deck trivia. When models and measurements disagree, trust measured sustained bytes/token on your binaries first, then reconcile the model---never the reverse.
-
-This discipline is boring until a driver upgrade silently shifts shared-memory defaults; teams with versioned chip models catch the shift in CI, not in customer tickets.
-
-Document every constraint assumption in git next to the passes that consume it; future you will not remember which workshop whiteboard justified a tile size.
-
-Hardware constraints are the floor today; megakernels and compilers are how you build on it. Fleet-wide SLO reviews should cite this chapter's constraint matrix before approving any new fusion pass in production LLM serving fleets \citep{taxbreak2026}.

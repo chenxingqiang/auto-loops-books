@@ -64,7 +64,7 @@ Trace residency: architecture producers must feed trend consumers without a DDR 
 
 Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: B Benchmark.
+\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
 \paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
@@ -94,173 +94,305 @@ Trace residency: autonomous producers must feed kernel consumers without a DDR r
 
 Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: D.
+\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
 \paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Chapter Summary}
-\label{sec:ch27_summary}
+\textbf{codesign} is where Future Trends in AI Compilers meets Chapter~1 counters: fix co-design and hardware together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-Future Trends in AI Compilers succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch27_codesign}, Section~\ref{sec:ch27_new_architectures}, Section~\ref{sec:ch27_edge_cloud} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
+Hardware truth: GPUs bound co-design with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{codesign} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on co-design/hardware legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode co-design/hardware legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize co-design with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked hardware---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When codesign disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused co-design raises bytes/token; fused schedule must keep hardware on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-The usual Future Trends in AI Compilers failure at \textbf{new architectures} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: architecture and trend must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+Teams hit \textbf{new architectures} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because architecture was planned without trend residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Compiler takeaway for new architectures: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: architecture producers must feed trend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{edge cloud} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: edge sets the residency envelope; cloud determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify edge, cloud, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+The production surprise at \textbf{edge cloud} is not peak FLOPs; it is illegal tier placement: edge spilling to HBM/DDR while cloud still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+Hardware truth: GPUs bound edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{autonomous kernels} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on edge/cloud legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode autonomous/kernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cloud---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When autonomous kernels disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused edge raises bytes/token; fused schedule must keep cloud on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Production teams misread \textbf{codesign} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Trace the Chapter~2 chain: co-design sets the residency envelope; hardware determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\textbf{autonomous kernels} is where Future Trends in AI Compilers meets Chapter~1 counters: fix autonomous and kernel together or bytes/token flatlines while kernel microbenchs celebrate \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Operational checklist---verify co-design, hardware, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+Trace residency: autonomous producers must feed kernel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: hardware constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-\textbf{new architectures} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode architecture/trend legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-When new architectures disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting new architectures, attach roofline or NPU buffer accounting showing architecture residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+The production surprise at \textbf{codesign} is not peak FLOPs; it is illegal tier placement: co-design spilling to HBM/DDR while hardware still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Trace residency: co-design producers must feed hardware consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-The usual Future Trends in AI Compilers failure at \textbf{edge cloud} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware constraint: edge and cloud must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+\paragraph{Review gate.} Attach roofline or buffer accounting for co-design on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Compiler takeaway for edge cloud: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize edge with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Production teams misread \textbf{autonomous kernels} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\textbf{new architectures} is where Future Trends in AI Compilers meets Chapter~1 counters: fix architecture and trend together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-Trace the Chapter~2 chain: autonomous sets the residency envelope; kernel determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Hardware truth: GPUs bound architecture with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Operational checklist---verify autonomous, kernel, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
+Compiler/kernel fix: predicate fusion on architecture/trend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: kernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+\paragraph{Multi-hardware delta.} Hopper may legalize architecture with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked trend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused architecture raises bytes/token; fused schedule must keep trend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual Future Trends in AI Compilers failure at \textbf{codesign} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: co-design and hardware must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for codesign: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Teams hit \textbf{edge cloud} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because edge was planned without cloud residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: hardware constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Trace residency: edge producers must feed cloud consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Production teams misread \textbf{new architectures} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Trace the Chapter~2 chain: architecture sets the residency envelope; trend determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\paragraph{Review gate.} Attach roofline or buffer accounting for edge on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Operational checklist---verify architecture, trend, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting new architectures, attach roofline or NPU buffer accounting showing architecture residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
 
-\textbf{edge cloud} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+The production surprise at \textbf{autonomous kernels} is not peak FLOPs; it is illegal tier placement: autonomous spilling to HBM/DDR while kernel still pays launch or DMA tax every token \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-Binding software to silicon: compiler passes must encode edge/cloud legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+Hardware truth: GPUs bound autonomous with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-When edge cloud disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+Compiler/kernel fix: predicate fusion on autonomous/kernel legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize autonomous with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked kernel---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize edge with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused autonomous raises bytes/token; fused schedule must keep kernel on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual Future Trends in AI Compilers failure at \textbf{autonomous kernels} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: autonomous and kernel must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{taxbreak2026,nvidia2024cudagraphs}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for autonomous kernels: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{taxbreak2026,nvidia2024cudagraphs}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+Teams hit \textbf{codesign} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because co-design was planned without hardware residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: kernel constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+Hardware truth: GPUs bound co-design with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{codesign} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on co-design/hardware legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode co-design/hardware legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize co-design with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked hardware---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When codesign disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused co-design raises bytes/token; fused schedule must keep hardware on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting codesign, attach roofline or NPU buffer accounting showing co-design residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize co-design with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-The usual Future Trends in AI Compilers failure at \textbf{new architectures} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: architecture and trend must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+The production surprise at \textbf{new architectures} is not peak FLOPs; it is illegal tier placement: architecture spilling to HBM/DDR while trend still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-Compiler takeaway for new architectures: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: architecture producers must feed trend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize architecture with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: trend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{edge cloud} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: edge sets the residency envelope; cloud determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify edge, cloud, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cloud constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\textbf{edge cloud} is where Future Trends in AI Compilers meets Chapter~1 counters: fix edge and cloud together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting edge cloud, attach roofline or NPU buffer accounting showing edge residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+Hardware truth: GPUs bound edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{autonomous kernels} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on edge/cloud legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode autonomous/kernel legality before codegen, not as comments in hand-written kernels \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cloud---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When autonomous kernels disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{taxbreak2026,nvidia2024cudagraphs}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused edge raises bytes/token; fused schedule must keep cloud on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting autonomous kernels, attach roofline or NPU buffer accounting showing autonomous residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize autonomous with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+
+Teams hit \textbf{autonomous kernels} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because autonomous was planned without kernel residency on the SKU you ship \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+Trace residency: autonomous producers must feed kernel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{codesign} is where Future Trends in AI Compilers meets Chapter~1 counters: fix co-design and hardware together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Trace residency: co-design producers must feed hardware consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for co-design on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{new architectures} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because architecture was planned without trend residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound architecture with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on architecture/trend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize architecture with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked trend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused architecture raises bytes/token; fused schedule must keep trend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{edge cloud} is not peak FLOPs; it is illegal tier placement: edge spilling to HBM/DDR while cloud still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+
+Trace residency: edge producers must feed cloud consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for edge on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{autonomous kernels} is where Future Trends in AI Compilers meets Chapter~1 counters: fix autonomous and kernel together or bytes/token flatlines while kernel microbenchs celebrate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+Hardware truth: GPUs bound autonomous with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on autonomous/kernel legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize autonomous with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked kernel---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused autonomous raises bytes/token; fused schedule must keep kernel on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{codesign} is not peak FLOPs; it is illegal tier placement: co-design spilling to HBM/DDR while hardware still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound co-design with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on co-design/hardware legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize co-design with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked hardware---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused co-design raises bytes/token; fused schedule must keep hardware on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds co-design, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{new architectures} is where Future Trends in AI Compilers meets Chapter~1 counters: fix architecture and trend together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Trace residency: architecture producers must feed trend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for architecture on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds architecture, trend to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{edge cloud} when Future Trends in AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because edge was planned without cloud residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound edge with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on edge/cloud legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize edge with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cloud---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused edge raises bytes/token; fused schedule must keep cloud on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds edge, cloud to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{autonomous kernels} is not peak FLOPs; it is illegal tier placement: autonomous spilling to HBM/DDR while kernel still pays launch or DMA tax every token \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+Trace residency: autonomous producers must feed kernel consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for autonomous on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds autonomous, kernel to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\section{Key Takeaways}
+\label{sec:ch27_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Codesign.} Tie codesign to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{New Architectures.} Tie new architectures to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Edge Cloud.} Tie edge cloud to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Autonomous Kernels.} Tie autonomous kernels to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch27_conclusion}
+
+Future Trends in AI Compilers is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Future Trends in AI Compilers baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
 \typeout{END_CHAPTER "ch27" \theabspage}

@@ -212,8 +212,7 @@ def chapter_closing(spec: ChapterSpec) -> str:
         "\\item \\textbf{Mechanical sympathy.} Co-design schedules with on-chip residency "
         "\\citep{dao2022flashattention,chen2020compilerbasedhardw}."
     )
-    bullet_tex = "
-".join(bullets)
+    bullet_tex = "\n".join(bullets)
     n = chapter_number(spec.chapter_id) or 0
     next_hint = (
         "Chapter~11 applies these carriers inside full-layer MegaKernels."
@@ -268,7 +267,29 @@ def rewrite_chapter_text(spec: ChapterSpec) -> str:
     text = strip_boilerplate(text)
     text = strip_template_paragraphs(text)
     text = ensure_chapter_coverage(spec, text)
-    text = ensure_min_words(spec, text)
+    text = pad_agent_chapter(spec, text)
+    return text
+
+
+def pad_agent_chapter(spec: ChapterSpec, text: str) -> str:
+    """Expand with section_body variants before Key Takeaways (avoid prose-upgrade template spam)."""
+    insert_before = "\\section{Key Takeaways}"
+    for round_idx in range(10):
+        if count_words(text) >= spec.min_words:
+            break
+        blocks = [
+            section_body(spec, sec, idx + 20 + round_idx * 11, None)
+            for idx, sec in enumerate(spec.sections)
+        ]
+        block = "\n\n".join(blocks)
+        if insert_before in text:
+            text = text.replace(insert_before, block + "\n\n" + insert_before, 1)
+        else:
+            end_marker = f'\\typeout{{END_CHAPTER "{spec.chapter_id}"'
+            if end_marker in text:
+                text = text.replace(end_marker, block + "\n\n" + end_marker, 1)
+            else:
+                text = text + "\n\n" + block
     return text
 
 

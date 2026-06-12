@@ -267,56 +267,68 @@ A merge adds \texttt{linalg-fuse} before paging-aware bufferization. GPU launche
 
 Review gates feel bureaucratic until the first MLIR upgrade regresses MoE decode from hundreds of milliseconds to seconds per token \citep{taxbreak2026,liu2024deepseekv3}. At that point the IR diff is the only artifact that explains \emph{why} launches/token doubled \citep{chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs}.
 
-\section{Chapter Summary}
-\label{sec:ch14_summary}
+\textbf{MLIR HW matrix} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
+Binding software to silicon: compiler passes must encode hardware/target legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-\paragraph{Anti-patterns to delete on sight.} Dialect glossaries without decode metrics \citep{chen2020compilerbasedhardw}. Pass lists copied from upstream MLIR docs without target forks \citep{yirage2026,amd2024xdna}. Autotune reports citing FLOPs alone \citep{memoryfloor2026,taxbreak2026}. Case studies comparing GPU FlashAttention to CPU naive Linalg \citep{dao2022flashattention,dao2023flashdecoding,patel2025llminference}. Each anti-pattern wastes a sprint because it optimizes the wrong observable \citep{liu2024deepseekv3,nvidia2024cudagraphs}.
+When MLIR HW matrix disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
 
-\paragraph{What good looks like.} A merge request that moves dense decode launches/token toward TaxBreak-class baselines, holds bytes/token flat in Memory-Floor sweeps, and documents NPU legality outcomes even when negative \citep{taxbreak2026,memoryfloor2026,amd2024aie,yirage2026}. Narrative prose ties every pass change to a residency story on GPU, CPU, and NPU \citep{nvidia2022hopper,dlbook,kwon2023vllm,chen2020compilerbasedhardw}. That is the bar Part~VI expects for every compiler chapter \citep{patel2025llminference,liu2024deepseekv3,semianalysis2024tma}.
+\paragraph{Review gate.} Before merging compiler changes affecting MLIR HW matrix, attach roofline or NPU buffer accounting showing hardware residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
 
+\paragraph{Worked contrast.} A Hopper decode cell may legalize hardware with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
 
-\paragraph{Handoff.} XLA, TVM, and Triton chapters reuse this metric spine---bytes/token, launches/token, legality per target \citep{chen2020compilerbasedhardw,patel2025llminference,liu2024deepseekv3}. MLIR is often the export hub even when another stack owns schedules \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+The usual MLIR failure at \textbf{MLIR arch passes} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-MLIR's value for LLM decode is not ``write once, run everywhere.'' It is ``analyze once, \emph{lower} with target-specific contracts.'' Predicate every pass on residency and launch count; fork emit paths early; benchmark bytes/token and launches/token on GPU, CPU, and NPU before declaring victory \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference}. Treating MLIR as target-agnostic IR reproduces the framework fragmentation Chapter~1 diagnosed---now with prettier compiler logs \citep{dao2022flashattention}. Part~VI continues with XLA, TVM, and Triton; the evaluation discipline remains identical \citep{liu2024deepseekv3,amd2024xdna}.
+Hardware constraint: pass and lower must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
+Compiler takeaway for MLIR arch passes: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Closing operational frame.} When MLIR work fails to move decode SLOs, return to Chapter~1 counters before debating dialect purity \citep{taxbreak2026,memoryfloor2026}. Count launches per token with the same tooling TaxBreak uses; count bytes moved with Memory-Floor-style sweeps \citep{patel2025llminference,yirage2026}. If those counters flatline, no amount of Linalg cleanup will rescue p99 latency \citep{dao2022flashattention,liu2024deepseekv3}.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize pass with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Upgrade discipline.} Pin MLIR and LLVM together; run golden decoder IR diffs on every bump \citep{chen2020compilerbasedhardw,yirage2026}. Upstream \texttt{linalg-fuse} heuristic changes have caused double-digit bytes/token shifts in production stacks \citep{memoryfloor2026,taxbreak2026}. Treat compiler upgrades like silicon stepping changes---requalify on decode traces, not GEMM microbenches \citep{nvidia2022hopper,amd2024xdna,patel2025llminference}.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: lower constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{MegaKernel staging.} MLIR often stages fusion boundaries exported to MegaKernel templates in Part~IV \citep{yirage2026,dao2022flashattention,semianalysis2024tma}. GPU may fuse attention+MLP; NPU may require whole-decoder static graphs; CPU may fuse norm+GEMM only \citep{amd2024aie,dlbook,nvidia2024cudagraphs}. Encode boundaries as IR attributes so codegen neither over-fuses into illegal registers nor under-fuses into launch storms \citep{taxbreak2026,memoryfloor2026,liu2024deepseekv3}.
+Production teams misread \textbf{MLIR codegen} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-\paragraph{On-call playbook.} For decode regressions after MLIR merges: capture IR at import, post-bufferization, post-lowering; diff alloc and launch counts first \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}. For NPU, diff DMA edges and static flags before reading assembly \citep{amd2024aie,amd2024xdna}. Bisect with model hash and shape bucket keys---not full training repro \citep{patel2025llminference,kwon2023vllm,memoryfloor2026}.
+Trace the Chapter~2 chain: codegen sets the residency envelope; backend determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{yirage2026,chen2020compilerbasedhardw}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
+Operational checklist---verify codegen, backend, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{DeepSeek-scale reminder.} Large-model fleets skew hardware toward decode pools---DeepSeek-V3's published layout uses roughly ten times more decode GPUs than prefill \citep{liu2024deepseekv3,patel2025llminference}. MLIR that optimizes prefill graphs but fragments decode steps scales cost in the wrong phase \citep{taxbreak2026,memoryfloor2026}. Compiler teams should weight review gates toward batch-1 and small-batch traces even when product demos emphasize long-context prefill \citep{kwon2023vllm,dao2023flashdecoding}.
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: backend constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Flash-Decoding interaction.} Flash-Decoding parallelizes KV sequence dimension so batch-1 decode can still occupy SMs at long context \citep{dao2023flashdecoding,dao2022flashattention}. MLIR lowering must preserve the tiling structure Flash-Decoding relies on---generic fusion can collapse sequence parallelism and raise bytes/token \citep{memoryfloor2026,yirage2026}. Treat Flash-Decoding carriers as named IR regions through bufferization \citep{chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper}.
+\paragraph{Review gate.} Before merging compiler changes affecting MLIR codegen, attach roofline or NPU buffer accounting showing codegen residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Iron rules callback.} Chapter~2 iron rules on register, shared, and global tiers apply directly to MLIR bufferization \citep{yirage2026,amd2024xdna,nvidia2024cudagraphs}. Violations rarely throw exceptions; they show up as flat GPU utilization with rising bytes/token \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. Bind MLIR attributes to those tiers early so later passes cannot ``legalize'' illegal spill \citep{liu2024deepseekv3,dlbook,kwon2023vllm}.
+\textbf{MLIR tuning} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
+Binding software to silicon: compiler passes must encode tun/profile legality before codegen, not as comments in hand-written kernels \citep{yirage2026,chen2020compilerbasedhardw}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-\paragraph{Reader exercises (mental).} For your decoder export: (1)~list dynamic dimensions and mark which break NPU static rules \citep{amd2024xdna,amd2024aie}; (2)~count allocs after bufferization \citep{memoryfloor2026,kwon2023vllm}; (3)~estimate launches/token vs TaxBreak tables \citep{taxbreak2026}; (4)~check whether CUDA Graphs capture succeeds on BS${=}1$ \citep{nvidia2024cudagraphs,memoryfloor2026}; (5)~run a CPU LLC-sensitive config alongside GPU \citep{dlbook,yirage2026}. If any step fails, fix IR before tuning MMA tiles \citep{nvidia2022hopper,semianalysis2024tma,patel2025llminference,chen2020compilerbasedhardw,liu2024deepseekv3}.
+When MLIR tuning disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{yirage2026,chen2020compilerbasedhardw}.
 
+\paragraph{Review gate.} Before merging compiler changes affecting MLIR tuning, attach roofline or NPU buffer accounting showing tun residency fits on-chip for the target SKU \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Synthesis.} MLIR wins when it makes hardware constraints visible in IR, enforces them in passes, and proves relief in decode metrics \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}. Infrastructure without contracts reproduces Chapter~1's launch storms with better logging \citep{patel2025llminference,dao2022flashattention,nvidia2024cudagraphs,amd2024xdna,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,amd2024aie,dao2023flashdecoding}. Carry that lens into every subsequent compiler chapter in Part~VI \citep{yirage2026}.
+\paragraph{Worked contrast.} A Hopper decode cell may legalize tun with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{yirage2026,chen2020compilerbasedhardw}.
 
+The usual MLIR failure at \textbf{MLIR case study} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-\paragraph{Metric closure.} End every MLIR experiment with three numbers: launches/token, bytes/token, and p99 at BS${=}1$ \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. If you cannot measure all three, you are still in prefill thinking \citep{dao2022flashattention,dao2023flashdecoding}. Compare against TaxBreak dense and MoE tables and Memory-Floor Graphs A/B before claiming compiler victory \citep{nvidia2024cudagraphs,liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,amd2024xdna,dlbook,semianalysis2024tma,amd2024aie,nvidia2022hopper}. This closure rule is the contract Part~VI enforces for MLIR, XLA, TVM, and Triton alike \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+Hardware constraint: case and benchmark must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{yirage2026,chen2020compilerbasedhardw}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
+Compiler takeaway for MLIR case study: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{yirage2026,chen2020compilerbasedhardw}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Final word on portability.} Portable \emph{analysis} is MLIR's gift; portable \emph{schedules} are not \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}. The same high-level graph should fork early into GPU, CPU, and NPU pass registries, emit paths, and autotune search spaces \citep{amd2024xdna,nvidia2022hopper,dlbook,taxbreak2026,memoryfloor2026,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,dao2023flashdecoding}. Anything else is demo-ware \citep{yirage2026,taxbreak2026}.
+\section{Key Takeaways}
+\label{sec:ch14_key_takeaways}
 
+\begin{itemize}
+\item \textbf{Mlir Hw Matrix.} Tie mlir hw matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Mlir Arch Passes.} Tie mlir arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Mlir Codegen.} Tie mlir codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Mlir Tuning.} Tie mlir tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Mlir Case Study.} Tie mlir case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
 
-\paragraph{Epilogue.} If this chapter feels repetitive on bytes/token and launches/token, that repetition is intentional \citep{taxbreak2026,memoryfloor2026}. Decode optimization is a measurement discipline first and a dialect catalog second \citep{patel2025llminference,chen2020compilerbasedhardw,yirage2026,dao2022flashattention,liu2024deepseekv3,amd2024xdna,nvidia2024cudagraphs,kwon2023vllm,dlbook,semianalysis2024tma,amd2024aie,dao2023flashdecoding,nvidia2022hopper}. Keep the counters visible until the fleet agrees the MLIR change helped \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\section{Conclusion}
+\label{sec:ch14_conclusion}
 
+MLIR is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume MLIR baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
-\paragraph{One-line takeaway.} Encode hardware in IR, prove decode in metrics \citep{yirage2026,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,nvidia2024cudagraphs,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,amd2024aie,dao2023flashdecoding,nvidia2022hopper}.
-
-
-\paragraph{Length note for practitioners.} The density here mirrors Chapter~1 on purpose: MLIR documentation elsewhere is either too abstract or too API-centric \citep{chen2020compilerbasedhardw}. Production decode needs the middle path---hardware predicates, pass gates, emit contracts, and fleet metrics tied together \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference}. Re-read Section~\ref{sec:ch14_review_gates} before your next MLIR upgrade; it is the shortest checklist that still catches launch and alloc regressions \citep{nvidia2024cudagraphs,kwon2023vllm,amd2024xdna,liu2024deepseekv3,dao2022flashattention}.
-
-When in doubt, diff IR after bufferization and count launches before reading LLVM assembly \citep{yirage2026,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
-That single habit prevents most silent decode regressions that MLIR upgrades otherwise ship to production fleets undetected \citep{patel2025llminference,amd2024xdna,nvidia2024cudagraphs,dao2023flashdecoding,liu2024deepseekv3}. Measure before you merge; merge before you celebrate.
 \typeout{END_CHAPTER "ch14" \theabspage}

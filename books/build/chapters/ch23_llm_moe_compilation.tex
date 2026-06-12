@@ -98,249 +98,413 @@ Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or D
 
 \paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Chapter Summary}
-\label{sec:ch23_summary}
+\textbf{LLM decode compile} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix LLM and decode together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-LLM and MoE Specialized Compilation succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch23_llm_decode_compile}, Section~\ref{sec:ch23_moe_scheduling}, Section~\ref{sec:ch23_kv_hardware} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
+Hardware truth: GPUs bound LLM with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{LLM decode compile} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on LLM/decode legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode LLM/decode legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize LLM with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked decode---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When LLM decode compile disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused LLM raises bytes/token; fused schedule must keep decode on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting LLM decode compile, attach roofline or NPU buffer accounting showing LLM residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize LLM with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{moe scheduling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: moe and expert must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{liu2024deepseekv3,patel2025llminference}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+Teams hit \textbf{moe scheduling} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because moe was planned without expert residency on the SKU you ship \citep{liu2024deepseekv3,patel2025llminference}.
 
-Compiler takeaway for moe scheduling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{liu2024deepseekv3,patel2025llminference}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: moe producers must feed expert consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize moe with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: expert constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for moe on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{kv hardware} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: kv sets the residency envelope; cache determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{dao2022flashattention,dao2023flashdecoding}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify kv, cache, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cache constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,dao2023flashdecoding}.
+The production surprise at \textbf{kv hardware} is not peak FLOPs; it is illegal tier placement: kv spilling to HBM/DDR while cache still pays launch or DMA tax every token \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting kv hardware, attach roofline or NPU buffer accounting showing kv residency fits on-chip for the target SKU \citep{dao2022flashattention,dao2023flashdecoding}.
+Hardware truth: GPUs bound kv with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{hetero moe} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on kv/cache legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode hetero/load legality before codegen, not as comments in hand-written kernels \citep{liu2024deepseekv3,patel2025llminference}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize kv with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cache---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When hetero moe disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{liu2024deepseekv3,patel2025llminference}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused kv raises bytes/token; fused schedule must keep cache on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting hetero moe, attach roofline or NPU buffer accounting showing hetero residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hetero with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
 
-Production teams misread \textbf{LLM decode compile} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Trace the Chapter~2 chain: LLM sets the residency envelope; decode determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\textbf{hetero moe} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix hetero and load together or bytes/token flatlines while kernel microbenchs celebrate \citep{liu2024deepseekv3,patel2025llminference}.
 
-Operational checklist---verify LLM, decode, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+Trace residency: hetero producers must feed load consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: decode constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting LLM decode compile, attach roofline or NPU buffer accounting showing LLM residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for hetero on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-\textbf{moe scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode moe/expert legality before codegen, not as comments in hand-written kernels \citep{liu2024deepseekv3,patel2025llminference}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-When moe scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{liu2024deepseekv3,patel2025llminference}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting moe scheduling, attach roofline or NPU buffer accounting showing moe residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+The production surprise at \textbf{LLM decode compile} is not peak FLOPs; it is illegal tier placement: LLM spilling to HBM/DDR while decode still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize moe with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+Trace residency: LLM producers must feed decode consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{kv hardware} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware constraint: kv and cache must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,dao2023flashdecoding}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+\paragraph{Review gate.} Attach roofline or buffer accounting for LLM on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Compiler takeaway for kv hardware: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,dao2023flashdecoding}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize kv with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cache constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,dao2023flashdecoding}.
 
-Production teams misread \textbf{hetero moe} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\textbf{moe scheduling} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix moe and expert together or bytes/token flatlines while kernel microbenchs celebrate \citep{liu2024deepseekv3,patel2025llminference}.
 
-Trace the Chapter~2 chain: hetero sets the residency envelope; load determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{liu2024deepseekv3,patel2025llminference}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Hardware truth: GPUs bound moe with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Operational checklist---verify hetero, load, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{liu2024deepseekv3,patel2025llminference}.
+Compiler/kernel fix: predicate fusion on moe/expert legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: load constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Multi-hardware delta.} Hopper may legalize moe with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked expert---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting hetero moe, attach roofline or NPU buffer accounting showing hetero residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused moe raises bytes/token; fused schedule must keep expert on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{LLM decode compile} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: LLM and decode must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for LLM decode compile: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize LLM with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Teams hit \textbf{kv hardware} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because kv was planned without cache residency on the SKU you ship \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: decode constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Trace residency: kv producers must feed cache consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Production teams misread \textbf{moe scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Trace the Chapter~2 chain: moe sets the residency envelope; expert determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{liu2024deepseekv3,patel2025llminference}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\paragraph{Review gate.} Attach roofline or buffer accounting for kv on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Operational checklist---verify moe, expert, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: expert constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting moe scheduling, attach roofline or NPU buffer accounting showing moe residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
 
-\textbf{kv hardware} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+The production surprise at \textbf{hetero moe} is not peak FLOPs; it is illegal tier placement: hetero spilling to HBM/DDR while load still pays launch or DMA tax every token \citep{liu2024deepseekv3,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode kv/cache legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,dao2023flashdecoding}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+Hardware truth: GPUs bound hetero with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-When kv hardware disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,dao2023flashdecoding}.
+Compiler/kernel fix: predicate fusion on hetero/load legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting kv hardware, attach roofline or NPU buffer accounting showing kv residency fits on-chip for the target SKU \citep{dao2022flashattention,dao2023flashdecoding}.
+\paragraph{Multi-hardware delta.} Hopper may legalize hetero with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked load---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize kv with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,dao2023flashdecoding}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused hetero raises bytes/token; fused schedule must keep load on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{hetero moe} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: hetero and load must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{liu2024deepseekv3,patel2025llminference}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for hetero moe: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{liu2024deepseekv3,patel2025llminference}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hetero with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+Teams hit \textbf{LLM decode compile} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because LLM was planned without decode residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: load constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+Hardware truth: GPUs bound LLM with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{LLM decode compile} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on LLM/decode legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode LLM/decode legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize LLM with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked decode---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When LLM decode compile disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused LLM raises bytes/token; fused schedule must keep decode on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting LLM decode compile, attach roofline or NPU buffer accounting showing LLM residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize LLM with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{moe scheduling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: moe and expert must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{liu2024deepseekv3,patel2025llminference}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+The production surprise at \textbf{moe scheduling} is not peak FLOPs; it is illegal tier placement: moe spilling to HBM/DDR while expert still pays launch or DMA tax every token \citep{liu2024deepseekv3,patel2025llminference}.
 
-Compiler takeaway for moe scheduling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{liu2024deepseekv3,patel2025llminference}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: moe producers must feed expert consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize moe with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: expert constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for moe on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{kv hardware} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: kv sets the residency envelope; cache determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{dao2022flashattention,dao2023flashdecoding}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify kv, cache, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cache constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,dao2023flashdecoding}.
+\textbf{kv hardware} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix kv and cache together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting kv hardware, attach roofline or NPU buffer accounting showing kv residency fits on-chip for the target SKU \citep{dao2022flashattention,dao2023flashdecoding}.
+Hardware truth: GPUs bound kv with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{hetero moe} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on kv/cache legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode hetero/load legality before codegen, not as comments in hand-written kernels \citep{liu2024deepseekv3,patel2025llminference}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize kv with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cache---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When hetero moe disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{liu2024deepseekv3,patel2025llminference}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused kv raises bytes/token; fused schedule must keep cache on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting hetero moe, attach roofline or NPU buffer accounting showing hetero residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hetero with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
 
-Production teams misread \textbf{LLM decode compile} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Trace the Chapter~2 chain: LLM sets the residency envelope; decode determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Teams hit \textbf{hetero moe} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because hetero was planned without load residency on the SKU you ship \citep{liu2024deepseekv3,patel2025llminference}.
 
-Operational checklist---verify LLM, decode, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+Trace residency: hetero producers must feed load consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: decode constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting LLM decode compile, attach roofline or NPU buffer accounting showing LLM residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for hetero on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-\textbf{moe scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode moe/expert legality before codegen, not as comments in hand-written kernels \citep{liu2024deepseekv3,patel2025llminference}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-When moe scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{liu2024deepseekv3,patel2025llminference}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting moe scheduling, attach roofline or NPU buffer accounting showing moe residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+\textbf{LLM decode compile} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix LLM and decode together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize moe with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+Trace residency: LLM producers must feed decode consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{kv hardware} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware constraint: kv and cache must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{dao2022flashattention,dao2023flashdecoding}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+\paragraph{Review gate.} Attach roofline or buffer accounting for LLM on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Compiler takeaway for kv hardware: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{dao2022flashattention,dao2023flashdecoding}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize kv with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: cache constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{dao2022flashattention,dao2023flashdecoding}.
 
-Production teams misread \textbf{hetero moe} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Teams hit \textbf{moe scheduling} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because moe was planned without expert residency on the SKU you ship \citep{liu2024deepseekv3,patel2025llminference}.
 
-Trace the Chapter~2 chain: hetero sets the residency envelope; load determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{liu2024deepseekv3,patel2025llminference}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Hardware truth: GPUs bound moe with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Operational checklist---verify hetero, load, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{liu2024deepseekv3,patel2025llminference}.
+Compiler/kernel fix: predicate fusion on moe/expert legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: load constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Multi-hardware delta.} Hopper may legalize moe with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked expert---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting hetero moe, attach roofline or NPU buffer accounting showing hetero residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused moe raises bytes/token; fused schedule must keep expert on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{LLM decode compile} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: LLM and decode must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for LLM decode compile: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize LLM with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+The production surprise at \textbf{kv hardware} is not peak FLOPs; it is illegal tier placement: kv spilling to HBM/DDR while cache still pays launch or DMA tax every token \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: decode constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Trace residency: kv producers must feed cache consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Production teams misread \textbf{moe scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Trace the Chapter~2 chain: moe sets the residency envelope; expert determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{liu2024deepseekv3,patel2025llminference}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\paragraph{Review gate.} Attach roofline or buffer accounting for kv on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Operational checklist---verify moe, expert, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{liu2024deepseekv3,patel2025llminference}.
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: expert constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting moe scheduling, attach roofline or NPU buffer accounting showing moe residency fits on-chip for the target SKU \citep{liu2024deepseekv3,patel2025llminference}.
 
-\textbf{kv hardware} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\textbf{hetero moe} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix hetero and load together or bytes/token flatlines while kernel microbenchs celebrate \citep{liu2024deepseekv3,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode kv/cache legality before codegen, not as comments in hand-written kernels \citep{dao2022flashattention,dao2023flashdecoding}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+Hardware truth: GPUs bound hetero with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-When kv hardware disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{dao2022flashattention,dao2023flashdecoding}.
+Compiler/kernel fix: predicate fusion on hetero/load legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting kv hardware, attach roofline or NPU buffer accounting showing kv residency fits on-chip for the target SKU \citep{dao2022flashattention,dao2023flashdecoding}.
+\paragraph{Multi-hardware delta.} Hopper may legalize hetero with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked load---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize kv with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{dao2022flashattention,dao2023flashdecoding}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused hetero raises bytes/token; fused schedule must keep load on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual LLM and MoE Specialized Compilation failure at \textbf{hetero moe} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: hetero and load must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{liu2024deepseekv3,patel2025llminference}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for hetero moe: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{liu2024deepseekv3,patel2025llminference}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize hetero with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{liu2024deepseekv3,patel2025llminference}.
+The production surprise at \textbf{LLM decode compile} is not peak FLOPs; it is illegal tier placement: LLM spilling to HBM/DDR while decode still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: load constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{liu2024deepseekv3,patel2025llminference}.
+Hardware truth: GPUs bound LLM with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on LLM/decode legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize LLM with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked decode---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused LLM raises bytes/token; fused schedule must keep decode on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{moe scheduling} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix moe and expert together or bytes/token flatlines while kernel microbenchs celebrate \citep{liu2024deepseekv3,patel2025llminference}.
+
+Trace residency: moe producers must feed expert consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for moe on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{kv hardware} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because kv was planned without cache residency on the SKU you ship \citep{dao2022flashattention,dao2023flashdecoding}.
+
+Hardware truth: GPUs bound kv with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on kv/cache legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize kv with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cache---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused kv raises bytes/token; fused schedule must keep cache on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{hetero moe} is not peak FLOPs; it is illegal tier placement: hetero spilling to HBM/DDR while load still pays launch or DMA tax every token \citep{liu2024deepseekv3,patel2025llminference}.
+
+Trace residency: hetero producers must feed load consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for hetero on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{LLM decode compile} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because LLM was planned without decode residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Trace residency: LLM producers must feed decode consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for LLM on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{moe scheduling} is not peak FLOPs; it is illegal tier placement: moe spilling to HBM/DDR while expert still pays launch or DMA tax every token \citep{liu2024deepseekv3,patel2025llminference}.
+
+Hardware truth: GPUs bound moe with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on moe/expert legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize moe with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked expert---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused moe raises bytes/token; fused schedule must keep expert on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{kv hardware} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix kv and cache together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,dao2023flashdecoding}.
+
+Trace residency: kv producers must feed cache consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for kv on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{hetero moe} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because hetero was planned without load residency on the SKU you ship \citep{liu2024deepseekv3,patel2025llminference}.
+
+Hardware truth: GPUs bound hetero with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on hetero/load legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize hetero with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked load---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused hetero raises bytes/token; fused schedule must keep load on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{LLM decode compile} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix LLM and decode together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound LLM with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on LLM/decode legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize LLM with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked decode---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused LLM raises bytes/token; fused schedule must keep decode on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds LLM, decode to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{moe scheduling} when LLM and MoE Specialized Compilation looks correct in isolation yet decode telemetry disagrees---usually because moe was planned without expert residency on the SKU you ship \citep{liu2024deepseekv3,patel2025llminference}.
+
+Trace residency: moe producers must feed expert consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for moe on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds moe, expert to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{kv hardware} is not peak FLOPs; it is illegal tier placement: kv spilling to HBM/DDR while cache still pays launch or DMA tax every token \citep{dao2022flashattention,dao2023flashdecoding}.
+
+Hardware truth: GPUs bound kv with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on kv/cache legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize kv with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cache---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused kv raises bytes/token; fused schedule must keep cache on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds cache to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{hetero moe} is where LLM and MoE Specialized Compilation meets Chapter~1 counters: fix hetero and load together or bytes/token flatlines while kernel microbenchs celebrate \citep{liu2024deepseekv3,patel2025llminference}.
+
+Trace residency: hetero producers must feed load consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for hetero on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds hetero, load to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\section{Key Takeaways}
+\label{sec:ch23_key_takeaways}
+
+\begin{itemize}
+\item \textbf{LLM Decode Compile.} Tie LLM decode compile to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Moe Scheduling.} Tie moe scheduling to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Kv Hardware.} Tie kv hardware to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Hetero Moe.} Tie hetero moe to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch23_conclusion}
+
+LLM and MoE Specialized Compilation is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume LLM and MoE Specialized Compilation baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
 \typeout{END_CHAPTER "ch23" \theabspage}

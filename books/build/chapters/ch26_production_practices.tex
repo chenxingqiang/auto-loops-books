@@ -98,209 +98,357 @@ Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or D
 
 \paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\section{Chapter Summary}
-\label{sec:ch26_summary}
+\textbf{env packaging} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix deploy and packag together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,memoryfloor2026}.
 
-Production Deployment and Engineering Best Practices succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch26_env_packaging}, Section~\ref{sec:ch26_multi_hw_ops}, Section~\ref{sec:ch26_pitfalls} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
+Hardware truth: GPUs bound deploy with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{env packaging} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on deploy/packag legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode deploy/packag legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,memoryfloor2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize deploy with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked packag---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When env packaging disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,memoryfloor2026}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused deploy raises bytes/token; fused schedule must keep packag on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting env packaging, attach roofline or NPU buffer accounting showing deploy residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize deploy with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{multi HW ops} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: operation and production must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,memoryfloor2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+Teams hit \textbf{multi HW ops} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because operation was planned without production residency on the SKU you ship \citep{patel2025llminference,memoryfloor2026}.
 
-Compiler takeaway for multi HW ops: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,memoryfloor2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: operation producers must feed production consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize operation with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: production constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for operation on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{pitfalls} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: pitfall sets the residency envelope; lesson determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify pitfall, lesson, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: lesson constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+The production surprise at \textbf{pitfalls} is not peak FLOPs; it is illegal tier placement: pitfall spilling to HBM/DDR while lesson still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting pitfalls, attach roofline or NPU buffer accounting showing pitfall residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+Hardware truth: GPUs bound pitfall with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on pitfall/lesson legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode schedul/fleet legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize pitfall with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lesson---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused pitfall raises bytes/token; fused schedule must keep lesson on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting scheduling, attach roofline or NPU buffer accounting showing schedul residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize schedul with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Production teams misread \textbf{env packaging} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Trace the Chapter~2 chain: deploy sets the residency envelope; packag determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,memoryfloor2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\textbf{scheduling} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix schedul and fleet together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-Operational checklist---verify deploy, packag, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,memoryfloor2026}.
+Trace residency: schedul producers must feed fleet consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: packag constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting env packaging, attach roofline or NPU buffer accounting showing deploy residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for schedul on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-\textbf{multi HW ops} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode operation/production legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,memoryfloor2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-When multi HW ops disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting multi HW ops, attach roofline or NPU buffer accounting showing operation residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+The production surprise at \textbf{env packaging} is not peak FLOPs; it is illegal tier placement: deploy spilling to HBM/DDR while packag still pays launch or DMA tax every token \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize operation with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
+Trace residency: deploy producers must feed packag consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{pitfalls} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware constraint: pitfall and lesson must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+\paragraph{Review gate.} Attach roofline or buffer accounting for deploy on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Compiler takeaway for pitfalls: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize pitfall with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: lesson constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Production teams misread \textbf{scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\textbf{multi HW ops} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix operation and production together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,memoryfloor2026}.
 
-Trace the Chapter~2 chain: schedul sets the residency envelope; fleet determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Hardware truth: GPUs bound operation with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Operational checklist---verify schedul, fleet, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+Compiler/kernel fix: predicate fusion on operation/production legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fleet constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize operation with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked production---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting scheduling, attach roofline or NPU buffer accounting showing schedul residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused operation raises bytes/token; fused schedule must keep production on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{env packaging} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: deploy and packag must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,memoryfloor2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for env packaging: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,memoryfloor2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize deploy with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
+Teams hit \textbf{pitfalls} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because pitfall was planned without lesson residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: packag constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
+Trace residency: pitfall producers must feed lesson consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-Production teams misread \textbf{multi HW ops} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Trace the Chapter~2 chain: operation sets the residency envelope; production determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,memoryfloor2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+\paragraph{Review gate.} Attach roofline or buffer accounting for pitfall on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Operational checklist---verify operation, production, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: production constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting multi HW ops, attach roofline or NPU buffer accounting showing operation residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
 
-\textbf{pitfalls} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+The production surprise at \textbf{scheduling} is not peak FLOPs; it is illegal tier placement: schedul spilling to HBM/DDR while fleet still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
 
-Binding software to silicon: compiler passes must encode pitfall/lesson legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+Hardware truth: GPUs bound schedul with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-When pitfalls disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+Compiler/kernel fix: predicate fusion on schedul/fleet legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting pitfalls, attach roofline or NPU buffer accounting showing pitfall residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize schedul with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked fleet---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize pitfall with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused schedul raises bytes/token; fused schedule must keep fleet on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{scheduling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Hardware constraint: schedul and fleet must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
 
-Compiler takeaway for scheduling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize schedul with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+Teams hit \textbf{env packaging} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because deploy was planned without packag residency on the SKU you ship \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fleet constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Hardware truth: GPUs bound deploy with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{env packaging} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on deploy/packag legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode deploy/packag legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,memoryfloor2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize deploy with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked packag---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When env packaging disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,memoryfloor2026}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused deploy raises bytes/token; fused schedule must keep packag on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting env packaging, attach roofline or NPU buffer accounting showing deploy residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize deploy with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{multi HW ops} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
 
-Hardware constraint: operation and production must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,memoryfloor2026}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+The production surprise at \textbf{multi HW ops} is not peak FLOPs; it is illegal tier placement: operation spilling to HBM/DDR while production still pays launch or DMA tax every token \citep{patel2025llminference,memoryfloor2026}.
 
-Compiler takeaway for multi HW ops: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,memoryfloor2026}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+Trace residency: operation producers must feed production consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize operation with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: production constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for operation on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Production teams misread \textbf{pitfalls} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Trace the Chapter~2 chain: pitfall sets the residency envelope; lesson determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
 
-Operational checklist---verify pitfall, lesson, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: lesson constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\textbf{pitfalls} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix pitfall and lesson together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting pitfalls, attach roofline or NPU buffer accounting showing pitfall residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+Hardware truth: GPUs bound pitfall with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-\textbf{scheduling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+Compiler/kernel fix: predicate fusion on pitfall/lesson legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-Binding software to silicon: compiler passes must encode schedul/fleet legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\paragraph{Multi-hardware delta.} Hopper may legalize pitfall with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lesson---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-When scheduling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused pitfall raises bytes/token; fused schedule must keep lesson on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
 
-\paragraph{Review gate.} Before merging compiler changes affecting scheduling, attach roofline or NPU buffer accounting showing schedul residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize schedul with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-Production teams misread \textbf{env packaging} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
 
-Trace the Chapter~2 chain: deploy sets the residency envelope; packag determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,memoryfloor2026}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Teams hit \textbf{scheduling} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because schedul was planned without fleet residency on the SKU you ship \citep{patel2025llminference,dlbook}.
 
-Operational checklist---verify deploy, packag, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,memoryfloor2026}.
+Trace residency: schedul producers must feed fleet consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: packag constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,memoryfloor2026}.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting env packaging, attach roofline or NPU buffer accounting showing deploy residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Review gate.} Attach roofline or buffer accounting for schedul on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-\textbf{multi HW ops} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-Binding software to silicon: compiler passes must encode operation/production legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,memoryfloor2026}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
 
-When multi HW ops disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting multi HW ops, attach roofline or NPU buffer accounting showing operation residency fits on-chip for the target SKU \citep{patel2025llminference,memoryfloor2026}.
+\textbf{env packaging} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix deploy and packag together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize operation with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,memoryfloor2026}.
+Trace residency: deploy producers must feed packag consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
 
-The usual Production Deployment and Engineering Best Practices failure at \textbf{pitfalls} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
 
-Hardware constraint: pitfall and lesson must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+\paragraph{Review gate.} Attach roofline or buffer accounting for deploy on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
 
-Compiler takeaway for pitfalls: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} A Hopper decode cell may legalize pitfall with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: lesson constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
 
-Production teams misread \textbf{scheduling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+Teams hit \textbf{multi HW ops} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because operation was planned without production residency on the SKU you ship \citep{patel2025llminference,memoryfloor2026}.
 
-Trace the Chapter~2 chain: schedul sets the residency envelope; fleet determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+Hardware truth: GPUs bound operation with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
 
-Operational checklist---verify schedul, fleet, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
+Compiler/kernel fix: predicate fusion on operation/production legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
 
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: fleet constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+\paragraph{Multi-hardware delta.} Hopper may legalize operation with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked production---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
-\paragraph{Review gate.} Before merging compiler changes affecting scheduling, attach roofline or NPU buffer accounting showing schedul residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused operation raises bytes/token; fused schedule must keep production on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{pitfalls} is not peak FLOPs; it is illegal tier placement: pitfall spilling to HBM/DDR while lesson still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+
+Trace residency: pitfall producers must feed lesson consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for pitfall on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{scheduling} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix schedul and fleet together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound schedul with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on schedul/fleet legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize schedul with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked fleet---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused schedul raises bytes/token; fused schedule must keep fleet on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{env packaging} is not peak FLOPs; it is illegal tier placement: deploy spilling to HBM/DDR while packag still pays launch or DMA tax every token \citep{patel2025llminference,memoryfloor2026}.
+
+Hardware truth: GPUs bound deploy with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on deploy/packag legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize deploy with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked packag---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused deploy raises bytes/token; fused schedule must keep packag on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{multi HW ops} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix operation and production together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,memoryfloor2026}.
+
+Trace residency: operation producers must feed production consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for operation on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{pitfalls} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because pitfall was planned without lesson residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound pitfall with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on pitfall/lesson legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize pitfall with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lesson---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused pitfall raises bytes/token; fused schedule must keep lesson on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{scheduling} is not peak FLOPs; it is illegal tier placement: schedul spilling to HBM/DDR while fleet still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+
+Trace residency: schedul producers must feed fleet consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for schedul on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{env packaging} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because deploy was planned without packag residency on the SKU you ship \citep{patel2025llminference,memoryfloor2026}.
+
+Trace residency: deploy producers must feed packag consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for deploy on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds deploy, packag to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+The production surprise at \textbf{multi HW ops} is not peak FLOPs; it is illegal tier placement: operation spilling to HBM/DDR while production still pays launch or DMA tax every token \citep{patel2025llminference,memoryfloor2026}.
+
+Hardware truth: GPUs bound operation with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on operation/production legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize operation with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked production---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused operation raises bytes/token; fused schedule must keep production on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds operation, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\textbf{pitfalls} is where Production Deployment and Engineering Best Practices meets Chapter~1 counters: fix pitfall and lesson together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+
+Trace residency: pitfall producers must feed lesson consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+
+Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for pitfall on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+
+\paragraph{Scope.} This section binds pitfall, lesson to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+Teams hit \textbf{scheduling} when Production Deployment and Engineering Best Practices looks correct in isolation yet decode telemetry disagrees---usually because schedul was planned without fleet residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+
+Hardware truth: GPUs bound schedul with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+
+Compiler/kernel fix: predicate fusion on schedul/fleet legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper may legalize schedul with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked fleet---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+
+\begin{example}
+Decode cell (BS${=}1$, ctx${=}2048$): unfused schedul raises bytes/token; fused schedule must keep fleet on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+\end{example}
+
+\paragraph{Scope.} This section binds schedul, fleet to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+
+
+
+\section{Key Takeaways}
+\label{sec:ch26_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Env Packaging.} Tie env packaging to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Multi HW Ops.} Tie multi HW ops to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Pitfalls.} Tie pitfalls to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Scheduling.} Tie scheduling to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch26_conclusion}
+
+Production Deployment and Engineering Best Practices is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Production Deployment and Engineering Best Practices baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
 \typeout{END_CHAPTER "ch26" \theabspage}

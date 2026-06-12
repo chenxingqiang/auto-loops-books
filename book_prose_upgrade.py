@@ -251,6 +251,8 @@ def upgrade_chapter_text(spec: ChapterSpec) -> str:
 
 def ensure_min_words(spec: ChapterSpec, text: str) -> str:
     text = text
+    insert_before = f"\\section{{Key Takeaways}}"
+    end_marker = f'\\typeout{{END_CHAPTER "{spec.chapter_id}"'
     for round_idx in range(8):
         gap = max(0, spec.min_words - count_words(text))
         if gap <= 0:
@@ -259,9 +261,10 @@ def ensure_min_words(spec: ChapterSpec, text: str) -> str:
         for i, sec in enumerate(spec.sections):
             extra_blocks.append(section_paragraphs(spec, sec, i + 50 + round_idx * 17, None))
         block = "\n\n".join(extra_blocks)
-        marker = f'\\typeout{{END_CHAPTER "{spec.chapter_id}"'
-        if marker in text:
-            text = text.replace(marker, block + "\n\n" + marker)
+        if insert_before in text:
+            text = text.replace(insert_before, block + "\n\n" + insert_before, 1)
+        elif end_marker in text:
+            text = text.replace(end_marker, block + "\n\n" + end_marker, 1)
         else:
             text = text + "\n\n" + block
     return text

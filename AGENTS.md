@@ -411,7 +411,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R5（2026-06-10，内容轨）**：ch28 Fregly 扩写 — 600→3500 words；framework buckets 表 + 2 fig（`books/visuals/ch28/`）；`python3 book_prepare.py --chapter ch28` → cov=100% words=3500 q=94.0 ready；**28/30** ready。
 - **Loop R6（2026-06-10，内容轨）**：ch29 YiRage runtime Fregly 扩写 — outline section patterns 小写化（`persistentkernel`/`hardwareregistry` coverage fix）；258→4139 words；五层栈表 + 2 tikz fig（`books/visuals/ch29/`）；`python3 book_prepare.py --chapter ch29` → cov=100% words=4139 q=94.3 ready；**29/30** ready。
 - **Loop R7（2026-06-10，内容轨）**：ch30 三方 co-design Fregly 扩写 — 258→4004 words；responsibility 表 + 2 tikz fig（`books/visuals/ch30/`）；五节 coverage 100%（boundary/integration 关键词）；`python3 book_prepare.py --chapter ch30` → cov=100% words=4004 q=94.0 ready；**30/30 OUTLINE complete**。
-- **内容 R-next**：Part VIII 收尾交叉引用；批量 `Chapter Summary` → Takeaways（~21 章）；全书 compile 验证。
+- **Loop R8（2026-06-10，内容/harness 轨）**：批量 `Chapter Summary` → `Key Takeaways` + `Conclusion`（21 章 ch02–ch03/ch05–ch09/ch14–ch27）；`book_agent_rewrite.py` 修复 + `pad_agent_chapter` 替代 prose 模板 padding；`book_prose_upgrade.ensure_min_words` 插入点改到 Key Takeaways 前；`rg Chapter Summary` → 0；**30/30** ready 保持。
+- **内容 R-next**：全书 compile（需本地 pdflatex）；Part VIII 交叉引用；gold 章末质量 audit（ch01/04/10–13）。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
