@@ -986,7 +986,7 @@
         [
           "persistent_kernel_decode",
           [
-            "PersistentKernel",
+            "persistentkernel",
             "decode",
             "mode"
           ]
@@ -1002,7 +1002,7 @@
         [
           "hw_registry_runtime",
           [
-            "HardwareRegistry",
+            "hardwareregistry",
             "detect",
             "chip"
           ]
