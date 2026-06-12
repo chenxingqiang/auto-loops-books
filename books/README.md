@@ -86,11 +86,11 @@ Re-run `uv run book-loop insert-visuals --chapter ch01` to sync after plan chang
 | ch02 | `chapters/ch02_dataflow_mindset.tex` | In progress |
 | ch03 | `chapters/ch03_hardware_constraints.tex` | In progress |
 
-List rubric: `uv run book_prepare.py --list`. Full 目录: [`AI Compiler Performance Engineering.md`](../AI%20Compiler%20Performance%20Engineering.md).
+List rubric: `uv run book_prepare.py --list`. Full 目录: [`book_content.md`](../book_content.md).
 
 ## Fact verification
 
-Numeric claims and worked examples require **web verification** (≥2 searches, cross-check) before publication. Log URLs in `research/<chapter_id>/verified_facts.jsonl`. See [`FACT_VERIFICATION.md`](FACT_VERIFICATION.md).
+Numeric claims and worked examples require **web verification** (≥2 searches, cross-check) before publication. Log URLs in `research/<chapter_id>/verified_facts.jsonl`. Protocol: [`WRITING_STYLE.md`](WRITING_STYLE.md) §八（事实核验门禁）.
 
 ## Writing rules
 

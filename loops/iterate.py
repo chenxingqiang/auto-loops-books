@@ -44,9 +44,8 @@ from book_visuals import cmd_plan, cmd_render, generated_dir, load_plan  # noqa:
 RESULTS_TSV = ROOT / "book_results.tsv"
 STATE_JSON = ROOT / "loops" / "loop_state.json"
 RESEARCH_ROOT = ROOT / "books" / "research"
-OUTLINE_SPEC = ROOT / "AI Compiler Performance Engineering.md"
+OUTLINE_SPEC = ROOT / "book_content.md"
 WRITING_STYLE = ROOT / "books" / "WRITING_STYLE.md"
-FACT_VERIFICATION = ROOT / "books" / "FACT_VERIFICATION.md"
 STYLE_REFERENCE_CHAPTER = "ch01"
 
 # Numeric/unit tokens that trigger fact-verification expectations when uncited.
@@ -407,7 +406,7 @@ def fact_verification_tasks(spec: ChapterSpec, tex: str) -> list[str]:
 
     tasks.append(
         f"Facts: every numeric claim / worked example must pass web verification "
-        f"(≥2 independent sources); log to {rel_log} with URLs — see {FACT_VERIFICATION.name}"
+        f"(≥2 independent sources); log to {rel_log} with URLs — see WRITING_STYLE.md §八"
     )
 
     if not log_path.exists():

@@ -27,7 +27,7 @@
     "Voice: WRITING_STYLE.md — problem-first, HW↔SW chain, GPU/CPU/NPU deltas; no template paragraphs.",
     "Rhythm reference: books/build/chapters/ch01_llm_decode_bottlenecks.tex",
     "Voice: follow WRITING_STYLE.md (engineer-narrative; problem-first; HW/SW bound; multi-hardware). Gold standard: ch01.",
-    "Facts: every numeric claim / worked example must pass web verification (≥2 independent sources); log to books/research/ch13/verified_facts.jsonl with URLs — see FACT_VERIFICATION.md",
+    "Facts: every numeric claim / worked example must pass web verification (≥2 independent sources); log to books/research/ch13/verified_facts.jsonl with URLs — see WRITING_STYLE.md §八",
     "Fact content mismatch (source): ch13 cross-hardware decode metrics use bytes/token methodology… — missing [ch13, cross-hardware, metrics, bytes/token, methodology]",
     "References OK for ch13: 15 cites vs 50 content keywords",
     "Citation loop PASS ch13: 35 papers, 181 bindings"
