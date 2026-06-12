@@ -278,21 +278,45 @@ def has_pad_tail_block(spec: ChapterSpec, text: str) -> bool:
     return pad_restart_index(before, spec) is not None
 
 
+def _second_match_index(text: str, signature: str) -> int | None:
+    """Return start index of second case-insensitive occurrence of signature."""
+    pat = re.compile(re.escape(signature), re.IGNORECASE)
+    matches = list(pat.finditer(text))
+    if len(matches) >= 2:
+        return matches[1].start()
+    return None
+
+
 def pad_restart_index(before: str, spec: ChapterSpec) -> int | None:
-    first_title = section_title(spec.sections[0].label)
-    signatures = (
-        f"Teams hit \\textbf{{{first_title}}}",
-        f"The production surprise at \\textbf{{{first_title}}}",
-        f"\\textbf{{{first_title}}} is where ",
-    )
+    """Detect start of pad_agent tail before Key Takeaways."""
+    scope_marker = "\\paragraph{Scope.}"
+    scope_positions: list[int] = []
+    start = 0
+    while True:
+        idx = before.find(scope_marker, start)
+        if idx < 0:
+            break
+        scope_positions.append(idx)
+        start = idx + 1
+
+    n = len(spec.sections)
+    if n and len(scope_positions) > n:
+        last_legit = scope_positions[n - 1]
+        para_end = before.find("\n\n", last_legit)
+        if para_end >= 0:
+            return para_end + 2
+
     cut = None
-    for sig in signatures:
-        pos = before.find(sig)
-        if pos < 0:
-            continue
-        pos2 = before.find(sig, pos + len(sig))
-        if pos2 > 0:
-            cut = pos2 if cut is None else min(cut, pos2)
+    for sec in spec.sections:
+        title = section_title(sec.label)
+        for sig in (
+            f"Teams hit \\textbf{{{title}}}",
+            f"The production surprise at \\textbf{{{title}}}",
+            f"\\textbf{{{title}}} is where ",
+        ):
+            pos2 = _second_match_index(before, sig)
+            if pos2 is not None and pos2 > 0:
+                cut = pos2 if cut is None else min(cut, pos2)
     return cut
 
 

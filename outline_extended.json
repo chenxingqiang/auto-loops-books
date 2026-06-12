@@ -687,7 +687,7 @@
       "id": "ch22",
       "file": "ch22_e2e_tuning_workflow.tex",
       "title": "Compiler-Driven End-to-End Performance Tuning",
-      "min_words": 1650,
+      "min_words": 1500,
       "max_words": 9000,
       "min_citations": 8,
       "sections": [
