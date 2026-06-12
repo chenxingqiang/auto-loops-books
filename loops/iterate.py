@@ -375,6 +375,20 @@ def style_violations(tex: str) -> list[str]:
     return hits
 
 
+def chapter_ending_violations(tex: str) -> list[str]:
+    """Fregly gold ending: Key Takeaways + Conclusion; no legacy Chapter Summary."""
+    if len(tex.strip()) < 500:
+        return []
+    hits: list[str] = []
+    if re.search(r"\\section\{Chapter Summary\}", tex):
+        hits.append("replace \\section{Chapter Summary} with Key Takeaways + Conclusion")
+    if "\\section{Key Takeaways}" not in tex:
+        hits.append("add \\section{Key Takeaways} before Conclusion (Fregly gold ending)")
+    if "\\section{Conclusion}" not in tex:
+        hits.append("add \\section{Conclusion} after Key Takeaways")
+    return hits
+
+
 def verified_facts_path(spec: ChapterSpec) -> Path:
     return RESEARCH_ROOT / spec.chapter_id / "verified_facts.jsonl"
 
@@ -443,6 +457,9 @@ def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     tex = read_chapter_text(spec)
     for issue in style_violations(tex):
         tasks.append(f"Style fix: {issue} (see {WRITING_STYLE.name} §III)")
+
+    for issue in chapter_ending_violations(tex):
+        tasks.append(f"Chapter ending: {issue} (see {WRITING_STYLE.name} §VII)")
 
     try:
         from book_proper_nouns import proper_noun_tasks
