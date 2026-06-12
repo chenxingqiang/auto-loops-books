@@ -399,7 +399,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 > Agent 每轮 append 3～5 行：日期、轨（内容/harness）、主攻、验证命令、结果、下一轮建议。**勿删历史。**
 
-- **基线（2026-06）**：27/27 `chapter_ready`；全书 ~495 页 `books/main.pdf`。
+- **基线（2026-06）**：30/30 `chapter_ready`；全书 `books/main.pdf`（Jun 11；本地无 pdflatex 时沿用上次 build）。
 - **Fregly 映射**：`WRITING_STYLE.md` §七；样章 [`reference-chapter-1.pdf`](reference-chapter-1.pdf)。
 - **AGENT_SKIP（深度章）**：ch01–ch05、ch10、ch11、**ch12**、**ch13**、ch14 — batch 禁止覆盖。
 - **Gold endings**：ch01 / ch04 / ch10 / ch11 / **ch12** / **ch13** — Key Takeaways + Conclusion。
@@ -412,7 +412,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R6（2026-06-10，内容轨）**：ch29 YiRage runtime Fregly 扩写 — outline section patterns 小写化（`persistentkernel`/`hardwareregistry` coverage fix）；258→4139 words；五层栈表 + 2 tikz fig（`books/visuals/ch29/`）；`python3 book_prepare.py --chapter ch29` → cov=100% words=4139 q=94.3 ready；**29/30** ready。
 - **Loop R7（2026-06-10，内容轨）**：ch30 三方 co-design Fregly 扩写 — 258→4004 words；responsibility 表 + 2 tikz fig（`books/visuals/ch30/`）；五节 coverage 100%（boundary/integration 关键词）；`python3 book_prepare.py --chapter ch30` → cov=100% words=4004 q=94.0 ready；**30/30 OUTLINE complete**。
 - **Loop R8（2026-06-10，内容/harness 轨）**：批量 `Chapter Summary` → `Key Takeaways` + `Conclusion`（21 章 ch02–ch03/ch05–ch09/ch14–ch27）；`book_agent_rewrite.py` 修复 + `pad_agent_chapter` 替代 prose 模板 padding；`book_prose_upgrade.ensure_min_words` 插入点改到 Key Takeaways 前；`rg Chapter Summary` → 0；**30/30** ready 保持。
-- **内容 R-next**：全书 compile（需本地 pdflatex）；Part VIII 交叉引用；gold 章末质量 audit（ch01/04/10–13）。
+- **Loop R9（2026-06-09，内容/harness 轨）**：Part VII→VIII 桥接 — ch26/ch27 Conclusion 指向 Ch28–30；ch28 开篇回指 Ch27；`book_spec_audit.py` 27→30 章、7→8 Part、`CH_DIR` 路径对齐 `build/chapters`、事实门禁改查 `WRITING_STYLE.md` §八；gold 章 audit：ch01/04/10/12/13 Key Takeaways 无 pad 模板；ch11 保留 intentional `\paragraph{Review gate.}`；`python3 book_spec_audit.py` → PASS 30/30（P0=0）；compile 仍 blocked（无 pdflatex）。
+- **内容 R-next**：本地/CI 全书 compile；ch28–30 反向引用 ch26/27 生产 runbook（可选）；pad 章正文去重（ch14–27）。
 - **Harness R-next**：文档路径统一到 `build/chapters`；`iterate.py` 中 `FACT_VERIFICATION.md` 引用对齐 WRITING_STYLE；enrich agent_tasks（Fregly 章末 lint）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。

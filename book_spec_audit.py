@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Global compliance audit against AI Compiler Performance Engineering.md."""
+"""Global compliance audit against book_content.md."""
 
 from __future__ import annotations
 
@@ -12,9 +12,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent
-SPEC_MD = ROOT / "AI Compiler Performance Engineering.md"
+SPEC_MD = ROOT / "book_content.md"
 BOOKS = ROOT / "books"
-CHAPTERS = BOOKS / "chapters"
 RESEARCH = BOOKS / "research"
 
 sys.path.insert(0, str(ROOT))
@@ -38,12 +37,12 @@ COMPILER_SECTION_SUFFIXES = (
     "_tuning",
     "_case_study",
 )
-EXPECTED_CHAPTER_COUNT = 27
-EXPECTED_PART_COUNT = 7
+EXPECTED_CHAPTER_COUNT = 30
+EXPECTED_PART_COUNT = 8
 APPENDIX_LABELS = tuple(f"附录{chr}" for chr in "ABCDEFGH")
 
 SPEC_CHAPTER_RE = re.compile(r"#### 第(\d+)章\s+(.+)")
-SPEC_PART_RE = re.compile(r"### 第([一二三四五六七])篇\s+(.+?)[（(]")
+SPEC_PART_RE = re.compile(r"### 第([一二三四五六七八])篇\s+(.+?)[（(]")
 
 
 @dataclass
@@ -114,13 +113,13 @@ def audit_structure(report: AuditReport) -> None:
         spec_entry = next((s for s in OUTLINE if s.chapter_id == cid), None)
         if not spec_entry:
             continue
-        path = CHAPTERS / spec_entry.filename
+        path = CH_DIR / spec_entry.filename
         if not path.exists():
             report.add("P1", "files", f"{cid} .tex missing", spec_entry.filename)
 
     report.stats["spec_chapters_in_md"] = len(spec_chs)
     report.stats["outline_chapters"] = len(OUTLINE)
-    report.stats["tex_files"] = len(list(CHAPTERS.glob("ch*.tex")))
+    report.stats["tex_files"] = len(list(CH_DIR.glob("ch*.tex")))
 
 
 def audit_compiler_template(report: AuditReport) -> None:
@@ -150,18 +149,22 @@ def audit_compiler_template(report: AuditReport) -> None:
 def audit_governance(report: AuditReport) -> None:
     for name, path in [
         ("WRITING_STYLE", BOOKS / "WRITING_STYLE.md"),
-        ("FACT_VERIFICATION", BOOKS / "FACT_VERIFICATION.md"),
         ("visuals_style.py", BOOKS / "visuals_style.py"),
         ("program_books", ROOT / "program_books.md"),
     ]:
         if not path.exists():
             report.add("P0", "governance", f"Required file missing: {name}", str(path))
 
+    style_path = BOOKS / "WRITING_STYLE.md"
+    style_text = style_path.read_text(encoding="utf-8") if style_path.exists() else ""
+    if "事实核验" not in style_text and "verified_facts.jsonl" not in style_text:
+        report.add("P0", "governance", "WRITING_STYLE.md missing fact-verification gate (§八)")
+
     spec_text = SPEC_MD.read_text(encoding="utf-8") if SPEC_MD.exists() else ""
     if "WRITING_STYLE.md" not in spec_text:
         report.add("P2", "governance", "Spec does not link WRITING_STYLE.md")
-    if "FACT_VERIFICATION.md" not in spec_text:
-        report.add("P2", "governance", "Spec does not link FACT_VERIFICATION.md")
+    if "verified_facts.jsonl" not in spec_text and "事实核验" not in spec_text:
+        report.add("P2", "governance", "Spec does not document verified_facts.jsonl fact gate")
 
     pb = (ROOT / "program_books.md").read_text(encoding="utf-8") if (ROOT / "program_books.md").exists() else ""
     if "outline_extended.json" not in pb and "ch04" in pb:
@@ -174,7 +177,7 @@ def audit_appendices(report: AuditReport) -> None:
         if label not in spec:
             continue
     # Check if any appendix tex exists
-    appendix_files = list(CHAPTERS.glob("*appendix*")) + list(BOOKS.glob("*appendix*"))
+    appendix_files = list(CH_DIR.glob("*appendix*")) + list(BOOKS.glob("*appendix*"))
     if not appendix_files:
         report.add("P2", "appendices", "Spec defines 附录A–H but no appendix .tex files in repo")
     report.stats["appendix_files"] = len(appendix_files)
@@ -183,9 +186,9 @@ def audit_appendices(report: AuditReport) -> None:
 def audit_book_themes(report: AuditReport) -> None:
     """Spec §七: dual case study, three hardware classes, YiRage thread."""
     all_tex = "\n".join(
-        (CHAPTERS / s.filename).read_text(encoding="utf-8")
+        (CH_DIR / s.filename).read_text(encoding="utf-8")
         for s in OUTLINE
-        if (CHAPTERS / s.filename).exists()
+        if (CH_DIR / s.filename).exists()
     ).lower()
     ready_tex = "\n".join(read_chapter_text(s).lower() for s in OUTLINE if chapter_ready(s))
 
@@ -265,7 +268,7 @@ def audit_chapter_gates(report: AuditReport) -> None:
     report.stats["gate_details"] = gate_details
 
     if len(ready) < 3:
-        report.add("P1", "progress", f"Only {len(ready)}/27 chapters pass gates; spec expects full manuscript")
+        report.add("P1", "progress", f"Only {len(ready)}/{EXPECTED_CHAPTER_COUNT} chapters pass gates; spec expects full manuscript")
 
     stub_only = [
         r["id"] for r in gate_details
@@ -277,7 +280,7 @@ def audit_chapter_gates(report: AuditReport) -> None:
     # ch03 in main.tex order
     main = (BOOKS / "main.tex").read_text(encoding="utf-8") if (BOOKS / "main.tex").exists() else ""
     inputs = re.findall(r"\\input\{build/chapters/([^}]+)\}", main)
-    outline_files = [s.filename for s in OUTLINE if (CHAPTERS / s.filename).exists()]
+    outline_files = [s.filename for s in OUTLINE if (CH_DIR / s.filename).exists()]
     if inputs != outline_files:
         report.add("P1", "build", "main.tex chapter order differs from OUTLINE file existence order")
 
@@ -289,7 +292,7 @@ def audit_main_tex(report: AuditReport) -> None:
         return
     text = main.read_text(encoding="utf-8")
     for spec in OUTLINE:
-        if (CHAPTERS / spec.filename).exists():
+        if (CH_DIR / spec.filename).exists():
             needle = f"\\input{{build/chapters/{spec.filename}}}"
             if needle not in text:
                 report.add("P2", "build", f"main.tex missing \\input for {spec.chapter_id}")
@@ -322,7 +325,7 @@ def print_report(report: AuditReport) -> None:
 
     stats = report.stats
     print(f"\n--- Progress ---")
-    print(f"Chapters ready:  {stats.get('ready_count', 0)}/27")
+    print(f"Chapters ready:  {stats.get('ready_count', 0)}/{EXPECTED_CHAPTER_COUNT}")
     print(f"Compile OK:      {stats.get('compile_ok', False)}")
     print(f"OUTLINE entries: {stats.get('outline_chapters', 0)}")
     print(f"Tex files:       {stats.get('tex_files', 0)}")
@@ -361,8 +364,8 @@ def print_report(report: AuditReport) -> None:
     print("\n--- Verdict ---")
     if by_sev["P0"]:
         print("FAIL — resolve P0 blockers before claiming spec compliance.")
-    elif len(stats.get("ready_chapters", [])) < 27:
-        print(f"PARTIAL — structure aligned; manuscript {stats.get('ready_count', 0)}/27 complete.")
+    elif len(stats.get("ready_chapters", [])) < EXPECTED_CHAPTER_COUNT:
+        print(f"PARTIAL — structure aligned; manuscript {stats.get('ready_count', 0)}/{EXPECTED_CHAPTER_COUNT} complete.")
     else:
         print("PASS — all chapters meet gates; review P2/P3 polish items.")
 
