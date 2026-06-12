@@ -226,7 +226,7 @@ def compile_book() -> bool:
             cwd=BOOKS,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            timeout=180,
+            timeout=900,
             check=False,
         )
         return proc.returncode == 0

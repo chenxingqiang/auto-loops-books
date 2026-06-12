@@ -46,7 +46,7 @@ uv run book-loop step --pick weakest
 
 **Phases executed:**
 
-1. **Stub** — create `books/chapters/<file>.tex` + `main.tex` `\input` if missing
+1. **Stub** — create `books/build/chapters/<file>.tex` + `main.tex` `\input{build/chapters/...}` if missing
 2. **Research** — `research_tools` (or keywords/queries only without `SERPAPI_KEY`)
 3. **Visuals** — `book_visuals` plan → render → auto-insert at `\label{sec:...}`
 4. **Compile** — `books/make.sh`

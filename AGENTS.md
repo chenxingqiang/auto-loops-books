@@ -399,7 +399,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 > Agent 每轮 append 3～5 行：日期、轨（内容/harness）、主攻、验证命令、结果、下一轮建议。**勿删历史。**
 
-- **基线（2026-06）**：30/30 `chapter_ready`；全书 `books/main.pdf`（Jun 11；本地无 pdflatex 时沿用上次 build）。
+- **基线（2026-06）**：30/30 `chapter_ready`；CI **Build book PDF** 绿（[run #1](https://github.com/chenxingqiang/auto-loops-books/actions/runs/27386473852)）；本地无 pdflatex 时以 CI artifact 为准。
 - **Fregly 映射**：`WRITING_STYLE.md` §七；样章 [`reference-chapter-1.pdf`](reference-chapter-1.pdf)。
 - **AGENT_SKIP（深度章）**：ch01–ch05、ch10、ch11、**ch12**、**ch13**、ch14 — batch 禁止覆盖。
 - **Gold endings**：ch01 / ch04 / ch10 / ch11 / **ch12** / **ch13** — Key Takeaways + Conclusion。
@@ -414,9 +414,10 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R8（2026-06-10，内容/harness 轨）**：批量 `Chapter Summary` → `Key Takeaways` + `Conclusion`（21 章 ch02–ch03/ch05–ch09/ch14–ch27）；`book_agent_rewrite.py` 修复 + `pad_agent_chapter` 替代 prose 模板 padding；`book_prose_upgrade.ensure_min_words` 插入点改到 Key Takeaways 前；`rg Chapter Summary` → 0；**30/30** ready 保持。
 - **Loop R9（2026-06-09，内容/harness 轨）**：Part VII→VIII 桥接 — ch26/ch27 Conclusion 指向 Ch28–30；ch28 开篇回指 Ch27；`book_spec_audit.py` 27→30 章、7→8 Part、`CH_DIR` 路径对齐 `build/chapters`、事实门禁改查 `WRITING_STYLE.md` §八；gold 章 audit：ch01/04/10/12/13 Key Takeaways 无 pad 模板；ch11 保留 intentional `\paragraph{Review gate.}`；`python3 book_spec_audit.py` → PASS 30/30（P0=0）；compile 仍 blocked（无 pdflatex）。
 - **Loop R10（2026-06-09，harness 轨）**：ch28–30 补 `verified_facts.jsonl`（audit P1→0）；`iterate.py`/`loops/README.md`/`program_books.md`/`books/README.md`/`research_tools.py` 事实引用统一到 `WRITING_STYLE.md` §八；`OUTLINE_SPEC`→`book_content.md`；`python3 book_spec_audit.py` → PASS 30/30 facts P1=0；compile 仍 blocked。
-- **Loop R11（2026-06-09，harness 轨）**：`.github/workflows/book.yml` CI compile（TeX Live + `make.sh` + PDF artifact）；根 `README.md` 路径/FACT 引用对齐 `build/chapters` + `WRITING_STYLE.md` §八；`iterate.py` 增 `chapter_ending_violations`（Fregly 章末 lint）；push 仍受 GitHub 443 网络阻塞（R10+R11 commits 本地）。
-- **内容 R-next**：pad 章正文去重（ch14–27）；ch28–30 反向引用 ch26/27 生产 runbook（可选）。
-- **Harness R-next**：`program_books.md`/`loops/README.md` 路径 `build/chapters` 批量对齐；CI 首次绿后 `compile_book` timeout 上调；push 待网络恢复。
+- **Loop R11（2026-06-09，harness 轨）**：`.github/workflows/book.yml` CI compile（TeX Live + `make.sh` + PDF artifact）；根 `README.md` 路径/FACT 引用对齐 `build/chapters` + `WRITING_STYLE.md` §八；`iterate.py` 增 `chapter_ending_violations`（Fregly 章末 lint）；已 push。
+- **Loop R12（2026-06-09，harness+内容轨）**：`program_books.md`/`loops/README.md`/`WRITING_STYLE.md` 路径 → `build/chapters`；`compile_book` timeout 180→900s；ch30 Conclusion 回指 Ch26 runbook + Ch27 baselines；CI run #1 **success** (~30s)；`python3 book_prepare.py --chapter ch30` 待验。
+- **内容 R-next**：pad 章正文去重（ch14–27）；Part VIII 生产 worksheet 示例 JSON（可选）。
+- **Harness R-next**：`books/README.md` 章路径表；AGENTS §10 增 CI compile 说明；`main.pdf` git 策略（artifact vs tracked）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
