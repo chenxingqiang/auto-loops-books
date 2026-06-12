@@ -445,6 +445,9 @@ def fact_verification_tasks(spec: ChapterSpec, tex: str) -> list[str]:
     return tasks
 
 
+PAD_DEDUP_DEEP_REWRITE_FLOOR = 1000
+
+
 def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
     try:
         from book_pad_dedup import audit_chapter
@@ -455,15 +458,25 @@ def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
     if not report["changed"]:
         return []
     cmd = f"python3 book_pad_dedup.py --apply {spec.chapter_id}"
-    if report["words_after"] < report["min_words"]:
+    words_after = report["words_after"]
+    if words_after < PAD_DEDUP_DEEP_REWRITE_FLOOR:
         return [
             "Pad dedup: duplicate pad_agent tail before Key Takeaways "
-            f"({report['words_before']}->{report['words_after']} words). "
-            f"Run `{cmd} --force --adjust-min`, or Fregly deep-rewrite to restore depth."
+            f"({report['words_before']}->{words_after} words). "
+            "Strip-only would leave thin filler—run "
+            f"`uv run book-loop deep-rewrite --chapter {spec.chapter_id}` "
+            "for Fregly prose (do not `--force --adjust-min` alone)."
+        ]
+    if words_after < report["min_words"]:
+        return [
+            "Pad dedup: duplicate pad_agent tail before Key Takeaways "
+            f"({report['words_before']}->{words_after} words). "
+            f"Prefer `uv run book-loop deep-rewrite --chapter {spec.chapter_id}`; "
+            f"strip-only fallback: `{cmd} --force --adjust-min`."
         ]
     return [
         f"Pad dedup: run `{cmd}` to remove pad tail "
-        f"({report['words_before']}->{report['words_after']} words, coverage {report['coverage']})."
+        f"({report['words_before']}->{words_after} words, coverage {report['coverage']})."
     ]
 
 
