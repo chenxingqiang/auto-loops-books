@@ -459,8 +459,7 @@ def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
         return [
             "Pad dedup: duplicate pad_agent tail before Key Takeaways "
             f"({report['words_before']}->{report['words_after']} words). "
-            f"Run `{cmd} --force` and set honest min_words in outline_extended.json "
-            f"(~{report['words_after']}), or Fregly deep-rewrite to restore depth."
+            f"Run `{cmd} --force --adjust-min`, or Fregly deep-rewrite to restore depth."
         ]
     return [
         f"Pad dedup: run `{cmd}` to remove pad tail "

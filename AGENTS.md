@@ -419,8 +419,9 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R13（2026-06-09，harness 轨）**：`books/README.md` 重写（build/chapters、30/30 Part 表、CI badge）；根 `README.md` CI badge；`WRITING_STYLE.md` Fregly §七 章骨架 + `reference-chapter-1.pdf` 双 gold 标准；AGENTS §10 CI artifact 说明；pad 去重调研：ch19/ch26 exact dedup 会跌破 min_words → 下轮 selective 模板剥离。
 - **Loop R14（2026-06-09，harness+内容轨）**：`book_pad_dedup.py`（`--audit`/`--apply` tail-block 剥离）；`book_agent_rewrite` 增 `pad_restart_index` + `has_pad_tail_block` 防重复 pad；**ch19 试点** strip 3933→2090 words，`outline_extended.json` min_words 3500→2000；`python3 book_prepare.py --chapter ch19` → ready q=94.2；audit ch14–27：仅 ch14 无 pad tail，其余 strip 后需降 min 或 deep-rewrite。
 - **Loop R15（2026-06-09，harness+内容轨）**：**ch18/ch20** pad strip（3933→2090、4021→2138）+ min_words 2000/2100；compiler 三章 ch18–20 均 honest gate；`iterate.py` 增 `pad_dedup_tasks()` → agent_tasks；30/30 ready 保持。
-- **内容 R-next**：batch strip ch15–17、ch21–27 + 诚实 min_words 或 Fregly deep-rewrite（逐章）。
-- **Harness R-next**：`book_pad_dedup --apply --range` batch 模式；Part VI compiler 章 deep-rewrite 队列。
+- **Loop R16（2026-06-09，harness+内容轨）**：`book_pad_dedup.py` 增 `--adjust-min`（honest floor = max(1000, words//50*50)）；batch `--apply --range 15-27 --force --adjust-min` — ch15–17/ch21–27 strip + outline min 对齐（ch18–20 已无 tail skip）；`book_spec_audit.py` → PASS 30/30；**30/30** ready 保持。
+- **内容 R-next**：Part VI compiler 章（ch15–17、ch21–27）Fregly deep-rewrite 拉回 3500+ words（不靠 pad）；优先 ch25（1297w）扩写。
+- **Harness R-next**：`iterate.py` pad_dedup_tasks 已指向 `--force --adjust-min`；Part VI deep-rewrite 队列。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
@@ -442,7 +443,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 | 一步 | `uv run book-loop step [--chapter chXX]` |
 | 深度 | `uv run book-loop deep-rewrite --chapter chXX` |
 | 评估 | `uv run book_prepare.py --chapter chXX` |
-| Pad 剥离 | `python3 book_pad_dedup.py --audit --range 14-27` / `--apply chXX --force` |
+| Pad 剥离 | `python3 book_pad_dedup.py --audit --range 14-27` / `--apply chXX --force --adjust-min` |
 | 编译 | `cd books && bash make.sh`（或 CI artifact） |
 
 ### Gotchas
