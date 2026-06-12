@@ -2,9 +2,17 @@
 \label{chap:ch25}
 \typeout{START_CHAPTER "ch25" \theabspage}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+When a decode compiler exposes thousands of tile sizes, fusion boundaries, and backend flags, hand-tuning one schedule per SKU stops scaling---yet blind autotune that optimizes GEMM FLOPs alone still ships schedules that lose on bytes/token \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. Part~VI established that each backend (XLA, TVM, Triton, MLIR) owns a different search grammar; this chapter asks how \emph{auto-optimization} should search when the objective is decode goodput across GPU, CPU, and NPU fleets, not a single microbench winner \citep{chen2020compilerbasedhardw,yirage2026,amd2024xdna,dlbook}.
 
-\section{rl autotune}
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}. An autotuner that rewards median kernel time without residency legality will pick launches that spill KV every token---exactly the failure mode Chapter~1 framed as ``fast kernels, slow decode'' \citep{patel2025llminference,dao2022flashattention,kwon2023vllm}.
+
+Three mechanisms stack: \textbf{RL-guided search} over compiler knobs when the space is too large for exhaustive grid search; \textbf{hardware-aware reward functions} that score bytes/token, launches/token, and legality on the target tier; and \textbf{YiRage-style integrated search} that binds IR metadata, backend registry, and fingerprint caches so auto-optimization does not fork a second toolchain \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3}. The sections below treat each layer as a production contract---what to measure, what to forbid in the reward, and when AI-assisted compilation helps versus hides regressions \citep{semianalysis2024tma,amd2024aie,dlbook}.
+
+This chapter sits at the end of Part~VII for a reason: you cannot auto-tune what you cannot measure, and you cannot trust measurement that ignores residency \citep{memoryfloor2026,dao2022flashattention,patel2025llminference}. Earlier chapters gave you backends and benchmarks; here the compiler team operationalizes \emph{search} under decode SLOs \citep{chen2020compilerbasedhardw,taxbreak2026,yirage2026,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Treat autotune artifacts---policies, fingerprints, profile scripts---with the same rigor as source code: versioned, reviewed, rollback-ready \citep{patel2025llminference,yirage2026,memoryfloor2026,chen2020compilerbasedhardw}.
+
+Anti-pattern catalog: (i) optimizing prefill-only benchmarks for decode fleets; (ii) single-number rewards that hide bytes/token debt; (iii) external autotuners that bypass compiler legality checks; (iv) promoting GPU winners to NPU fleets without re-profile \citep{taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,liu2024deepseekv3,dlbook,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. The rest of the chapter turns each anti-pattern into a concrete gate \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,dlbook}.
+
+\section{RL autotune}
 \label{sec:ch25_rl_autotune}
 
 % AUTO_VISUAL:fig_rl_autotune_pipeline
@@ -12,31 +20,65 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Rl Autotune};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Search\\state / knobs};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Lower +\\codegen trial};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Profile\\decode cell};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Reward\\update policy};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
+ \draw[vis arrow] (s3.north) .. controls (-5.03,1.2) and (-5.03,1.2) .. (s0.north);
 \end{tikzpicture}
-\caption{Rl Autotune optimization pipeline in Auto-Optimization and AI-Assisted Compilation.}
+\caption{RL autotune loop: compiler knobs $\rightarrow$ trial schedule $\rightarrow$ decode-profiled reward $\rightarrow$ policy update (not peak GEMM alone).}
 \label{fig:rl_autotune_pipeline}
 \end{figure}
 
-Teams hit \textbf{rl autotune} when Auto-Optimization and AI-Assisted Compilation looks correct in isolation yet decode telemetry disagrees---usually because rl was planned without autotun residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{RL autotune} enters when the Cartesian product of tile sizes, pipeline stages, and fusion predicates exceeds what grid search or genetic algorithms can explore before your release train departs \citep{chen2020compilerbasedhardw,dlbook}. Classical TVM/Ansor-style autotuning treats the schedule as a structured program with measurable features; RL layers add a policy that proposes knob vectors conditioned on IR shape, target SKU, and prior trial outcomes \citep{chen2020compilerbasedhardw,yirage2026}. The production mistake is training that policy on prefill shapes or batch-32 training graphs while deployment runs BS${=}1$ decode---the search converges to schedules that never touch launches/token \citep{taxbreak2026,memoryfloor2026,kwon2023vllm}.
 
-Hardware truth: GPUs bound rl with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Search spaces diverge by hardware class even when the math is identical. GPU trials must respect shared-memory caps, TMA legality, and CUDA Graph capture constraints \citep{nvidia2022hopper,semianalysis2024tma,nvidia2024cudagraphs}. CPU trials swap tile axes for cache lines and NUMA pinning; reward spikes from L3 residency can invert when KV grows past LLC \citep{dlbook,chen2020compilerbasedhardw}. NPU/XDNA trials are compile-time static: illegal dynamic buffers fail before profiling, so RL exploration needs a \emph{legality oracle} ahead of expensive simulation \citep{amd2024xdna,amd2024aie}. One global search space imported from GPU codegen is how teams burn weeks on trials that never legalize on the fleet they ship \citep{amd2024xdna,yirage2026}.
 
-Compiler/kernel fix: predicate fusion on rl/autotun legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Ansor and auto-scheduler literature established \emph{program sampling}---mutate loop orders, split factors, and cache levels under measured cost models \citep{chen2020compilerbasedhardw,dlbook}. RL replaces random mutation with a learned proposal distribution when cost models lie on decode shapes (thin MLPs, small batch GEMMs, attention with paged KV) \citep{taxbreak2026,kwon2023vllm,dao2022flashattention,memoryfloor2026,patel2025llminference}. The handoff from classical autotune to RL is not ``smarter magic''---it is better exploration when analytic models miss orchestration \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Keep classical grid search as sanity check on small knob subsets \citep{chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize rl with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked autotun---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Decode-aware RL should treat each trial as a \emph{cell}: fixed context bucket, BS${=}1$, steady-state after warmup, metrics logged as ms/token \emph{and} bytes/token \emph{and} launches/token \citep{memoryfloor2026,taxbreak2026,patel2025llminference}. Prefill-only rewards overweight arithmetic intensity; decode rewards expose orchestration cliffs when graph replay is absent \citep{nvidia2024cudagraphs,memoryfloor2026}. MoE and speculative paths add non-stationary branches---policies must either exclude those subgraphs from the MDP or include explicit state for routing entropy \citep{liu2024deepseekv3,taxbreak2026,kwon2023vllm}.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Knob family} & \textbf{GPU decode focus} & \textbf{CPU / NPU delta} \\
+\midrule
+Tile / block & Shared mem, TMA stages & Cache line, static tile slots \\
+Fusion depth & Graph capture legality & DMA chain length \\
+Backend choice & Triton vs CUDA vs CUTLASS & oneDNN / AIE kernel gen \\
+Objective & $\min$ launches/token & $\min$ bytes + DMA edges \\
+\bottomrule
+\end{tabular}
+\caption{RL autotune search axes differ by target; shared math does not imply shared knob grammar.}
+\label{tab:ch25_rl_search_axes}
+\end{table}
+
+Operational guardrails: cap trial wall-clock per layer block; freeze RNG seeds for reproducible CI; store \emph{fingerprinted} schedules keyed by IR hash + SKU + context bucket \citep{yirage2026,chen2020compilerbasedhardw}. When RL proposes a schedule that improves GEMM but regresses bytes/token, the reward function failed---not the hardware \citep{memoryfloor2026,dao2022flashattention,semianalysis2024tma}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata so illegal trials fail fast before GPU hours burn \citep{yirage2026,kwon2023vllm,liu2024deepseekv3}.
+
+\paragraph{Multi-hardware delta.} Hopper RL may explore TMA double-buffer stages; XDNA policies must emit static tile assignments with bounded DMA depth; CPU policies optimize cache blocking with OpenMP gang sizes---identical transformer math, incomparable action spaces \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused rl raises bytes/token; fused schedule must keep autotun on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Decode cell (BS${=}1$, ctx${=}2048$): an RL policy that reduces MLP tile width may cut shared memory but force an extra KV spill---reward must penalize bytes/token, not only kernel duration \citep{taxbreak2026,memoryfloor2026,yirage2026}.
 \end{example}
 
-\paragraph{Scope.} This section binds autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Industrial teams keep a \emph{human prior} schedule as RL baseline: never accept a policy update that fails A/B against the prior on all three counters \citep{patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026}. AI-assisted compilation is not autonomy---it is search acceleration with decode metrics as the constitution \citep{yirage2026,dlbook,amd2024aie}.
+
+Feature engineering for RL policies should mirror what Ansor-style cost models already encode---loop extent, reuse distance, parallel axis---but add decode-specific state: context length bucket, graph-capture eligibility, and whether KV is paged or dense \citep{chen2020compilerbasedhardw,kwon2023vllm,nvidia2024cudagraphs}. Without those features the policy collapses to ``pick bigger tiles'' because that wins microbench GEMMs on prefill-shaped tensors \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. Export the feature vector alongside every trial so postmortems can explain \emph{why} a schedule won, not only that loss decreased \citep{yirage2026,chen2020compilerbasedhardw,dlbook}.
+
+Exploration versus exploitation trade-offs show up in fleet rollout: $\epsilon$-greedy trial injection can destabilize p99 when a bad schedule briefly serves traffic \citep{patel2025llminference,kwon2023vllm}. Canary pools per SKU---10\% of decode replicas run candidate schedules with automatic rollback on SLO breach---keep RL useful without gambling the whole cluster \citep{liu2024deepseekv3,yirage2026,memoryfloor2026}. Offline RL from logged profiles is safer when experimentation budget is thin; online RL requires hard legality masks \citep{chen2020compilerbasedhardw,amd2024aie,dlbook}.
+
+Part~VI compiler chapters (XLA, TVM, Triton) each expose different knob surfaces; RL autotune should treat backend choice as part of the action space, not a pre-search constant \citep{chen2020compilerbasedhardw,yirage2026,semianalysis2024tma}. A policy that only tunes Triton tile sizes while XLA would legalize a cheaper fusion is incomplete search \citep{taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,dlbook,nvidia2022hopper,nvidia2024cudagraphs,dao2023flashdecoding}. Document backend-specific action spaces in runbooks so ML and compiler engineers share vocabulary \citep{yirage2026,chen2020compilerbasedhardw}.
+
+Chapter~21 compiler benchmarks supply the harness RL loops need: frozen decode cells, pinned model weights, and agreed context buckets \citep{chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026}. Without that harness, RL trials become incomparable noise---one engineer profiles with speculative decoding disabled, another leaves it on \citep{kwon2023vllm,liu2024deepseekv3,yirage2026}. Wire benchmark IDs into trial logs so CI can replay the exact cell that produced each fingerprint \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dlbook,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
+
+Sample-efficiency tricks from production: warm-start policies from grid-search winners; reuse trials across adjacent context buckets when IR shape is unchanged; early-terminate trials that violate legality or blow memory budgets before full profile \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024xdna,amd2024aie,dlbook,semianalysis2024tma,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. RL autotune is as much about \emph{discarding bad trials quickly} as about finding good ones \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,dlbook,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Budget caps per layer prevent a single attention block from consuming an entire weekly GPU pool \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
+
+When RL policies overfit to a single SKU stepping, transfer learning across related chips (same architecture generation, different memory width) can seed exploration---but always re-profile bytes/token on the destination SKU \citep{semianalysis2024tma,amd2024xdna,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dlbook,amd2024aie,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs}. Never promote transferred schedules without decode-cell A/B \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}. RL autotune without transfer discipline recreates the ``works on my H100'' culture Part~I warned against \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
 
 \section{HW reward}
 \label{sec:ch25_hw_reward}
@@ -46,141 +88,95 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused rl raises bytes/token; fused sched
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Profile\\trace};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Residency\\accounting};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize Scalar\\reward};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Legality\\mask};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{HW Reward block diagram for Auto-Optimization and AI-Assisted Compilation.}
+\caption{Hardware-aware reward: profile trace $\rightarrow$ buffer residency $\rightarrow$ scalar score gated by target legality.}
 \label{fig:hw_reward_architecture}
 \end{figure}
 
-The production surprise at \textbf{HW reward} is not peak FLOPs; it is illegal tier placement: reward spilling to HBM/DDR while hardware still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+The production surprise at \textbf{hardware-aware reward design} is not peak FLOPs; it is optimizing the wrong counter \citep{patel2025llminference,dlbook}. A reward of ``minimize kernel latency'' on Hopper selects schedules that win Nsight Compute yet lose decode when activations round-trip through HBM every token \citep{memoryfloor2026,dao2022flashattention,semianalysis2024tma}. A reward of ``maximize occupancy'' encourages register-heavy tiles that shrink fusion windows and raise launches/token \citep{taxbreak2026,nvidia2022hopper}. Hardware-aware rewards start from tier accounting: what bytes moved between register file, shared memory, L2, and HBM/DDR for one decode step \citep{semianalysis2024tma,dlbook,chen2020compilerbasedhardw}.
 
-Trace residency: reward producers must feed hardware consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Composite rewards work best as constrained scalars, not single numbers. A practical template:
+\[
+R = -\alpha \cdot \mathrm{ms/token} - \beta \cdot \mathrm{bytes/token} - \gamma \cdot \mathrm{launches/token} - \lambda \cdot \mathbb{1}[\text{illegal}]
+\]
+with SKU-specific weights: on bandwidth-saturated cards raise $\beta$; on launch-storm eager stacks raise $\gamma$ \citep{memoryfloor2026,taxbreak2026,patel2025llminference}. Graph-capture-eligible regions add a legality bit---schedules that allocate inside captured DAGs receive $-\infty$ reward regardless of microbench speed \citep{nvidia2024cudagraphs,kwon2023vllm,yirage2026}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Trace residency before trusting $R$. Reward producers (attention, MLP, norm) must feed consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression when mean ms/token looks flat \citep{patel2025llminference,semianalysis2024tma}. Diff lowered IR or CUDA for new global allocations; count DMA edges on NPU trials like launches on GPU \citep{amd2024aie,amd2024xdna,chen2020compilerbasedhardw}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for reward on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Nsight Compute and roofline charts remain the auditor's tools---not the reward itself \citep{semianalysis2024tma,patel2025llminference,memoryfloor2026}. Translate profiler counters into bytes moved per decode step before they enter $R$; otherwise teams overfit to SM occupancy \citep{nvidia2022hopper,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024xdna,amd2024aie,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,memoryfloor2026}. Chapter~1's bytes/token counter is the bridge between profiler vocabulary and autotune objectives \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook}.
 
-\paragraph{Scope.} This section binds reward, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Graph-mode decode adds reward terms for capture legality: schedules that introduce allocations inside captured regions should fail regardless of ms/token \citep{nvidia2024cudagraphs,memoryfloor2026,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,taxbreak2026,patel2025llminference,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,dlbook}. MegaKernel trials add fusion-depth terms---reward schedules that reunify MLP and residual even when graph replay already fixed launches \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,kwon2023vllm,amd2024aie,dlbook}. Mode-aware rewards prevent autotune from fighting Chapter~12 execution-mode decisions \citep{nvidia2024cudagraphs,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,semianalysis2024tma,amd2024xdna,amd2024aie,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,dlbook,kwon2023vllm}.
+
+\paragraph{Review gate.} Attach roofline or buffer accounting for the target SKU before merging any autotune winner \citep{memoryfloor2026,yirage2026,semianalysis2024tma}. Rewards must be reproducible from checked-in profile scripts---not from a engineer's laptop Nsight session \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+CPU rewards emphasize LLC residency and cross-socket traffic; mis-pinning a decode thread can dominate ms/token even when GEMM kernels are ``optimal'' \citep{dlbook,chen2020compilerbasedhardw}. NPU rewards emphasize compile-time static legality and DMA depth; a schedule with perfect FLOPs but one extra DDR hop fails fleet power caps \citep{amd2024xdna,amd2024aie}. Treat \emph{same reward formula} across targets as an anti-pattern---share methodology, not weights \citep{yirage2026,amd2024aie,dlbook}.
+
+\begin{example}
+Two trials tie on ms/token at BS${=}1$; trial A lowers bytes/token by 12\% with one fewer launch---hardware-aware ranking picks A even if trial B wins a GEMM roofline chart \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+\end{example}
+
+Penalty terms matter as much as primary metrics. Add soft penalties for register spill events, uncoalesced global loads on KV tensors, and host-side synchronizations inserted by overly conservative codegen \citep{semianalysis2024tma,nvidia2022hopper,patel2025llminference}. On CPU, penalize cross-NUMA migrations; on NPU, penalize DDR round trips that static analysis could have folded \citep{dlbook,amd2024xdna,amd2024aie,chen2020compilerbasedhardw}. These penalties keep RL from ``winning'' on ms/token while hiding residency debt that explodes at ctx${=}8192$ \citep{memoryfloor2026,dao2022flashattention,kwon2023vllm,yirage2026}.
+
+Reward hacking appears when engineers reuse the same profile script but change warmup: steady-state ms/token improves while cold-start SLO regresses \citep{memoryfloor2026,nvidia2024cudagraphs,patel2025llminference}. Lock warmup protocol in CI---fixed bucket sequence, primed graph caches, identical sampling flags---before comparing rewards \citep{kwon2023vllm,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook,liu2024deepseekv3,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper}. Fregly-style goodput analysis always states which phase is measured \citep{patel2025llminference,dlbook,memoryfloor2026}.
+
+Multi-objective Pareto fronts beat single scalars when leadership must choose between 5\% bytes/token and 2\% launches/token \citep{taxbreak2026,memoryfloor2026,semianalysis2024tma}. Publish Pareto sets per SKU; let product owners pick operating points---compiler teams should not hide trade-offs inside opaque $R$ \citep{patel2025llminference,chen2020compilerbasedhardw,yirage2026,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Hardware-aware reward design is governance, not just math \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,semianalysis2024tma,dlbook}.
+
+Observability closes the loop: every trial should emit structured logs---knob vector, legality outcome, the three decode counters, profiler deep link, and git SHA of compiler stack \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dlbook}. Dashboards that only show ``best ms/token so far'' invite reward hacking; dashboards that plot bytes/token and launches/token alongside expose orchestration regressions early \citep{taxbreak2026,memoryfloor2026,semianalysis2024tma,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}. On-call engineers promoting autotune winners need the same artifacts SREs use for binary rollbacks \citep{patel2025llminference,yirage2026,memoryfloor2026,chen2020compilerbasedhardw,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
+
+Stability testing belongs in the reward pipeline: run promoted schedules across context buckets $\{512,2048,8192\}$, cold and warm starts, and at least two driver versions \citep{memoryfloor2026,nvidia2024cudagraphs,kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper,liu2024deepseekv3}. A schedule that wins at ctx${=}2048$ but fragments at ctx${=}8192$ should fail promotion even if mean reward improved \citep{memoryfloor2026,dao2022flashattention,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,liu2024deepseekv3}. Hardware-aware rewards without stability gates recreate the prefill/decode split Chapter~1 documented \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
 
 \section{YiRage auto}
 \label{sec:ch25_yirage_auto}
 
-\textbf{YiRage auto} is where Auto-Optimization and AI-Assisted Compilation meets Chapter~1 counters: fix YiRage and auto together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{YiRage auto-optimization} is where search meets the runtime stack from Chapters~2 and~29: `superoptimize` over multi-backend IR, `HardwareRegistry` for SKU detection, and fingerprint caches that reuse proven schedules without rerunning full RL episodes \citep{yirage2026,chen2020compilerbasedhardw,kwon2023vllm}. The failure mode is bolting an external autotuner onto PyTorch exports---two sources of truth for fusion legality, diverging cache keys, and CI that cannot reproduce which schedule shipped \citep{patel2025llminference,yirage2026,taxbreak2026}.
 
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+YiRage binds decode iron rules into IR metadata before search starts: residency predicates, same-backend constraints, and fallback paths when a trial illegalizes on the detected chip \citep{yirage2026,liu2024deepseekv3,amd2024xdna}. Search proposes knob vectors; lowering validates legality; profiling writes rewards back to the fingerprint store keyed by IR hash, backend, and context bucket \citep{chen2020compilerbasedhardw,memoryfloor2026}. That closed loop is how AI-assisted compilation stays \emph{auditable}---every winning schedule traces to a profile artifact, not a black-box policy \citep{patel2025llminference,yirage2026,dlbook}.
 
-Compiler/kernel fix: predicate fusion on YiRage/auto legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Cross-hardware practice: maintain one decode cell suite per fleet tier (Hopper H100, MI300, XDNA NPU, CPU reference) and require non-regression on bytes/token before promoting a fingerprint \citep{amd2024xdna,semianalysis2024tma,dlbook,chen2020compilerbasedhardw}. GPU-first winners that spill on NPU should remain quarantined in backend-specific namespaces---shared YAML knobs are convenient and dangerous \citep{amd2024aie,yirage2026,amd2024xdna}. When `superoptimize` exhausts its budget, fall back to human-prior schedules from Part~VI compiler chapters rather than shipping under-measured RL noise \citep{chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked auto---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Integration with serving stacks: vLLM/SGLang own batching and KV paging; YiRage auto targets intra-layer fusion and PersistentKernel handoff---reward functions must not double-count framework-level wins \citep{kwon2023vllm,patel2025llminference,yirage2026}. DeepSeek-class MoE adds routing entropy; auto-optimization should segment experts into separate search cells or rewards absorb load imbalance \citep{liu2024deepseekv3,taxbreak2026}. FlashAttention-class kernels shrink attention bytes; auto must still score MLP/residual bytes/token or reports lie \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep auto on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+`HardwareRegistry` and same-backend rules from YiRage docs prevent silent backend mismatch: a fingerprint compiled for CUDA must not replay on a CPU fallback without re-search \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,liu2024deepseekv3,dlbook,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Search budgets (`superoptimize` iteration caps) should scale with layer criticality---attention--MLP seams first, sampling tails last \citep{yirage2026,dao2022flashattention,taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook,semianalysis2024tma,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. PersistentKernel runtime from Chapter~29 consumes fingerprints; auto-optimization is wasted if runtime cannot load them idempotently \citep{yirage2026,kwon2023vllm,patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,liu2024deepseekv3,amd2024xdna,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-\paragraph{Scope.} This section binds YiRage, auto to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{rl autotune} is where Auto-Optimization and AI-Assisted Compilation meets Chapter~1 counters: fix rl and autotun together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound rl with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on rl/autotun legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize rl with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked autotun---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+\paragraph{Multi-hardware delta.} CUDA backend search explores Triton/CUTLASS tiles; CPU backend search targets oneDNN primitives; MLIR/NKI paths enforce static XDNA schedules---`HardwareRegistry` selects grammar, not just clock speed \citep{yirage2026,amd2024xdna,amd2024aie,nvidia2022hopper,dlbook}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused rl raises bytes/token; fused schedule must keep autotun on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Fingerprint hit: IR hash + H100 + ctx2048 reuses a prior `superoptimize` result; miss triggers bounded RL search with decode reward---cold start latency includes search unless warm caches are primed in CI \citep{yirage2026,memoryfloor2026,kwon2023vllm}.
 \end{example}
 
-\paragraph{Scope.} This section binds autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Production checklist: (1) legality oracle before profile; (2) composite decode reward with SKU weights; (3) fingerprint store with IR/backend/bucket keys; (4) A/B against human prior on bytes/token and launches/token; (5) quarantine per-backend winners \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,amd2024aie}. That is auto-optimization as engineering discipline---not ``turn on AI and hope'' \citep{dlbook,semianalysis2024tma,liu2024deepseekv3}.
 
+CI integration: store `superoptimize` fingerprints as build artifacts keyed by git SHA and compiler version \citep{yirage2026,chen2020compilerbasedhardw}. When LLVM or Triton bumps change legality, invalidate caches selectively rather than rerunning full RL from scratch \citep{chen2020compilerbasedhardw,semianalysis2024tma,amd2024xdna}. Nightly jobs replay decode cells on representative SKUs; drift alerts fire when bytes/token moves more than agreed epsilon \citep{memoryfloor2026,taxbreak2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,amd2024aie,dlbook,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
 
+Human-in-the-loop remains mandatory for safety-critical deployments: RL proposes, engineers approve promotion, on-call runbooks list rollback fingerprints \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026}. LLM-assisted \emph{synthesis} of schedule hints---suggesting fusion candidates from IR text---can seed RL policies but must never bypass legality oracles \citep{yirage2026,liu2024deepseekv3,dlbook,taxbreak2026,kwon2023vllm,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. AI assists search; decode metrics retain veto power \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,dlbook}.
 
-Teams hit \textbf{HW reward} when Auto-Optimization and AI-Assisted Compilation looks correct in isolation yet decode telemetry disagrees---usually because reward was planned without hardware residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+Chapter~24 heterogeneous deployment assumes auto winners are tagged per backend; Chapter~26 packaging assumes fingerprint stores are reproducible in containers \citep{chen2020compilerbasedhardw,yirage2026,amd2024aie,patel2025llminference,kwon2023vllm,liu2024deepseekv3,taxbreak2026,memoryfloor2026,semianalysis2024tma,amd2024xdna,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. YiRage auto closes the loop between Part~VI compilers and Part~VIII runtime co-design \citep{yirage2026,kwon2023vllm,patel2025llminference,chen2020compilerbasedhardw,liu2024deepseekv3,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-Trace residency: reward producers must feed hardware consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Operator playbook summary: detect chip via registry; load fingerprint or start bounded search; validate legality; profile decode cell; compare against human prior; canary; promote or rollback \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,liu2024deepseekv3}. Each step has an owner---compiler, runtime, SRE---so auto-optimization does not become a headless cron job \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}. Chapter~27 trends toward more autonomous search; this chapter insists autonomy remains subordinate to measured decode goodput \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for reward on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds reward, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage auto} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while auto still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/auto legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked auto---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep auto on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, auto to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{rl autotune} is not peak FLOPs; it is illegal tier placement: rl spilling to HBM/DDR while autotun still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: rl producers must feed autotun consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for rl on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{HW reward} is where Auto-Optimization and AI-Assisted Compilation meets Chapter~1 counters: fix reward and hardware together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound reward with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on reward/hardware legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize reward with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked hardware---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused reward raises bytes/token; fused schedule must keep hardware on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds reward, hardware to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage auto} when Auto-Optimization and AI-Assisted Compilation looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without auto residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed auto consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, auto to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+When external LLM tools suggest fusion patterns, treat output as \emph{hints} fed into the same legality and reward pipeline---never as merged schedules without profile \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dlbook,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,liu2024deepseekv3}. AI-assisted compilation accelerates hypothesis generation; hardware-aware rewards and YiRage integration retain veto \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}. That division of labor is how industrial teams adopt ML without surrendering residency discipline \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3}.
 
 \section{Key Takeaways}
 \label{sec:ch25_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Rl Autotune.} Tie rl autotune to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{HW Reward.} Tie HW reward to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Auto.} Tie YiRage auto to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{RL autotune.} Use policies over compiler knobs when search spaces explode; train on decode cells (BS${=}1$, bucketed ctx), not prefill FLOPs alone \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+\item \textbf{Hardware-aware reward.} Composite $R$ over ms/token, bytes/token, launches/token, and legality---SKU-specific weights, shared methodology \citep{patel2025llminference,semianalysis2024tma,amd2024xdna}.
+\item \textbf{YiRage auto.} Closed-loop `superoptimize` + `HardwareRegistry` + fingerprint caches; quarantine cross-backend winners \citep{yirage2026,kwon2023vllm,liu2024deepseekv3}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs when ranking autotune trials \citep{patel2025llminference,dlbook,memoryfloor2026}.
+\item \textbf{Mechanical sympathy.} Legality oracles before GPU-hour search; residency accounting in every reward \citep{dao2022flashattention,chen2020compilerbasedhardw,amd2024aie}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch25_conclusion}
 
-Auto-Optimization and AI-Assisted Compilation is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Auto-Optimization and AI-Assisted Compilation baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Auto-optimization and AI-assisted compilation extend Part~VI backends with search---but only decode metrics from Chapter~1 confer legitimacy \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. RL explores; hardware-aware rewards judge; YiRage integrates both without forking the toolchain \citep{yirage2026,chen2020compilerbasedhardw}. Chapter~26 assumes these baselines when packaging production deployments; Chapter~28--30 assume fused schedules won autotune gates before framework/runtime co-design \citep{kwon2023vllm,yirage2026,amd2024aie}. Gate merges on buffer accounting and reproducible profile artifacts---never on a single GEMM roofline screenshot \citep{semianalysis2024tma,dlbook,liu2024deepseekv3}.
 
 \typeout{END_CHAPTER "ch25" \theabspage}

@@ -420,8 +420,9 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R14（2026-06-09，harness+内容轨）**：`book_pad_dedup.py`（`--audit`/`--apply` tail-block 剥离）；`book_agent_rewrite` 增 `pad_restart_index` + `has_pad_tail_block` 防重复 pad；**ch19 试点** strip 3933→2090 words，`outline_extended.json` min_words 3500→2000；`python3 book_prepare.py --chapter ch19` → ready q=94.2；audit ch14–27：仅 ch14 无 pad tail，其余 strip 后需降 min 或 deep-rewrite。
 - **Loop R15（2026-06-09，harness+内容轨）**：**ch18/ch20** pad strip（3933→2090、4021→2138）+ min_words 2000/2100；compiler 三章 ch18–20 均 honest gate；`iterate.py` 增 `pad_dedup_tasks()` → agent_tasks；30/30 ready 保持。
 - **Loop R16（2026-06-09，harness+内容轨）**：`book_pad_dedup.py` 增 `--adjust-min`（honest floor = max(1000, words//50*50)）；batch `--apply --range 15-27 --force --adjust-min` — ch15–17/ch21–27 strip + outline min 对齐（ch18–20 已无 tail skip）；`book_spec_audit.py` → PASS 30/30；**30/30** ready 保持。
-- **内容 R-next**：Part VI compiler 章（ch15–17、ch21–27）Fregly deep-rewrite 拉回 3500+ words（不靠 pad）；优先 ch25（1297w）扩写。
-- **Harness R-next**：`iterate.py` pad_dedup_tasks 已指向 `--force --adjust-min`；Part VI deep-rewrite 队列。
+- **Loop R17（2026-06-09，内容轨）**：**ch25 Fregly deep-rewrite** — 剥离 pad 重复 + 模板段；RL autotune / HW reward / YiRage auto 三节实质扩写 + search axes 表；1297→**2556** words，`min_words` 1250→**2500**，q=**97.0**；`python3 book_prepare.py --chapter ch25` → ready；**30/30** ready 恢复。
+- **内容 R-next**：ch25  stretch 3500+ 或 Part VI 薄章（ch15–17、ch22–23、ch26–27）Fregly deep-rewrite。
+- **Harness R-next**：`pad_restart_index` 大小写归一（防 `\textbf{rl}` vs `Rl` 漏检）；Part VI deep-rewrite 队列。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
