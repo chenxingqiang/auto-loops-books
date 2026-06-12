@@ -121,6 +121,7 @@ All prose must follow [`WRITING_STYLE.md`](WRITING_STYLE.md):
 
 ```bash
 uv run book_prepare.py --chapter ch01
+python3 book_pad_dedup.py --audit --range 14-27
 uv run book-loop status
 ```
 
