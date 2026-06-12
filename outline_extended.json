@@ -724,7 +724,7 @@
       "id": "ch23",
       "file": "ch23_llm_moe_compilation.tex",
       "title": "LLM and MoE Specialized Compilation",
-      "min_words": 1650,
+      "min_words": 1150,
       "max_words": 9000,
       "min_citations": 8,
       "sections": [

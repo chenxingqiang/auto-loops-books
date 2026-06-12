@@ -422,8 +422,9 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R16（2026-06-09，harness+内容轨）**：`book_pad_dedup.py` 增 `--adjust-min`（honest floor = max(1000, words//50*50)）；batch `--apply --range 15-27 --force --adjust-min` — ch15–17/ch21–27 strip + outline min 对齐（ch18–20 已无 tail skip）；`book_spec_audit.py` → PASS 30/30；**30/30** ready 保持。
 - **Loop R17（2026-06-09，内容轨）**：**ch25 Fregly deep-rewrite** — 剥离 pad 重复 + 模板段；RL autotune / HW reward / YiRage auto 三节实质扩写 + search axes 表；1297→**2556** words，`min_words` 1250→**2500**，q=**97.0**；`python3 book_prepare.py --chapter ch25` → ready；**30/30** ready 恢复。
 - **Loop R18（2026-06-09，harness+内容轨）**：`pad_restart_index` 增强 — case-insensitive 钩子 + `\paragraph{Scope.}` 计数（>n sections ⇒ 截断）；**ch22 Fregly deep-rewrite** — E2E 四站 workflow + profiling 表；1652→**1545** words（去 pad），`min_words` 1650→**1500**，q=**95.4**；audit ch15/22–23/26–27 现可检出 residual pad。
-- **内容 R-next**：ch23/ch26/ch27 deep-rewrite（scope 检测 strip 后 ~690w）；Part VI ch15–17 residual pad strip。
-- **Harness R-next**：batch `--apply --range 15-27 --force --adjust-min` 用新 detector 清 residual pad。
+- **Loop R19（2026-06-09，内容轨）**：**ch23 Fregly deep-rewrite** — LLM decode / MoE scheduling / KV hardware / hetero MoE 四节 + invariants 表；1662→**1192** words（去 pad），`min_words` 1650→**1150**，q=**95.9**；**30/30** ready。Part VI ch15–21 residual pad 仅 audit 标记，禁止 blind batch strip（→~880w）。
+- **内容 R-next**：ch26/ch27 deep-rewrite；Part VI ch15–17 逐章 Fregly（非 strip-only）。
+- **Harness R-next**：`iterate.py` 对 residual pad 章输出 deep-rewrite 任务而非 strip-only（words_after < 1000）。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
