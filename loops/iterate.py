@@ -445,6 +445,29 @@ def fact_verification_tasks(spec: ChapterSpec, tex: str) -> list[str]:
     return tasks
 
 
+def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
+    try:
+        from book_pad_dedup import audit_chapter
+
+        report = audit_chapter(spec)
+    except ImportError:
+        return []
+    if not report["changed"]:
+        return []
+    cmd = f"python3 book_pad_dedup.py --apply {spec.chapter_id}"
+    if report["words_after"] < report["min_words"]:
+        return [
+            "Pad dedup: duplicate pad_agent tail before Key Takeaways "
+            f"({report['words_before']}->{report['words_after']} words). "
+            f"Run `{cmd} --force` and set honest min_words in outline_extended.json "
+            f"(~{report['words_after']}), or Fregly deep-rewrite to restore depth."
+        ]
+    return [
+        f"Pad dedup: run `{cmd}` to remove pad tail "
+        f"({report['words_before']}->{report['words_after']} words, coverage {report['coverage']})."
+    ]
+
+
 def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     tasks: list[str] = []
     research_dir = RESEARCH_ROOT / spec.chapter_id
@@ -460,6 +483,8 @@ def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
 
     for issue in chapter_ending_violations(tex):
         tasks.append(f"Chapter ending: {issue} (see {WRITING_STYLE.name} §VII)")
+
+    tasks.extend(pad_dedup_tasks(spec))
 
     try:
         from book_proper_nouns import proper_noun_tasks

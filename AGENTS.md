@@ -418,8 +418,9 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R12（2026-06-09，harness+内容轨）**：`program_books.md`/`loops/README.md` 路径 → `build/chapters`；`compile_book` timeout 180→900s；ch30 Conclusion 回指 Ch26 runbook + Ch27 baselines；CI run #1 **success** (~30s)。
 - **Loop R13（2026-06-09，harness 轨）**：`books/README.md` 重写（build/chapters、30/30 Part 表、CI badge）；根 `README.md` CI badge；`WRITING_STYLE.md` Fregly §七 章骨架 + `reference-chapter-1.pdf` 双 gold 标准；AGENTS §10 CI artifact 说明；pad 去重调研：ch19/ch26 exact dedup 会跌破 min_words → 下轮 selective 模板剥离。
 - **Loop R14（2026-06-09，harness+内容轨）**：`book_pad_dedup.py`（`--audit`/`--apply` tail-block 剥离）；`book_agent_rewrite` 增 `pad_restart_index` + `has_pad_tail_block` 防重复 pad；**ch19 试点** strip 3933→2090 words，`outline_extended.json` min_words 3500→2000；`python3 book_prepare.py --chapter ch19` → ready q=94.2；audit ch14–27：仅 ch14 无 pad tail，其余 strip 后需降 min 或 deep-rewrite。
-- **内容 R-next**：batch strip ch15–27 + 诚实 min_words 或 Fregly deep-rewrite（逐章）。
-- **Harness R-next**：`book_pad_dedup` 接入 `book-loop step` agent_tasks；citation-loop 文档 ch01–30 已齐。
+- **Loop R15（2026-06-09，harness+内容轨）**：**ch18/ch20** pad strip（3933→2090、4021→2138）+ min_words 2000/2100；compiler 三章 ch18–20 均 honest gate；`iterate.py` 增 `pad_dedup_tasks()` → agent_tasks；30/30 ready 保持。
+- **内容 R-next**：batch strip ch15–17、ch21–27 + 诚实 min_words 或 Fregly deep-rewrite（逐章）。
+- **Harness R-next**：`book_pad_dedup --apply --range` batch 模式；Part VI compiler 章 deep-rewrite 队列。
 - **协议（2026-06）**：本文重整为双轨 PSIVE；每轮 **commit + push → 自动下一轮**。
 - **Loop R2（2026-06-10，Harness/契约）**：§5.5 **目录迭代** — Agent 可在内容不足/结构不合理时改 `book_content.md` + OUTLINE + main.tex；三层同步 checklist。
 
