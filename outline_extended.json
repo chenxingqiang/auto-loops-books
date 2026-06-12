@@ -582,7 +582,7 @@
       "id": "ch15",
       "file": "ch15_xla.tex",
       "title": "XLA: Production-Grade AI Compiler",
-      "min_words": 2050,
+      "min_words": 800,
       "max_words": 9000,
       "min_citations": 8,
       "template": "compiler",

@@ -480,6 +480,23 @@ def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
     ]
 
 
+def pad_residual_chapters() -> list[str]:
+    """Chapters where strip-only pad dedup would leave prose below deep-rewrite floor."""
+    try:
+        from book_pad_dedup import audit_chapter
+    except ImportError:
+        return []
+    out: list[str] = []
+    for spec in OUTLINE:
+        tex = read_chapter_text(spec)
+        if not tex.strip():
+            continue
+        row = audit_chapter(spec)
+        if row["changed"] and row["words_after"] < PAD_DEDUP_DEEP_REWRITE_FLOOR:
+            out.append(f"{spec.chapter_id}→{row['words_after']}w")
+    return out
+
+
 def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     tasks: list[str] = []
     research_dir = RESEARCH_ROOT / spec.chapter_id
@@ -821,7 +838,13 @@ def print_status(*, pick: str = "sequential") -> None:
         for row in part_progress():
             print(f"  {row['part_id']}\t{row['ready']}/{row['total']}\t{row['title']}")
     if progress["all_outline_ready"]:
-        print("\nAll OUTLINE chapters pass gates.\n")
+        print("\nAll OUTLINE chapters pass gates.")
+        residual = pad_residual_chapters()
+        if residual:
+            shown = ", ".join(residual[:12])
+            extra = f" (+{len(residual) - 12} more)" if len(residual) > 12 else ""
+            print(f"Pad residual (deep-rewrite): {shown}{extra}")
+        print()
     else:
         print()
 
