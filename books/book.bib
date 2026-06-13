@@ -24,6 +24,51 @@
   note={44-cell cross-GPU study; CUDA Graphs A/B on H100 and L4}
 }
 
+@article{chen2020compilerbasedhardw,
+  title={Compiler-based Hardware Profiling for Software-Defined Architecture},
+  author={Chen, X},
+  year={2020},
+  url={https://doi.org/10.1109/southeastcon44009.2020.9249733}
+}
+
+@inproceedings{chen2018tvm,
+  title={{TVM}: An Automated End-to-End Optimizing Compiler for Deep Learning},
+  author={Chen, Tianqi and Moreau, Thierry and Jiang, Ziheng and Zheng, Lianmin and Yan, Eddie and Cowan, Meghan and Shen, Haichen and Wang, Leyuan and Hu, Yuwei and Ceze, Luis and Guestrin, Carlos and Krishnamurthy, Arvind},
+  booktitle={13th USENIX Symposium on Operating Systems Design and Implementation (OSDI)},
+  pages={578--594},
+  year={2018},
+  url={https://arxiv.org/abs/1802.04799},
+  note={Graph- and operator-level optimization, operator fusion, memory latency hiding, ML-based cost model; CPU/GPU/FPGA}
+}
+
+@inproceedings{chen2018autotvm,
+  title={Learning to Optimize Tensor Programs},
+  author={Chen, Tianqi and Zheng, Lianmin and Yan, Eddie and Jiang, Ziheng and Moreau, Thierry and Ceze, Luis and Guestrin, Carlos and Krishnamurthy, Arvind},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2018},
+  url={https://arxiv.org/abs/1805.08166},
+  note={AutoTVM; template-based statistical cost model (GBT/TreeGRU), transfer learning; 1.2--3.8x end-to-end}
+}
+
+@inproceedings{zheng2020ansor,
+  title={Ansor: Generating High-Performance Tensor Programs for Deep Learning},
+  author={Zheng, Lianmin and Jia, Chengfan and Sun, Minmin and Wu, Zhao and Yu, Cody Hao and Haj-Ali, Ameer and Wang, Yida and Yang, Jun and Zhuo, Danyang and Sen, Koushik and Gonzalez, Joseph E. and Stoica, Ion},
+  booktitle={14th USENIX Symposium on Operating Systems Design and Implementation (OSDI)},
+  pages={863--879},
+  year={2020},
+  url={https://arxiv.org/abs/2006.06762},
+  note={Template-free auto-scheduler; hierarchical sampling, evolutionary search, task scheduler; up to 3.8x/2.6x/1.7x on Intel CPU/ARM CPU/NVIDIA GPU}
+}
+
+@article{lai2023relax,
+  title={Relax: Composable Abstractions for End-to-End Dynamic Machine Learning},
+  author={Lai, Ruihang and Shao, Junru and Feng, Siyuan and Jin, Yuchen and others},
+  journal={arXiv preprint arXiv:2311.02103},
+  year={2023},
+  url={https://arxiv.org/abs/2311.02103},
+  note={TVM Unity; cross-level IRModule (Relax graph + TensorIR), first-class symbolic shapes, call\_tir DPS; replaces Relay}
+}
+
 @inproceedings{dao2022flashattention,
   title={Flash{A}ttention: Fast and Memory-Efficient Exact Attention with {IO}-Awareness},
   author={Dao, Tri and Fu, Dan and Ermon, Stefano and Rudra, Atri and R{\'e}, Christopher},

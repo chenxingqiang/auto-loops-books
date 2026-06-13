@@ -57,3 +57,4 @@ ch14-202606101206	100.0	4652	52	95.6	keep	deep-rewrite
 ch14-202606101218	100.0	4223	52	94.5	keep	deep-rewrite
 ch12-202606112315	100.0	3354	17	95.1	keep	deep-rewrite
 ch13-202606112324	100.0	4880	19	94.8	keep	deep-rewrite
+ch16-202606131301	100.0	2169	17	94.1	keep	deep-rewrite: replace ch16 TVM pad filler with verified Relax/TIR/AutoTVM/Ansor content
