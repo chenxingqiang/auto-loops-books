@@ -1,150 +1,55 @@
 {
   "chapter_id": "ch13",
-  "pool_count": 40,
+  "pool_count": 21,
   "bib_keys": [
-    "jayawardena2026coreprinciplesofma",
     "park2026cpugpuworkloaddist",
-    "markowitz2023generativeaiaremor",
-    "chowdhury2026marginalizedstakeh",
-    "zhuang2023convolutionalneura",
-    "shao2025thetheoreticalappl",
-    "wu2023pytorch20thejourne",
-    "rjoub2026greendecodingelqco",
     "memoryfloor2026",
     "yirage2026",
-    "hwang2022developmentofteach",
     "jeong2026flowgraphawaretili",
     "dao2023flashdecoding",
     "pronk2026beyondmodeloptimiz",
-    "shen2025efficientllminfere",
-    "khan2026dequantizationpena",
     "patel2025llminference",
-    "semianalysis2024tma",
-    "ramachandran2026coreethicalprincip",
-    "charlotte2024aidrivenoptimizati",
-    "eliot2021coreprinciplesofju",
-    "thakur2026coreprinciplesandm",
-    "shankar2025advancementsinaiba",
-    "bate2026aicanslowlyshiftan",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "nvidia2024cudagraphs",
+    "wu2023pytorch20thejourne",
     "malaraju2025aiaugmentedcompile",
-    "anon20261chapter1corearchi",
     "cummins2022compilergymrobustp",
-    "cronin2024coretechnicalconce",
-    "geroimenko2026thecoreprincipleso",
-    "chandra2025reducinglatencyand",
     "li2025llmpoweredautomate",
     "taxbreak2026",
     "dao2022flashattention",
     "kwon2023vllm",
     "liu2024deepseekv3",
-    "nvidia2022hopper",
-    "amd2024xdna",
     "amd2024aie",
-    "nvidia2024cudagraphs",
+    "semianalysis2024tma",
     "dlbook"
   ],
   "papers": [
     {
-      "bib_key": "jayawardena2026coreprinciplesofma",
-      "title": "Core Principles of Machine Learning: Theory, Methods, and Practice",
-      "source_tier": "C",
-      "relevance_score": 113,
-      "matched_keywords": [
-        "core theory",
-        "fusion theory",
-        "fusion",
-        "core",
-        "real",
-        "ship",
-        "theory"
-      ]
-    },
-    {
       "bib_key": "park2026cpugpuworkloaddist",
       "title": "CPU-GPU Workload Distribution during Throughput-Oriented LLM Inference on Single-GPU Systems",
       "source_tier": "A",
-      "relevance_score": 83,
+      "relevance_score": 92,
       "matched_keywords": [
-        "GPU CPU",
-        "CPU",
-        "GPU",
-        "NPU",
-        "decode"
-      ]
-    },
-    {
-      "bib_key": "markowitz2023generativeaiaremor",
-      "title": "Generative AI are More Truth-Biased than Humans: A Replication and Extension of Core Truth-Default Theory Principles",
-      "source_tier": "B",
-      "relevance_score": 79,
-      "matched_keywords": [
-        "core theory",
-        "core",
-        "independent",
-        "theory"
-      ]
-    },
-    {
-      "bib_key": "chowdhury2026marginalizedstakeh",
-      "title": "Marginalized Stakeholder Theory: Origins and Core Principles",
-      "source_tier": "C",
-      "relevance_score": 79,
-      "matched_keywords": [
-        "core theory",
-        "core",
-        "ship",
-        "theory"
-      ]
-    },
-    {
-      "bib_key": "zhuang2023convolutionalneura",
-      "title": "Convolutional Neural Networks Inference Memory Optimization with Receptive Field-Based Input Tiling",
-      "source_tier": "B",
-      "relevance_score": 42,
-      "matched_keywords": [
-        "tiling",
-        "NPU"
-      ]
-    },
-    {
-      "bib_key": "shao2025thetheoreticalappl",
-      "title": "The Theoretical Application of Computational Complexity Theory in Compiler Optimization",
-      "source_tier": "B",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "compiler",
-        "theory"
-      ]
-    },
-    {
-      "bib_key": "wu2023pytorch20thejourne",
-      "title": "PyTorch 2.0: The Journey to Bringing Compiler Technologies to the Core of PyTorch (Keynote)",
-      "source_tier": "A",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "compiler",
-        "core"
-      ]
-    },
-    {
-      "bib_key": "rjoub2026greendecodingelqco",
-      "title": "Green Decoding: ELQ Co-Optimization and Carbon-Aware Scheduling for Efficient LLM Inference",
-      "source_tier": "B",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "independent",
-        "miss",
-        "real",
-        "ship"
+        "gpu cpu",
+        "cpu",
+        "gpu",
+        "npu",
+        "decode",
+        "target"
       ]
     },
     {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
-      "relevance_score": 28,
+      "relevance_score": 82,
       "matched_keywords": [
-        "GPU",
+        "gpu",
+        "bandwidth",
+        "batch-1",
+        "cell",
+        "cuda",
         "decode"
       ]
     },
@@ -152,20 +57,11 @@
       "bib_key": "yirage2026",
       "title": "YiRage: Multi-Backend LLM Inference Optimization",
       "source_tier": "A",
-      "relevance_score": 28,
+      "relevance_score": 37,
       "matched_keywords": [
-        "CPU",
-        "YiRage"
-      ]
-    },
-    {
-      "bib_key": "hwang2022developmentofteach",
-      "title": "Development of Teaching-Learning Contents for AI Core Principles at the Elementary School Level: With a Focus on Convolutional Neural Network",
-      "source_tier": "B",
-      "relevance_score": 28,
-      "matched_keywords": [
-        "NPU",
-        "core"
+        "cpu",
+        "cuda",
+        "yirage"
       ]
     },
     {
@@ -193,25 +89,7 @@
       "source_tier": "A",
       "relevance_score": 20,
       "matched_keywords": [
-        "NPU"
-      ]
-    },
-    {
-      "bib_key": "shen2025efficientllminfere",
-      "title": "Efficient LLM Inference on CPUs",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "CPU"
-      ]
-    },
-    {
-      "bib_key": "khan2026dequantizationpena",
-      "title": "De-quantization Penalties for Interactive LLM Inference on Prosumer GPUs",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "GPU"
+        "npu"
       ]
     },
     {
@@ -224,66 +102,39 @@
       ]
     },
     {
-      "bib_key": "semianalysis2024tma",
-      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "core"
+        "hopper"
       ]
     },
     {
-      "bib_key": "ramachandran2026coreethicalprincip",
-      "title": "Core Ethical Principles in AI",
-      "source_tier": "B",
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "core"
+        "xdna"
       ]
     },
     {
-      "bib_key": "charlotte2024aidrivenoptimizati",
-      "title": "AI-Driven Optimization of Compiler Pipelines for Heterogeneous Processing Architectures",
-      "source_tier": "B",
+      "bib_key": "nvidia2024cudagraphs",
+      "title": "CUDA Graphs",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "compiler"
+        "cuda"
       ]
     },
     {
-      "bib_key": "eliot2021coreprinciplesofju",
-      "title": "Core Principles of Justice And Respective AI Impacts",
-      "source_tier": "C",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
-      ]
-    },
-    {
-      "bib_key": "thakur2026coreprinciplesandm",
-      "title": "Core Principles and Mechanisms of Agentic AI",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
-      ]
-    },
-    {
-      "bib_key": "shankar2025advancementsinaiba",
-      "title": "Advancements in AI-Based Compiler Optimization Techniques for Machine Learning Workloads",
-      "source_tier": "B",
+      "bib_key": "wu2023pytorch20thejourne",
+      "title": "PyTorch 2.0: The Journey to Bringing Compiler Technologies to the Core of PyTorch (Keynote)",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
         "compiler"
-      ]
-    },
-    {
-      "bib_key": "bate2026aicanslowlyshiftan",
-      "title": "AI can slowly shift an organisation’s core principles. How to spot ‘value drift’ early",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
       ]
     },
     {
@@ -296,15 +147,6 @@
       ]
     },
     {
-      "bib_key": "anon20261chapter1corearchi",
-      "title": "1Chapter 1 Core Architecture, Working Principles, and Applications of DeepSeek",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
-      ]
-    },
-    {
       "bib_key": "cummins2022compilergymrobustp",
       "title": "CompilerGym: Robust, Performant Compiler Optimization Environments for AI Research",
       "source_tier": "A",
@@ -314,40 +156,12 @@
       ]
     },
     {
-      "bib_key": "cronin2024coretechnicalconce",
-      "title": "Core Technical Concepts",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
-      ]
-    },
-    {
-      "bib_key": "geroimenko2026thecoreprincipleso",
-      "title": "The Core Principles of Communicating with Generative AI",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "core"
-      ]
-    },
-    {
-      "bib_key": "chandra2025reducinglatencyand",
-      "title": "Reducing Latency and Enhancing Accuracy in LLM Inference through Firmware-Level Optimization",
-      "source_tier": "B",
-      "relevance_score": 18,
-      "matched_keywords": [
-        "constraints",
-        "real"
-      ]
-    },
-    {
       "bib_key": "li2025llmpoweredautomate",
       "title": "LLM-Powered Automated Detection and Optimization of Inference Bottlenecks in Distributed Systems: A Static Analysis Approach",
       "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "bottleneck"
+        "static"
       ]
     },
     {
@@ -379,20 +193,6 @@
       "matched_keywords": []
     },
     {
-      "bib_key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "source_tier": "A",
-      "relevance_score": 0,
-      "matched_keywords": []
-    },
-    {
-      "bib_key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
-      "source_tier": "A",
-      "relevance_score": 0,
-      "matched_keywords": []
-    },
-    {
       "bib_key": "amd2024aie",
       "title": "AI Engine Technology",
       "source_tier": "A",
@@ -400,8 +200,8 @@
       "matched_keywords": []
     },
     {
-      "bib_key": "nvidia2024cudagraphs",
-      "title": "CUDA Graphs",
+      "bib_key": "semianalysis2024tma",
+      "title": "NVIDIA Tensor Core Evolution: From Volta To Blackwell",
       "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": []

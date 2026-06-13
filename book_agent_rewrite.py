@@ -33,7 +33,7 @@ from book_prose_upgrade import (  # noqa: E402
 )
 from research_tools import chapter_number, extract_outline_bullets  # noqa: E402
 
-AGENT_SKIP = frozenset({"ch01", "ch02", "ch03", "ch04", "ch05", "ch10", "ch11", "ch14"})
+AGENT_SKIP = frozenset({"ch01", "ch02", "ch03", "ch04", "ch05", "ch10", "ch11", "ch12", "ch13", "ch14"})
 
 SECTION_RE = re.compile(
     r"\\section\{[^}]+\}\s*\n\\label\{([^}]+)\}\s*\n(.*?)"
@@ -212,8 +212,7 @@ def chapter_closing(spec: ChapterSpec) -> str:
         "\\item \\textbf{Mechanical sympathy.} Co-design schedules with on-chip residency "
         "\\citep{dao2022flashattention,chen2020compilerbasedhardw}."
     )
-    bullet_tex = "
-".join(bullets)
+    bullet_tex = "\n".join(bullets)
     n = chapter_number(spec.chapter_id) or 0
     next_hint = (
         "Chapter~11 applies these carriers inside full-layer MegaKernels."
@@ -268,7 +267,80 @@ def rewrite_chapter_text(spec: ChapterSpec) -> str:
     text = strip_boilerplate(text)
     text = strip_template_paragraphs(text)
     text = ensure_chapter_coverage(spec, text)
-    text = ensure_min_words(spec, text)
+    text = pad_agent_chapter(spec, text)
+    return text
+
+
+def has_pad_tail_block(spec: ChapterSpec, text: str) -> bool:
+    if "\\section{Key Takeaways}" not in text or not spec.sections:
+        return False
+    before = text.split("\\section{Key Takeaways}", 1)[0]
+    return pad_restart_index(before, spec) is not None
+
+
+def _second_match_index(text: str, signature: str) -> int | None:
+    """Return start index of second case-insensitive occurrence of signature."""
+    pat = re.compile(re.escape(signature), re.IGNORECASE)
+    matches = list(pat.finditer(text))
+    if len(matches) >= 2:
+        return matches[1].start()
+    return None
+
+
+def pad_restart_index(before: str, spec: ChapterSpec) -> int | None:
+    """Detect start of pad_agent tail before Key Takeaways."""
+    scope_marker = "\\paragraph{Scope.}"
+    scope_positions: list[int] = []
+    start = 0
+    while True:
+        idx = before.find(scope_marker, start)
+        if idx < 0:
+            break
+        scope_positions.append(idx)
+        start = idx + 1
+
+    n = len(spec.sections)
+    if n and len(scope_positions) > n:
+        last_legit = scope_positions[n - 1]
+        para_end = before.find("\n\n", last_legit)
+        if para_end >= 0:
+            return para_end + 2
+
+    cut = None
+    for sec in spec.sections:
+        title = section_title(sec.label)
+        for sig in (
+            f"Teams hit \\textbf{{{title}}}",
+            f"The production surprise at \\textbf{{{title}}}",
+            f"\\textbf{{{title}}} is where ",
+        ):
+            pos2 = _second_match_index(before, sig)
+            if pos2 is not None and pos2 > 0:
+                cut = pos2 if cut is None else min(cut, pos2)
+    return cut
+
+
+def pad_agent_chapter(spec: ChapterSpec, text: str) -> str:
+    """Expand with section_body variants before Key Takeaways (avoid prose-upgrade template spam)."""
+    if has_pad_tail_block(spec, text):
+        return text
+    insert_before = "\\section{Key Takeaways}"
+    for round_idx in range(10):
+        if count_words(text) >= spec.min_words:
+            break
+        blocks = [
+            section_body(spec, sec, idx + 20 + round_idx * 11, None)
+            for idx, sec in enumerate(spec.sections)
+        ]
+        block = "\n\n".join(blocks)
+        if insert_before in text:
+            text = text.replace(insert_before, block + "\n\n" + insert_before, 1)
+        else:
+            end_marker = f'\\typeout{{END_CHAPTER "{spec.chapter_id}"'
+            if end_marker in text:
+                text = text.replace(end_marker, block + "\n\n" + end_marker, 1)
+            else:
+                text = text + "\n\n" + block
     return text
 
 

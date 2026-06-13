@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch28",
+  "chapter_title": "LLM Inference Frameworks and Serving Runtimes",
+  "visuals": [
+    {
+      "id": "fig_framework_landscape_pipeline",
+      "kind": "pipeline_figure",
+      "section": "framework_landscape",
+      "label": "fig:framework_landscape_pipeline",
+      "caption": "framework landscape optimization pipeline in LLM Inference Frameworks and Serving Runtimes.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "framework landscape"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_continuous_batching_architecture",
+      "kind": "architecture_figure",
+      "section": "continuous_batching",
+      "label": "fig:continuous_batching_architecture",
+      "caption": "continuous batching block diagram for LLM Inference Frameworks and Serving Runtimes.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

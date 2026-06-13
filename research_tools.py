@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
 RESEARCH_ROOT = BOOKS / "research"
 BIB_PATH = BOOKS / "book.bib"
-OUTLINE_MD = ROOT / "AI Compiler Performance Engineering.md"
+OUTLINE_MD = ROOT / "book_content.md"
 DEFAULT_MIN_CITATION_SCORE = 8
 
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
@@ -358,7 +358,7 @@ def analyze_relevance(paper: dict, keywords: list[tuple[str, int]]) -> tuple[int
     return score, matched
 
 
-# Source tiers — aligned with program_books.md / FACT_VERIFICATION.md
+# Source tiers — aligned with program_books.md / WRITING_STYLE.md §八
 TIER_A_URL_RE = re.compile(
     r"(?:arxiv\.org|openreview\.net|"
     r"doi\.org/10\.1145|doi\.org/10\.1109|"

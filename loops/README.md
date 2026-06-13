@@ -1,6 +1,8 @@
 # Loops a Book — `book-loop` orchestrator
 
-Autonomous full-book iteration for *AI Compiler Performance Engineering*. Implements the machine phases from [`program_books.md`](../program_books.md); the coding agent completes `agent_tasks` between steps.
+## autobooks 无限优化闭环
+
+Cloud Agent 书稿与 harness 双轨操作手册见 **[`AGENTS.md`](AGENTS.md)**（PSIVE + 每轮 commit/push + 自动下一轮）。Style north star: [`reference-chapter-1.pdf`](../reference-chapter-1.pdf).
 
 ```
 pick chapter → research → visuals → compile → evaluate → agent_tasks → (repeat)
@@ -44,7 +46,7 @@ uv run book-loop step --pick weakest
 
 **Phases executed:**
 
-1. **Stub** — create `books/chapters/<file>.tex` + `main.tex` `\input` if missing
+1. **Stub** — create `books/build/chapters/<file>.tex` + `main.tex` `\input{build/chapters/...}` if missing
 2. **Research** — `research_tools` (or keywords/queries only without `SERPAPI_KEY`)
 3. **Visuals** — `book_visuals` plan → render → auto-insert at `\label{sec:...}`
 4. **Compile** — `books/make.sh`
@@ -137,7 +139,7 @@ All must pass before the sequential pointer advances:
 Every `step` emits a task list. Typical items:
 
 1. **Voice** — follow [`books/WRITING_STYLE.md`](../books/WRITING_STYLE.md); gold standard ch01
-2. **Facts** — web-verify every number/example (≥2 searches); log URLs in `books/research/<id>/verified_facts.jsonl` per [`FACT_VERIFICATION.md`](../books/FACT_VERIFICATION.md)
+2. **Facts** — web-verify every number/example (≥2 searches); log URLs in `books/research/<id>/verified_facts.jsonl` per [`WRITING_STYLE.md`](../books/WRITING_STYLE.md) §八
 3. **Style fix** — forbidden lecture phrases detected in chapter `.tex`
 4. **Fact check** — uncited numeric paragraphs flagged by soft lint
 5. **Sections** — expand missing `OUTLINE` sections with cited prose
@@ -149,23 +151,32 @@ When all OUTLINE chapters are ready, tasks include extending `book_prepare.OUTLI
 
 ## Full-book workflow
 
+Each loop round: **machine step → agent tasks → verify → evolve docs → commit → push → next round**. See [`AGENTS.md` §每轮 Git 闭环](../AGENTS.md#每轮-git-闭环验证通过后必做--自动下一轮) for the full protocol (selective `git add`, HEREDOC commit, push, `git pull --rebase`, immediate Loop R{n+1}).
+
 ```bash
-# 1. Progress
+# 1. Perceive
 uv run book-loop status
 
-# 2. Machine step
+# 2. Machine step (or deep-rewrite)
 uv run book-loop step
 
-# 3. Agent: edit loops/loop_state.json tasks → chapters/*.tex, book.bib
+# 3. Agent: edit loops/loop_state.json tasks → books/build/chapters/*.tex, book.bib
 
 # 4. Verify
 cd books && bash make.sh
 uv run book_prepare.py --chapter ch01
 
-# 5. Git keep/revert per program_books.md
+# 5. Evolve: append AGENTS.md「当前轮次笔记」
 
-# 6. Repeat until ch01 ready → ch02 → ch03 → extend OUTLINE
+# 6. Git (after all gates pass): selective git add → commit → push
+git push -u origin HEAD
+
+# 7. Sync + scan backlog → start Loop R{n+1} (no user prompt unless stop conditions)
+git pull --rebase origin "$(git branch --show-current)"
+uv run book-loop status
 ```
+
+**Stop only when:** user says stop / verification cannot pass / push fails after retry / read-only task. Otherwise **continue automatically** after push.
 
 ### One-shot bootstrap (new clone)
 

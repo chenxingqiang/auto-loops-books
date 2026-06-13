@@ -2,7 +2,19 @@
 \label{chap:ch22}
 \typeout{START_CHAPTER "ch22" \theabspage}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+A decode compiler team can win every microbenchmark and still lose the fleet when nobody owns the \emph{end-to-end} tuning loop---profile, locate, change, gate, repeat---under the bytes/token and launches/token counters Chapter~1 made non-negotiable \citep{patel2025llminference,taxbreak2026,memoryfloor2026}. Part~VI gave you backends; Chapter~21 gave you benchmark harnesses; this chapter wires them into a \textbf{compiler-driven E2E workflow} that treats each compiler knob as a hypothesis until decode telemetry confirms it \citep{chen2020compilerbasedhardw,yirage2026,dlbook}.
+
+TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic when fusion boundaries still export activations \citep{memoryfloor2026,nvidia2024cudagraphs}. E2E tuning exists to catch that gap: the moment a compiler change improves a GEMM kernel but raises bytes/token, the workflow rejects it before merge \citep{dao2022flashattention,yirage2026,patel2025llminference}.
+
+The loop has four stations---hardware-aware profiling, bottleneck locating, structured tuning workflow, regression gates---each bound to multi-hardware residency rules from Chapter~2 \citep{chen2020compilerbasedhardw,amd2024xdna,amd2024aie,semianalysis2024tma}. Fregly's profile-first culture applies throughout: Nsight and roofline charts justify knob changes more than intuition about tile sizes \citep{patel2025llminference,semianalysis2024tma,memoryfloor2026}. Chapter~25 extends this loop with automated search; Chapter~26 packages the artifacts for production \citep{yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3}.
+
+Industrial teams document the loop as a runbook, not tribal knowledge. New hires should reproduce a baseline profile on day one, classify a bottleneck on day two, and propose a single-knob experiment by day three---all against the same decode cell \citep{patel2025llminference,chen2020compilerbasedhardw,yirage2026,memoryfloor2026,taxbreak2026,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. When the runbook is missing, compiler teams revert to GEMM microbench heroics \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dlbook,amd2024aie,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Ownership matters: profiling belongs to whoever changes IR; gates belong to release engineering; classification belongs to a cross-functional review with serving SREs present \citep{patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Compiler-only tuning loops ship illegal schedules that frameworks mask until load rises \citep{kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Anti-patterns to post on the wall: (1) tune tiles while launches/token exceed kernel time; (2) merge compiler wins without canary; (3) profile prefill, ship decode; (4) skip IR diff review; (5) treat framework batching wins as compiler fusion wins \citep{taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. The sections below replace each anti-pattern with a concrete practice \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+E2E tuning also bounds \emph{when to stop}: if bytes/token and launches/token meet SLO after graph replay, MegaKernel investment waits---mode selection from Chapter~12 applies before endless fusion \citep{nvidia2024cudagraphs,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,taxbreak2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Good enough under measured decode goodput beats perfect under imaginary FLOPs \citep{patel2025llminference,dlbook,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,amd2024aie,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
 \section{HW aware profiling}
 \label{sec:ch22_hw_aware_profiling}
@@ -12,31 +24,52 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\HW Aware Profiling};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Decode\\cell setup};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Tier\\counters};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Roofline\\+ timeline};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Report\\bytes / launches};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{HW Aware Profiling optimization pipeline in Compiler-Driven End-to-End Performance Tuning.}
+\caption{Hardware-aware profiling pipeline: frozen decode cell $\rightarrow$ residency counters $\rightarrow$ roofline/timeline $\rightarrow$ bytes/token and launches/token report.}
 \label{fig:hw_aware_profiling_pipeline}
 \end{figure}
 
-Teams hit \textbf{HW aware profiling} when Compiler-Driven End-to-End Performance Tuning looks correct in isolation yet decode telemetry disagrees---usually because profil was planned without bandwidth residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+\textbf{Hardware-aware profiling} fails when teams profile prefill shapes, batch-32 training graphs, or synthetic GEMMs while production runs BS${=}1$ decode with paged KV \citep{kwon2023vllm,patel2025llminference,taxbreak2026}. The fix is a \emph{frozen decode cell}: pinned model revision, context bucket, sampling flags, warmup protocol, and SKU---logged beside every trace so comparisons are apples-to-apples \citep{memoryfloor2026,chen2020compilerbasedhardw,yirage2026}.
 
-Hardware truth: GPUs bound profil with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+GPU profiling binds to shared-memory occupancy, TMA transactions, and global bytes moved per decode step---not SM utilization alone \citep{nvidia2022hopper,semianalysis2024tma,patel2025llminference}. CPU profiling binds to LLC misses, NUMA cross-socket traffic, and OpenMP gang efficiency \citep{dlbook,chen2020compilerbasedhardw}. NPU/XDNA profiling counts DMA edges and static tile residency; many GPU counters simply do not exist---substitute compile-time buffer accounting plus on-device cycle estimates \citep{amd2024xdna,amd2024aie,yirage2026}.
 
-Compiler/kernel fix: predicate fusion on profil/bandwidth legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Counter} & \textbf{GPU tool surface} & \textbf{CPU / NPU delta} \\
+\midrule
+bytes/token & Nsight memory chart, CUPTI & perf/LBR, DMA byte counts \\
+launches/token & CUDA API trace, CUPTI & thread launches, sync points \\
+ms/token & end-to-end decode cell & same cell, power cap noted \\
+legality & graph capture, shared mem & static schedule, tile slots \\
+\bottomrule
+\end{tabular}
+\caption{Hardware-aware profiling maps the same decode questions to different toolchains.}
+\label{tab:ch22_profiling_counters}
+\end{table}
 
-\paragraph{Multi-hardware delta.} Hopper may legalize profil with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked bandwidth---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Translate profiler output into Chapter~1 vocabulary before opening a compiler ticket: if bytes/token is within 10\% of analytic HBM roofline ($R_{\mathrm{floor}}$), orchestration tweaks (graphs, fusion) may still help; if bytes dominate, tile changes without fusion are theater \citep{memoryfloor2026,semianalysis2024tma,taxbreak2026}. YiRage and similar stacks export IR-level residency metadata so profiles can be tied to specific fusion boundaries rather than mystery kernels \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm}.
+
+Warmup discipline separates steady-state decode from cold-start stories: graph capture, allocator priming, and CUDA context creation belong in the profile protocol document---not in ad-hoc Slack threads \citep{nvidia2024cudagraphs,memoryfloor2026,kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper}. Teams that compare profiles without matched warmup compare different phases and waste compiler cycles \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dlbook,amd2024aie,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Tooling hygiene: store raw `.nsys-rep`, CUPTI CSV, or NPU trace bundles beside summarized bytes/token tables in artifact storage keyed by git SHA \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Summaries alone rot; raw traces enable re-analysis when classification rules improve \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Prefill vs decode profiling split: compiler teams often inherit prefill-heavy traces from training infra \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Mandate decode-cell scripts in CI and reject profile uploads that omit BS${=}1$ metadata \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Hardware-aware profiling is a contract, not a one-off Nsight session \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+\paragraph{Multi-hardware delta.} Hopper profiles expose TMA and warp-specialization; XDNA profiles expose tile SRAM fill; CPU profiles expose cache hierarchy---identical decode step, incomparable dashboards unless normalized to bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused profil raises bytes/token; fused schedule must keep bandwidth on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Decode cell (BS${=}1$, ctx${=}2048$): a profile showing low SM occupancy but high HBM throughput is bandwidth-bound---compiler tuning should target fusion and KV residency, not bigger GEMM tiles \citep{memoryfloor2026,patel2025llminference,dao2022flashattention}.
 \end{example}
-
-\paragraph{Scope.} This section binds profil, bandwidth to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{bottleneck locating}
 \label{sec:ch22_bottleneck_locating}
@@ -46,301 +79,96 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused profil raises bytes/token; fused s
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Profile\\facts};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Classify\\bound};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize Map to\\compiler knob};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Prioritize\\next change};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Bottleneck Locating block diagram for Compiler-Driven End-to-End Performance Tuning.}
+\caption{Bottleneck locating: profile facts $\rightarrow$ launch vs memory vs residency class $\rightarrow$ compiler knob $\rightarrow$ prioritized experiment.}
 \label{fig:bottleneck_locating_architecture}
 \end{figure}
 
-The production surprise at \textbf{bottleneck locating} is not peak FLOPs; it is illegal tier placement: bottleneck spilling to HBM/DDR while bottleneck still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+\textbf{Bottleneck locating} is where E2E tuning separates senior compiler engineers from kernel tourists \citep{patel2025llminference,dlbook,chen2020compilerbasedhardw}. The production surprise is not peak FLOPs---it is misclassification: teams fuse operators while launches/token remain launch-bound, or capture CUDA Graphs while bytes/token stay at eager levels \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026,yirage2026}.
 
-Trace residency: bottleneck producers must feed bottleneck consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Use a decision tree grounded in measured counters:
+\begin{enumerate}
+\item \textbf{Launch-bound:} high launches/token, low $R_{\mathrm{floor}}$ proximity $\rightarrow$ graph mode, op fusion, MegaKernel seams (Chapter~12) \citep{nvidia2024cudagraphs,memoryfloor2026,taxbreak2026,yirage2026}.
+\item \textbf{Memory-bound:} bytes/token near roofline $\rightarrow$ fusion depth, KV layout, attention kernel choice \citep{dao2022flashattention,dao2023flashdecoding,semianalysis2024tma,memoryfloor2026}.
+\item \textbf{Residency-illegal:} correct counters but p99 spikes $\rightarrow$ spill paths, graph illegality, dynamic alloc in capture region \citep{nvidia2024cudagraphs,kwon2023vllm,patel2025llminference,yirage2026}.
+\item \textbf{Framework-bound:} compiler clean but Python/scheduler overhead $\rightarrow$ hand off to serving stack (Chapter~28), do not keep retuning tiles \citep{kwon2023vllm,patel2025llminference,taxbreak2026}.
+\end{enumerate}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Diff lowered IR or CUDA when classification is unclear: new global allocations between attention and MLP usually explain bytes/token regressions better than guesswork \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention}. On NPU, diff static DMA schedules; on CPU, diff cache-blocking parameters in oneDNN/TorchInductor output \citep{amd2024xdna,amd2024aie,dlbook,chen2020compilerbasedhardw}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for bottleneck on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+MoE and speculative decode add \textbf{routing-bound} buckets: expert imbalance shows up as latency tails even when per-expert kernels look healthy \citep{liu2024deepseekv3,taxbreak2026,kwon2023vllm}. Locate whether the bottleneck is compile-time expert fusion, runtime routing, or both before changing schedules \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-\paragraph{Scope.} This section binds bottleneck to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Attention-backend swaps (FlashAttention, SDPA, vendor libs) can move bytes/token without changing launches/token---classify whether the bottleneck lives in attention or MLP/residual before celebrating attention wins \citep{dao2022flashattention,dao2023flashdecoding,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. TaxBreak-style launch counts decompose where framework fragmentation still dominates \citep{taxbreak2026,patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Cross-SKU classification differs: a launch-bound Hopper cell may be memory-bound on a bandwidth-starved SKU at the same model \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,taxbreak2026,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Bottleneck labels are properties of (model, bucket, SKU), not universal truths \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+When profiles disagree with production dashboards, suspect bucket mismatch (context length), batching policy, or speculative path divergence---reconcile framework counters with compiler-cell counters before filing compiler bugs \citep{kwon2023vllm,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Bottleneck locating is forensic work \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+\paragraph{Review gate.} Every bottleneck ticket attaches profile artifacts, classification label, and the single compiler knob under test---no unfocused ``make it faster'' requests \citep{patel2025llminference,yirage2026,memoryfloor2026,chen2020compilerbasedhardw}.
 
 \section{tuning workflow}
 \label{sec:ch22_tuning_workflow}
 
-\textbf{tuning workflow} is where Compiler-Driven End-to-End Performance Tuning meets Chapter~1 counters: fix workflow and tun together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+\textbf{Tuning workflow} turns classifications into a repeatable experiment queue \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,dlbook}. Industrial teams use a kanban-style pipeline: \emph{hypothesis} (knob + expected counter movement) $\rightarrow$ \emph{branch build} $\rightarrow$ \emph{decode-cell A/B} $\rightarrow$ \emph{review} $\rightarrow$ \emph{merge or discard} \citep{memoryfloor2026,taxbreak2026,kwon2023vllm}.
 
-Hardware truth: GPUs bound workflow with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+One change per experiment: fusion depth \emph{or} tile size \emph{or} backend switch---never three at once, or postmortems cannot attribute wins \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}. Keep a \emph{human prior} schedule checked in as baseline; candidates must beat prior on bytes/token, launches/token, and ms/token simultaneously on the target SKU \citep{memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw}.
 
-Compiler/kernel fix: predicate fusion on workflow/tun legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Workflow stages map to Part~VI backends: XLA flags, TVM schedules, Triton configs, MLIR pass pipelines---each logged with version hashes \citep{chen2020compilerbasedhardw,yirage2026,semianalysis2024tma,amd2024xdna}. Cross-backend experiments require separate hypothesis cards; promoting a Triton win to an XLA fleet without re-profile repeats the GPU-only culture Chapter~1 rejected \citep{patel2025llminference,taxbreak2026,memoryfloor2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,amd2024xdna}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize workflow with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tun---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Canary deployment belongs in the workflow: 5--10\% of decode replicas run candidate schedules with automatic rollback when p99 or error rate breaches SLO \citep{patel2025llminference,kwon2023vllm,liu2024deepseekv3,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Compiler tuning without canary is how clusters learn about illegal graph capture at 2am \citep{nvidia2024cudagraphs,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper}.
+
+Experiment queues should cap WIP: three concurrent knob experiments per layer block maximum, or attribution collapses and profiles diverge \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Document expected counter deltas on each hypothesis card---``$\downarrow$ launches/token'' vs ``$\downarrow$ bytes/token''---so reviewers reject mismatched outcomes quickly \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Rollback paths must be rehearsed: fingerprinted human-prior schedules restore in one deploy step when canary breaches SLO \citep{yirage2026,chen2020compilerbasedhardw,kwon2023vllm,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Tuning workflow is incomplete without a tested undo button \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+
+Multi-hardware tuning runs parallel queues per fleet tier---never merge GPU and NPU experiment conclusions into one narrative \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,dlbook,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Shared methodology, separate queues, separate promotion gates \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024aie,dlbook,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
 \begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused workflow raises bytes/token; fused schedule must keep tun on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Hypothesis card: ``Increase MLP fusion depth by one operator; expect $\downarrow$ launches/token, $\Downarrow$ bytes/token if residency legal; measure ctx$\in\{512,2048,8192\}$.'' Reject if any bucket regresses \citep{memoryfloor2026,taxbreak2026,yirage2026,nvidia2024cudagraphs,kwon2023vllm}.
 \end{example}
-
-\paragraph{Scope.} This section binds workflow, tun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
 
 \section{regression gates}
 \label{sec:ch22_regression_gates}
 
-Teams hit \textbf{regression gates} when Compiler-Driven End-to-End Performance Tuning looks correct in isolation yet decode telemetry disagrees---usually because regression was planned without gate residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+\textbf{Regression gates} encode the workflow into CI so human discipline survives headcount churn \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,dlbook}. Minimum bar for merge:
+\begin{itemize}
+\item Decode-cell A/B on agreed buckets passes on bytes/token, launches/token, ms/token \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+\item No new global allocations in captured graph regions (GPU) or new DDR hops (NPU) \citep{nvidia2024cudagraphs,amd2024aie,yirage2026,kwon2023vllm}.
+\item IR diff attached; roofline or buffer accounting for target SKU \citep{semianalysis2024tma,chen2020compilerbasedhardw,patel2025llminference,amd2024xdna,dlbook,dao2022flashattention,liu2024deepseekv3,dao2023flashdecoding,memoryfloor2026,taxbreak2026,nvidia2022hopper,yirage2026,amd2024aie,kwon2023vllm}.
+\item Fingerprint or schedule artifact versioned with compiler git SHA \citep{yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,patel2025llminference,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+\end{itemize}
 
-Trace residency: regression producers must feed gate consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Nightly jobs replay the full cell matrix across representative SKUs; drift alerts fire when counters move more than agreed $\epsilon$ without an approved compiler bump \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Gates fail closed: ambiguous profiles block merge until reproduced \citep{patel2025llminference,yirage2026,memoryfloor2026,chen2020compilerbasedhardw,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Chapter~21 benchmarks supply the harness; Chapter~25 automates search inside the same gates \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Production runbooks (Chapter~26) assume these gates ran before containers ship \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,amd2024aie,kwon2023vllm,liu2024deepseekv3,memoryfloor2026,taxbreak2026,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for regression on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Flaky gates erode trust: quarantine tests with high variance until environment drift is fixed---do not weaken thresholds to greenwash CI \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Pin driver, CUDA, and compiler versions in gate metadata; unexplained drift triggers infra tickets before compiler blame \citep{nvidia2022hopper,nvidia2024cudagraphs,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,amd2024xdna}.
 
-\paragraph{Scope.} This section binds regression, gate to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Security and determinism gates belong beside performance: numerics diffs beyond agreed tolerance block merge even when ms/token improves \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Regression gates protect users, not just leaderboard scores \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-\section{Chapter Summary}
-\label{sec:ch22_summary}
+Publish gate failures publicly inside the compiler team: failed experiments teach more than silent reverts \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. A culture that hides negative results repeats the same illegal fusion twice \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
-Compiler-Driven End-to-End Performance Tuning succeeds when hardware constraints drive schedules and decode metrics prove relief \citep{yirage2026,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw}. Carry bytes/token and launches/token forward; later chapters assume these baselines exist. Key threads: Section~\ref{sec:ch22_hw_aware_profiling}, Section~\ref{sec:ch22_bottleneck_locating}, Section~\ref{sec:ch22_tuning_workflow} \citep{dao2022flashattention,amd2024xdna,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dlbook}.
+\section{Key Takeaways}
+\label{sec:ch22_key_takeaways}
 
-\textbf{HW aware profiling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+\begin{itemize}
+\item \textbf{HW-aware profiling.} Freeze decode cells; normalize GPU/CPU/NPU tools to bytes/token and launches/token \citep{patel2025llminference,memoryfloor2026,taxbreak2026,semianalysis2024tma,amd2024xdna}.
+\item \textbf{Bottleneck locating.} Classify launch-, memory-, residency-, or framework-bound before changing compiler knobs \citep{nvidia2024cudagraphs,dao2022flashattention,yirage2026,kwon2023vllm}.
+\item \textbf{Tuning workflow.} One knob per experiment; human prior baseline; canary on fleet \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026,patel2025llminference}.
+\item \textbf{Regression gates.} CI enforces counter non-regression, legality, and versioned artifacts \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie}.
+\item \textbf{Measure useful decode work.} Profile-first beats tile-size folklore \citep{patel2025llminference,dlbook,semianalysis2024tma}.
+\end{itemize}
 
-Binding software to silicon: compiler passes must encode profil/bandwidth legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+\section{Conclusion}
+\label{sec:ch22_conclusion}
 
-When HW aware profiling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting HW aware profiling, attach roofline or NPU buffer accounting showing profil residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize profil with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{bottleneck locating} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: bottleneck and bottleneck must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for bottleneck locating: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize bottleneck with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bottleneck constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{tuning workflow} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: workflow sets the residency envelope; tun determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify workflow, tun, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tun constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tuning workflow, attach roofline or NPU buffer accounting showing workflow residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{regression gates} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode regression/gate legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When regression gates disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting regression gates, attach roofline or NPU buffer accounting showing regression residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize regression with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{HW aware profiling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: profil sets the residency envelope; bandwidth determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify profil, bandwidth, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bandwidth constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting HW aware profiling, attach roofline or NPU buffer accounting showing profil residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{bottleneck locating} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode bottleneck/bottleneck legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When bottleneck locating disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting bottleneck locating, attach roofline or NPU buffer accounting showing bottleneck residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize bottleneck with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{tuning workflow} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: workflow and tun must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for tuning workflow: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize workflow with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tun constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{regression gates} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: regression sets the residency envelope; gate determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify regression, gate, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: gate constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting regression gates, attach roofline or NPU buffer accounting showing regression residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{HW aware profiling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: profil and bandwidth must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for HW aware profiling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize profil with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bandwidth constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{bottleneck locating} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: bottleneck sets the residency envelope; bottleneck determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify bottleneck, bottleneck, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bottleneck constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting bottleneck locating, attach roofline or NPU buffer accounting showing bottleneck residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{tuning workflow} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode workflow/tun legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When tuning workflow disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tuning workflow, attach roofline or NPU buffer accounting showing workflow residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize workflow with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{regression gates} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: regression and gate must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for regression gates: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize regression with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: gate constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\textbf{HW aware profiling} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode profil/bandwidth legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When HW aware profiling disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting HW aware profiling, attach roofline or NPU buffer accounting showing profil residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize profil with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{bottleneck locating} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: bottleneck and bottleneck must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for bottleneck locating: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize bottleneck with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bottleneck constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{tuning workflow} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: workflow sets the residency envelope; tun determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify workflow, tun, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tun constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tuning workflow, attach roofline or NPU buffer accounting showing workflow residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{regression gates} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode regression/gate legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When regression gates disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting regression gates, attach roofline or NPU buffer accounting showing regression residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize regression with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{HW aware profiling} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: profil sets the residency envelope; bandwidth determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify profil, bandwidth, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bandwidth constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting HW aware profiling, attach roofline or NPU buffer accounting showing profil residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{bottleneck locating} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode bottleneck/bottleneck legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When bottleneck locating disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting bottleneck locating, attach roofline or NPU buffer accounting showing bottleneck residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize bottleneck with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{tuning workflow} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: workflow and tun must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for tuning workflow: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize workflow with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tun constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{regression gates} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: regression sets the residency envelope; gate determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify regression, gate, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: gate constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting regression gates, attach roofline or NPU buffer accounting showing regression residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{HW aware profiling} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: profil and bandwidth must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for HW aware profiling: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize profil with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bandwidth constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-Production teams misread \textbf{bottleneck locating} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: bottleneck sets the residency envelope; bottleneck determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{patel2025llminference,dlbook}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify bottleneck, bottleneck, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: bottleneck constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting bottleneck locating, attach roofline or NPU buffer accounting showing bottleneck residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\textbf{tuning workflow} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode workflow/tun legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When tuning workflow disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting tuning workflow, attach roofline or NPU buffer accounting showing workflow residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize workflow with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-The usual Compiler-Driven End-to-End Performance Tuning failure at \textbf{regression gates} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: regression and gate must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{patel2025llminference,dlbook}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for regression gates: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{patel2025llminference,dlbook}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize regression with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: gate constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{patel2025llminference,dlbook}.
+Compiler-driven end-to-end performance tuning is the operational glue between backends (Part~VI), benchmarks (Chapter~21), automated search (Chapter~25), and production packaging (Chapter~26) \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Without hardware-aware profiling and regression gates, compiler teams optimize kernels while decode goodput flatlines \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Gate merges on buffer accounting and reproducible decode cells---never on a single Nsight screenshot \citep{semianalysis2024tma,yirage2026,patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
 
 \typeout{END_CHAPTER "ch22" \theabspage}

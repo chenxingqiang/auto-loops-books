@@ -1,8 +1,10 @@
 # AI Compiler Performance Engineering — Unified Writing Voice & Style
 
 **Canonical spec (Chinese):** sections I–VI below.
-**Manuscript language:** English (`books/chapters/*.tex`).
-**Gold-standard reference:** Chapter 1 (`ch01_llm_decode_bottlenecks.tex`) — all chapters must match its engineering narrative density, problem-first structure, and hardware–software coupling.
+**Manuscript language:** English (`books/build/chapters/*.tex`).
+**Gold-standard references:**
+- **本书 rhythm：** `ch01_llm_decode_bottlenecks.tex` — multi-HW + YiRage + decode metrics
+- **O'Reilly 章骨架：** [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) — opening hook, goodput/mechanical sympathy sections, Takeaways granularity (§七)
 
 **Loop enforcement:** Every `agent_tasks` block from `uv run book-loop step` assumes compliance with this file. Read before editing any chapter.
 
@@ -149,103 +151,160 @@ Never GPU-only generalizations. Tie every optimization claim to memory hierarchy
 
 ## 六、对标参考（已定型优质文风）
 
-全书所有章节严格对标 **第 1 章定稿**（`ch01_llm_decode_bottlenecks.tex`）：
+全书章节对标 **两层 gold standard**：
 
-- 工程叙事感强、问题导向清晰
-- 软硬件联动、多硬件对比
-- 有踩坑、有复盘、有结论
-- 无教科书刻板感
+| 层 | 参考 | 用途 |
+|----|------|------|
+| **本书定稿** | `ch01_llm_decode_bottlenecks.tex` | 多硬件 + YiRage + decode goodput 指标链 |
+| **O'Reilly 样章** | [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) | 章结构、Takeaways 粒度、案例叙事、profile-first 方法论 |
 
-When expanding ch02+, read ch01's section openings and paragraph rhythm before drafting.
+When expanding ch02+, read **ch01 的节奏** + **Fregly Ch.1 的章骨架** before drafting.
 
 ---
 
 ## 七、O'Reilly 对齐：*AI Systems Performance Engineering*（Fregly）风格映射
 
-**Reference sample:** `chapter1-AI Systems Performance Engineering - Chris Fregly.pdf` (repo root).
+**Reference sample:** [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) — *AI Systems Performance Engineering* (Chris Fregly), **Ch.1 Introduction and AI System Overview** (repo root).
 
-本书与 Fregly 同属 **中高阶 AI 系统性能工程专著**，但聚焦 **编译器 + 多硬件 decode/MegaKernel**（YiRage），而非 PyTorch 全栈 + NVIDIA 集群运维。对齐的是 **叙事范式与章节结构**，不是复制其 CUDA/PyTorch 生态边界。
+本书与 Fregly 同属 **中高阶 AI 系统性能工程专著**，但聚焦 **编译器 + 多硬件 decode/MegaKernel**（YiRage），而非 PyTorch 全栈 + NVIDIA 集群运维/K8s。对齐的是 **叙事范式、章骨架与 Takeaways 粒度**，不是复制其 CUDA/PyTorch/K8s 边界。
+
+### 0. Fregly Ch.1 章骨架（逐段对照，Agent 必遵）
+
+样章 **Table of Contents** 与正文顺序如下——深度改写章应 mimic 此 **节奏**，替换为本书主题：
+
+| 顺序 | Fregly Ch.1 节 | 样章做法 | 本书等价 |
+|------|----------------|----------|----------|
+| 1 | **Opening hook**（DeepSeek / H800 / $6M） | 具名案例 + 出口限制 + 可核验数字 + 「skill beats brute force」 | TaxBreak / Memory-Floor / DeepSeek-V3 / 出口限制类比；**禁止**「In this chapter we will…」式 meta 段（样章 p.2 那段为反例） |
+| 2 | **The AI Systems Performance Engineer** | 角色 + 职责清单（benchmark / scale / resources） | 解码/MegaKernel 工程师视角：launches/token、bytes/token、编译 Pass |
+| 3 | **Benchmarking and Profiling** | Nsight + PyTorch profiler；自动化回归测试 callout | TaxBreak 分解 + Nsight + `book-loop` 回归矩阵 |
+| 4 | **DeepSeek case study**（长节 + Figure） | 约束 → DualPipe / FlashMLA / 开源透明 | DeepSeek MLA、FlashAttention、YiRage triplet 回归 |
+| 5 | **Mechanical Sympathy** | Martin Thompson；FlashAttention 2–4×；MLA | residency-first fusion；FlashAttention / online softmax |
+| 6 | **Measuring Goodput** | Meta ETR；**算例**（100k tokens / 10s → 83.3%） | `kernels/token`、`bytes/token`、`R_floor`；附算例或 cited cell |
+| 7 | **Book Roadmap** | 映射 Part II–IV 各章 | 桥接 `\part{}` / 下一章 `\ref` |
+| 8 | **Key Takeaways** | 6 条：**粗体祈使标题 + 2–4 句段落**（非单行 dash） | 5–8 条；每条 `\textbf{Title}` + 解释段 + `\citep{}` |
+| 9 | **Conclusion** |  synthesis + **明确 bridge 到 Ch.2 硬件** | synthesis + bridge 到下一章 `\ref` |
+
+**Opening hook 模板（Fregly 实测有效）：**
+
+```latex
+In [year/context], [named team] [surprising outcome] despite [hard constraint] \citep{…}.
+They treated [scarce resource] as the bottleneck and [codesign action] \citep{…}.
+Contrast this with [brute-force path]: [cost/scale numbers] \citep{…}.
+The takeaway: at scale, [goodput insight]---not raw [FLOPs/utilization] \citep{…}.
+```
+
+**Side note / callout（样章 tip 框）：** 关键工程纪律用独立 `\paragraph{…}` 短段突出（如 automated perf tests、MLPerf 使用 caution）。不要用无内容的 `\paragraph{Review gate}` 复读。
 
 ### 1. 双线主轴对照（全书贯穿）
 
-| Fregly 主线 | 本书等价 |
-|-------------|----------|
-| **Mechanical Sympathy**（软硬件协同） | **Hardware–software codesign**：硬件约束 → 编译 Pass → 内核/静态图；每节必须绑定 residency |
-| **Goodput**（有效吞吐） | **Useful decode metrics**：`kernels/token`、`bytes/token`、batch-1 `ms/token`、`R_floor`、HDBI——拒绝裸 FLOPs / 利用率 |
-| DeepSeek 等工业标杆 | TaxBreak、Memory-Floor、FlashAttention/Flash-Decoding、DeepSeek-V3 部署比、YiRage 回归矩阵 |
-| Profile-driven tuning | TaxBreak 分解 + Nsight/roofline 思维 + IR diff 回归门 |
+| Fregly 主线 | 样章原文要点 | 本书等价 |
+|-------------|--------------|----------|
+| **Mechanical Sympathy** | Martin Thompson；算法贴合 memory hierarchy；FlashAttention tile | **Hardware–software codesign**：约束 → Pass → kernel；**禁止** isolated GEMM 微基准 |
+| **Goodput** | Useful work / time；discount stalled comm、failed restarts、data wait | **`kernels/token`、`bytes/token`、batch-1 `ms/token`、`R_floor`、HDBI** |
+| **Profile-first** | Nsight Systems + Compute + PyTorch profiler；hypothesis → measure → adjust | TaxBreak + Nsight + IR diff；**先 profile 再 TC tile** |
+| **Skill vs brute force** | DeepSeek on H800 vs GPT-4 $100M train | Memory-Floor fusion vs graph-only；multi-HW triplet |
+| **Transparency** | Open-Source Week；MLPerf；reproducible benchmarks | `verified_facts.jsonl` + cited URLs + appendix regression |
+| **Holistic stack** | HW + SW + algorithms 任一层弱则全栈 bottleneck | GPU + CPU + XDNA + compiler IR 同章对比 |
 
-**EN:** Open chapters by naming the **constraint** (hardware export rules, SRAM ceiling, launch floor), not by defining softmax/attention from first principles.
+**EN:** Open chapters by naming the **constraint** (export rules, SRAM ceiling, launch floor), not by defining softmax from first principles.
 
 ### 2. 单章固定范式（Fregly 对齐，全书强制）
 
-每章按以下顺序组织（与 Fregly 的 *Key Takeaways → Conclusion* 一致）：
+1. **Opening** — 具名案例 / 约束 / 量化锚点（1–4 段，**无** chapter meta-summary）
+2. **`\section{…}` 正文** — 可检索标题；每节一个问题；**Figure/Table** 支撑论点
+3. **Mechanism / Goodput 节**（核心章）— 至少一节显式 goodput 或 mechanical sympathy
+4. **`\section{Key Takeaways}`** — 5–8 条；**标题 + 段落**（见下）
+5. **`\section{Conclusion}`** — 串联 + **下一章 bridge**（必须 `\ref` 或 explicit chapter number）
 
-1. **Opening** — 行业痛点 / 约束 / 量化锚点（1–3 段）
-2. **`\section{…}` 正文** — 每节 = 一个具体工程问题；小节标题可检索
-3. **Figure / Table / Example** — 数据优先
-4. **`\section{Key Takeaways}`** — 5–8 条 bullet，可碎片化查阅
-5. **`\section{Conclusion}`** — 串联本章、引出下一章
-
-**LaTeX 模板：**
+**Key Takeaways 模板（对齐样章 p.47–48，非单行 bullet）：**
 
 ```latex
 \section{Key Takeaways}
 \label{sec:chXX_key_takeaways}
+
 \begin{itemize}
-\item \textbf{Measure …} — … \citep{…}
+\item \textbf{Measure goodput, not peak FLOPs.}
+Raw tensor-core utilization misleads when communication, launches, or HBM bytes dominate decode \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+Profile end-to-end ms/token and decompose launches/token and bytes/token before tuning MMA tiles \citep{…}.
+
+\item \textbf{Prefer skillful residency over brute-force silicon.}
+…
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:chXX_conclusion}
-… bridge to Chapter~YY …
+… This chapter established … Chapter~\ref{chap:chYY} applies the same mechanical-sympathy lens to … \citep{…}.
 ```
 
-**迁移：** 深度 Agent 润色章用 `Key Takeaways` + `Conclusion`；旧 `Chapter Summary` 在改版时替换。
+**迁移：** 深度 Agent 润色章用上述 Takeaways + Conclusion；旧 `\section{Chapter Summary}` 与 Conclusion 后的 template padding **必须删除**。
 
-### 3. 叙事模板（问题驱动 + 量化）
+### 3. Goodput 叙事模板（样章 §「Measuring Goodput」）
 
-`工程痛点 → 约束 → 底层机制 → 分层方案（GPU/CPU/NPU）→ 基准/数字 → 取舍`
+Fregly 给出 **定义 + 算例 + Meta 引用 + 行动项**。本书 decode 章应包含：
 
-### 4. 与 Fregly 的刻意差异
+1. **定义一句**：useful tokens（或 useful layer output bytes）per unit time，扣除 materialized activations / 多余 launches / spill。
+2. **算例或 cited cell**：TaxBreak launches/token、Memory-Floor $R_{\mathrm{floor}}$、或 fusion ablation 行。
+3. **错误指标警示**：裸 FLOPs、SM util、peak bandwidth  alone。
+4. **行动项**：先 fix bytes/token 或 launches/token，再 TC。
 
-| 维度 | Fregly | 本书 |
-|------|--------|------|
-| 硬件 | NVIDIA 为主 | GPU + CPU + XDNA/AIE |
-| 软件 | PyTorch / CUDA / K8s | YiRage IR、MegaKernel |
-| 附录 | 175+ 优化清单 | 回归基准 + verified_facts JSONL |
+**EN sketch:** *If fusion removes six $d$-vector HBM round trips at $d{=}4096$ BF16, activation bytes drop $\approx 49$ KB/layer/token before KV reads—TC util can rise with flat ms/token.*
 
-### 5. 深度 Agent 润色（选项 2）Fregly 验收
+### 4. Mechanical Sympathy 叙事模板（样章 §「Mechanical Sympathy」）
 
-1. 章首 200 词内：**可核验数字** 或 **named benchmark**
-2. 每 `\section`：**multi-hardware delta**
-3. 结尾：**Key Takeaways + Conclusion**（非 padding）
-4. 禁止 `Review gate` 机械复读
-5. `verified_facts.jsonl` 为技术主张，非 meta 描述
+1. 点名 **Martin Thompson / Jackie Stewart** 类比（一句即可）。
+2. **Named algorithm**：FlashAttention / MLA / online softmax — tile 或 residency 如何贴合 hierarchy。
+3. **Virtuous cycle**：算法 ↔ 硬件（Transformer Engine、TMA、SFU exp2）— 一句闭环。
+4. **本书落点**：YiRage Pass / MegaKernel / XDNA static slot。
+
+### 5. 与 Fregly 的刻意差异
+
+| 维度 | Fregly 样章 | 本书 |
+|------|-------------|------|
+| 硬件 | NVIDIA GB200/NVL72、K8s、NCCL | GPU + **CPU + XDNA/AIE** |
+| 软件 | PyTorch、Triton、vLLM 运维 | **YiRage IR**、decoder MegaKernel |
+| 指标 | Training goodput、cluster $ | **Batch-1 decode** goodput |
+| 附录 | 175+ checklist | Appendix regression + `verified_facts.jsonl` |
+| 章首 | 含一段 meta overview（**勿学**） | **禁止** meta chapter summary 段 |
+
+### 6. 深度 Agent 润色（选项 2）Fregly 验收清单
+
+对照 [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) 与 ch01，**全部**满足才记 **Fregly-ready**：
+
+1. 章首 200 词内：**具名案例** + **≥2 个可核验数字**（已入 `verified_facts.jsonl`）
+2. 无 Fregly 反模式 meta 段（「This chapter serves as…」「By the end of Chapter N, readers will…」）
+3. 至少一节显式 **goodput** 或 **mechanical sympathy**（含 named kernel/Pass）
+4. 每 `\section`：**multi-hardware delta**（GPU vs CPU vs NPU/XDNA 其二以上）
+5. **Key Takeaways**：每条 = **粗体标题 + 解释段**（≥2 句），非单行 `\textbf{X} — one line`
+6. **Conclusion**：≥1 段 synthesis + **明确 bridge** 到下一章
+7. 禁止 `Review gate` / `Worked contrast` / `ensure_min_words` 模板污染
+8. `verified_facts.jsonl` 覆盖正文关键数字；`\citep{}` 与 bib URL 一致
 
 ---
 
 ## Agent checklist (per editing session)
 
-Before committing chapter prose:
+Before committing chapter prose, read [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) §Key Takeaways for bullet granularity.
 
-1. Does each `\section` open with a production problem or misconception (not a definition)?
-2. Does every optimization claim name a hardware constraint and a measurable effect?
-3. Are GPU, CPU, and NPU/edge angles addressed where the topic applies?
-4. Are forbidden lecture phrases absent (see Section III)?
-5. Are citations tied to real benchmarks or architecture docs—not hand-wavy theory?
-6. Does the section close with an industrial takeaway or YiRage/compiler mapping where relevant?
-7. Are all numbers and examples web-verified with URLs logged in `books/research/<id>/verified_facts.jsonl` (see `FACT_VERIFICATION.md`)?
-
+1. Does the chapter open with a **named case + constraint + numbers** (not a chapter roadmap paragraph)?
+2. Does each `\section` open with a production problem or misconception (not a definition)?
+3. Does every optimization claim name a hardware constraint and a measurable **goodput** effect?
+4. Are GPU, CPU, and NPU/edge angles addressed where the topic applies?
+5. Are forbidden lecture phrases absent (see Section III)?
+6. Are citations tied to real benchmarks or architecture docs—not hand-wavy theory?
+7. Does the section close with an industrial takeaway or YiRage/compiler mapping where relevant?
+8. Do **Key Takeaways** use **bold title + explanatory paragraph** per item (Fregly style)?
+9. Does **Conclusion** bridge explicitly to the next chapter?
+10. Are all numbers web-verified with URLs in `books/research/<id>/verified_facts.jsonl` (§八)?
 
 ---
 
-## 八、事实核验门禁（与 FACT_VERIFICATION.md 同步）
+## 八、事实核验门禁
 
-凡**事实描述、数据举例、厂商参数、性能数字**，必须先 **Web 检索 ≥2 轮、交叉验证**，写入 `books/research/<chapter_id>/verified_facts.jsonl` 并附 **可靠链接**，方可进入 `books/chapters/*.tex`。
+凡**事实描述、数据举例、厂商参数、性能数字**，必须先 **Web 检索 ≥2 轮、交叉验证**，写入 `books/research/<chapter_id>/verified_facts.jsonl` 并附 **可靠链接**，方可进入 `books/build/chapters/*.tex`。
 
 - 禁止无 URL 的数字、禁止单一路径未核对就写入
 - 未通过核验：仅用 `\vispending{}` / TBD，不得冒充实测
 - 正文数字旁必须有 `\citep{}`；`book.bib` 中 URL 与核验日志一致
+- **Fregly 对齐：** 样章 Ch.1 每个 major claim（DeepSeek cost、H800 bandwidth、MLPerf speedup）均带 source；本书同等标准
 
 **EN:** No numeric fact ships without web verification, JSONL log, and matching bibliography URL.

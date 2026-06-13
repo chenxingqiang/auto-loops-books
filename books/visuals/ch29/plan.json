@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch29",
+  "chapter_title": "YiRage Runtime Layer and Persistent Kernel Execution",
+  "visuals": [
+    {
+      "id": "fig_yirage_stack_layers_pipeline",
+      "kind": "pipeline_figure",
+      "section": "yirage_stack_layers",
+      "label": "fig:yirage_stack_layers_pipeline",
+      "caption": "YiRage stack layers optimization pipeline in YiRage Runtime Layer and Persistent Kernel Execution.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "YiRage stack layers"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_persistent_kernel_decode_architecture",
+      "kind": "architecture_figure",
+      "section": "persistent_kernel_decode",
+      "label": "fig:persistent_kernel_decode_architecture",
+      "caption": "persistent kernel decode block diagram for YiRage Runtime Layer and Persistent Kernel Execution.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

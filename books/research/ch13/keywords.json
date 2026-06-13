@@ -84,6 +84,10 @@
     "weight": 9
   },
   {
+    "term": "bandwidth",
+    "weight": 9
+  },
+  {
     "term": "batch-1",
     "weight": 9
   },
@@ -108,10 +112,6 @@
     "weight": 9
   },
   {
-    "term": "core",
-    "weight": 9
-  },
-  {
     "term": "cuda",
     "weight": 9
   },
@@ -121,10 +121,6 @@
   },
   {
     "term": "flops",
-    "weight": 9
-  },
-  {
-    "term": "gemm",
     "weight": 9
   },
   {
@@ -148,19 +144,11 @@
     "weight": 9
   },
   {
-    "term": "microbenchmarks",
-    "weight": 9
-  },
-  {
     "term": "numa",
     "weight": 9
   },
   {
     "term": "on-chip",
-    "weight": 9
-  },
-  {
-    "term": "profile",
     "weight": 9
   },
   {
@@ -193,6 +181,10 @@
   },
   {
     "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "traffic",
     "weight": 9
   },
   {

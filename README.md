@@ -5,9 +5,13 @@ Two autonomous research loops in one repo:
 | Loop | Protocol | Mutable surface | Metric |
 |------|----------|-----------------|--------|
 | **autoresearch-mlx** | [`program.md`](program.md) | `train.py` | `val_bpb` |
-| **Loops a Book** (autobooks) | [`program_books.md`](program_books.md) | `books/chapters/*.tex` | `quality_score` |
+| **Loops a Book** (autobooks) | [`program_books.md`](program_books.md) | `books/build/chapters/*.tex` | `quality_score` |
 
 Both follow [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) pattern: a fixed harness scores each experiment; the agent keeps wins and reverts regressions via git.
+
+**Cloud Agents:** operating manual — [`AGENTS.md`](AGENTS.md) (dual-track PSIVE loop: book content + loops harness; commit/push every round).
+
+[![Build book PDF](https://github.com/chenxingqiang/auto-loops-books/actions/workflows/book.yml/badge.svg)](https://github.com/chenxingqiang/auto-loops-books/actions/workflows/book.yml)
 
 ---
 
@@ -60,6 +64,27 @@ uv run book_prepare.py --chapter ch01
 
 Point a coding agent at [`program_books.md`](program_books.md) and alternate **`book-loop step`** with completing **`agent_tasks`** in [`loops/loop_state.json`](loops/loop_state.json).
 
+**YiRage submodule** (Part VIII runtime chapters):
+
+```bash
+git submodule update --init --recursive deps/YiRage
+# see deps/README.md
+```
+
+**Compiler submodules** (Part VI ch14–ch19 — MLIR, XLA, TVM, Triton, IREE, Glow):
+
+```bash
+git submodule update --init --depth 1 deps/llvm-project deps/xla deps/tvm deps/triton deps/iree deps/glow
+# MLIR sources: deps/llvm-project/mlir/
+```
+
+**DeepSeek inference building blocks** (engine itself not fully open; ch10 MLA, ch23 MoE, ch24 KV/disagg):
+
+```bash
+git submodule update --init --depth 1 \
+  deps/open-infra-index deps/FlashMLA deps/DeepEP deps/DeepGEMM deps/eplb deps/3FS
+```
+
 ### Repository map (autobooks)
 
 | Path | Role |
@@ -70,10 +95,11 @@ Point a coding agent at [`program_books.md`](program_books.md) and alternate **`
 | [`research_tools.py`](research_tools.py) | Per-chapter Scholar search → `books/research/<id>/` |
 | [`citation_loop.py`](citation_loop.py) | Per-chapter bib (≥25), sentence bindings, strict verify, `\citep` apply |
 | [`book_visuals.py`](book_visuals.py) | Figure/table plan, TikZ render, audit |
-| [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) | Unified voice — engineer-narrative; gold standard = ch01 |
-| [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md) | Fact gate — web-verify numbers/examples; `verified_facts.jsonl` + URLs |
-| [`AI Compiler Performance Engineering.md`](AI%20Compiler%20Performance%20Engineering.md) | Chinese outline spec (目录); English output in `.tex` |
-| [`books/chapters/*.tex`](books/chapters/) | Mutable manuscript |
+| [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) | Unified voice — engineer-narrative; gold standard = ch01; §八 fact gate |
+| [`AGENTS.md`](AGENTS.md) | Infinite book loop — Fregly alignment, Cloud Agent checklist |
+| [`reference-chapter-1.pdf`](reference-chapter-1.pdf) | Fregly style north star (*AI Systems Performance Engineering*, Ch.1 sample) |
+| [`book_content.md`](book_content.md) | Chinese outline spec (目录); English output in `.tex` |
+| [`books/build/chapters/*.tex`](books/build/chapters/) | Mutable manuscript |
 | [`books/main.tex`](books/main.tex) | Book skeleton + `\input` order |
 | [`book_results.tsv`](book_results.tsv) | Append-only experiment log |
 | [`loops/loop_state.json`](loops/loop_state.json) | Last step actions + **`agent_tasks`** for the LLM |
@@ -100,7 +126,7 @@ uv run citation-loop verify --all
 
 ### Agent loop (never stop)
 
-1. Read [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) and skim [`ch01`](books/chapters/ch01_llm_decode_bottlenecks.tex) for tone.
+1. Read [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) and skim [`ch01`](books/build/chapters/ch01_llm_decode_bottlenecks.tex) for tone.
 2. Run `uv run book-loop step`.
 3. Complete every item in `loops/loop_state.json` → `agent_tasks` (sections, words, citations, bib, visuals).
 4. Git **keep** if `quality_score` improved or structural sync succeeded; else **revert** (see `program_books.md`).
@@ -127,7 +153,7 @@ Engineer-narrative, problem-first, hardware↔software bound, multi-hardware (GP
 
 ### Fact verification (mandatory)
 
-Every **numeric claim, vendor spec, or worked example** must be **web-searched and cross-checked** (≥2 query passes) before entering the manuscript. Log primary URLs in `books/research/<chapter_id>/verified_facts.jsonl`; cite with matching `book.bib` / `citations_merged.bib` links. Protocol: [`books/FACT_VERIFICATION.md`](books/FACT_VERIFICATION.md). Unverified numbers stay in `\vispending{}` / TBD only.
+Every **numeric claim, vendor spec, or worked example** must be **web-searched and cross-checked** (≥2 query passes) before entering the manuscript. Log primary URLs in `books/research/<chapter_id>/verified_facts.jsonl`; cite with matching `book.bib` / `citations_merged.bib` links. Protocol: [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §八（事实核验门禁）. Unverified numbers stay in `\vispending{}` / TBD only.
 
 **Citation loop (orthogonal to fact gate):** `citation-loop` builds per-chapter `chapter.bib` (≥25 papers), binds claim sentences via chapter keywords, strict-verifies, then `apply` writes `\citep{}` into `build/chapters/*.tex`. Run `merge-bib` before compile.
 

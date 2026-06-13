@@ -72,6 +72,14 @@
     "weight": 9
   },
   {
+    "term": "bandwidth",
+    "weight": 9
+  },
+  {
+    "term": "batch-1",
+    "weight": 9
+  },
+  {
     "term": "buffer",
     "weight": 9
   },
@@ -104,19 +112,7 @@
     "weight": 9
   },
   {
-    "term": "execution",
-    "weight": 9
-  },
-  {
     "term": "flops",
-    "weight": 9
-  },
-  {
-    "term": "fusion",
-    "weight": 9
-  },
-  {
-    "term": "gemm",
     "weight": 9
   },
   {
@@ -136,19 +132,15 @@
     "weight": 9
   },
   {
-    "term": "kernel",
-    "weight": 9
-  },
-  {
     "term": "launches",
     "weight": 9
   },
   {
-    "term": "mode",
+    "term": "means",
     "weight": 9
   },
   {
-    "term": "modes",
+    "term": "mode",
     "weight": 9
   },
   {
@@ -184,15 +176,15 @@
     "weight": 9
   },
   {
-    "term": "three",
-    "weight": 9
-  },
-  {
     "term": "tile",
     "weight": 9
   },
   {
     "term": "token",
+    "weight": 9
+  },
+  {
+    "term": "traffic",
     "weight": 9
   },
   {

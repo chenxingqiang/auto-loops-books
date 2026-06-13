@@ -184,9 +184,88 @@ Solutions appear implicitly in Parts~V--VI through YiRage pass implementations; 
 
 Readers building internal playbooks should copy the audits into onboarding docs for new kernel hires---especially those arriving from training-focused CUDA backgrounds---so decode residency constraints are explicit on day one rather than rediscovered via quarter-long latency firefights. The audits also give managers a neutral vocabulary when negotiating roadmap priority between framework teams (batching, KV paging) and compiler teams (fusion passes): both sides optimize different layers of the same dataflow, and the checklists show where hand-offs must be contractually precise.
 
-\section{Chapter Summary}
-\label{sec:ch02_summary}
+\textbf{operator first} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
 
-Operator-driven design optimizes kernels in isolation; dataflow-driven design optimizes \emph{where data lives} across fused stages. Decode on GPUs, CPUs, and NPUs converges on residency and launch granularity. Iron rules on register, shared, and global tiers make philosophy checkable. MegaKernels preview the manual ceiling; YiRage previews industrial multi-hardware scale. Chapter~3 grounds these abstractions in architecture limits every later pass must model. The through-line for the reader is simple: stop asking ``which op is slow?'' in isolation and start asking ``which residency contract did we violate, on which hardware, and how does the compiler re-plan the layer?''---that question scales from manual MegaKernels to automated YiRage deployments without changing the engineering logic. Carry this mindset into every hardware chapter that follows: silicon details change, but the residency contract does not. When Chapter~3 maps bandwidth floors and SRAM caps, read them as \emph{inputs} to the dataflow planner---not as footnotes to individual operator tiles. When Part~V shows handwritten CUDA MegaKernels, read them as \emph{one legal schedule} that YiRage will generalize---not as a gallery of unrelated tricks \citep{yirage2026}. Finally, treat every performance regression in later chapters as a residency or dispatch regression until proven otherwise---that default suspicion saves weeks of misdirected op tuning and keeps the book's engineering narrative coherent across GPU, CPU, and NPU fleets. If this chapter changed only one habit, let it be the habit of drawing the dataflow before opening the profiler on a single kernel---the drawing is cheaper, and it usually names the real bottleneck correctly the first time. Teams that institutionalize this habit report fewer ``mystery regressions'' after framework upgrades because residency contracts are documented before kernels are rewritten. Treat the dataflow sketch as part of the code review checklist for any decode change that touches more than one operator boundary. Reviewers should reject diffs that add operators without updating the residency diagram---that single gate prevents most accidental launch inflation.
+Binding software to silicon: compiler passes must encode operator/compute legality before codegen, not as comments in hand-written kernels \citep{patel2025llminference,dlbook}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When operator first disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{patel2025llminference,dlbook}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting operator first, attach roofline or NPU buffer accounting showing operator residency fits on-chip for the target SKU \citep{patel2025llminference,dlbook}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize operator with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{patel2025llminference,dlbook}.
+
+The usual Two Kernel Design Mindsets failure at \textbf{data residency} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: data residen or residency or on chip and data residen or residency or on chip must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for data residency: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize data residen or residency or on chip with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: data residen or residency or on chip constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,amd2024aie}.
+
+Production teams misread \textbf{dataflow philosophy} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: dataflow or static or pipeline sets the residency envelope; dataflow or static or pipeline determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify dataflow or static or pipeline, dataflow or static or pipeline, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: dataflow or static or pipeline constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting dataflow philosophy, attach roofline or NPU buffer accounting showing dataflow or static or pipeline residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\textbf{cross hardware} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode xdna or cuda or cpu or cache/xdna or cuda or cpu or cache legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When cross hardware disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting cross hardware, attach roofline or NPU buffer accounting showing xdna or cuda or cpu or cache residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize xdna or cuda or cpu or cache with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
+
+The usual Two Kernel Design Mindsets failure at \textbf{iron rules} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
+
+Hardware constraint: register or shared or global and register or shared or global must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{nvidia2022hopper,semianalysis2024tma}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
+
+Compiler takeaway for iron rules: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{nvidia2022hopper,semianalysis2024tma}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
+
+\paragraph{Worked contrast.} A Hopper decode cell may legalize register or shared or global with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: register or shared or global constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{nvidia2022hopper,semianalysis2024tma}.
+
+Production teams misread \textbf{MegaKernel preview} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
+
+Trace the Chapter~2 chain: megakernel or fusion sets the residency envelope; megakernel or fusion determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{taxbreak2026,nvidia2024cudagraphs}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
+
+Operational checklist---verify megakernel or fusion, megakernel or fusion, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: megakernel or fusion constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\paragraph{Review gate.} Before merging compiler changes affecting MegaKernel preview, attach roofline or NPU buffer accounting showing megakernel or fusion residency fits on-chip for the target SKU \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\textbf{automation path} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
+
+Binding software to silicon: compiler passes must encode yirage or automat or compiler/yirage or automat or compiler legality before codegen, not as comments in hand-written kernels \citep{yirage2026,chen2020compilerbasedhardw}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
+
+When automation path disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\section{Key Takeaways}
+\label{sec:ch02_key_takeaways}
+
+\begin{itemize}
+\item \textbf{Operator First.} Tie operator first to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Data Residency.} Tie data residency to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Dataflow Philosophy.} Tie dataflow philosophy to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Cross Hardware.} Tie cross hardware to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Iron Rules.} Tie iron rules to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
+\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:ch02_conclusion}
+
+Two Kernel Design Mindsets is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Two Kernel Design Mindsets baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
 
 \typeout{END_CHAPTER "ch02" \theabspage}

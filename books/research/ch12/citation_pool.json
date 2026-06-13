@@ -1,307 +1,53 @@
 {
   "chapter_id": "ch12",
-  "pool_count": 57,
+  "pool_count": 19,
   "bib_keys": [
-    "adepoju2026threemodesofdataba",
-    "khairy2019sstgpuanexecutiond",
-    "raju2021performanceenhance",
-    "yamazaki2024acceleratinganover",
-    "zhang2025threemodelingformu",
-    "akkarighazou2020kineticandkinemati",
-    "fukumura2024visuallyrepresenti",
-    "anon2019comparisonofthreem",
-    "alizadeh2020machinelearningbas",
-    "hung2021exploringthediffer",
-    "huang2025optimizationofmult",
-    "kwon2019rootkitinsidegpuke",
-    "ebrahim2022citybasedapproachf",
-    "liu2018akernelstackprotec",
-    "chen2019crstateinkernelche",
-    "beaton20212amu4tuningidiopho",
     "memoryfloor2026",
     "nvidia2024cudagraphs",
-    "mishra2019finetuningdeeplear",
-    "mishra2023distributedpytorch",
-    "mishra2023pytorchmodelinterp",
     "yirage2026",
-    "antonov2021inferringcustomsyn",
-    "pitigalaarac2024symbolicexecutionf",
-    "meneguele2020securekernelexecut",
-    "yetter2024atruenarrativeofth",
-    "johannesmeye2022kasperscanningforg",
-    "hong2021anoveldynamicanaly",
-    "belev2022federalbudgetexecu",
-    "mishra2019probabilitydistrib",
-    "mishra2019introductiontopyto",
-    "mishra2019naturallanguagepro",
-    "chaubal2025audioclassificatio",
-    "mishra2019introductiontoneur",
-    "chaubal2025tensorsinpytorch",
-    "mishra2019supervisedlearning",
-    "mishra2019cnnandrnnusingpyto",
-    "chaubal2025imagecaptioningwit",
-    "ketkar2021introductiontopyto",
-    "han2023torchactcollection",
-    "chaubal2025recommendersystems",
-    "reyes2019rtorchrbindingstop",
-    "zai2020anhangmathematikde",
+    "fukumura2024visuallyrepresenti",
+    "yamazaki2024acceleratinganover",
     "kirchheim2022pytorchoodalibrary",
     "dao2023flashdecoding",
     "patel2025llminference",
     "kwon2023vllm",
-    "anon2019studyofcomprehensi",
-    "anon2019partthreeremovingd",
+    "nvidia2022hopper",
+    "amd2024xdna",
+    "alizadeh2020machinelearningbas",
+    "chen2019crstateinkernelche",
     "taxbreak2026",
     "dao2022flashattention",
     "liu2024deepseekv3",
-    "nvidia2022hopper",
-    "amd2024xdna",
     "amd2024aie",
     "semianalysis2024tma",
     "dlbook"
   ],
   "papers": [
     {
-      "bib_key": "adepoju2026threemodesofdataba",
-      "title": "Three Modes of Database-Kernel Integration via eBPF: Observability, Policy Injection, and Kernel-Resident State",
-      "source_tier": "B",
-      "relevance_score": 100,
-      "matched_keywords": [
-        "trade",
-        "constraints",
-        "kernel",
-        "kernels",
-        "mode",
-        "modes",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "khairy2019sstgpuanexecutiond",
-      "title": "SST-GPU: An Execution -Driven CUDA Kernel Scheduler and Streaming-Multiprocessor Compute Model",
-      "source_tier": "B",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "CUDA",
-        "execution",
-        "GPU",
-        "kernel",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "raju2021performanceenhance",
-      "title": "PERFORMANCE ENHANCEMENT OF CUDA APPLICATIONS BY OVERLAPPING DATA TRANSFER AND KERNEL EXECUTION",
-      "source_tier": "B",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "bottleneck",
-        "CPU",
-        "CUDA",
-        "execution",
-        "GPU",
-        "kernel",
-        "NPU"
-      ]
-    },
-    {
-      "bib_key": "yamazaki2024acceleratinganover",
-      "title": "Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion",
-      "source_tier": "A",
-      "relevance_score": 90,
-      "matched_keywords": [
-        "execution",
-        "fusion",
-        "GPU",
-        "kernel",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "zhang2025threemodelingformu",
-      "title": "Three modeling formulations and computational complexity analysis for project scheduling with multiple execution modes",
-      "source_tier": "B",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "akkarighazou2020kineticandkinemati",
-      "title": "KINETIC AND KINEMATIC ANALYSIS OF THREE DIFFERENT EXECUTION MODES OF STAG LEAP WITH AND WITHOUT THROW- CATCH BALL IN RHYTHMIC GYMNASTICS",
-      "source_tier": "B",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "fukumura2024visuallyrepresenti",
-      "title": "Visually Representing CPU Execution with the KERNEL Educational Computer Model",
-      "source_tier": "A",
-      "relevance_score": 72,
-      "matched_keywords": [
-        "CPU",
-        "execution",
-        "kernel",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "anon2019comparisonofthreem",
-      "title": "Comparison of Three Modes of Ventilation During Robot-assisted Hysterectomy in Trendelenburg Position",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "mode",
-        "modes",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "alizadeh2020machinelearningbas",
-      "title": "Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution",
-      "source_tier": "A",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "hung2021exploringthediffer",
-      "title": "Exploring the Difference in Horror Movie Execution Modes",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes"
-      ]
-    },
-    {
-      "bib_key": "huang2025optimizationofmult",
-      "title": "Optimization of Multi-Execution Modes and Resource-Constrained Complex System Development Project Scheduling Based on Digital Design Structure Matrix",
-      "source_tier": "C",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "mode",
-        "modes"
-      ]
-    },
-    {
-      "bib_key": "kwon2019rootkitinsidegpuke",
-      "title": "Rootkit inside GPU Kernel Execution",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "ebrahim2022citybasedapproachf",
-      "title": "City-based approach for GPU kernel execution trace visualisation",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "liu2018akernelstackprotec",
-      "title": "A kernel stack protection model against attacks from kernel execution units",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "kernel",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "chen2019crstateinkernelche",
-      "title": "CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU",
-      "source_tier": "A",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "execution",
-        "GPU",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "beaton20212amu4tuningidiopho",
-      "title": "2aMU4 - Tuning idiophone bar torsional modes with three-dimensional cutaway geometries",
-      "source_tier": "B",
-      "relevance_score": 54,
-      "matched_keywords": [
-        "mode",
-        "modes",
-        "three"
-      ]
-    },
-    {
       "bib_key": "memoryfloor2026",
       "title": "Memory-Bound but Not Bandwidth-Limited: The Physical AI Inference Gap in Batch-1 LLM Decode",
       "source_tier": "A",
-      "relevance_score": 47,
+      "relevance_score": 101,
       "matched_keywords": [
-        "CUDA Graphs",
-        "CUDA",
+        "cuda graph",
+        "bandwidth",
+        "batch-1",
+        "cell",
+        "cuda",
         "decode",
-        "GPU"
+        "gpu",
+        "graphs"
       ]
     },
     {
       "bib_key": "nvidia2024cudagraphs",
       "title": "CUDA Graphs",
       "source_tier": "A",
-      "relevance_score": 40,
+      "relevance_score": 58,
       "matched_keywords": [
-        "CUDA Graphs",
-        "CUDA"
-      ]
-    },
-    {
-      "bib_key": "mishra2019finetuningdeeplear",
-      "title": "Fine-Tuning Deep Learning Models Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 38,
-      "matched_keywords": [
-        "PyTorch",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "mishra2023distributedpytorch",
-      "title": "Distributed PyTorch Modelling, Model Optimization, and Deployment",
-      "source_tier": "B",
-      "relevance_score": 38,
-      "matched_keywords": [
-        "PyTorch",
-        "mode"
-      ]
-    },
-    {
-      "bib_key": "mishra2023pytorchmodelinterp",
-      "title": "PyTorch Model Interpretability and Interface to Sklearn",
-      "source_tier": "B",
-      "relevance_score": 38,
-      "matched_keywords": [
-        "PyTorch",
-        "mode"
+        "cuda graph",
+        "cuda",
+        "graphs"
       ]
     },
     {
@@ -310,205 +56,29 @@
       "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "CPU",
-        "CUDA",
-        "YiRage"
+        "cpu",
+        "cuda",
+        "yirage"
       ]
     },
     {
-      "bib_key": "antonov2021inferringcustomsyn",
-      "title": "Inferring Custom Synthesizable Kernel for Generation of Coprocessors with Out-of-Order Execution",
+      "bib_key": "fukumura2024visuallyrepresenti",
+      "title": "Visually Representing CPU Execution with the KERNEL Educational Computer Model",
       "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "execution",
-        "kernel"
+        "cpu",
+        "mode"
       ]
     },
     {
-      "bib_key": "pitigalaarac2024symbolicexecutionf",
-      "title": "Symbolic Execution for Dynamic Kernel Analysis",
+      "bib_key": "yamazaki2024acceleratinganover",
+      "title": "Accelerating an overhead-sensitive atmospheric model on GPUs using asynchronous execution and kernel fusion",
       "source_tier": "A",
       "relevance_score": 36,
       "matched_keywords": [
-        "execution",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "meneguele2020securekernelexecut",
-      "title": "Secure Kernel Execution with Intel SGX",
-      "source_tier": "B",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "yetter2024atruenarrativeofth",
-      "title": "A True Narrative Of The Confession And Execution Of The Three [Illegible Text] At Tyburn",
-      "source_tier": "B",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "johannesmeye2022kasperscanningforg",
-      "title": "Kasper: Scanning for Generalized Transient Execution Gadgets in the Linux Kernel",
-      "source_tier": "B",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "hong2021anoveldynamicanaly",
-      "title": "A Novel Dynamic Analysis Infrastructure to Instrument Untrusted Execution Flow Across User-Kernel Spaces",
-      "source_tier": "A",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "kernel"
-      ]
-    },
-    {
-      "bib_key": "belev2022federalbudgetexecu",
-      "title": "Federal Budget Execution for Three Quarters of 2021",
-      "source_tier": "C",
-      "relevance_score": 36,
-      "matched_keywords": [
-        "execution",
-        "three"
-      ]
-    },
-    {
-      "bib_key": "mishra2019probabilitydistrib",
-      "title": "Probability Distributions Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "mishra2019introductiontopyto",
-      "title": "Introduction to PyTorch, Tensors, and Tensor Operations",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "mishra2019naturallanguagepro",
-      "title": "Natural Language Processing Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "chaubal2025audioclassificatio",
-      "title": "Audio Classification with PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "mishra2019introductiontoneur",
-      "title": "Introduction to Neural Networks Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "chaubal2025tensorsinpytorch",
-      "title": "Tensors in PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "mishra2019supervisedlearning",
-      "title": "Supervised Learning Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "mishra2019cnnandrnnusingpyto",
-      "title": "CNN and RNN Using PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "chaubal2025imagecaptioningwit",
-      "title": "Image Captioning with PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "ketkar2021introductiontopyto",
-      "title": "Introduction to PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "han2023torchactcollection",
-      "title": "TorchAct, collection of activation function for PyTorch.",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "chaubal2025recommendersystems",
-      "title": "Recommender Systems with PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "reyes2019rtorchrbindingstop",
-      "title": "rTorch: R Bindings to 'PyTorch'",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
-      ]
-    },
-    {
-      "bib_key": "zai2020anhangmathematikde",
-      "title": "Anhang: Mathematik, Deep Learning, PyTorch",
-      "source_tier": "B",
-      "relevance_score": 20,
-      "matched_keywords": [
-        "PyTorch"
+        "gpu",
+        "mode"
       ]
     },
     {
@@ -517,7 +87,7 @@
       "source_tier": "A",
       "relevance_score": 20,
       "matched_keywords": [
-        "PyTorch"
+        "pytorch"
       ]
     },
     {
@@ -526,7 +96,7 @@
       "source_tier": "A",
       "relevance_score": 19,
       "matched_keywords": [
-        "PyTorch",
+        "pytorch",
         "decode"
       ]
     },
@@ -549,21 +119,39 @@
       ]
     },
     {
-      "bib_key": "anon2019studyofcomprehensi",
-      "title": "Study of Comprehension and Execution of Medication Prescriptions in Parkinsonian Patients and Healthy Volunteers",
-      "source_tier": "B",
+      "bib_key": "nvidia2022hopper",
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "execution"
+        "hopper"
       ]
     },
     {
-      "bib_key": "anon2019partthreeremovingd",
-      "title": "PART THREE. Removing Distractions",
-      "source_tier": "B",
+      "bib_key": "amd2024xdna",
+      "title": "AMD XDNA Architecture",
+      "source_tier": "A",
       "relevance_score": 18,
       "matched_keywords": [
-        "three"
+        "xdna"
+      ]
+    },
+    {
+      "bib_key": "alizadeh2020machinelearningbas",
+      "title": "Machine Learning-based Interference Detection in GPGPU Concurrent Kernel Execution",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
+      ]
+    },
+    {
+      "bib_key": "chen2019crstateinkernelche",
+      "title": "CRState: In-Kernel Checkpoint/Restart of OpenCL Program Execution on GPU",
+      "source_tier": "A",
+      "relevance_score": 18,
+      "matched_keywords": [
+        "gpu"
       ]
     },
     {
@@ -583,20 +171,6 @@
     {
       "bib_key": "liu2024deepseekv3",
       "title": "DeepSeek-V3 Technical Report",
-      "source_tier": "A",
-      "relevance_score": 0,
-      "matched_keywords": []
-    },
-    {
-      "bib_key": "nvidia2022hopper",
-      "title": "NVIDIA Hopper Architecture In-Depth",
-      "source_tier": "A",
-      "relevance_score": 0,
-      "matched_keywords": []
-    },
-    {
-      "bib_key": "amd2024xdna",
-      "title": "AMD XDNA Architecture",
       "source_tier": "A",
       "relevance_score": 0,
       "matched_keywords": []

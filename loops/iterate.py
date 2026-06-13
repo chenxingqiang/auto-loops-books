@@ -44,9 +44,8 @@ from book_visuals import cmd_plan, cmd_render, generated_dir, load_plan  # noqa:
 RESULTS_TSV = ROOT / "book_results.tsv"
 STATE_JSON = ROOT / "loops" / "loop_state.json"
 RESEARCH_ROOT = ROOT / "books" / "research"
-OUTLINE_SPEC = ROOT / "AI Compiler Performance Engineering.md"
+OUTLINE_SPEC = ROOT / "book_content.md"
 WRITING_STYLE = ROOT / "books" / "WRITING_STYLE.md"
-FACT_VERIFICATION = ROOT / "books" / "FACT_VERIFICATION.md"
 STYLE_REFERENCE_CHAPTER = "ch01"
 
 # Numeric/unit tokens that trigger fact-verification expectations when uncited.
@@ -376,6 +375,20 @@ def style_violations(tex: str) -> list[str]:
     return hits
 
 
+def chapter_ending_violations(tex: str) -> list[str]:
+    """Fregly gold ending: Key Takeaways + Conclusion; no legacy Chapter Summary."""
+    if len(tex.strip()) < 500:
+        return []
+    hits: list[str] = []
+    if re.search(r"\\section\{Chapter Summary\}", tex):
+        hits.append("replace \\section{Chapter Summary} with Key Takeaways + Conclusion")
+    if "\\section{Key Takeaways}" not in tex:
+        hits.append("add \\section{Key Takeaways} before Conclusion (Fregly gold ending)")
+    if "\\section{Conclusion}" not in tex:
+        hits.append("add \\section{Conclusion} after Key Takeaways")
+    return hits
+
+
 def verified_facts_path(spec: ChapterSpec) -> Path:
     return RESEARCH_ROOT / spec.chapter_id / "verified_facts.jsonl"
 
@@ -407,7 +420,7 @@ def fact_verification_tasks(spec: ChapterSpec, tex: str) -> list[str]:
 
     tasks.append(
         f"Facts: every numeric claim / worked example must pass web verification "
-        f"(≥2 independent sources); log to {rel_log} with URLs — see {FACT_VERIFICATION.name}"
+        f"(≥2 independent sources); log to {rel_log} with URLs — see WRITING_STYLE.md §八"
     )
 
     if not log_path.exists():
@@ -432,6 +445,58 @@ def fact_verification_tasks(spec: ChapterSpec, tex: str) -> list[str]:
     return tasks
 
 
+PAD_DEDUP_DEEP_REWRITE_FLOOR = 1000
+
+
+def pad_dedup_tasks(spec: ChapterSpec) -> list[str]:
+    try:
+        from book_pad_dedup import audit_chapter
+
+        report = audit_chapter(spec)
+    except ImportError:
+        return []
+    if not report["changed"]:
+        return []
+    cmd = f"python3 book_pad_dedup.py --apply {spec.chapter_id}"
+    words_after = report["words_after"]
+    if words_after < PAD_DEDUP_DEEP_REWRITE_FLOOR:
+        return [
+            "Pad dedup: duplicate pad_agent tail before Key Takeaways "
+            f"({report['words_before']}->{words_after} words). "
+            "Strip-only would leave thin filler—run "
+            f"`uv run book-loop deep-rewrite --chapter {spec.chapter_id}` "
+            "for Fregly prose (do not `--force --adjust-min` alone)."
+        ]
+    if words_after < report["min_words"]:
+        return [
+            "Pad dedup: duplicate pad_agent tail before Key Takeaways "
+            f"({report['words_before']}->{words_after} words). "
+            f"Prefer `uv run book-loop deep-rewrite --chapter {spec.chapter_id}`; "
+            f"strip-only fallback: `{cmd} --force --adjust-min`."
+        ]
+    return [
+        f"Pad dedup: run `{cmd}` to remove pad tail "
+        f"({report['words_before']}->{words_after} words, coverage {report['coverage']})."
+    ]
+
+
+def pad_residual_chapters() -> list[str]:
+    """Chapters where strip-only pad dedup would leave prose below deep-rewrite floor."""
+    try:
+        from book_pad_dedup import audit_chapter
+    except ImportError:
+        return []
+    out: list[str] = []
+    for spec in OUTLINE:
+        tex = read_chapter_text(spec)
+        if not tex.strip():
+            continue
+        row = audit_chapter(spec)
+        if row["changed"] and row["words_after"] < PAD_DEDUP_DEEP_REWRITE_FLOOR:
+            out.append(f"{spec.chapter_id}→{row['words_after']}w")
+    return out
+
+
 def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     tasks: list[str] = []
     research_dir = RESEARCH_ROOT / spec.chapter_id
@@ -444,6 +509,11 @@ def build_agent_tasks(spec: ChapterSpec, ev: dict[str, Any]) -> list[str]:
     tex = read_chapter_text(spec)
     for issue in style_violations(tex):
         tasks.append(f"Style fix: {issue} (see {WRITING_STYLE.name} §III)")
+
+    for issue in chapter_ending_violations(tex):
+        tasks.append(f"Chapter ending: {issue} (see {WRITING_STYLE.name} §VII)")
+
+    tasks.extend(pad_dedup_tasks(spec))
 
     try:
         from book_proper_nouns import proper_noun_tasks
@@ -768,7 +838,13 @@ def print_status(*, pick: str = "sequential") -> None:
         for row in part_progress():
             print(f"  {row['part_id']}\t{row['ready']}/{row['total']}\t{row['title']}")
     if progress["all_outline_ready"]:
-        print("\nAll OUTLINE chapters pass gates.\n")
+        print("\nAll OUTLINE chapters pass gates.")
+        residual = pad_residual_chapters()
+        if residual:
+            shown = ", ".join(residual[:12])
+            extra = f" (+{len(residual) - 12} more)" if len(residual) > 12 else ""
+            print(f"Pad residual (deep-rewrite): {shown}{extra}")
+        print()
     else:
         print()
 

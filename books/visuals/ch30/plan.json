@@ -1,0 +1,48 @@
+{
+  "chapter_id": "ch30",
+  "chapter_title": "Framework, Compiler, and Runtime Co-Design for Decode Goodput",
+  "visuals": [
+    {
+      "id": "fig_responsibility_split_pipeline",
+      "kind": "pipeline_figure",
+      "section": "responsibility_split",
+      "label": "fig:responsibility_split_pipeline",
+      "caption": "responsibility split optimization pipeline in Framework, Compiler, and Runtime Co-Design for Decode Goodput.",
+      "status": "done",
+      "placement": "t",
+      "stages": [
+        {
+          "name": "Input",
+          "detail": "responsibility split"
+        },
+        {
+          "name": "On-chip",
+          "detail": "Tiling / residency"
+        },
+        {
+          "name": "Fused compute",
+          "detail": "Megakernel stage"
+        },
+        {
+          "name": "Output",
+          "detail": "Next layer / KV"
+        }
+      ]
+    },
+    {
+      "id": "fig_decode_pipeline_handoff_architecture",
+      "kind": "architecture_figure",
+      "section": "decode_pipeline_handoff",
+      "label": "fig:decode_pipeline_handoff_architecture",
+      "caption": "decode pipeline handoff block diagram for Framework, Compiler, and Runtime Co-Design for Decode Goodput.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Host",
+        "On-chip buffer",
+        "Compute array",
+        "Memory tier"
+      ]
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 {
   "chapter_id": "ch13",
-  "timestamp": "2026-06-10T03:02:54.669922",
+  "timestamp": "2026-06-12T07:24:08.940491",
   "min_binding_score": 12,
   "min_matched_keywords": 2,
   "tier_a_only": true,
-  "bindings_before": 13,
-  "bindings_after": 355,
+  "bindings_before": 181,
+  "bindings_after": 181,
   "rejected_from_previous": 0,
   "tier_counts_in_bindings": {
-    "A": 355
+    "A": 181
   },
   "catalog_tier_a": 21,
-  "catalog_total": 41
+  "catalog_total": 35
 }

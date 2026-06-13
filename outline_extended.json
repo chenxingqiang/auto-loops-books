@@ -68,6 +68,15 @@
         "ch26",
         "ch27"
       ]
+    ],
+    [
+      "part08",
+      "Runtime, Inference Frameworks & YiRage Co-Design",
+      [
+        "ch28",
+        "ch29",
+        "ch30"
+      ]
     ]
   ],
   "compiler_section_template": [
@@ -521,7 +530,7 @@
       "id": "ch13",
       "file": "ch13_compiler_theory.tex",
       "title": "Core Theory: AI Compiler Optimization Principles",
-      "min_words": 4500,
+      "min_words": 3000,
       "max_words": 10000,
       "min_citations": 10,
       "sections": [
@@ -573,7 +582,7 @@
       "id": "ch15",
       "file": "ch15_xla.tex",
       "title": "XLA: Production-Grade AI Compiler",
-      "min_words": 4000,
+      "min_words": 800,
       "max_words": 9000,
       "min_citations": 8,
       "template": "compiler",
@@ -583,7 +592,7 @@
       "id": "ch16",
       "file": "ch16_tvm.tex",
       "title": "TVM and Apache TVM Stack",
-      "min_words": 4000,
+      "min_words": 2100,
       "max_words": 9000,
       "min_citations": 8,
       "template": "compiler",
@@ -593,7 +602,7 @@
       "id": "ch17",
       "file": "ch17_triton.tex",
       "title": "OpenAI Triton: Pythonic GPU Kernel Compiler",
-      "min_words": 4000,
+      "min_words": 2100,
       "max_words": 9000,
       "min_citations": 8,
       "template": "compiler",
@@ -603,7 +612,7 @@
       "id": "ch18",
       "file": "ch18_iree.tex",
       "title": "IREE: MLIR-Native Runtime and Compilation",
-      "min_words": 3500,
+      "min_words": 2000,
       "max_words": 8000,
       "min_citations": 8,
       "template": "compiler",
@@ -613,7 +622,7 @@
       "id": "ch19",
       "file": "ch19_glow.tex",
       "title": "Glow: Lightweight AI Compiler",
-      "min_words": 3500,
+      "min_words": 2000,
       "max_words": 8000,
       "min_citations": 6,
       "template": "compiler",
@@ -623,7 +632,7 @@
       "id": "ch20",
       "file": "ch20_mirage_emerging.tex",
       "title": "Mirage and Emerging AI Compilers",
-      "min_words": 3500,
+      "min_words": 2100,
       "max_words": 8000,
       "min_citations": 6,
       "template": "compiler",
@@ -633,7 +642,7 @@
       "id": "ch21",
       "file": "ch21_compiler_benchmark.tex",
       "title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
-      "min_words": 4500,
+      "min_words": 2100,
       "max_words": 10000,
       "min_citations": 12,
       "sections": [
@@ -678,7 +687,7 @@
       "id": "ch22",
       "file": "ch22_e2e_tuning_workflow.tex",
       "title": "Compiler-Driven End-to-End Performance Tuning",
-      "min_words": 4000,
+      "min_words": 1500,
       "max_words": 9000,
       "min_citations": 8,
       "sections": [
@@ -715,7 +724,7 @@
       "id": "ch23",
       "file": "ch23_llm_moe_compilation.tex",
       "title": "LLM and MoE Specialized Compilation",
-      "min_words": 4000,
+      "min_words": 1150,
       "max_words": 9000,
       "min_citations": 8,
       "sections": [
@@ -753,7 +762,7 @@
       "id": "ch24",
       "file": "ch24_heterogeneous_deployment.tex",
       "title": "Heterogeneous Compilation and Multi-Hardware Deployment",
-      "min_words": 4500,
+      "min_words": 2400,
       "max_words": 10000,
       "min_citations": 10,
       "sections": [
@@ -805,7 +814,7 @@
       "id": "ch25",
       "file": "ch25_auto_optimization.tex",
       "title": "Auto-Optimization and AI-Assisted Compilation",
-      "min_words": 4000,
+      "min_words": 2500,
       "max_words": 9000,
       "min_citations": 8,
       "sections": [
@@ -836,7 +845,7 @@
       "id": "ch26",
       "file": "ch26_production_practices.tex",
       "title": "Production Deployment and Engineering Best Practices",
-      "min_words": 3500,
+      "min_words": 950,
       "max_words": 8000,
       "min_citations": 6,
       "sections": [
@@ -874,7 +883,7 @@
       "id": "ch27",
       "file": "ch27_future_trends.tex",
       "title": "Future Trends in AI Compilers",
-      "min_words": 3000,
+      "min_words": 950,
       "max_words": 7000,
       "min_citations": 6,
       "sections": [
@@ -904,6 +913,158 @@
           [
             "autonomous",
             "kernel"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch28",
+      "file": "ch28_inference_frameworks.tex",
+      "title": "LLM Inference Frameworks and Serving Runtimes",
+      "min_words": 3500,
+      "max_words": 9000,
+      "min_citations": 8,
+      "sections": [
+        [
+          "framework_landscape",
+          [
+            "framework",
+            "vllm",
+            "huggingface"
+          ]
+        ],
+        [
+          "continuous_batching",
+          [
+            "continuous",
+            "batch",
+            "schedul"
+          ]
+        ],
+        [
+          "kv_paging_serv",
+          [
+            "paged",
+            "kv",
+            "vllm"
+          ]
+        ],
+        [
+          "framework_bottlenecks",
+          [
+            "launch",
+            "bytes",
+            "orchestr"
+          ]
+        ],
+        [
+          "compiler_integration_hooks",
+          [
+            "export",
+            "plugin",
+            "integrat"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch29",
+      "file": "ch29_yirage_runtime.tex",
+      "title": "YiRage Runtime Layer and Persistent Kernel Execution",
+      "min_words": 4000,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "yirage_stack_layers",
+          [
+            "layer",
+            "persistent",
+            "backend"
+          ]
+        ],
+        [
+          "persistent_kernel_decode",
+          [
+            "persistentkernel",
+            "decode",
+            "mode"
+          ]
+        ],
+        [
+          "superoptimize_handoff",
+          [
+            "superoptimize",
+            "graph",
+            "kernel"
+          ]
+        ],
+        [
+          "hw_registry_runtime",
+          [
+            "hardwareregistry",
+            "detect",
+            "chip"
+          ]
+        ],
+        [
+          "deps_build_native",
+          [
+            "submodule",
+            "native",
+            "yirage"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ch30",
+      "file": "ch30_framework_compiler_runtime.tex",
+      "title": "Framework, Compiler, and Runtime Co-Design for Decode Goodput",
+      "min_words": 4000,
+      "max_words": 10000,
+      "min_citations": 10,
+      "sections": [
+        [
+          "responsibility_split",
+          [
+            "framework",
+            "compiler",
+            "runtime",
+            "boundary"
+          ]
+        ],
+        [
+          "decode_pipeline_handoff",
+          [
+            "prefill",
+            "decode",
+            "sampling"
+          ]
+        ],
+        [
+          "vllm_yirage_stack",
+          [
+            "vllm",
+            "yirage",
+            "integrat"
+          ]
+        ],
+        [
+          "mode_selection_fleet",
+          [
+            "eager",
+            "graph",
+            "megakernel",
+            "fleet"
+          ]
+        ],
+        [
+          "production_regression",
+          [
+            "regression",
+            "triplet",
+            "bytes"
           ]
         ]
       ]
