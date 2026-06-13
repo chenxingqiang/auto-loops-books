@@ -59,3 +59,4 @@ ch12-202606112315	100.0	3354	17	95.1	keep	deep-rewrite
 ch13-202606112324	100.0	4880	19	94.8	keep	deep-rewrite
 ch16-202606131301	100.0	2169	17	94.1	keep	deep-rewrite: replace ch16 TVM pad filler with verified Relax/TIR/AutoTVM/Ansor content
 ch17-202606131315	100.0	2117	15	94.0	keep	deep-rewrite: replace ch17 Triton pad filler with verified tile/TTGIR/autotune content
+ch18-202606131328	100.0	2038	13	94.1	keep	deep-rewrite: replace ch18 IREE pad filler with verified Flow/Stream/HAL/VM content
