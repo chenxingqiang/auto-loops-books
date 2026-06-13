@@ -31,6 +31,26 @@
   url={https://doi.org/10.1109/southeastcon44009.2020.9249733}
 }
 
+@inproceedings{tillet2019triton,
+  title={Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations},
+  author={Tillet, Philippe and Kung, H. T. and Cox, David},
+  booktitle={Proceedings of the 3rd ACM SIGPLAN International Workshop on Machine Learning and Programming Languages (MAPL@PLDI)},
+  pages={10--19},
+  year={2019},
+  doi={10.1145/3315508.3329973},
+  url={https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf},
+  note={Tile = statically shaped sub-array; Triton-C + LLVM-based Triton-IR; matmul/conv on par with cuBLAS/cuDNN}
+}
+
+@misc{tritonlang2024,
+  title={Triton: A Language and Compiler for Custom Deep-Learning Primitives},
+  author={{OpenAI / triton-lang contributors}},
+  year={2024},
+  howpublished={\url{https://github.com/triton-lang/triton}},
+  url={https://github.com/triton-lang/triton},
+  note={MLIR-based backend: Triton IR (TTIR) $\to$ TritonGPU IR (TTGIR) $\to$ LLVM $\to$ PTX/AMDGCN; \texttt{@triton.autotune} with num\_warps/num\_stages}
+}
+
 @inproceedings{chen2018tvm,
   title={{TVM}: An Automated End-to-End Optimizing Compiler for Deep Learning},
   author={Chen, Tianqi and Moreau, Thierry and Jiang, Ziheng and Zheng, Lianmin and Yan, Eddie and Cowan, Meghan and Shen, Haichen and Wang, Leyuan and Hu, Yuwei and Ceze, Luis and Guestrin, Carlos and Krishnamurthy, Arvind},
