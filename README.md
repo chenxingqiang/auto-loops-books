@@ -4,7 +4,6 @@ Two autonomous research loops in one repo:
 
 | Loop | Protocol | Mutable surface | Metric |
 |------|----------|-----------------|--------|
-| **autoresearch-mlx** | [`program.md`](program.md) | `train.py` | `val_bpb` |
 | **Loops a Book** (autobooks) | [`program_books.md`](program_books.md) | `books/build/chapters/*.tex` | `quality_score` |
 
 Both follow [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) pattern: a fixed harness scores each experiment; the agent keeps wins and reverts regressions via git.
@@ -169,59 +168,3 @@ uv run book_visuals.py --audit --chapter ch01
 ```
 
 Outputs: `books/research/<id>/` (incl. `verified_facts.jsonl`), `books/visuals/<id>/plan.json`, `books/visuals/<id>/generated/*.tex`.
-
----
-
-## autoresearch-mlx (Apple Silicon training loop)
-
-Apple Silicon (MLX) port of autoresearch. Full credit to [@karpathy](https://github.com/karpathy) for the core idea.
-
-### Quick start
-
-Requirements: Apple Silicon Mac, Python 3.10+, [uv](https://docs.astral.sh/uv/).
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh   # install uv if needed
-uv sync
-uv run prepare.py                                  # one-time data + tokenizer prep
-uv run train.py                                    # one 5-minute training experiment
-```
-
-Point a coding agent at [`program.md`](program.md) and let it run the loop.
-
-### What matters
-
-- `prepare.py` — data prep, tokenizer, dataloader, evaluation. Treat as fixed.
-- `train.py` — model, optimizer, training loop. **The file the agent edits.**
-- `program.md` — autonomous experiment protocol.
-- `results.tsv` — logged experiment history.
-
-### Public baseline results
-
-| Commit | val_bpb | Status | Description |
-|---|---:|---|---|
-| `383abb4` | 2.667000 | keep | baseline (AdamW, default config) |
-| `909dd59` | 2.588904 | keep | halve total batch size to `2^16` |
-| `4161af3` | 2.533728 | keep | increase matrix LR to `0.04` |
-| `5efc7aa` | 1.807902 | keep | reduce depth from `8` to `4` |
-
-### Differences from upstream
-
-- **MLX instead of PyTorch/CUDA** — native Apple Silicon, unified memory.
-- **Smaller eval token budget** — faster iteration on Apple Silicon.
-- **Roughly 6–7 minutes per experiment** — 5 min training + compile/eval overhead.
-- **MFU reporting is placeholder** — no Apple Silicon H100 FLOPs reference.
-
----
-
-## Acknowledgments
-
-- [Andrej Karpathy](https://github.com/karpathy) — autoresearch and nanochat
-- [scasella/nanochat-mlx](https://github.com/scasella/nanochat-mlx) — MLX GPT reference
-- [awni/picochat](https://github.com/awni/picochat) — MLX training patterns
-- [Apple MLX team](https://github.com/ml-explore/mlx)
-- Deep Learning book notation template — [`books/`](books/) LaTeX style
-
-## License
-
-MIT. See [LICENSE](LICENSE).
