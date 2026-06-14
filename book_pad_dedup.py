@@ -26,8 +26,8 @@ KEY_TAKEAWAYS = "\\section{Key Takeaways}"
 
 
 def honest_min_words(words_after: int) -> int:
-    """Round down to nearest 50, floor at 1000."""
-    return max(1000, (words_after // 50) * 50)
+    """Round down to nearest 50, floor at 5000 (book-wide minimum)."""
+    return max(5000, (words_after // 50) * 50)
 
 
 def strip_pad_tail_block(text: str, spec: ChapterSpec) -> tuple[str, bool]:

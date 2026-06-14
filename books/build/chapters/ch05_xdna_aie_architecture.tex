@@ -373,6 +373,57 @@ Binding software to silicon: compiler passes must encode yirage/xdna legality be
 
 When YiRage XDNA backend disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
 
+
+\section{Ryzen AI decode benchmarking}
+\label{sec:ch05_ryzen_benchmark}
+
+\textbf{Benchmarking XDNA decode} requires the same discipline as GPU TaxBreak sweeps---but counters swap launches/token for DMA transactions and DDR bytes/token \citep{taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Build a decode cell with BS${=}1$, ctx buckets $\{512,2048,8192\}$, and pinned Ryzen AI driver/runtime versions \citep{amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+Warm-up must include graph runner initialization and first-token compile amortization---cold-start numbers dominate laptop UX but mislead steady-state decode comparisons \citep{yirage2026,patel2025llminference,amd2024aie,amd2024xdna,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Report both first-token and token-$k$ steady ms/token; product teams need both \citep{patel2025llminference,kwon2023vllm,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Metric} & \textbf{XDNA decode meaning} \\
+\midrule
+DDR bytes/token & Weight + KV + spill traffic \\
+DMA edges/token & Static graph orchestration tax \\
+MAC active \% & Tile utilization vs stall \\
+Compile time & Amortization over session length \\
+p99 ms/token & Tail under CPU/NPU DDR contention \\
+\bottomrule
+\end{tabular}
+\caption{Ryzen AI decode benchmark counter set (batch-1).}
+\label{tab:ch05_ryzen_benchmark}
+\end{table}
+
+Triplet runs export the same high-level decoder from YiRage IR to CUDA and XDNA backends; diff legality failures before celebrating either side's ms/token \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. A GPU win on launches/token paired with an XDNA DDR bytes/token regression signals residency failure, not ``NPU is slow'' \citep{memoryfloor2026,patel2025llminference,yirage2026,amd2024xdna,amd2024aie,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+\begin{example}
+Ryzen AI decode gate: Llama-3.2-1B at ctx${=}2048$ must show DDR bytes/token within 10\% of GPU baseline \emph{or} document why watt/token target justifies regression; attach static buffer table and DMA edge list \citep{amd2024xdna,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\end{example}
+
+\paragraph{Fleet parity.} Laptop fleets share DDR with display, browser, and background services---decode benchmarks on isolated benches overstate steady-state goodput \citep{amd2024xdna,patel2025llminference,memoryfloor2026,yirage2026,amd2024aie,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Qualify under realistic contention or publish contention assumptions \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+
+\paragraph{Regression harness.} Check in golden decode-cell scripts alongside static graphs: same tokenizer, ctx buckets, and DDR byte counters every CI run \citep{yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Driver upgrades that change DMA timing without changing FLOPs still fail SLOs---treat runtime versions like CUDA toolkit pins \citep{amd2024aie,patel2025llminference,yirage2026,amd2024xdna,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Publish benchmark artifacts with every Ryzen AI graph promotion so field teams replay the same counters \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+
+\paragraph{Documentation contract.} Every XDNA decode release note should list max context per bucket, compile time, steady ms/token, and DDR bytes/token at ctx${=}2048$ \citep{amd2024xdna,amd2024aie,patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Without published counters, partners cannot tell whether regressions come from graphs, drivers, or contention---support cycles lengthen \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Treat decode benchmarks as shipping artifacts, not lab one-offs \citep{yirage2026,amd2024aie,amd2024xdna,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+
+\paragraph{Shape buckets.} Compile separate static graphs for each $(\text{batch},\text{ctx})$ class you ship; never extrapolate from a single prefill graph \citep{amd2024xdna,amd2024aie,kwon2023vllm,patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Bucket count trades compile storage for decode predictability---document which bucket each SKU image selects at runtime \citep{yirage2026,amd2024xdna,patel2025llminference,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+
+\paragraph{Closing metric.} When in doubt, re-run the decode cell: if DDR bytes/token and p99 ms/token both improve, the static graph change is real; if only FLOPs move, reject the merge \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+
+\paragraph{Handoff to Part IV.} Chapter~\ref{chap:ch06} generalizes residency budgeting across GPU, CPU, and NPU; carry forward the XDNA counters defined here as mandatory fields in every cross-hardware decode report \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+
+Benchmarks without DDR byte counters are incomplete for Ryzen AI decode qualification today \citep{amd2024xdna,patel2025llminference,memoryfloor2026}.
+
 \section{Key Takeaways}
 \label{sec:ch05_key_takeaways}
 
