@@ -67,3 +67,4 @@ ch06-202606140458	100.0	3503	16	94.0	keep	deep-rewrite: replace ch06 residency p
 ch07-202606140522	100.0	3500	15	94.0	keep	deep-rewrite: replace ch07 static-role pad filler with verified warp-specialization/persistent-kernel content
 ch08-202606140543	100.0	3500	16	94.0	keep	deep-rewrite: replace ch08 pad filler with verified TMA/double-buffer/async pipeline content
 ch09-202606140606	100.0	3501	13	94.0	keep	deep-rewrite: replace ch09 pad filler with verified sync-hierarchy/deadlock content
+ch24-202606140620	100.0	2401	18	94.0	keep	deep-rewrite: replace ch24 pad filler with verified heterogeneous-deployment content (pad-residual backlog cleared)
