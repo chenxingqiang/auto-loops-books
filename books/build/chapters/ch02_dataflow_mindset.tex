@@ -273,6 +273,6 @@ Dispatching an entire decoder layer with activations resident across QKV, attent
 \section{Conclusion}
 \label{sec:ch02_conclusion}
 
-Two Kernel Design Mindsets is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Two Kernel Design Mindsets baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+The operator-driven and dataflow-driven mindsets are not two styles of the same craft; they are different theories of what a decoder layer \emph{is}---a list of kernels to tune versus a schedule of residency to plan \citep{taxbreak2026,memoryfloor2026}. The dataflow mindset is the one this book commits to, because at batch-1 decode the operator boundaries themselves are the cost, and only a residency-first schedule---materialized as a MegaKernel and enforced by YiRage's iron rules---removes them \citep{yirage2026,dao2022flashattention}. That mindset is empty, however, without the hardware facts it must plan against: Chapter~\ref{chap:ch03} supplies the concrete memory hierarchies, parallelism grains, and scheduling models of GPUs, CPUs, and NPUs that every later compiler pass encodes \citep{nvidia2022hopper,amd2024aie}.
 
 \typeout{END_CHAPTER "ch02" \theabspage}

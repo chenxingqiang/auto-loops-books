@@ -396,6 +396,6 @@ Review gates must confirm no simultaneous buffers exceed per-tile SRAM caps and 
 \section{Conclusion}
 \label{sec:ch05_conclusion}
 
-AMD XDNA/AIE Dataflow Architecture is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume AMD XDNA/AIE Dataflow Architecture baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+AMD XDNA/AIE shows the opposite end of the architecture spectrum from the CUDA GPU of Chapter~4: a spatial-dataflow fabric of fixed compute tiles with small deterministic SRAM, no hardware cache, and a statically configured schedule, where decode latency is bought with compile-time tile and DMA planning rather than runtime flexibility \citep{amd2024xdna,amd2024aie}. The lesson is that the same decoder math demands a fundamentally different compilation per class, and a schedule transplanted from the GPU is illegal here---which is precisely why residency must be planned, not assumed \citep{semianalysis2024tma,yirage2026}. With both hardware extremes now mapped, Chapter~\ref{chap:ch06} opens Part~IV's MegaKernel techniques by making on-chip data residency a budgeted, checkable property across all three classes \citep{memoryfloor2026,taxbreak2026}.
 
 \typeout{END_CHAPTER "ch05" \theabspage}

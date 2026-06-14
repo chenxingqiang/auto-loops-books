@@ -336,6 +336,6 @@ YiRage uses MLIR as interchange between exported graphs and target megakernels, 
 \section{Conclusion}
 \label{sec:ch14_conclusion}
 
-MLIR is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume MLIR baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+MLIR's value for decode is the shared, multi-level dialect substrate that lets one decoder export carry residency invariants from a high-level graph down to target code without each backend reinventing the lowering---provided those invariants are preserved across passes and the codegen path stays host-light \citep{lai2023relax,yirage2026}. The recurring trap is celebrating a successful lowering while p99 decode flatlines because casts became buffers or the platform wrapper rebuilds tensors per token \citep{taxbreak2026,memoryfloor2026}. MLIR is infrastructure, not a strategy; the next chapter shows what a production compiler built on similar foundations actually decides---Chapter~\ref{chap:ch15} turns to XLA, whose automatic HLO fusion and command-buffer capture put the MLIR-era ideas to work at the largest deployed scale \citep{openxla2024,nvidia2024cudagraphs}.
 
 \typeout{END_CHAPTER "ch14" \theabspage}
