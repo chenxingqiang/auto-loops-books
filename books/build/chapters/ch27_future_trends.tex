@@ -122,11 +122,20 @@ Search budgets for autonomous kernels should cap candidate evaluations per merge
 \label{sec:ch27_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Co-design.} Encode silicon capabilities as IR legality; prove on decode cells \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,amd2024xdna,patel2025llminference,kwon2023vllm,liu2024deepseekv3,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{New architectures.} Adapter passes + arch-specific regression; decode-first ports \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,amd2024xdna}.
-\item \textbf{Edge--cloud.} Tier fingerprints, adaptive backend selection, no cross-tier promotion \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,liu2024deepseekv3,memoryfloor2026,taxbreak2026,dlbook,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Autonomous kernels.} Legality + decode reward + rollback; hints not bypass \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,amd2024xdna}.
-\item \textbf{Part VIII next.} Framework/runtime/compiler co-design implements these trends in deployable form \citep{yirage2026,kwon2023vllm,patel2025llminference,chen2020compilerbasedhardw,liu2024deepseekv3,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+\item \textbf{Co-design ships as compiler metadata contracts.}
+Hardware--software co-design stops being a slogan when an ISA or memory-hierarchy change arrives with a contract the compiler can read---what may be fused, what must stay paged, which tiers exist \citep{yirage2026,semianalysis2024tma}. Encoding silicon capabilities as IR legality and proving each on decode cells is what turns a new feature into a usable, checkable optimization rather than a press release \citep{chen2020compilerbasedhardw,patel2025llminference}.
+
+\item \textbf{New architectures are a recurring, decode-first tax.}
+Every silicon generation forces adapter passes, backend forks, and hardware-registry entries, and the discipline that keeps the cost bounded is decode-first porting with architecture-specific regression \citep{chen2020compilerbasedhardw,yirage2026}. Bringing a new target up on prefill alone hides exactly the residency and launch gaps that batch-1 decode will later expose \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Edge--cloud means one artifact, tier-specific fingerprints.}
+Unified compilation targets a single model with per-tier fingerprints---edge NPU static schedules, cloud GPU graph capture, CPU fallback---without pretending one schedule fits all \citep{amd2024xdna,amd2024aie}. Adaptive backend selection at runtime with no cross-tier promotion is what prevents a schedule tuned for one tier from silently regressing another \citep{patel2025llminference,kwon2023vllm}.
+
+\item \textbf{Autonomous kernels need legality, reward, and rollback.}
+LLM-assisted and search-driven kernel generation is the most hyped and highest-risk trend, because a generated kernel can be fast and wrong \citep{chen2020compilerbasedhardw,yirage2026}. It is safe only inside a frame that verifies legality, rewards decode goodput rather than microbench latency, and can roll back---treating the generator as a hint source, not a bypass of the residency contract \citep{memoryfloor2026,patel2025llminference}.
+
+\item \textbf{Part VIII makes these trends deployable.}
+The co-design, portability, and automation trends above are not abstractions; framework, runtime, and compiler co-design is where they become a shipped serving stack \citep{yirage2026,kwon2023vllm}. The next part descends from trend to implementation, carrying the same decode-goodput yardstick \citep{patel2025llminference,taxbreak2026}.
 \end{itemize}
 
 \section{Conclusion}
