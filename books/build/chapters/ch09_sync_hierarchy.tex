@@ -2,455 +2,152 @@
 \label{chap:ch09}
 \typeout{START_CHAPTER "ch09" \theabspage}
 
-Parts~I--II established decode metrics and hardware contracts; \emph{Hierarchical Synchronization and Communication} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+The double-buffer pipelines of Chapter~8 only work if the producer and consumer agree on when a buffer is ready, and a megakernel that fuses a whole layer must coordinate hundreds of units without ever returning to the host. Synchronization is therefore not a detail at the bottom of the stack---it is the mechanism that makes static roles and overlapped movement safe, and getting it wrong is how a fused kernel either corrupts data or deadlocks \citep{shah2024flashattention3,nvidia2022hopper}. The decode stakes are unchanged: dense Llama-3.2-1B issues 847.5 launches per token on H100 and OLMoE-1B/7B issues 9{,}305, and the whole point of collapsing those launches is to keep coordination on chip rather than paying a host round trip per operator \citep{taxbreak2026,memoryfloor2026}.
+The mistake to avoid is using a coarser synchronization scope than the dependency requires. A barrier that synchronizes a whole thread block when only two warps need to agree wastes cycles serializing units that could have run free; conversely, omitting a needed barrier is a correctness bug that surfaces as nondeterministic output \citep{dao2022flashattention,nvidia2024cudagraphs}. This chapter develops the synchronization hierarchy, shows how to pick the right primitive per hardware class, treats deadlock as a first-class hazard, and ends with the YiRage pass that inserts and checks synchronization per target.
+\index{Synchronization}
+\index{Barrier}
+\index{Deadlock}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
-
-\section{sync hierarchy}
+\section{Sync hierarchy}
 \label{sec:ch09_sync_hierarchy}
 
 % AUTO_VISUAL:fig_sync_hierarchy_pipeline
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Sync Hierarchy};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis pipeline node] (s0) at (-5.5,0) {\footnotesize Warp\\\_\_syncwarp};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Block\\bar.sync};
+ \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Cluster\\barrier};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Grid / multi-GPU\\collective};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Sync Hierarchy optimization pipeline in Hierarchical Synchronization and Communication.}
+\caption{The synchronization hierarchy: cost rises with scope, from a warp barrier to a multi-GPU collective. Synchronize at the narrowest scope a dependency requires.}
 \label{fig:sync_hierarchy_pipeline}
 \end{figure}
 
-Teams hit \textbf{sync hierarchy} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because sync was planned without barrier residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
+Synchronization on a GPU is hierarchical, mirroring the thread hierarchy of Chapter~7, and the central design rule is to \textbf{sync} at the narrowest scope that the dependency actually spans \citep{shah2024flashattention3}. The reason a hierarchy exists at all is that coordination has a physical cost proportional to how far apart the units being coordinated are and how many of them there are, so a single universal synchronization primitive would be either too weak (unable to coordinate distant units) or too expensive (paying chip-crossing cost for a local handoff) \citep{nvidia2022hopper,patel2025llminference}. By exposing a ladder of scopes, the hardware lets software pay only for the coordination it needs.
 
-Hardware truth: GPUs bound sync with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+ The finest scope is the warp: \texttt{\_\_syncwarp} coordinates the 32 threads of a warp and is nearly free because they already execute in lockstep. The next is the thread block: \texttt{bar.sync} (exposed as \texttt{\_\_syncthreads}) is a \textbf{barrier} that all threads of a CTA must reach before any proceeds, and it is the workhorse of shared-memory kernels \citep{nvidia2022hopper}. Between these sits the transaction \textbf{barrier} (mbarrier) of Chapter~8, which producer and consumer warps use to hand off a buffer without a full block \textbf{barrier} \citep{shah2024flashattention3}.
 
-Compiler/kernel fix: predicate fusion on sync/barrier legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The transaction \textbf{barrier} deserves emphasis as the scope that decode kernels live in. Unlike a block \texttt{bar.sync}, which forces every warp to a common point, a transaction \textbf{barrier} lets a producer warp signal ``buffer $k$ is full'' to exactly the consumer that waits on it, so the two coordinate one tile apart while the rest of the kernel runs free \citep{shah2024flashattention3}. This is the synchronization that makes the double-buffer pipeline of Chapter~8 possible: without it, overlapping a load with a compute would require a block \textbf{barrier} between them that defeats the overlap. The transaction \textbf{barrier} is thus the connective tissue of the whole MegaKernel design---it is how static roles hand work to each other without a coarse stall \citep{nvidia2022hopper,dao2022flashattention}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize sync with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked barrier---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Above the block, Hopper adds cluster-scope synchronization. Thread-block clusters are co-scheduled on the same GPC and can synchronize through hardware-accelerated cluster \textbf{barrier} instructions, which is what lets the distributed-shared-memory sharing of Chapter~6 be coordinated safely \citep{nvidia2022hopper,shah2024flashattention3}. Coarser still is grid-scope synchronization across all CTAs of a kernel, available through cooperative-groups grid \textbf{sync} but expensive because it requires all CTAs to be resident, and coarsest is multi-GPU communication through collectives such as all-reduce and all-gather, which cross the device boundary and the interconnect \citep{patel2025llminference,dlbook}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused sync raises bytes/token; fused schedule must keep barrier on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+\begin{table}[t]
+\centering
+\caption{The GPU synchronization hierarchy; cost rises steeply with scope, so a decode kernel coordinates at the narrowest scope a dependency spans \citep{shah2024flashattention3,patel2025llminference}.}
+\label{tab:ch09_sync_scopes}
+\begin{tabular}{lll}
+\toprule
+Scope & Primitive & Relative cost \\
+\midrule
+Warp & \texttt{\_\_syncwarp} & Near-free (lockstep) \\
+Producer/consumer & Transaction barrier & Two units, one tile apart \\
+Block (CTA) & \texttt{bar.sync} & Stall to slowest warp \\
+Cluster & Cluster barrier & Several co-scheduled CTAs \\
+Grid / multi-GPU & Grid sync / collective & Chip- or network-crossing \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The cost gradient across these scopes is the whole reason the hierarchy matters. A warp \textbf{barrier} is a few cycles; a block \textbf{barrier} stalls until the slowest warp arrives; a cluster \textbf{barrier} spans several CTAs; a grid \textbf{sync} or a collective crosses the chip or the network and can cost orders of magnitude more \citep{shah2024flashattention3,patel2025llminference}. For decode this gradient is acute because the per-token work is tiny, so a coarse \textbf{sync} on the critical path is overhead with nothing to amortize it against. The pingpong scheduling of Chapter~7---overlapping one warpgroup's softmax with another's GEMM---is exactly a use of narrow-scope barriers to coordinate two units without a block-wide stall, and it is why that technique recovered tens of TFLOPS \citep{shah2024flashattention3}.
 
-\section{hardware sync pick}
+A useful way to see why scope dominates cost is to think about how many units a \textbf{barrier} must wait for and how far apart they are physically. A warp \textbf{barrier} waits for 32 threads that already advance together, so it is essentially a no-op that the hardware can satisfy immediately \citep{nvidia2022hopper}. A block \textbf{barrier} waits for every warp in the CTA, so it stalls until the straggler arrives---and at batch-1 decode, where warps may have unequal work, that straggler sets the pace. A cluster \textbf{barrier} additionally crosses CTA boundaries within a GPC, and a grid \textbf{sync} requires every CTA in the kernel to be co-resident and to reach the same point, which is why it is only usable in a persistent kernel and is still expensive. A multi-GPU collective leaves the chip entirely, traversing NVLink or a network fabric, so its latency is measured in microseconds against the nanoseconds of an on-chip \textbf{barrier} \citep{patel2025llminference,memoryfloor2026}.
+
+This gradient also explains why disaggregated decode deployments care so much about where synchronization lands. When a model is split across devices for tensor parallelism, every layer may require an all-reduce to sum partial results, and that collective is on the per-token critical path \citep{patel2025llminference}. The design response is the same producer-consumer overlap one scope coarser: overlap the collective with the next layer's compute so the network latency hides behind useful work, exactly as a transaction \textbf{barrier} overlaps a TMA load with a WGMMA \citep{shah2024flashattention3,dlbook}. The synchronization hierarchy is thus self-similar---the same overlap principle applies at every scope, only the latency to hide grows.
+
+\section{Hardware sync pick}
 \label{sec:ch09_hardware_sync_pick}
 
 % AUTO_VISUAL:fig_hardware_sync_pick_architecture
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.5,0) {\footnotesize GPU\\barriers / mbarrier};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize CPU\\fences / atomics};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize NPU\\locks / tokens};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Multi-device\\collectives};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Hardware Sync Pick block diagram for Hierarchical Synchronization and Communication.}
+\caption{Each hardware class provides different synchronization primitives; the compiler picks the one matching the dependency and the target.}
 \label{fig:hardware_sync_pick_architecture}
 \end{figure}
 
-The production surprise at \textbf{hardware sync pick} is not peak FLOPs; it is illegal tier placement: GPU spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
+Picking the right synchronization primitive is target-specific, and the three classes differ as much in synchronization as they did in memory and movement. On a \textbf{gpu} the primitives are the barrier family above plus atomics for fine-grained updates; the design choice is which scope to use and whether to use a transaction barrier for asynchronous handoff or a full block barrier for a bulk-synchronous phase \citep{shah2024flashattention3,nvidia2022hopper}. CUTLASS wraps the producer/consumer barrier discipline in reusable asynchronous pipeline classes precisely because hand-managing a circular list of barriers across many asynchronous operations is too error-prone for a human, which is a strong hint that synchronization belongs in a compiler pass rather than in hand-written kernels \citep{shah2024flashattention3}.
 
-Trace residency: GPU producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+A subtlety specific to the \textbf{gpu} is the difference between a barrier and an atomic, and when each is the right tool. A \textbf{barrier} enforces that all participating units reach a point before any proceeds---a phase boundary---whereas an atomic enforces that a single memory update happens indivisibly, allowing units to coordinate without all stopping \citep{nvidia2022hopper}. For a reduction where many warps contribute to one sum, an atomic add lets them proceed independently and merge results, avoiding a full \textbf{barrier}; for a phase change where the next stage cannot start until the previous fully completes, a \textbf{barrier} is required. Choosing atomics where possible keeps units running and is often the better fit for the irregular, low-parallelism reductions of batch-1 decode, while barriers remain necessary at genuine phase boundaries \citep{shah2024flashattention3,memoryfloor2026}. The transaction \textbf{barrier} is a hybrid---it is a \textbf{barrier} scoped to a producer-consumer pair, giving phase-boundary semantics without a block-wide stall.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+On a \textbf{cpu} synchronization is built from memory fences, atomic operations, and the cache-coherence protocol rather than explicit barriers into a scratchpad \citep{dlbook}. Threads coordinate through atomic flags and acquire/release fences that order memory operations, and the hardware's coherence protocol makes a write by one core visible to another---at the cost of coherence traffic that, like NUMA, can dominate a memory-bound decode loop if threads share data across sockets. The \textbf{cpu} design choice is to minimize cross-core sharing on the hot path, partitioning work so that each thread's data is mostly private and synchronization is rare, the opposite of a GPU kernel that synchronizes warps every pipeline stage.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for GPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+On an \textbf{npu} synchronization is explicit and local: AIE-ML tiles use locks and task-completion-tokens, where the DMA signals a token when a buffer is ready and the vector unit waits on it before consuming, and neighboring tiles coordinate through configured streams and cascade connections \citep{amd2024aie,amd2024xdna}. Because the array is statically configured, the synchronization pattern is fixed at compile time---there is no dynamic contention for a shared lock as there might be on a CPU---which makes the \textbf{npu} the most deterministic of the three but also the least forgiving: a mis-sequenced token is a compile-time bug that stalls the pipeline rather than a rare race. Across collectives, multi-device decode must also pick a communication pattern---all-reduce for tensor-parallel sums, all-gather for sharded weights---and overlap it with compute, which is the same producer-consumer overlap one scope coarser \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The deeper contrast is between explicit and implicit synchronization, and it tracks the same axis as residency and movement. The \textbf{gpu} sits in the middle: barriers are explicit, but the hardware still schedules warps dynamically, so synchronization coordinates a partly dynamic machine. The \textbf{cpu} is the most implicit: the coherence protocol synchronizes caches automatically, and the programmer mostly reasons about ordering through fences rather than issuing explicit barriers, which is convenient but makes the synchronization cost hard to see and easy to incur accidentally through false sharing \citep{dlbook}. The \textbf{npu} is the most explicit: every lock and token is placed by the compiler, nothing is automatic, and the cost is fully visible at compile time \citep{amd2024aie,amd2024xdna}. A residency-first engineer reads this as the same lesson once more---the more explicit the control, the more the compiler can reason about and minimize the coordination, which is why the statically scheduled \textbf{npu} is the most predictable and the coherence-driven \textbf{cpu} the most prone to hidden synchronization cost.
 
-\section{deadlock detection}
+A concrete \textbf{cpu} hazard worth calling out is false sharing: two threads writing different variables that happen to share a cache line force the coherence protocol to ping the line between cores on every write, synchronizing data that did not logically need synchronizing \citep{dlbook}. For a memory-bound decode loop this can quietly dominate, and the fix is a layout decision---pad per-thread state to separate cache lines---not a synchronization primitive. It is the \textbf{cpu} analogue of the GPU's bank conflicts: an accidental sharing that the compiler must lay out around.
+
+\section{Deadlock detection}
 \label{sec:ch09_deadlock_detection}
 
-\textbf{deadlock detection} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix deadlock and deadlock together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+Static role assignment and asynchronous pipelines introduce a hazard that synchronous, per-operator kernels largely avoid: \textbf{deadlock}. When producer and consumer units coordinate through barriers, a mismatch in their arrive/wait counts, or a circular dependency where each unit waits for the other, hangs the kernel permanently \citep{shah2024flashattention3,nvidia2022hopper}. On a GPU a \textbf{deadlock} typically manifests as a kernel that never returns; on an NPU it manifests as a pipeline stage waiting forever on a token that will never be signaled \citep{amd2024aie}. The insidious property is that these failures are often nondeterministic or configuration-dependent: a barrier-count assumption that holds at one block size or warp count breaks at another, so a kernel that passes tests on one shape hangs on a production shape \citep{shah2024flashattention3,nvidia2022hopper}. This is the worst kind of bug to discover in a serving system, because it surfaces as a hung request under specific load rather than as a clean failure in testing, which is the strongest argument for proving deadlock-freedom statically rather than relying on test coverage.
 
-Hardware truth: GPUs bound deadlock with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+ Because these are coordination bugs, not arithmetic bugs, they do not show up in a numerical test---the kernel simply never finishes.
 
-Compiler/kernel fix: predicate fusion on deadlock/deadlock legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The classic \textbf{deadlock} patterns are worth naming because a compiler can check for them. The first is a barrier-count mismatch: if a barrier expects $n$ arrivals but only $n{-}1$ units reach it (because one took a divergent path), the barrier never releases \citep{shah2024flashattention3}. The second is a circular wait: producer waits for the consumer to free a buffer while the consumer waits for the producer to fill it, a cycle that only a correct initial condition (the producer starting with empty buffers) avoids. The third is an ordering bug in a multi-stage pipeline where the barriers are not arranged as a consistent circular list, so two stages wait on each other out of order \citep{shah2024flashattention3}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize deadlock with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked deadlock---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+There is a reason these patterns proliferate exactly when performance improves. Each optimization in this Part trades a bulk-synchronous structure---compute everything, synchronize, move on---for a finer-grained asynchronous one where units run ahead and coordinate point-to-point \citep{shah2024flashattention3,dao2022flashattention}. Bulk-synchronous code is hard to deadlock because there is one barrier everyone hits; asynchronous, warp-specialized code has many barriers with specific arrive/wait counts, and every one is an opportunity for a mismatch. In other words, \textbf{deadlock} risk is the price of the overlap that makes decode fast, which is why a serious decode kernel cannot treat synchronization casually---the very structure that wins latency is the structure that can hang.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused deadlock raises bytes/token; fused schedule must keep deadlock on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+The role of control-flow divergence in \textbf{deadlock} deserves emphasis because it is the subtlest case. A \textbf{barrier} placed inside a conditional that only some warps take will wait forever for the warps that branched around it \citep{nvidia2022hopper,shah2024flashattention3}. This is why barriers must be placed at points all participating units are guaranteed to reach, and why a compiler that understands the control flow is better positioned to verify this than a human reading a complex kernel. On a statically scheduled \textbf{npu} the analogous bug is a token that one tile expects but no tile ever produces because a stage was conditionally skipped, and again the static schedule makes it checkable at compile time \citep{amd2024aie,amd2024xdna}.
 
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The defense is to make synchronization structural rather than ad hoc. CUTLASS's pipeline classes exist so that the arrive/wait counts and the circular barrier list are generated from a single specification, guaranteeing they match \citep{shah2024flashattention3}. A compiler that owns synchronization can go further: it can verify statically that every barrier's expected arrival count equals the number of units that reach it on all paths, that the producer-consumer cycle has a correct initial condition, and that the barrier ordering forms a consistent list---turning \textbf{deadlock} from a runtime hang discovered in production into a compile-time rejection \citep{yirage2026,wu2024mirage}. On a statically scheduled NPU this check is especially natural because the entire synchronization pattern is known at compile time \citep{amd2024xdna}. The same staticness that makes an NPU unforgiving---no cache to hide a late load, no dynamic scheduler to reorder around a stall---is what makes its synchronization fully analyzable: with every lock, token, and stream assignment fixed before execution, the compiler can simulate the coordination and prove progress, something far harder on a dynamically scheduled GPU where warp progress depends on runtime occupancy \citep{amd2024aie,nvidia2022hopper}. This is a recurring trade in the book: explicit, static control is harder to write by hand but easier for a compiler to verify, which is exactly why these facets belong in a pass.
 
 \section{YiRage sync pass}
 \label{sec:ch09_yirage_sync_pass}
 
-Teams hit \textbf{YiRage sync pass} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without sync residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+The book's reference compiler turns synchronization into a generated, checked pass. \textbf{YiRage} carries a \textbf{sync} pass that, given a fused region with its static roles and pipeline, inserts the synchronization at the narrowest correct scope per target---warp and transaction barriers on a GPU, fences and atomics on a CPU, locks and tokens on an NPU---and verifies the result is deadlock-free before codegen \citep{yirage2026,shah2024flashattention3}. Because the pass consumes the role assignment of Chapter~7 and the pipeline of Chapter~8, it knows exactly which units must coordinate and when, so it can choose warp-scope over block-scope wherever the dependency permits and avoid the coarse-\textbf{sync} overhead that decode cannot afford \citep{nvidia2022hopper,memoryfloor2026}.
 
-Trace residency: YiRage producers must feed sync consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Choosing the scope is itself an optimization the pass performs, not just a correctness step. Given the dependency graph of a fused region, the pass determines, for each handoff, the smallest set of units that actually share data and synchronizes only them---two warps through a transaction \textbf{barrier} rather than the whole block, or a cluster \textbf{barrier} only where distributed shared memory is genuinely used \citep{shah2024flashattention3,nvidia2022hopper}. This matters because a human writing a kernel tends to reach for the familiar block \texttt{bar.sync} even when a narrower primitive would do, leaving performance on the table; the pass has no such habit and picks the minimal scope mechanically. For batch-1 decode, where every coarse \textbf{sync} on the critical path is unamortized overhead, this minimization is a direct latency win \citep{taxbreak2026,memoryfloor2026}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The pass also adapts the synchronization to the precision and the pipeline depth, because those change what must be coordinated. A deeper pipeline has more buffers and therefore more transaction barriers in flight, and the pass must generate a consistent circular list of exactly the right length \citep{shah2024flashattention3}. A lower-precision format that packs more elements per buffer can change which units produce and consume a given tile, shifting where the barriers belong. Because the \textbf{sync} pass runs after the tiling and pipeline passes have fixed these decisions, it has the information to place the barriers correctly, which is the argument for synchronization being a late, dependent pass rather than something hand-written up front \citep{yirage2026,wu2024mirage}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The pass's verification is the part that matters most for a megakernel. A whole-model megakernel coordinates hundreds of units, and a single mismatched barrier hangs the entire forward pass, so shipping one without a static deadlock check is reckless \citep{mpk2025,wu2024mirage}. The \textbf{YiRage} \textbf{sync} pass checks barrier arrival counts against the units on every control-flow path, validates the producer-consumer initial conditions, and confirms the barrier ordering forms a consistent list, rejecting any region that cannot be proven deadlock-free \citep{yirage2026}. This composes with the residency, role, and pipeline checks of the previous chapters: the superoptimizer proposes a fusion, the memory pass certifies its footprint, the tiling pass assigns roles, the pipeline pass overlaps movement, and the \textbf{sync} pass guarantees the coordination is correct and minimal---all per target, all before a kernel is emitted \citep{wu2024mirage,mpk2025}.
 
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The verification also has to reason about the multi-device boundary when a model is sharded. A tensor-parallel layer's all-reduce is a synchronization point across devices, and a mismatch there---one rank expecting a collective that another never issues---hangs the whole job exactly like a barrier-count mismatch within a kernel, but now across the network \citep{patel2025llminference,dlbook}. The \textbf{sync} pass treats the collective as another synchronization edge in the dependency graph, checking that every participating rank issues a matching collective and that the overlap with compute does not create a cycle where a rank waits to send while a peer waits to receive. This unifies on-chip and cross-device coordination under one analysis, which matters because production decode increasingly spans many devices and a cross-device \textbf{deadlock} is even harder to debug by hand than an on-chip one \citep{patel2025llminference,memoryfloor2026}.
 
-\textbf{sync hierarchy} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix sync and barrier together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,yirage2026}.
+A final benefit of owning synchronization in the compiler is reproducibility across targets. A hand-written kernel's synchronization is tuned for one GPU and silently wrong or suboptimal on another---a barrier count assuming a specific warp count, say, or an atomic pattern that contends differently under another memory model \citep{nvidia2022hopper,amd2024xdna}. Because the \textbf{YiRage} \textbf{sync} pass regenerates the synchronization from the dependency graph per target, the same logical kernel gets a correct plan on each, with the scope and primitive chosen for that machine \citep{yirage2026}. For a fleet that mixes GPU generations, CPUs, and NPUs, this is the difference between maintaining one verified specification and maintaining a matrix of hand-tuned, separately-debugged kernels.
 
-Hardware truth: GPUs bound sync with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The result is that synchronization, the most error-prone part of a hand-written fused kernel, becomes a property the compiler generates and proves rather than one a CUDA expert debugs by staring at hangs. For a serving team deploying megakernels across a heterogeneous fleet, that guarantee is what makes end-to-end fusion safe: the same logical kernel gets a different, minimal, deadlock-free synchronization plan on an H100, a CPU, and an XDNA tile, each checked before it runs \citep{yirage2026,patel2025llminference}.
 
-Compiler/kernel fix: predicate fusion on sync/barrier legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize sync with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked barrier---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused sync raises bytes/token; fused schedule must keep barrier on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{hardware sync pick} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because GPU was planned without CPU residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: GPU producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for GPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{deadlock detection} is not peak FLOPs; it is illegal tier placement: deadlock spilling to HBM/DDR while deadlock still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound deadlock with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on deadlock/deadlock legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize deadlock with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked deadlock---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused deadlock raises bytes/token; fused schedule must keep deadlock on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage sync pass} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix YiRage and sync together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed sync consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{sync hierarchy} is not peak FLOPs; it is illegal tier placement: sync spilling to HBM/DDR while barrier still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
-
-Trace residency: sync producers must feed barrier consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for sync on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{hardware sync pick} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix GPU and CPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound GPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on GPU/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize GPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused GPU raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{deadlock detection} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because deadlock was planned without deadlock residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: deadlock producers must feed deadlock consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for deadlock on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage sync pass} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while sync still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/sync legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked sync---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep sync on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{sync hierarchy} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because sync was planned without barrier residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
-
-Hardware truth: GPUs bound sync with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on sync/barrier legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize sync with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked barrier---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused sync raises bytes/token; fused schedule must keep barrier on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{hardware sync pick} is not peak FLOPs; it is illegal tier placement: GPU spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: GPU producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for GPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{deadlock detection} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix deadlock and deadlock together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound deadlock with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on deadlock/deadlock legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize deadlock with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked deadlock---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused deadlock raises bytes/token; fused schedule must keep deadlock on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage sync pass} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without sync residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed sync consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{sync hierarchy} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix sync and barrier together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,yirage2026}.
-
-Trace residency: sync producers must feed barrier consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for sync on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{hardware sync pick} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because GPU was planned without CPU residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound GPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on GPU/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize GPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused GPU raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{deadlock detection} is not peak FLOPs; it is illegal tier placement: deadlock spilling to HBM/DDR while deadlock still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Trace residency: deadlock producers must feed deadlock consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for deadlock on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage sync pass} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix YiRage and sync together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/sync legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked sync---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep sync on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{sync hierarchy} is not peak FLOPs; it is illegal tier placement: sync spilling to HBM/DDR while barrier still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
-
-Hardware truth: GPUs bound sync with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on sync/barrier legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize sync with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked barrier---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused sync raises bytes/token; fused schedule must keep barrier on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{hardware sync pick} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix GPU and CPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: GPU producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for GPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{deadlock detection} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because deadlock was planned without deadlock residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound deadlock with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on deadlock/deadlock legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize deadlock with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked deadlock---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused deadlock raises bytes/token; fused schedule must keep deadlock on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage sync pass} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while sync still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed sync consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{sync hierarchy} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because sync was planned without barrier residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
-
-Trace residency: sync producers must feed barrier consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for sync on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds sync, barrier to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{hardware sync pick} is not peak FLOPs; it is illegal tier placement: GPU spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound GPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on GPU/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize GPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused GPU raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{deadlock detection} is where Hierarchical Synchronization and Communication meets Chapter~1 counters: fix deadlock and deadlock together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: deadlock producers must feed deadlock consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for deadlock on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds deadlock to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage sync pass} when Hierarchical Synchronization and Communication looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without sync residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/sync legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked sync---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep sync on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, sync to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
+It is worth situating this within the book's recurring argument. Chapters~6 through~9 have each taken one facet of a fused decode kernel---residency, role assignment, asynchronous movement, and now synchronization---and shown that the facet is best handled as a checked, per-target compiler pass rather than as hand-written CUDA, because each is a place where prefill intuitions mislead and where a single hand-tuned artifact fails to port \citep{taxbreak2026,memoryfloor2026}. Synchronization completes the set: it is the facet that turns the other three from independent optimizations into a single correct kernel, because residency without coordination races, roles without coordination deadlock, and pipelines without coordination read stale buffers \citep{shah2024flashattention3,amd2024aie}. Treating all four as composable passes over a shared representation is what lets a superoptimizer propose an aggressive fusion and have the compiler certify it is resident, role-assigned, overlapped, and deadlock-free before a single token is decoded \citep{wu2024mirage,yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch09_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Sync Hierarchy.} Tie sync hierarchy to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Hardware Sync Pick.} Tie hardware sync pick to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Deadlock Detection.} Tie deadlock detection to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Sync Pass.} Tie YiRage sync pass to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Synchronize at the narrowest correct scope.}
+Cost rises steeply from a warp barrier to a block barrier to a cluster barrier to a grid sync or multi-GPU collective, so use the narrowest scope a dependency spans \citep{shah2024flashattention3,patel2025llminference}. A coarse sync on the decode critical path is pure overhead with nothing to amortize it against \citep{taxbreak2026}.
+
+\item \textbf{Pick the primitive per hardware class.}
+GPUs use barriers, transaction barriers, and atomics; CPUs use fences, atomics, and cache coherence; NPUs use locks and task-completion-tokens; multi-device uses collectives \citep{nvidia2022hopper,amd2024aie}. Minimize cross-core sharing and false sharing on a CPU; the NPU pattern is fixed at compile time \citep{amd2024xdna}.
+
+\item \textbf{Treat deadlock as a first-class hazard.}
+Barrier-count mismatches, circular waits, and inconsistent barrier ordering hang a fused kernel without any numerical error \citep{shah2024flashattention3}. They are coordination bugs invisible to a correctness test and often shape- or configuration-dependent, so they hang in production rather than in testing \citep{nvidia2022hopper}.
+
+\item \textbf{Make synchronization structural and checkable.}
+Generate arrive/wait counts and the circular barrier list from one specification, as CUTLASS pipeline classes do, so they cannot mismatch \citep{shah2024flashattention3}. A compiler can verify deadlock-freedom statically \citep{wu2024mirage}.
+
+\item \textbf{Generate and prove sync per target.}
+The YiRage sync pass inserts minimal, correct synchronization per class and rejects any region not provably deadlock-free, composing with the residency, role, and pipeline passes \citep{yirage2026,mpk2025}. Megakernels coordinate hundreds of units, so the proof is essential \citep{memoryfloor2026}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch09_conclusion}
 
-Hierarchical Synchronization and Communication is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Hierarchical Synchronization and Communication baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Synchronization is what makes the static roles of Chapter~7 and the asynchronous pipelines of Chapter~8 safe: a hierarchy of scopes from warp barriers to multi-GPU collectives, with cost rising sharply as scope widens, so the discipline is to coordinate at the narrowest scope a dependency requires \citep{shah2024flashattention3,patel2025llminference}. Each hardware class supplies different primitives---GPU barriers, CPU fences, NPU tokens---and each introduces deadlock as a coordination hazard invisible to numerical tests, which is why the YiRage sync pass inserts minimal synchronization per target and proves it deadlock-free before codegen \citep{yirage2026,amd2024aie}. With residency, roles, movement, and synchronization all now compiler-managed and checked, the MegaKernel machinery is complete enough to tackle the algorithm that ties them together in the decode hot path: Chapter~\ref{chap:ch10} develops the online-softmax attention optimization that keeps the running statistics resident and synchronized across the very pipeline stages this chapter coordinated \citep{dao2022flashattention,memoryfloor2026}.
 
 \typeout{END_CHAPTER "ch09" \theabspage}
