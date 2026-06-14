@@ -69,3 +69,4 @@ ch08-202606140543	100.0	3500	16	94.0	keep	deep-rewrite: replace ch08 pad filler 
 ch09-202606140606	100.0	3501	13	94.0	keep	deep-rewrite: replace ch09 pad filler with verified sync-hierarchy/deadlock content
 ch24-202606140620	100.0	2401	18	94.0	keep	deep-rewrite: replace ch24 pad filler with verified heterogeneous-deployment content (pad-residual backlog cleared)
 ch03-202606140636	100.0	4004	20	94.0	keep	deep-rewrite: replace ch03 hardware-constraints template filler with verified GPU/CPU/NPU content
+ch15-202606140650	100.0	1682	18	95.3	keep	deep-rewrite: expand thin XLA chapter to sibling depth with verified HLO/fusion/command-buffer content

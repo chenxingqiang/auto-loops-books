@@ -85,6 +85,15 @@
   note={AOT MLIR compiler+runtime; Flow/Stream/HAL/VM dialects; dispatch-region fusion; \texttt{.vmfb} fat binary; targets llvm-cpu, CUDA, ROCm/HIP, Vulkan/SPIR-V, Metal, AMD AIE (experimental)}
 }
 
+@misc{openxla2024,
+  title={{XLA}: Accelerated Linear Algebra --- {OpenXLA} Architecture},
+  author={{OpenXLA Project}},
+  year={2024},
+  howpublished={\url{https://openxla.org/xla/architecture}},
+  url={https://openxla.org/xla/architecture},
+  note={StableHLO $\to$ HLO $\to$ LLVM/PTX/TPU; operator fusion as primary optimization (no HBM intermediates); PriorityFusion / Multi-Output passes; CommandBufferThunk launch capture; Triton emitters}
+}
+
 @inproceedings{tillet2019triton,
   title={Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations},
   author={Tillet, Philippe and Kung, H. T. and Cox, David},
