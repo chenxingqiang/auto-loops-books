@@ -317,13 +317,20 @@ Compiler takeaway for MLIR case study: lower the same decoder IR, but predicate 
 \label{sec:ch14_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Mlir Hw Matrix.} Tie mlir hw matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mlir Arch Passes.} Tie mlir arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mlir Codegen.} Tie mlir codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mlir Tuning.} Tie mlir tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mlir Case Study.} Tie mlir case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Decode breaks the ``portable IR'' story.}
+Prefill hides target sins because a large prompt amortizes launch overhead and keeps tensor cores fed; batch-1 decode removes that amortization, so a portable MLIR graph that looks fine in prefill exposes per-target residency gaps in decode \citep{dao2022flashattention,patel2025llminference}. Portability across dialects does not imply portability of decode goodput \citep{taxbreak2026}.
+
+\item \textbf{Erase redundant casts before bufferization.}
+Torch-MLIR and similar exporters emit verbose tensor graphs with redundant casts, and each surviving cast becomes a buffer after bufferization \citep{chen2020compilerbasedhardw,yirage2026}. Cleaning the graph and lowering paged-KV views early---so affine maps express in-bounds gather/scatter---keeps page boundaries visible to fusion \citep{kwon2023vllm,dao2022flashattention}.
+
+\item \textbf{Codegen is not just a backend detail.}
+Teams celebrate the first successful NVVM lowering, then watch p99 decode flatline because the platform wrapper still constructs tensors on the host every token \citep{taxbreak2026,nvidia2024cudagraphs}. The codegen path must produce a capturable, host-light launch sequence, not merely correct device code \citep{memoryfloor2026}.
+
+\item \textbf{Autotune at the decode shape.}
+Prefill profile logs are the classic trap: they recommend tile sizes that overflow shared memory at batch-1 and force HBM spill \citep{memoryfloor2026,semianalysis2024tma}. MLIR tuning must use a decode-shaped profile, or the chosen schedule wins prefill and loses token generation \citep{patel2025llminference}.
+
+\item \textbf{Preserve residency invariants across passes.}
+YiRage uses MLIR as interchange between exported graphs and target megakernels, and the decode lesson is invariant preservation---residency metadata must attach before generic canonicalization erases it \citep{yirage2026,chen2020compilerbasedhardw}. A triplet harness reporting bytes/token, launches/token, and compile rejections is what makes those invariants auditable \citep{memoryfloor2026,taxbreak2026}.
 \end{itemize}
 
 \section{Conclusion}
