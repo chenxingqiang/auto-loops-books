@@ -2,9 +2,11 @@
 \label{chap:ch20}
 \typeout{START_CHAPTER "ch20" \theabspage}
 
-Part~VI treats \emph{Mirage and Emerging AI Compilers} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
-
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The compilers of Chapters~16--19 all answer the same question---given this operator, schedule it well---but Mirage asks a different one: given this whole tensor program, \emph{superoptimize} it, discovering optimizations that span algebraic rewrites, schedules, and entirely new custom kernels at once \citep{wu2024mirage}. That shift matters for decode because the highest-leverage transformation is not a better matmul tile; it is collapsing a token's worth of operators into one kernel so the host stops launching thousands of them. Dense Llama-3.2-1B averages 847.5 GPU launches per output token on H100; OLMoE-1B/7B averages 9{,}305 \citep{taxbreak2026}. Mirage's descendant, the Mirage Persistent Kernel (MPK), takes this to its conclusion by transforming LLM inference into a single megakernel and cutting end-to-end latency by $1.2$--$6.7\times$ \citep{mpk2025}.
+This chapter is also where the book's own reference compiler comes from: \textbf{YiRage} is a Mirage-lineage, multi-backend descendant, so the ideas here---multi-level search, megakernel fusion, residency-as-metadata---are the spine of everything we have called YiRage in earlier chapters \citep{yirage2026}. We treat Mirage and the emerging wave as production surfaces graded on bytes/token and launches/token, not as research curiosities \citep{memoryfloor2026,patel2025llminference}.
+\index{Mirage}
+\index{Superoptimization}
+\index{Megakernel}
 
 \section{Mirage HW matrix}
 \label{sec:ch20_mirage_hw_matrix}
@@ -14,31 +16,25 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Mirage HW Matrix};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Tensor program\\(PyTorch ref)};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Superoptimize\\$\mu$Graph search};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Verified\\megakernel};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize GPU target\\one launch / token};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Mirage HW Matrix optimization pipeline in Mirage and Emerging AI Compilers.}
+\caption{Mirage superoptimizes a tensor program over a multi-level $\mu$Graph search space and emits a verified, fused kernel---one launch per token in the MPK limit.}
 \label{fig:mirage_hw_matrix_pipeline}
 \end{figure}
 
-Teams hit \textbf{Mirage HW matrix} when Mirage and Emerging AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without target residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+Mirage's ``\textbf{matrix}'' is not a list of vendor targets like IREE's; it is the GPU compute hierarchy itself \citep{wu2024mirage}. A $\mu$Graph represents a tensor program uniformly at three levels---kernel, thread block, and thread---and that hierarchy \emph{is} the \textbf{hardware} model the superoptimizer searches against \citep{wu2024mirage}. The consequence is that Mirage is GPU-first by construction: the kernel/block/thread structure maps directly onto a CUDA \textbf{target}, and its strongest results are on NVIDIA GPUs \citep{mpk2025}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The honest multi-hardware reading follows from that. On a \textbf{gpu} Mirage is exactly aligned with the residency hierarchy---block-level tensors live in shared memory, kernel-level tensors in device memory---so its search naturally optimizes bytes/token \citep{wu2024mirage,memoryfloor2026}. On a \textbf{cpu} the kernel/block/thread abstraction does not map cleanly, so the superoptimization approach is emerging rather than production there \citep{dlbook}. On an \textbf{npu} like XDNA/AIE the static-dataflow model is different again, and the value Mirage offers is conceptual---multi-level search and verified fusion---rather than a ready backend \citep{amd2024xdna,amd2024aie}.
 
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Mirage is also a representative of a broader emerging wave, and the family resemblance is what matters more than any one project. The common thread across the new compilers is a move away from fixed, hand-authored pass pipelines toward \emph{search with verification}: instead of trusting a human-proved rewrite, these systems explore a large space of equivalent programs and certify the winner, which lets them discover fusions and custom kernels that no pass library encodes \citep{wu2024mirage}. The second shared theme is end-to-end fusion as a first-class goal rather than a peephole optimization---the megakernel is the clearest example, but the same instinct drives whole-program scheduling in IREE and aggressive operator fusion elsewhere \citep{mpk2025,iree2024}. For a decode engineer the practical signal is that the frontier has shifted from ``which library has the fastest GEMM'' to ``which compiler can collapse my whole token into the fewest, most resident launches and prove it correct'' \citep{taxbreak2026,memoryfloor2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} A Hopper GPU rewards the megakernel fusion Mirage discovers because it removes launches and keeps tensors in shared memory; a static NPU fabric needs the fusion decided at compile time with a fixed tile/DMA plan instead \citep{semianalysis2024tma,amd2024aie}. This is precisely why YiRage generalizes the Mirage idea across backends rather than shipping a single GPU artifact \citep{yirage2026}.
 
 \section{Mirage arch passes}
 \label{sec:ch20_mirage_arch_passes}
@@ -47,230 +43,92 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.6,0) {\footnotesize Kernel graph\\(device mem)};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Block graph\\(shared mem)};
+ \node[vis arch node] (s2) at (1.9,0) {\footnotesize Thread graph\\(registers)};
+ \node[vis arch node] (s3) at (5.5,0) {\footnotesize PIT equivalence\\verifier};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Mirage Arch Passes block diagram for Mirage and Emerging AI Compilers.}
+\caption{Mirage's $\mu$Graph spans kernel (device memory), block (shared memory), and thread (register) levels; candidates are checked by a probabilistic equivalence verifier.}
 \label{fig:mirage_arch_passes_architecture}
 \end{figure}
 
-The production surprise at \textbf{Mirage arch passes} is not peak FLOPs; it is illegal tier placement: pass spilling to HBM/DDR while lower still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Mirage's ``\textbf{pass}'' pipeline is really a search, and that is the conceptual departure from every prior chapter \citep{wu2024mirage}. Instead of a fixed sequence of rewrites, the superoptimizer explores a space of $\mu$Graphs that jointly combine algebraic transformations, schedule transformations, and the generation of new custom kernels---an \textbf{optim}ization no single hand-written pass would find \citep{wu2024mirage}. The $\mu$Graph levels carry the residency contract directly: a kernel graph keeps tensors in device memory, a block graph keeps intermediates in shared memory to cut device-memory access, and a thread graph \textbf{lower}s scope to registers \citep{wu2024mirage}.
 
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+\begin{table}[t]
+\centering
+\caption{Mirage's $\mu$Graph levels and the memory tier each one keeps tensors in; the level structure is the residency contract \citep{wu2024mirage}.}
+\label{tab:ch20_mugraph_levels}
+\begin{tabular}{lll}
+\toprule
+Level & Memory tier & Role \\
+\midrule
+Kernel graph & Device memory (HBM) & Whole-GPU kernels; tensors shared via DRAM \\
+Block graph & Shared memory & Thread-block compute; intermediates on-chip \\
+Thread graph & Registers & Per-thread scope; finest reuse \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The level structure is not bookkeeping; it is the whole reason the search can reason about bytes/token. When the optimizer chooses to express a sub-computation as a block graph, it is committing those intermediates to shared memory and therefore removing the device-memory traffic a kernel-level expression would incur \citep{wu2024mirage,memoryfloor2026}. When an intermediate is too large for shared memory, Mirage splits the work into multiple block graphs so that each one fits, which keeps the on-chip residency invariant intact instead of silently spilling \citep{wu2024mirage}. A human writing CUDA makes these decisions implicitly and inconsistently; the $\mu$Graph makes them explicit and searchable, which is what lets the superoptimizer trade device-memory traffic for shared-memory reuse deliberately.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Two ideas make this tractable and trustworthy. First, abstraction-based pruning shrinks the enormous search space while preserving a certain optimality guarantee, so the search is not brute force \citep{wu2024mirage}. Second, a probabilistic equivalence verifier checks each candidate $\mu$Graph against the reference by random testing over finite fields---polynomial identity testing generalized to the LAX fragment (linear algebra plus division and exponentiation)---which avoids floating-point noise and drives the probability of accepting a wrong kernel arbitrarily low \citep{wu2024mirage}. This is a different correctness model from a compiler that trusts each hand-proved rewrite, and it is what lets Mirage emit kernels a human never wrote. Notably, Mirage does not lower through an MLIR \textbf{dialect} tower; the multi-level $\mu$Graph is a single uniform representation, which is why it can search across levels that a staged dialect pipeline keeps separate \citep{lai2023relax,wu2024mirage}.
 
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{What the verifier buys.} Because equivalence is checked rather than assumed, a discovered megakernel can be deployed with quantified confidence, not just empirical testing---the discipline a decode team needs before replacing a known-correct kernel-per-operator path with a fused one \citep{wu2024mirage,patel2025llminference}.
 
 \section{Mirage codegen}
 \label{sec:ch20_mirage_codegen}
 
-\textbf{Mirage codegen} is where Mirage and Emerging AI Compilers meets Chapter~1 counters: fix codegen and backend together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+Mirage's \textbf{codegen} turns a verified $\mu$Graph into CUDA, and MPK extends this to \textbf{emit} an entire LLM forward pass as one megakernel \citep{wu2024mirage,mpk2025}. The mechanism is an SM-level task graph (tGraph) that captures data dependencies at the granularity of individual streaming multiprocessors, so the \textbf{backend} can schedule cross-operator software pipelining and communication--computation overlap \emph{inside} a single kernel launch, with decentralized scheduling across SMs \citep{mpk2025}. The \textbf{platform} is the GPU, and the generated CUDA includes the intra-SM optimizations---software pipelining, register reuse, bank-conflict-aware layouts---that a per-operator emit cannot coordinate across operators \citep{mpk2025}.
 
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+For decode this is the most direct attack on launches/token in the book. A kernel-per-operator stack pays host dispatch for every one of the thousands of launches a token requires; a megakernel pays it once \citep{taxbreak2026,memoryfloor2026}. MPK reports $1.2$--$6.7\times$ end-to-end latency reductions from exactly this collapse, pushing inference toward hardware limits, and it does so from a few dozen lines of Python that name the fused layers---for example one call fusing RMSNorm and a linear projection \citep{mpk2025}. What codegen still cannot fix is an algorithm that is genuinely device-memory bound: if the working set does not fit on chip, even a perfect megakernel must stream it \citep{dlbook}.
 
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The deeper reason the megakernel helps is that it changes what can overlap. In a kernel-per-operator schedule, the boundary between two operators is also a synchronization point: the host waits for one kernel to finish before launching the next, so the GPU idles through dispatch latency and any tail effects \citep{taxbreak2026}. Inside a single megakernel those boundaries become intra-kernel dependencies that the SM-level task graph can pipeline---one SM can start the next task's loads while another finishes the current task's compute, and collective communication can overlap with computation instead of stalling behind it \citep{mpk2025}. At batch-1 decode, where there is no batch dimension to hide latency behind, this fine-grained overlap is often the only source of parallelism left, which is why the megakernel wins are largest exactly in the regime that hurts a conventional stack most \citep{memoryfloor2026,kwon2023vllm}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The megakernel's single-launch win is a GPU phenomenon---it removes CUDA launch and host-dispatch overhead; on an NPU the equivalent is a static single-dispatch schedule, and on a CPU it is the AOT bundle of Chapter~19 \citep{amd2024aie,rotem2018glow}. Same principle, different mechanism per class \citep{semianalysis2024tma}.
 
 \section{Mirage tuning}
 \label{sec:ch20_mirage_tuning}
 
-Teams hit \textbf{Mirage tuning} when Mirage and Emerging AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because tun was planned without profile residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+In Mirage, \textbf{tun}ing and compilation are the same act: the superoptimizer searches the $\mu$Graph space and the probabilistic verifier accepts only equivalent candidates, so ``tuning'' means letting the search run rather than hand-listing configurations \citep{wu2024mirage}. You still \textbf{profile} candidates---the search is guided by measured performance and bounded by the abstraction-based pruning---but the engineer's job is to set the search budget and the operating point, not to write schedules \citep{wu2024mirage}.
 
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{pitfall} is twofold and specific. First, superoptimization is expensive: searching and verifying a large $\mu$Graph space costs real compile time, so it pays for hot, reused programs (a served LLM's decode layer) and not for one-off graphs \citep{wu2024mirage,kwon2023vllm}. Second, the correctness guarantee is probabilistic and scoped to the LAX fragment; operators outside that fragment do not get the same verification strength, so a team must know which parts of its model the guarantee actually covers \citep{wu2024mirage}. As elsewhere, the right search target is \textbf{hardware}-specific---a $\mu$Graph tuned for one GPU's shared-memory size and SM count is not automatically optimal on another, so re-search per SKU rather than assuming transfer \citep{nvidia2022hopper,patel2025llminference}. A practical way to budget the search is to spend it where the token spends its time: the decode-critical attention and projection layers are reused on every step and every request, so a long superoptimization run there amortizes over billions of tokens, whereas one-off preprocessing graphs rarely justify the cost \citep{wu2024mirage,kwon2023vllm}.
 
 \section{Mirage case study}
 \label{sec:ch20_mirage_case_study}
 
-The production surprise at \textbf{Mirage case study} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+The decisive \textbf{case} is MPK compiling a real LLM---an open Hugging Face model such as Qwen3-8B---into a single megakernel and \textbf{benchmark}ing it against a kernel-per-operator serving stack \citep{mpk2025}. The result restates the book's thesis from the superoptimizer's side: fusing the whole decode step into one launch removes the per-operator host dispatch that dominates batch-1, and the SM-level task graph overlaps the communication and computation that a kernel-per-operator schedule serializes, yielding the reported $1.2$--$6.7\times$ \citep{mpk2025,taxbreak2026}. The arithmetic is familiar---each avoided inter-operator round trip saves the activation bytes that would otherwise stream through device memory per token---only now the compiler discovers the fusion rather than a human writing it \citep{memoryfloor2026,dao2022flashattention}.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+It is worth being concrete about why the search, not just the fusion, is the contribution. A hand-written megakernel for one model is a heroic engineering effort that does not transfer to the next architecture; Mirage's superoptimizer regenerates the fused kernel from a reference implementation whenever the model or the GPU changes, and the probabilistic verifier certifies each result \citep{wu2024mirage,mpk2025}. For a serving team that means the megakernel is not a brittle artifact to maintain by hand but a compiler output to regenerate, which is the only way end-to-end fusion is sustainable across a model zoo that changes monthly. The cost, as the tuning section noted, is search time---paid once per model-target pair and amortized over every token served.
 
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{Mirage HW matrix} is where Mirage and Emerging AI Compilers meets Chapter~1 counters: fix hardware and target together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Mirage arch passes} when Mirage and Emerging AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because pass was planned without lower residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Mirage codegen} is not peak FLOPs; it is illegal tier placement: codegen spilling to HBM/DDR while backend still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Mirage tuning} is where Mirage and Emerging AI Compilers meets Chapter~1 counters: fix tun and profile together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Mirage case study} when Mirage and Emerging AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because case was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Mirage HW matrix} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while target still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: hardware producers must feed target consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Mirage arch passes} is where Mirage and Emerging AI Compilers meets Chapter~1 counters: fix pass and lower together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pass/lower legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lower---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pass raises bytes/token; fused schedule must keep lower on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Mirage codegen} when Mirage and Emerging AI Compilers looks correct in isolation yet decode telemetry disagrees---usually because codegen was planned without backend residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: codegen producers must feed backend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for codegen on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Mirage tuning} is not peak FLOPs; it is illegal tier placement: tun spilling to HBM/DDR while profile still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound tun with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on tun/profile legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize tun with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked profile---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tun raises bytes/token; fused schedule must keep profile on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Mirage case study} is where Mirage and Emerging AI Compilers meets Chapter~1 counters: fix case and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: case producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{cross-hardware} conclusion is where the emerging wave and this book converge. Mirage proves the GPU case; the open problem is carrying multi-level search and verified megakernel fusion to CPUs, NPUs, and heterogeneous deployments where the launch-collapse mechanism differs \citep{amd2024xdna,amd2024aie}. \textbf{YiRage} is the book's answer: a Mirage-lineage compiler that generalizes superoptimization and megakernel fusion across multiple backends and carries the Chapter~2 residency rules as checkable IR metadata, so a discovered fusion that would spill on a given target is rejected at compile time rather than shipped \citep{yirage2026}. That is why every prior chapter measured its compiler against the same YiRage yardstick---this is where the yardstick comes from \citep{patel2025llminference}.
 
 \section{Key Takeaways}
 \label{sec:ch20_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Mirage HW Matrix.} Tie Mirage HW matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mirage Arch Passes.} Tie Mirage arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mirage Codegen.} Tie Mirage codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mirage Tuning.} Tie Mirage tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Mirage Case Study.} Tie Mirage case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Superoptimization replaces hand-written passes with search.}
+Mirage jointly searches algebraic rewrites, schedules, and new custom kernels over a multi-level $\mu$Graph, finding fusions no fixed pass would \citep{wu2024mirage}. For decode the prize is collapsing per-token launches, not a faster single matmul \citep{taxbreak2026}.
+
+\item \textbf{The $\mu$Graph encodes residency by level.}
+Kernel graphs use device memory, block graphs use shared memory, thread graphs use registers, so the search optimizes bytes/token by construction \citep{wu2024mirage,memoryfloor2026}. The representation is the hardware model.
+
+\item \textbf{Verified megakernels attack launches/token directly.}
+MPK fuses an LLM forward pass into one launch via an SM-level task graph, reporting $1.2$--$6.7\times$ latency reduction by removing per-operator host dispatch \citep{mpk2025,nvidia2024cudagraphs}. One launch per token is the limit case of this book's thesis.
+
+\item \textbf{Probabilistic equivalence makes discovered kernels deployable.}
+Checking candidates by polynomial identity testing over finite fields (LAX fragment) gives quantified correctness, so a fused kernel can replace a known-good path with confidence---but only within the verified fragment \citep{wu2024mirage}. Know what the guarantee covers \citep{patel2025llminference}.
+
+\item \textbf{Search cost and SKU-specificity are the trade-offs.}
+Superoptimization pays for hot, reused decode layers, not one-off graphs, and a $\mu$Graph tuned for one GPU is not optimal on another \citep{wu2024mirage,nvidia2022hopper}. Budget the search and re-tune per target \citep{kwon2023vllm}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch20_conclusion}
 
-Mirage and Emerging AI Compilers is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Mirage and Emerging AI Compilers baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Mirage reframes compilation as multi-level superoptimization with verified correctness, and MPK shows its decode payoff: a single megakernel that collapses a token's launches and overlaps communication with computation inside one kernel, for $1.2$--$6.7\times$ \citep{wu2024mirage,mpk2025}. This is the intellectual source of the YiRage compiler used as the yardstick throughout the book---multi-level search, megakernel fusion, and residency encoded as checkable metadata---generalized beyond a single GPU artifact \citep{yirage2026,taxbreak2026}. The broader lesson is that the field is converging on search plus verification as the way to reach fewer, more resident launches, and that decode is the workload where this convergence pays off first because it has the least batch parallelism to fall back on \citep{wu2024mirage,taxbreak2026}. Having now surveyed each compiler surface individually, Chapter~\ref{chap:ch21} steps back to a unified analysis and a cross-hardware benchmark, comparing these stacks on the same decode metrics rather than on each project's favored microbenchmark \citep{memoryfloor2026,dlbook}.
 
 \typeout{END_CHAPTER "ch20" \theabspage}
