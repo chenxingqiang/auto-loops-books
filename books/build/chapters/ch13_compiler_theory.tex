@@ -192,14 +192,20 @@ GPU/CPU/NPU split & Where does each op emit? & triplet parity \\
 \label{sec:ch13_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Tiling is IO theory.} FlashAttention-style blocks exist to cut HBM traffic; tile search must use decode bytes/token, not GEMM FLOPs alone \citep{dao2022flashattention,memoryfloor2026,taxbreak2026,yirage2026}.
-\item \textbf{Fusion has legality.} Greedy fusion without carrier/residency checks silently regresses decode \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
-\item \textbf{Layout enables fusion.} Paged KV and blocked weights are compiler transforms, not runtime afterthoughts \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
-\item \textbf{Parallelism is bandwidth-aware.} Flash-Decoding parallel axes help only when on-chip residency holds \citep{dao2023flashdecoding,memoryfloor2026,semianalysis2024tma,patel2025llminference}.
-\item \textbf{Split backends, shared IR.} GPU/CPU/NPU emit differs; triplet regression is mandatory \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dlbook}.
-\item \textbf{Theory serves goodput.} Every pass must trace to bytes/token or launches/token on batch-1 decode \citep{taxbreak2026,memoryfloor2026,patel2025llminference,nvidia2024cudagraphs,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-\item \textbf{Pass order matters.} Layout before fusion; tiling metadata before autotune; legality before graph capture \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,taxbreak2026,amd2024xdna,amd2024aie,dlbook}.
-\item \textbf{CI mirrors theory.} Golden IR diffs, stride snapshots, and triplet bytes/token gates turn principles into merge blockers \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,semianalysis2024tma,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna}.
+\item \textbf{Tiling is IO theory, not FLOP theory.}
+FlashAttention-style blocks exist to choose which sub-blocks of weights, activations, and KV fit in registers, shared memory, L2, or NPU tile SRAM for each decode step, so the goal is cutting HBM traffic \citep{dao2022flashattention,semianalysis2024tma}. Tile search must therefore be driven by decode bytes/token, not by GEMM FLOPs, or it optimizes the wrong objective \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Fusion has legality, not just opportunity.}
+Each unfused operator boundary exports activations to HBM, but greedy fusion that ignores carrier and residency checks silently regresses decode by overflowing the on-chip budget \citep{dao2022flashattention,yirage2026}. Fusion theory governs \emph{when} a boundary may legally disappear, which a compiler must verify before merging operators \citep{chen2020compilerbasedhardw,patel2025llminference}.
+
+\item \textbf{Layout is a compiler transform, not a runtime afterthought.}
+How tensors are stored and traversed---contiguous versus blocked, paged KV tables, head-interleaved formats, TMA/vector alignment---decides whether a fusion is even reachable \citep{kwon2023vllm,patel2025llminference}. A wrong layout can double bytes/token without changing FLOPs, so layout assignment belongs in the pass pipeline ahead of fusion \citep{taxbreak2026,yirage2026}.
+
+\item \textbf{Parallelism must be bandwidth-aware.}
+Mapping work to SMs, cores, or AIE arrays---including Flash-Decoding's parallelization over KV length at batch-1---only helps when on-chip residency holds across the split \citep{dao2023flashdecoding,semianalysis2024tma}. A parallel axis that forces activations off-chip trades latency hiding for bandwidth it cannot afford \citep{memoryfloor2026,patel2025llminference}.
+
+\item \textbf{One IR, split backends, mandatory triplet regression.}
+A single decoder IR lowers to CUDA/HIP, CPU oneDNN/OpenMP, and XDNA/AIE static dataflow with genuinely different emit, so correctness on one target says nothing about the others \citep{yirage2026,amd2024xdna,amd2024aie}. The five pillars are co-dependent---a layout change can illegalize a fusion, a fusion can force new tiles, a parallel split can break capture---so develop them as co-design profiled on decode counters, gated in CI by golden IR diffs and triplet bytes/token \citep{chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
 \end{itemize}
 
 The pillars are not independent knobs---a layout change can illegalize a fusion plan; a fusion plan can force new tile sizes; a parallel split can break graph capture \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,taxbreak2026,dao2022flashattention,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,dao2023flashdecoding,nvidia2022hopper}. Treat compiler development as co-design across all five, profiled on decode counters, not as a sequence of isolated dialect tickets \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dlbook}.

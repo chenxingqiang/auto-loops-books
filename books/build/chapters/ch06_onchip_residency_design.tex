@@ -2,11 +2,13 @@
 \label{chap:ch06}
 \typeout{START_CHAPTER "ch06" \theabspage}
 
-Parts~I--II established decode metrics and hardware contracts; \emph{Data Residency and On-Chip Memory Design} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+Every decode bottleneck in this book reduces to one question: which bytes get to stay on chip, and for how long. Parts~I--II established that batch-1 decode is bandwidth- and orchestration-bound, not FLOP-bound; this chapter turns that diagnosis into a design discipline---planning the lifetime and residency of every tensor against the concrete on-chip memory each target actually has \citep{nvidia2022hopper,amd2024aie,dao2022flashattention}. The numbers from Chapter~1 are the motivation: dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, and each unfused boundary is a tensor that left the chip and came back \citep{taxbreak2026}. Removing host overhead alone bought $1.259\times$ on a Qwen-2.5-7B decode cell, but it could not fix illegal HBM traffic---only residency design can \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The mistake to avoid is treating on-chip memory as an optimization to apply after the kernel works. On-chip residency is the kernel's contract with the hardware, and it must be planned before codegen, per target, because the same tensor that fits in a GPU's shared memory overflows an NPU tile's SRAM \citep{semianalysis2024tma,amd2024xdna}.
+\index{Data residency}
+\index{On-chip memory}
+\index{Shared memory}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
-
-\section{lifetime planning}
+\section{Lifetime planning}
 \label{sec:ch06_lifetime_planning}
 
 % AUTO_VISUAL:fig_lifetime_planning_pipeline
@@ -14,31 +16,31 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Lifetime Planning};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Tensor\\produced};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Assign\\residency tier};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Consumed\\on-chip};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Buffer\\freed / reused};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Lifetime Planning optimization pipeline in Data Residency and On-Chip Memory Design.}
+\caption{Lifetime planning assigns each tensor a residency tier for the span between its production and last use, then reuses the buffer.}
 \label{fig:lifetime_planning_pipeline}
 \end{figure}
 
-Teams hit \textbf{lifetime planning} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because lifetime was planned without residen residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
+The first discipline is \textbf{lifetime} planning: for every intermediate tensor, determine when it is produced, when it is last consumed, and therefore where it should live for that span \citep{dlbook}. A tensor whose producer and consumer are adjacent in a fused region never needs to touch device memory at all; a tensor consumed many operators later, or by a different thread block, has a longer lifetime and may be forced to a slower tier. Getting this wrong is the single most common cause of ``mysterious'' decode regressions, because a tensor with an unnecessarily long lifetime silently occupies fast memory that another tensor needed, or spills to HBM and reintroduces the bandwidth tax the fusion was meant to remove \citep{taxbreak2026,memoryfloor2026}.
 
-Hardware truth: GPUs bound lifetime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Decode makes lifetime planning unusually tractable and unusually important. Tractable, because at batch-1 the per-token working set is small and regular: a query vector, the weight tiles for the current layer, and the KV cache slice for the current head \citep{kwon2023vllm}. Important, because that working set is read in full every single token, so any byte that lives one tier slower than it could pays its penalty thousands of times per sequence \citep{patel2025llminference}. The \textbf{residency} decision for the KV cache is the canonical example: it is too large to stay in the fastest tiers, so the design question becomes how much of it to stream and how to overlap that streaming with compute, not whether to keep it resident.
 
-Compiler/kernel fix: predicate fusion on lifetime/residen legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The KV cache deserves its own lifetime analysis because it breaks the simple producer-consumer pattern. Unlike an activation that is produced and consumed within a token, the KV cache is written once and then read on every subsequent token for the rest of the sequence, so its lifetime spans the entire generation. That long lifetime is why it cannot live in the fastest tiers and why decode is fundamentally a streaming problem: each token must read back the growing KV history, and the residency design question is not whether to keep it on chip but how to overlap its streaming with the per-token compute so the load latency is hidden \citep{kwon2023vllm,dao2023flashdecoding}. A residency plan that ignores this and treats the KV slice like a short-lived activation will either run out of fast memory or stall waiting for the load.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize lifetime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked residen---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Double buffering is the lifetime technique that makes streaming work, and it is worth naming because it appears on every hardware class. The idea is to give a streamed tensor two physical buffers so the engine can load tile $n{+}1$ into one buffer while compute consumes tile $n$ from the other, then swap. This doubles the buffer's footprint but overlaps transfer with compute, turning a sequence of load-then-compute stalls into a pipeline \citep{semianalysis2024tma,dao2022flashattention}. The lifetime planner must account for the doubled footprint when it checks capacity, which is the first place a naive plan and a real one diverge---a fused region that fits single-buffered may overflow once double buffering is added for the streamed operands.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused schedule must keep residen on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+A useful way to think about lifetime planning is as a static memory allocation problem solved at compile time rather than by a runtime allocator. If the compiler knows every tensor's lifetime, it can assign a small pool of physical buffers and reuse each one across non-overlapping lifetimes---exactly the static allocation and copy elimination that compilers like Glow perform on their low-level IR, and that a megakernel must perform to keep its working set bounded \citep{rotem2018glow,wu2024mirage}. The payoff is twofold: the allocator never appears in the per-token hot path, and the peak \textbf{residency} footprint is known before the kernel runs, so it can be checked against the target's on-chip capacity instead of discovered by a runtime out-of-memory error.
 
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+There is a subtlety worth flagging: lifetimes are not fixed by the math, they are shaped by the schedule. The same dataflow graph can be scheduled so that a tensor's producer and consumer are adjacent---giving it a short lifetime and on-chip residency---or so that unrelated work is interleaved between them, stretching its lifetime and forcing it to a slower tier \citep{wu2024mirage,dlbook}. This is why residency planning and scheduling cannot be separated: the schedule that minimizes launches may lengthen a critical tensor's lifetime past what fast memory can hold, and the schedule that keeps everything resident may serialize work that could have overlapped. The planner therefore co-optimizes the two, choosing an execution order that keeps the highest-reuse tensors' lifetimes short enough to stay resident while still exposing enough overlap to hide streaming latency \citep{taxbreak2026,memoryfloor2026}.
+
+The chapters that follow apply this discipline per hardware class, because the tiers themselves differ. What does not differ is the planning method: identify lifetimes, rank tensors by reuse-per-byte, and place the highest-reuse tensors in the fastest tier that can hold them for their lifetime, spilling only what genuinely cannot fit \citep{dlbook,dao2022flashattention}.
 
 \section{GPU residency}
 \label{sec:ch06_gpu_residency}
@@ -47,444 +49,108 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.5,0) {\footnotesize Registers\\256 KB/SM};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Shared mem\\up to 228 KB};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize L2 cache\\50 MB};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize HBM\\GBs};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{GPU Residency block diagram for Data Residency and On-Chip Memory Design.}
+\caption{H100 on-chip residency tiers per SM: registers and shared memory are the fast, capacity-limited tiers a decode kernel must budget against.}
 \label{fig:gpu_residency_architecture}
 \end{figure}
 
-The production surprise at \textbf{GPU residency} is not peak FLOPs; it is illegal tier placement: shared spilling to HBM/DDR while register still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
+On a GPU the fast tiers are concrete and small, and the design must respect their exact sizes. On an NVIDIA H100 (Hopper) SM, the \textbf{register} file is 65{,}536 32-bit registers---256\,KB per SM---with a hard ceiling of 255 registers per thread; \textbf{shared} memory is configurable up to 228\,KB per SM, of which 227\,KB is addressable by a single thread block after CUDA reserves 1\,KB; and the combined L1-plus-\textbf{shared} capacity is 256\,KB per SM, backed by a 50\,MB GPU-wide L2 cache before HBM \citep{nvidia2022hopper}. These are not trivia: they are the constraints a decode kernel's residency plan is solved against.
 
-Trace residency: shared producers must feed register consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The \textbf{register}/occupancy trade is the first one a decode kernel hits. Because resident threads share the 65{,}536-register file, a kernel that uses $R$ registers per thread caps resident threads near $65536/R$; at 128 registers per thread an SM holds at most 512 threads \citep{nvidia2022hopper}. A heavily fused decode kernel that keeps many partial sums in registers therefore trades occupancy for residency, and the right balance is workload-specific---at batch-1 there is little parallelism to hide latency, so keeping the working set in registers often beats chasing occupancy, up to the point where a register spill to local memory undoes the win.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+\textbf{Shared} memory is where the canonical decode fusion lives. FlashAttention keeps the query tile, the relevant key/value tiles, and the running softmax statistics in \textbf{shared} memory and registers, computing attention without ever materializing the full score matrix to HBM \citep{dao2022flashattention}. The residency arithmetic is direct: at hidden size $4096$ in BF16 each activation vector is $8\,$KB, so a fused decoder layer that keeps a handful of intermediates on chip avoids tens of kilobytes of HBM traffic per token---traffic that, multiplied across 32 layers and every generated token, dominates batch-1 latency \citep{taxbreak2026,memoryfloor2026}. Hopper adds mechanisms that make residency cheaper to exploit: TMA performs asynchronous bulk copies into \textbf{shared} memory that overlap with compute, and distributed shared memory lets thread blocks in a cluster read each other's shared memory directly rather than through L2 \citep{semianalysis2024tma,nvidia2022hopper}. The design lever is to size tiles so the hot working set fits in the 228\,KB budget and to use the async copy path so streaming the KV slice overlaps the matmul rather than stalling it.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for shared on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The bank structure of \textbf{shared} memory is a second constraint the residency plan must respect. H100 shared memory is divided into 32 banks, each 4 bytes wide, and consecutive 4-byte words map to consecutive banks; a warp that accesses 32 addresses falling in distinct banks completes in one transaction, while accesses that collide on a bank serialize into multiple transactions \citep{nvidia2022hopper}. A residency plan that places a tile in shared memory but lays it out so threads stride across the same bank turns a fast on-chip access into a serialized one, which at batch-1 decode---where the kernel runs thousands of times per sequence---is a measurable bytes/token penalty. The layout of a resident tensor is therefore part of the residency decision, not an afterthought: tile shapes and padding are chosen so the hot access pattern is conflict-free.
 
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+A worked register budget makes the occupancy trade concrete. Suppose a fused decode kernel keeps a query vector, several accumulator registers for the running softmax, and a weight fragment live in registers, totaling 96 registers per thread. With the 65{,}536-register file that allows roughly $65536/96 \approx 682$ resident threads per SM, comfortably above one full thread block; push the kernel to 200 registers per thread to fuse more work and resident threads fall to about 327, below a 512-thread block, so occupancy drops \citep{nvidia2022hopper}. At batch-1 that occupancy loss is often acceptable because there is no batch parallelism to hide latency anyway, but only up to the spill threshold: once a thread needs more than 255 registers the compiler spills to local memory, which is HBM-backed, and the residency win is lost \citep{taxbreak2026,memoryfloor2026}. The design rule is to fuse aggressively in registers until just before the spill, then stop.
+
+The L2 cache is the last on-chip line of defense. At 50\,MB it can hold reused weight tiles or KV lines across thread blocks, and Hopper exposes L2 residency controls so a kernel can bias frequently reused data to stay cached \citep{nvidia2022hopper}. But L2 is shared GPU-wide and far slower than shared memory, so relying on it is a fallback, not a plan---the residency design still aims to keep the per-token hot set in registers and \textbf{shared} memory.
 
 \section{CPU residency}
 \label{sec:ch06_cpu_residency}
 
-\textbf{CPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix cache and NUMA together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
+On a CPU the residency tiers are the \textbf{cache} hierarchy, and the design discipline shifts from explicit placement to cache-aware blocking. Unlike GPU shared memory, which the programmer manages directly, CPU L1/L2/L3 caches are hardware-managed, so residency is controlled indirectly by the access pattern: tile the computation so the working set of each tile fits in a target \textbf{cache} level and is reused before eviction \citep{dlbook,rotem2018glow}. For decode this means blocking the per-token GEMV and attention so the weight tile and KV slice currently in use stay in L1 or L2 across their reuse, rather than streaming the whole layer through the \textbf{cache} once and evicting it.
 
-Hardware truth: GPUs bound cache with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The second CPU-specific concern is \textbf{NUMA}. On multi-socket or multi-die servers, memory is partitioned across nodes, and a thread accessing memory on a remote \textbf{NUMA} node pays a latency and bandwidth penalty \citep{dlbook}. For a memory-bound decode workload that re-reads the full weight set every token, a \textbf{NUMA}-oblivious placement---weights allocated on one node, decode threads scheduled on another---can silently halve effective bandwidth. The residency plan on a CPU therefore includes thread and memory affinity: pin decode threads to the \textbf{NUMA} node that owns the weights they read, and replicate read-only weights per node when the bandwidth saving exceeds the memory cost \citep{patel2025llminference}.
 
-Compiler/kernel fix: predicate fusion on cache/NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The bandwidth arithmetic explains why this matters so much for decode on a CPU. At batch-1 the model re-reads its entire weight set from memory every token, so the achievable token rate is bounded by weight bytes divided by effective memory bandwidth---a memory-bound regime where a 7B model in BF16 must move roughly 14\,GB per token from wherever the weights live \citep{kwon2023vllm,memoryfloor2026}. If a \textbf{NUMA}-oblivious schedule forces half those reads across the inter-node link at a fraction of local bandwidth, the token rate drops proportionally, and no amount of compute optimization recovers it. This is the CPU analogue of the GPU's launch storm: the bottleneck is bytes moved through the wrong tier, and the fix is a residency and placement decision, not a faster inner loop.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize cache with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Hardware prefetchers complicate the \textbf{cache} residency picture in a way GPU shared memory does not. A CPU prefetcher will speculatively pull data into \textbf{cache} based on detected access patterns, which helps a streaming weight read but can also evict a small, hot tensor the kernel wanted to keep resident---so the blocking strategy must consider not just what fits in a \textbf{cache} level but what the prefetcher will displace \citep{dlbook}. The practical consequence is that CPU residency tuning is more empirical than GPU shared-memory tuning: the plan is validated by measuring \textbf{cache} miss rates at the decode operating point rather than by a static capacity check alone.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused cache raises bytes/token; fused schedule must keep NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The multi-hardware contrast with the GPU is instructive. A GPU kernel decides residency explicitly and statically through \textbf{shared}-memory allocation; a CPU kernel decides it implicitly through blocking and affinity, trusting the hardware \textbf{cache} to keep the blocked working set resident. The same fused decoder layer therefore wants a different schedule on each: the GPU schedule maximizes \textbf{shared}-memory reuse and async copy overlap, while the CPU schedule maximizes \textbf{cache} locality and respects \textbf{NUMA} boundaries---identical math, different residency mechanism, different bytes/token outcome \citep{taxbreak2026,memoryfloor2026}.
 
 \section{NPU residency}
 \label{sec:ch06_npu_residency}
 
-Teams hit \textbf{NPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without sram residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+On a spatial \textbf{NPU} the residency model is the most explicit of all, and it must be decided entirely at compile time. On the AMD XDNA2 / AIE-ML fabric, each compute tile has 64\,KB of L1 local data memory---eight 8\,KB banks in hardware, presented to the programmer as four interleaved 16\,KB banks---with a dedicated DMA engine, and each column adds a 512\,KB L2 \textbf{SRAM} memory tile shared by its compute tiles, with shim tiles bridging to off-chip DDR \citep{amd2024aie,amd2024xdna}. There is no hardware cache that opportunistically keeps data resident; what lives in \textbf{SRAM} is exactly what the compiler's DMA schedule placed there, and nothing else.
 
-Trace residency: NPU producers must feed sram consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+This makes \textbf{NPU} residency design both unforgiving and powerful. Unforgiving, because a tensor that does not fit the 64\,KB tile \textbf{SRAM} must be split across tiles or staged through the 512\,KB memory tile, and the DMA chain to do so is part of the program, not a runtime fallback \citep{amd2024xdna}. Powerful, because once the residency plan fits, there is no cache-miss variance and no allocator---the per-token cost is deterministic. The canonical decode fusion on this fabric keeps the attention tiles resident in L1/L2 \textbf{SRAM} and streams only inputs and final outputs through DDR, mapping the query-key-softmax-value chain as a single spatially tiled sweep so that intermediate scores never leave on-chip \textbf{SRAM} \citep{amd2024aie,dao2022flashattention}. Tiling parameters are chosen to maximize L1 reuse subject to the buffer constraint that the resident tiles fit the tile \textbf{SRAM}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Double buffering on the \textbf{NPU} is both more explicit and more essential than on the GPU. Because there is no cache to absorb a late load, a compute tile that waits for its next operand simply idles, so the DMA schedule must ping-pong between two buffers in the 64\,KB tile \textbf{SRAM}---loading the next tile via the tile's DMA engine while the vector unit consumes the current one \citep{amd2024aie,amd2024xdna}. This halves the usable tile capacity for the double-buffered operand, which is precisely the kind of constraint the residency plan must enforce up front: on a 64\,KB tile, a double-buffered weight tile plus a double-buffered activation tile plus the accumulators must all fit, and if they do not, the tiling parameters shrink until they do.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The spatial structure adds a residency dimension the GPU and CPU lack: data can move between neighboring tiles without going off chip. On the XDNA2 fabric, compute tiles in an array can read each other's local memory directly and pass data through cascade connections, so a large operand can be distributed across several tiles' \textbf{SRAM} and consumed as a spatial pipeline rather than streamed from DDR \citep{amd2024aie,amd2024xdna}. A residency plan that exploits this maps a fused attention sweep across a row or column of tiles, keeping the intermediate scores entirely in on-chip \textbf{SRAM} and sending only the inputs and final outputs through DDR---the spatial analogue of a GPU megakernel, with the same goal of minimizing off-chip bytes per token \citep{dao2022flashattention,memoryfloor2026}.
 
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The contrast across the three classes is now sharp. The GPU offers a large, programmer-managed \textbf{shared} memory plus a hardware L2 fallback; the CPU offers hardware-managed caches tuned by blocking; the \textbf{NPU} offers small, fully explicit \textbf{SRAM} with compiler-scheduled DMA and no fallback. A residency plan that is optimal on one is illegal or wasteful on another, which is exactly why on-chip memory design cannot be a single portable template \citep{semianalysis2024tma,dlbook}.
+
+\begin{table}[t]
+\centering
+\caption{On-chip residency tiers by hardware class; the fast tiers a decode kernel must budget against differ in size and in who manages them \citep{nvidia2022hopper,amd2024aie}.}
+\label{tab:ch06_residency_tiers}
+\begin{tabular}{lll}
+\toprule
+Class & Fast on-chip tier & Managed by \\
+\midrule
+GPU (H100 SM) & 228 KB shared, 256 KB registers & Programmer + HW L2 \\
+CPU & L1/L2/L3 cache & Hardware (blocking-tuned) \\
+NPU (XDNA2 tile) & 64 KB L1, 512 KB L2 SRAM & Compiler DMA (explicit) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{YiRage memory pass}
 \label{sec:ch06_yirage_memory_pass}
 
-The production surprise at \textbf{YiRage memory pass} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while memory still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+The book's reference compiler turns this discipline into a checkable pass. \textbf{YiRage} carries a \textbf{memory}-residency pass that encodes the per-class residency contract---GPU shared-memory and register budgets, CPU cache-blocking and NUMA constraints, NPU tile-SRAM capacity---as IR metadata, then verifies a candidate schedule against the target's actual on-chip \textbf{memory} before codegen \citep{yirage2026}. A fusion that would exceed the 228\,KB shared-memory budget on an H100, or overflow a 64\,KB XDNA tile, is rejected at compile time rather than discovered as a spill in production telemetry \citep{nvidia2022hopper,amd2024aie}.
 
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+This is the mechanism behind the residency claims made throughout the book. When earlier chapters said a schedule must ``keep the layer on chip,'' the \textbf{YiRage} \textbf{memory} pass is what makes that statement enforceable: it computes the peak resident footprint of a fused region from the lifetime plan, compares it to the target tier capacity, and either admits the fusion or splits it until it fits \citep{yirage2026,wu2024mirage}. Because the check is static, it composes with the megakernel search of Chapter~20---the superoptimizer proposes a fusion, and the \textbf{memory} pass certifies that its residency is legal on the target before the kernel is ever emitted \citep{wu2024mirage,mpk2025}.
 
-Compiler/kernel fix: predicate fusion on YiRage/memory legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Concretely, the pass operates on the lifetime plan rather than on the source program, which is what lets it reason about peak footprint correctly. It walks the fused region, tracks which buffers are simultaneously live at each point, accounts for double-buffered operands at their doubled size, and takes the maximum across the region as the peak resident footprint \citep{yirage2026,dao2022flashattention}. That maximum is compared against the target tier capacity---228\,KB on an H100 SM, 64\,KB on an XDNA tile---and if it exceeds the budget the pass has two legal responses: split the region so each piece fits, or demote the lowest-reuse tensor to a slower tier and accept its bandwidth cost \citep{nvidia2022hopper,amd2024aie}. Both are deterministic compile-time decisions, so the same model compiled for two SKUs gets two different but provably-legal residency plans.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked memory---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+The pass also closes a gap that pure search leaves open. A superoptimizer that proposes a megakernel is optimizing for performance and may propose a fusion that is faster in principle but illegal on a given tier; without a residency check, that fusion ships and spills in production \citep{wu2024mirage,mpk2025}. By making residency a verified precondition, the \textbf{YiRage} \textbf{memory} pass lets the search be aggressive---propose any fusion---while guaranteeing that whatever is emitted respects the target's on-chip \textbf{memory}, which is the separation of concerns that makes searched megakernels safe to deploy across a heterogeneous fleet \citep{yirage2026,patel2025llminference}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep memory on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{lifetime planning} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix lifetime and residen together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound lifetime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on lifetime/residen legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize lifetime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked residen---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused schedule must keep residen on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{GPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because shared was planned without register residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: shared producers must feed register consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for shared on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{CPU residency} is not peak FLOPs; it is illegal tier placement: cache spilling to HBM/DDR while NUMA still pays launch or DMA tax every token \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound cache with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on cache/NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize cache with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused cache raises bytes/token; fused schedule must keep NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{NPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix NPU and sram together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed sram consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage memory pass} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without memory residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/memory legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked memory---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep memory on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{lifetime planning} is not peak FLOPs; it is illegal tier placement: lifetime spilling to HBM/DDR while residen still pays launch or DMA tax every token \citep{nvidia2022hopper,amd2024aie}.
-
-Trace residency: lifetime producers must feed residen consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for lifetime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{GPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix shared and register together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound shared with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on shared/register legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize shared with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked register---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused shared raises bytes/token; fused schedule must keep register on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{CPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because cache was planned without NUMA residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
-
-Trace residency: cache producers must feed NUMA consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for cache on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{NPU residency} is not peak FLOPs; it is illegal tier placement: NPU spilling to HBM/DDR while sram still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on NPU/sram legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked sram---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused NPU raises bytes/token; fused schedule must keep sram on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage memory pass} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix YiRage and memory together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed memory consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{lifetime planning} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because lifetime was planned without residen residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound lifetime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on lifetime/residen legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize lifetime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked residen---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused schedule must keep residen on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{GPU residency} is not peak FLOPs; it is illegal tier placement: shared spilling to HBM/DDR while register still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: shared producers must feed register consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for shared on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{CPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix cache and NUMA together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound cache with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on cache/NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize cache with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused cache raises bytes/token; fused schedule must keep NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{NPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without sram residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed sram consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage memory pass} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while memory still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/memory legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked memory---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep memory on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{lifetime planning} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix lifetime and residen together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,amd2024aie}.
-
-Trace residency: lifetime producers must feed residen consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for lifetime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{GPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because shared was planned without register residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound shared with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on shared/register legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize shared with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked register---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused shared raises bytes/token; fused schedule must keep register on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{CPU residency} is not peak FLOPs; it is illegal tier placement: cache spilling to HBM/DDR while NUMA still pays launch or DMA tax every token \citep{nvidia2022hopper,amd2024aie}.
-
-Trace residency: cache producers must feed NUMA consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for cache on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{NPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix NPU and sram together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on NPU/sram legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked sram---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused NPU raises bytes/token; fused schedule must keep sram on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage memory pass} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without memory residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed memory consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{lifetime planning} is not peak FLOPs; it is illegal tier placement: lifetime spilling to HBM/DDR while residen still pays launch or DMA tax every token \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound lifetime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on lifetime/residen legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize lifetime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked residen---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused lifetime raises bytes/token; fused schedule must keep residen on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds lifetime, residen to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{GPU residency} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix shared and register together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: shared producers must feed register consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for shared on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds shared, register to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{CPU residency} when Data Residency and On-Chip Memory Design looks correct in isolation yet decode telemetry disagrees---usually because cache was planned without NUMA residency on the SKU you ship \citep{nvidia2022hopper,amd2024aie}.
-
-Hardware truth: GPUs bound cache with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on cache/NUMA legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize cache with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked NUMA---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused cache raises bytes/token; fused schedule must keep NUMA on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds cache, NUMA to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{NPU residency} is not peak FLOPs; it is illegal tier placement: NPU spilling to HBM/DDR while sram still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed sram consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, sram to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage memory pass} is where Data Residency and On-Chip Memory Design meets Chapter~1 counters: fix YiRage and memory together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/memory legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked memory---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep memory on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, memory to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
+The result is that residency stops being a property a kernel author hopes for and becomes one the compiler guarantees. For a serving team that is the difference between a decode kernel that is fast on the SKU it was tuned on and one that is provably within budget on every SKU in the fleet \citep{patel2025llminference,memoryfloor2026}.
 
 \section{Key Takeaways}
 \label{sec:ch06_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Lifetime Planning.} Tie lifetime planning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{GPU Residency.} Tie GPU residency to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{CPU Residency.} Tie CPU residency to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{NPU Residency.} Tie NPU residency to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Memory Pass.} Tie YiRage memory pass to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Plan tensor lifetimes before codegen.}
+Determine each tensor's production-to-last-use span and place it in the fastest tier that holds it for that lifetime; static allocation keeps the allocator out of the per-token path and makes the peak footprint checkable \citep{dlbook,rotem2018glow}. A too-long lifetime silently spills \citep{taxbreak2026}.
+
+\item \textbf{Budget against real GPU tier sizes.}
+An H100 SM has 256 KB of registers (255/thread max) and up to 228 KB of shared memory; fused decode kernels trade occupancy for residency and must fit the hot set in these budgets \citep{nvidia2022hopper}. FlashAttention keeps tiles in shared memory to avoid HBM traffic \citep{dao2022flashattention}.
+
+\item \textbf{CPU residency is blocking plus NUMA.}
+Caches are hardware-managed, so residency is controlled by cache-blocked tiling and by pinning decode threads to the NUMA node owning their weights \citep{dlbook,patel2025llminference}. A NUMA-oblivious placement can halve effective bandwidth on a memory-bound decode loop \citep{memoryfloor2026}.
+
+\item \textbf{NPU residency is explicit and compile-time.}
+An XDNA2 tile has 64 KB L1 SRAM and a 512 KB column L2, with compiler-scheduled DMA and no cache fallback, so what is resident is exactly what the schedule placed \citep{amd2024aie,amd2024xdna}. Tiles are sized to fit the SRAM buffer constraint \citep{semianalysis2024tma}.
+
+\item \textbf{Make residency a checkable compiler pass.}
+The YiRage memory pass encodes per-class budgets as IR metadata and rejects fusions that exceed on-chip capacity before codegen, composing with megakernel search \citep{yirage2026,wu2024mirage}. Residency becomes a guarantee the compiler proves, not a hope the kernel author holds \citep{mpk2025}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch06_conclusion}
 
-Data Residency and On-Chip Memory Design is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Data Residency and On-Chip Memory Design baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+On-chip residency is the concrete form every decode optimization in this book eventually takes: plan each tensor's lifetime, rank by reuse-per-byte, and place the hot working set in the fastest tier that can hold it on the target you actually ship \citep{dlbook,nvidia2022hopper}. The tiers differ sharply---programmer-managed shared memory and registers on a GPU, hardware caches plus NUMA on a CPU, explicit DMA-scheduled SRAM on an NPU---so the same fused layer wants a different residency plan per class, and a green build on one says nothing about residency on another \citep{amd2024aie,memoryfloor2026}. The YiRage memory pass makes the plan enforceable by checking peak footprint against tier capacity before codegen, so a fusion that would spill is split or demoted rather than shipped \citep{yirage2026}. With residency now a budgeted, checkable property, Chapter~\ref{chap:ch07} turns to the next MegaKernel technique built on it: static role assignment and schedule-free kernels that fix each thread block's job at compile time so the resident working set never moves \citep{taxbreak2026,patel2025llminference}.
 
 \typeout{END_CHAPTER "ch06" \theabspage}

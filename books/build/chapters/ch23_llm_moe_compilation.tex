@@ -145,11 +145,20 @@ Chapter~24 extends heterogeneity to cluster deployment; Chapter~28 clarifies fra
 \label{sec:ch23_key_takeaways}
 
 \begin{itemize}
-\item \textbf{LLM decode compile.} Optimize BS${=}1$ decoder slices with whole-step bytes/token gates; respect paging \citep{kwon2023vllm,dao2022flashattention,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,liu2024deepseekv3,amd2024aie,dlbook,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,semianalysis2024tma,amd2024xdna}.
-\item \textbf{MoE scheduling.} Template experts, fuse router prologue when legal, profile launches/token with routing entropy \citep{liu2024deepseekv3,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,memoryfloor2026,amd2024aie,dlbook,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,semianalysis2024tma,amd2024xdna}.
-\item \textbf{KV hardware.} Frameworks page; compilers layout and fuse around KV edges per GPU/CPU/NPU \citep{kwon2023vllm,amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,dlbook,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Hetero MoE.} Placement metadata + per-tier gates; quarantine backends across fallback paths \citep{liu2024deepseekv3,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,dlbook,kwon2023vllm,taxbreak2026,memoryfloor2026,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Measure useful decode work.} MoE and KV specialization still defer to Chapter~1 counters \citep{patel2025llminference,dlbook,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,amd2024aie,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper,semianalysis2024tma,amd2024xdna}.
+\item \textbf{Own the decoder slice at batch-1.}
+LLM decode compilation begins when the compiler owns a whole decoder slice---attention, MLP, norms, rotary, residual---exported at batch-1 with explicit KV shapes, and gates it on whole-step bytes/token rather than per-operator FLOPs \citep{kwon2023vllm,patel2025llminference}. Optimizing the slice as a unit while respecting the framework's paging is what keeps the attention-MLP seam resident \citep{dao2022flashattention,memoryfloor2026}.
+
+\item \textbf{MoE compilation meets dynamic routing.}
+The hard part of MoE scheduling is data-dependent routing: template the experts so they share a kernel, fuse the router prologue only when legal, and profile launches/token under realistic routing entropy rather than a uniform-load proxy \citep{liu2024deepseekv3,taxbreak2026}. A schedule that looks fine on balanced routing can thrash when real traffic skews load across experts \citep{patel2025llminference,kwon2023vllm}.
+
+\item \textbf{KV is a split responsibility.}
+Frameworks page and schedule KV blocks; the compiler chooses layout, fuses around the KV edges, and secures on-chip residency for the attention/MLP seam---and that split is realized differently per GPU, CPU, and NPU \citep{kwon2023vllm,amd2024xdna}. Treating KV layout as a compiler transform rather than a runtime afterthought is what makes the paged attention fast instead of merely correct \citep{dao2022flashattention,semianalysis2024tma}.
+
+\item \textbf{Heterogeneous MoE spans compile-time and runtime.}
+Load balancing splits across compile-time expert placement and runtime routing policy, so the compiler emits placement metadata and per-tier gates while the runtime routes, and backends are quarantined across fallback paths \citep{liu2024deepseekv3,patel2025llminference}. Without per-tier gates a placement tuned for one accelerator silently regresses another \citep{yirage2026,amd2024aie}.
+
+\item \textbf{MoE and KV specialization still defer to the decode counters.}
+However specialized the compilation, the acceptance metric is unchanged: bytes/token and launches/token at the batch-1 decode operating point, not peak FLOPs \citep{patel2025llminference,taxbreak2026}. MoE's launch density and KV's bandwidth pressure are precisely the terms those counters expose \citep{memoryfloor2026,dlbook}.
 \end{itemize}
 
 \section{Conclusion}

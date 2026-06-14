@@ -242,10 +242,10 @@ Book readers reproducing examples should init the submodule recursively, install
 \label{sec:ch29_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Runtime is Layer~5.} Compilers emit; Persistent Kernels execute with device memory discipline \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+\item \textbf{The runtime is Layer~5, distinct from the compiler.} Compiler passes from Parts~VI--VII emit fused plans, but the runtime layer owns device-memory discipline, launch templates, and backend selection so the plan actually executes within budget \citep{yirage2026,chen2020compilerbasedhardw}. Treating runtime as an afterthought is how a correctly-compiled megakernel still misses p99 when the host reconstructs state every token \citep{patel2025llminference,dlbook}.
 \item \textbf{Same-backend search.} Profile and ship on the target SKU; \texttt{hardwareregistry} must match fleet labels \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie}.
 \item \textbf{Handoff is contractual.} Fingerprints, page-table ABI, and softmax carriers must survive \texttt{superoptimize} to PK launch \citep{yirage2026,dao2022flashattention,kwon2023vllm,memoryfloor2026,taxbreak2026}.
-\item \textbf{Submodule is source of truth.} \texttt{deps/YiRage} native build required; smoke-test PK decode in CI \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dlbook}.
+\item \textbf{The submodule is the source of truth.} The runtime depends on the native \texttt{deps/YiRage} build, so CI must compile that submodule and smoke-test a Persistent Kernel decode rather than testing only the Python import \citep{yirage2026,chen2020compilerbasedhardw}. An import-only test passes while the native runtime is broken, which is precisely the failure that reaches production undetected \citep{patel2025llminference,dlbook}.
 \item \textbf{Counters at runtime.} Measure launches/token and bytes/token after PK warmup, not only import or search logs \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,nvidia2024cudagraphs,dlbook}.
 \end{itemize}
 

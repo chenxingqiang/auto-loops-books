@@ -159,16 +159,25 @@ Publish gate failures publicly inside the compiler team: failed experiments teac
 \label{sec:ch22_key_takeaways}
 
 \begin{itemize}
-\item \textbf{HW-aware profiling.} Freeze decode cells; normalize GPU/CPU/NPU tools to bytes/token and launches/token \citep{patel2025llminference,memoryfloor2026,taxbreak2026,semianalysis2024tma,amd2024xdna}.
-\item \textbf{Bottleneck locating.} Classify launch-, memory-, residency-, or framework-bound before changing compiler knobs \citep{nvidia2024cudagraphs,dao2022flashattention,yirage2026,kwon2023vllm}.
-\item \textbf{Tuning workflow.} One knob per experiment; human prior baseline; canary on fleet \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026,patel2025llminference}.
-\item \textbf{Regression gates.} CI enforces counter non-regression, legality, and versioned artifacts \citep{yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,amd2024aie}.
-\item \textbf{Measure useful decode work.} Profile-first beats tile-size folklore \citep{patel2025llminference,dlbook,semianalysis2024tma}.
+\item \textbf{Profile the production shape, not a proxy.}
+Hardware-aware profiling fails the moment a team measures prefill shapes, batch-32 training graphs, or synthetic GEMMs while production runs batch-1 decode with paged KV \citep{kwon2023vllm,patel2025llminference}. Freeze decode cells and normalize GPU, CPU, and NPU tools to the same bytes/token and launches/token so the numbers are comparable across targets \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Classify the bottleneck before touching a knob.}
+Bottleneck locating---deciding whether a workload is launch-, memory-, residency-, or framework-bound---is what separates senior compiler engineers from kernel tourists, because changing a compiler flag before classifying wastes effort on the wrong term \citep{patel2025llminference,dlbook}. The production surprise is usually orchestration or residency, not the matmul the tourist reaches for first \citep{nvidia2024cudagraphs,taxbreak2026}.
+
+\item \textbf{Change one knob per experiment against a human baseline.}
+A repeatable tuning workflow turns classifications into an experiment queue: establish a human-prior baseline, vary one knob at a time, and canary on the fleet before promotion \citep{chen2020compilerbasedhardw,yirage2026}. Bundling changes makes a regression impossible to attribute, which is why the discipline is one variable per measurement \citep{patel2025llminference}.
+
+\item \textbf{Encode the workflow as regression gates.}
+Human discipline does not survive headcount churn, so the workflow must live in CI: enforce counter non-regression, residency legality, and versioned, fingerprinted artifacts on every merge \citep{chen2020compilerbasedhardw,yirage2026}. A gate that checks bytes/token and launches/token at the decode cell is what stops a microbench-only win from shipping \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Profile-first beats tile-size folklore.}
+The recurring lesson of end-to-end tuning is that measured decode counters, not inherited tile-size heuristics, decide what to change \citep{patel2025llminference,dlbook}. Folklore tuned on someone else's prefill workload is exactly the trap a frozen decode cell and a profile-first loop are designed to avoid \citep{semianalysis2024tma}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch22_conclusion}
 
-Compiler-driven end-to-end performance tuning is the operational glue between backends (Part~VI), benchmarks (Chapter~21), automated search (Chapter~25), and production packaging (Chapter~26) \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Without hardware-aware profiling and regression gates, compiler teams optimize kernels while decode goodput flatlines \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Gate merges on buffer accounting and reproducible decode cells---never on a single Nsight screenshot \citep{semianalysis2024tma,yirage2026,patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+Compiler-driven end-to-end performance tuning is the operational glue between backends (Part~VI), benchmarks (Chapter~21), automated search (Chapter~25), and production packaging (Chapter~26) \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Without hardware-aware profiling and regression gates, compiler teams optimize kernels while decode goodput flatlines \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}. Gate merges on buffer accounting and reproducible decode cells---never on a single Nsight screenshot \citep{semianalysis2024tma,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026}. This profile-first, regression-gated workflow is general, but it pays off most on the hardest decode targets, which is where the next chapter applies it: Chapter~\ref{chap:ch23} specializes the workflow for LLM and MoE compilation, where data-dependent expert routing and growing KV caches stress exactly the launches/token and bytes/token counters this chapter taught teams to measure \citep{liu2024deepseekv3,kwon2023vllm}.
 
 \typeout{END_CHAPTER "ch22" \theabspage}

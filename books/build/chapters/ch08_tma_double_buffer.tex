@@ -2,43 +2,45 @@
 \label{chap:ch08}
 \typeout{START_CHAPTER "ch08" \theabspage}
 
-Parts~I--II established decode metrics and hardware contracts; \emph{TMA Double-Buffer Pipelines and Async Movement} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+Chapter~7 fixed roles so the consumer units never wait on a scheduler; this chapter makes sure they never wait on data either, by pipelining asynchronous movement so the next tile is already arriving while the current one is consumed \citep{shah2024flashattention3,semianalysis2024tma}. The stakes are the decode metrics established in Chapter~1: at batch-1 the model re-reads weights and the growing KV cache every token, so the load path, not the matmul, sets ms/token, and any cycle a compute unit spends idle waiting for a load is a cycle of pure latency \citep{taxbreak2026,kwon2023vllm}. Dense Llama-3.2-1B already issues 847.5 launches per token on H100 and OLMoE-1B/7B issues 9{,}305; collapsing those launches only pays off if the resulting fused kernel keeps its compute units fed \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The mistake to avoid is treating data movement as synchronous---load, then compute, then load. That serializes the two and exposes the full memory latency every step. The fix, across every hardware class, is a \textbf{double-buffer} \textbf{pipeline}: overlap the movement of tile $n{+}1$ with the computation on tile $n$, so latency is hidden behind useful work \citep{dao2022flashattention,amd2024aie}.
+\index{TMA}
+\index{Double buffering}
+\index{Asynchronous copy}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
-
-\section{pipeline theory}
+\section{Pipeline theory}
 \label{sec:ch08_pipeline_theory}
 
 % AUTO_VISUAL:fig_pipeline_theory_pipeline
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Pipeline Theory};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+\begin{tikzpicture}[vis base, scale=0.86, transform shape]
+ \node[vis pipeline node] (s0) at (-5.4,0) {\footnotesize Load tile $n$};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Compute $n$\\$\parallel$ load $n{+}1$};
+ \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Compute $n{+}1$\\$\parallel$ load $n{+}2$};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Steady-state\\overlap};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Pipeline Theory optimization pipeline in TMA Double-Buffer Pipelines and Async Movement.}
+\caption{A double-buffer pipeline: after a one-tile prologue, each compute step overlaps with the load of the next tile, hiding memory latency behind compute.}
 \label{fig:pipeline_theory_pipeline}
 \end{figure}
 
-Teams hit \textbf{pipeline theory} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because pipeline was planned without double-buffer residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
+The theory of a software \textbf{pipeline} is simple and general: split a stream of work into stages, give each stage its own buffer, and run the stages concurrently so that while one stage consumes buffer $A$, the previous stage fills buffer $B$ \citep{dlbook,dao2022flashattention}. The idea is borrowed directly from hardware instruction pipelines and from classical producer-consumer queueing, and the same intuition applies: throughput is set by the slowest stage, and latency is hidden as long as there is buffered work for the consumer to do while the producer runs ahead.
 
-Hardware truth: GPUs bound pipeline with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The reason a \textbf{pipeline} is the right frame for decode specifically is that decode is a stream of nearly identical, small units of work---one token's layer computation after another, each reading a predictable working set \citep{kwon2023vllm,taxbreak2026}. Streaming, regular work is the ideal case for pipelining: the stages are stable, the buffer sizes are known, and the depth can be fixed at compile time. This is in contrast to irregular, data-dependent work where the next tile's size or location is not known until the current one finishes, which is harder to pipeline and is one reason prefill and decode want different schedules \citep{dao2023flashdecoding,memoryfloor2026}.
 
-Compiler/kernel fix: predicate fusion on pipeline/double-buffer legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+ \textbf{Double-buffer}ing is the two-stage instance---one buffer being computed on, one being loaded---and it is the minimum needed to overlap movement with compute. The cost is doubled buffer footprint, which is exactly the residency charge Chapter~6 told the planner to account for; the benefit is that, after a one-tile prologue, the memory latency of every subsequent load is hidden behind the compute of the previous tile \citep{semianalysis2024tma,memoryfloor2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize pipeline with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked double-buffer---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Two quantities govern a \textbf{pipeline}'s effectiveness. The first is depth: a deeper \textbf{pipeline}, with more than two buffers in flight, hides more latency because more loads can be outstanding, but it consumes proportionally more fast memory \citep{shah2024flashattention3}. The second is the balance between the stages: if the load stage is slower than the compute stage, the \textbf{pipeline} is memory-bound and stalls no matter how deep it is, and if compute is slower, the loads complete early and the extra depth is wasted. For batch-1 decode the load stage usually dominates---the matmul is a thin matrix-vector product while the load is a full weight tile---so the design goal is to make the load as asynchronous and as overlapped as the hardware allows, then size the \textbf{pipeline} depth to the available fast memory \citep{taxbreak2026,kwon2023vllm}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused schedule must keep double-buffer on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+A worked latency argument shows why depth matters. Suppose a tile load takes 400 cycles of memory latency and the compute on a tile takes 300 cycles. With no pipeline, each step costs $400+300 = 700$ cycles, and the unit is idle 57\% of the time. With a two-stage \textbf{double-buffer}, the steady-state step cost drops to $\max(400,300) = 400$ cycles---the load and compute overlap, so the step is bounded by the slower stage---and the memory latency is fully hidden behind compute only if compute were the longer stage \citep{semianalysis2024tma,dao2022flashattention}. Here the load is longer, so the \textbf{pipeline} is memory-bound at 400 cycles per tile, and adding a third buffer does not help because the bottleneck is load bandwidth, not the number of outstanding loads. This is the quantitative form of the balance rule: deepen the \textbf{pipeline} only until the bottleneck stage saturates, then stop.
 
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The same arithmetic explains a counter-intuitive decode result. Because decode is memory-bound, the best a \textbf{pipeline} can do is hide the compute behind the load, which means the achievable token latency is bounded below by the time to stream the per-token working set---the weights and KV slice---no matter how clever the overlap \citep{taxbreak2026,memoryfloor2026}. Pipelining cannot beat that floor; it can only ensure the kernel reaches it instead of paying load-plus-compute serially. This is why Chapter~6's residency work and this chapter's movement work are complementary: residency reduces how many bytes must be streamed, and pipelining ensures the bytes that are streamed overlap with compute, and only together do they approach the memory-bandwidth floor \citep{kwon2023vllm,patel2025llminference}.
+
+The crucial enabling property is asynchrony. A \textbf{pipeline} only overlaps if the load can be issued and then proceed in the background while the issuing unit moves on to compute; a synchronous copy that blocks until it completes cannot overlap with anything \citep{semianalysis2024tma}. Every hardware class therefore provides some asynchronous movement primitive, and the chapters that follow are really a tour of those primitives---TMA on a GPU, prefetch and async copy on a CPU, DMA on an NPU---and of how a compiler builds a correct \textbf{double-buffer} \textbf{pipeline} on top of each. The common requirement is a completion signal: the consumer must know when buffer $B$ is full before it reads it, so each primitive pairs with a barrier or token that the \textbf{pipeline} uses to sequence the stages \citep{shah2024flashattention3,amd2024aie}.
 
 \section{GPU TMA}
 \label{sec:ch08_gpu_tma}
@@ -47,444 +49,110 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.5,0) {\footnotesize HBM\\(global)};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize TMA\\async bulk copy};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize Shared mem\\double buffer};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize WGMMA\\consumer};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{GPU TMA block diagram for TMA Double-Buffer Pipelines and Async Movement.}
+\caption{On Hopper, TMA issues asynchronous bulk copies from HBM into a double-buffered shared-memory region that WGMMA consumers drain.}
 \label{fig:gpu_tma_architecture}
 \end{figure}
 
-The production surprise at \textbf{GPU TMA} is not peak FLOPs; it is illegal tier placement: TMA spilling to HBM/DDR while Hopper still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
+On a \textbf{Hopper} GPU the asynchronous movement primitive is the Tensor Memory Accelerator (\textbf{TMA}), and it is purpose-built for the \textbf{double-buffer} \textbf{pipeline} this chapter describes. \textbf{TMA} performs asynchronous bulk copies between global and shared memory, and crucially it is issued by a single thread rather than by every thread in a warp, which frees the other threads' registers and address-generation work for compute \citep{shah2024flashattention3}. This is why FlashAttention-3 assigns \textbf{TMA} to a dedicated producer warp: one thread kicks off the bulk load, the producer moves on, and the consumer warpgroup runs WGMMA on the previously loaded tile \citep{shah2024flashattention3}.
 
-Trace residency: TMA producers must feed Hopper consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Completion is signaled through transaction barriers. A \textbf{TMA} copy is associated with a shared-memory barrier that tracks how many bytes have arrived, and the consumer waits on that barrier before reading the buffer; because the barrier is transaction-based, the hardware knows when the full tile has landed rather than relying on a thread count \citep{shah2024flashattention3,nvidia2022hopper}. This is the completion signal the \textbf{pipeline} theory required, and it is what lets the compiler build a correct multi-stage pipeline: each buffer has its own barrier, the producer fills buffer $n{+}1$ and arrives at its barrier while the consumer waits on buffer $n$'s barrier, and the two proceed in lockstep one tile apart.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+\textbf{TMA} also carries optimizations that matter for decode residency. It can multicast a single load to the shared memory of all CTAs in a thread-block cluster in one operation, so a weight tile read once is delivered to several consumers without re-reading HBM---a direct bytes/token saving when the same weights feed multiple CTAs \citep{shah2024flashattention3,nvidia2022hopper}. It also exposes an L2 promotion hint that biases the cache toward keeping \textbf{TMA}-loaded lines resident when the same input tile is consumed by many CTAs, as in a GEMM where each weight column feeds every row \citep{semianalysis2024tma,nvidia2022hopper}. Both are mechanisms the \textbf{pipeline} builder uses to ensure that the bytes a tile needs are either already on chip or arriving asynchronously, never fetched synchronously on the critical path.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for TMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+There is a register dimension to \textbf{TMA} that is easy to miss and directly relevant to the residency budget. On older async-copy paths every thread in a warp participated in address generation, consuming registers and instruction slots that then could not be used for compute \citep{dao2022flashattention}. Because \textbf{TMA} is issued by a single thread with a hardware-resident multidimensional descriptor, it frees the rest of the warp's registers, and combined with Hopper's warpgroup-wide register reallocation from Chapter~7 this lets the consumer warpgroup claim a larger share of the 65{,}536-register file for accumulators \citep{shah2024flashattention3,nvidia2022hopper}. The movement primitive and the residency budget are thus coupled: choosing \textbf{TMA} is not only a movement decision but a register decision, and a \textbf{pipeline} built on it can sustain deeper compute tiles than one built on the older per-thread copy.
 
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The interaction with the transaction barrier is what makes deep \textbf{TMA} pipelines correct rather than merely fast. Each buffer in the \textbf{pipeline} gets its own barrier object in shared memory; the producer thread issues the \textbf{TMA} for buffer $k$ and records the expected byte count on that buffer's barrier, and the consumer warpgroup waits on barrier $k$ before reading buffer $k$ \citep{shah2024flashattention3}. With $s$ buffers the producer can run up to $s$ tiles ahead, and the barriers form a circular list that sequences the stages---a structure CUTLASS encapsulates in reusable pipeline classes precisely because managing the barriers by hand is error-prone \citep{shah2024flashattention3,nvidia2022hopper}. For a compiler this is ideal: the barrier discipline is mechanical and can be generated, which is exactly what the YiRage \textbf{pipeline} pass does.
 
-\section{CPU dma}
+The predecessor primitive, \texttt{cp.async}, shipped on Ampere and established the pattern \textbf{TMA} perfected: asynchronously copy from global to shared memory and commit groups of copies that the consumer can wait on \citep{dao2022flashattention}. \textbf{TMA} improves on it by handling multidimensional tile descriptors in hardware, issuing from one thread, and integrating with the transaction barrier, which is why the deepest decode pipelines target \textbf{Hopper}'s \textbf{TMA} path \citep{shah2024flashattention3,semianalysis2024tma}.
+
+A practical caution applies when reasoning about \textbf{TMA} for decode rather than prefill. \textbf{TMA}'s headline benefits---bulk multidimensional copies, multicast across a cluster, L2 promotion for reused inputs---are largest when the same tile feeds many consumers, the GEMM-like sharing pattern of prefill \citep{semianalysis2024tma,nvidia2022hopper}. At batch-1 decode the reuse is lower: a weight tile is read once per token by a thin matrix-vector product, so the multicast and L2-promotion wins shrink and the dominant benefit reduces to the plain asynchrony---issuing the load early and overlapping it \citep{taxbreak2026,kwon2023vllm}. The design lesson is to use \textbf{TMA} for what decode actually needs (cheap asynchronous loads that free registers) without assuming the prefill-shaped sharing wins transfer, which is another instance of the book's theme that prefill intuitions mislead at the decode operating point.
+
+
+
+\section{CPU DMA}
 \label{sec:ch08_cpu_dma}
 
-\textbf{CPU dma} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix dma and CPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
+A \textbf{cpu} has no programmer-managed scratchpad and no \textbf{TMA}, so its version of the \textbf{double-buffer} \textbf{pipeline} is built from prefetching and the cache hierarchy rather than explicit asynchronous copies into shared memory \citep{dlbook}. The hardware prefetcher already overlaps movement with compute opportunistically: on a detected sequential access pattern it pulls the next cache lines ahead of demand, which for a streaming weight read is effectively a \textbf{pipeline} the hardware builds for free \citep{dlbook}. The kernel's job is to make the access pattern predictable enough for the prefetcher to track and to block the computation so the working set of each tile stays cache-resident across its reuse, as Chapter~6 described.
 
-Hardware truth: GPUs bound dma with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+When the hardware prefetcher is insufficient, software prefetch instructions let the kernel issue an explicit hint to begin loading a cache line some distance ahead of its use, which is the \textbf{cpu} analogue of issuing an asynchronous load early in a \textbf{pipeline} \citep{dlbook}. The distance---how many iterations ahead to prefetch---plays the role of \textbf{pipeline} depth: too short and the load does not complete before the data is needed, too long and the prefetched line is evicted before use or displaces something hot. Tuning that distance against the memory latency and the per-iteration compute is the \textbf{cpu} equivalent of choosing the number of buffers on a GPU.
 
-Compiler/kernel fix: predicate fusion on dma/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The absence of a scratchpad changes what ``double buffering'' even means on a \textbf{cpu}. There is no second explicit buffer to fill; instead the two stages share the cache, and the prefetch distance determines how far ahead the next tile's lines are brought in before eviction pressure or the prefetcher's own heuristics stop it \citep{dlbook}. This makes the \textbf{cpu} \textbf{pipeline} softer than a GPU's---there is no hard barrier guaranteeing buffer $B$ is full, only the statistical likelihood that the prefetched lines arrived---so correctness is never at risk (a cache miss just stalls) but performance is more variable. The practical implication is that \textbf{cpu} decode tuning is validated empirically by measuring cache-miss rates and achieved bandwidth at the decode operating point, rather than by reasoning about a fixed \textbf{pipeline} depth as on a GPU.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize dma with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused dma raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Some server CPUs add a dedicated \textbf{dma}-style data-movement engine that can copy memory regions asynchronously and offload bulk transfers from the cores, which brings the \textbf{cpu} closer to the explicit asynchronous model of a GPU or NPU \citep{dlbook}. Where available, such an engine lets a decode kernel stage a weight or KV block while the cores compute, an explicit \textbf{double-buffer} between memory tiers. But the dominant reality on a \textbf{cpu} is that residency and overlap are governed by the cache and prefetcher, so the \textbf{pipeline} is largely implicit; the multi-hardware contrast with the GPU is that the GPU programmer builds the pipeline explicitly with \textbf{TMA} and barriers, while the \textbf{cpu} programmer shapes access patterns and prefetch distance to coax the hardware into building an equivalent one \citep{semianalysis2024tma,memoryfloor2026}. For a decode kernel this means the highest-leverage \textbf{cpu} move is often simply ensuring the weight stream is contiguous and sequentially accessed so the prefetcher tracks it perfectly, rather than hand-rolling an explicit \textbf{double-buffer} that the hardware would have built anyway \citep{dlbook,kwon2023vllm}. The compiler's job on a \textbf{cpu} is therefore as much about laying out data for predictable access as about scheduling explicit transfers.
 
 \section{NPU pipeline}
 \label{sec:ch08_npu_pipeline}
 
-Teams hit \textbf{NPU pipeline} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without dma residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+On a spatial \textbf{npu} the \textbf{double-buffer} \textbf{pipeline} is the most explicit of all and is the native execution model. Each AMD XDNA / AIE-ML compute tile has a dedicated \textbf{dma} engine that moves data between streams and the tile's 64\,KB local SRAM, and the architecture provides task queues and task-completion-tokens so the \textbf{dma} can run ahead of compute and signal when a buffer is ready \citep{amd2024aie,amd2024xdna}. The completion token is the \textbf{npu}'s version of the GPU's transaction barrier: the vector unit waits on the token before consuming a buffer, and the \textbf{dma} fills the other buffer in the meantime.
 
-Trace residency: NPU producers must feed dma consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Because there is no cache to absorb a late load, double buffering is not an optimization on an \textbf{npu}---it is mandatory. A compute tile that waits on its \textbf{dma} simply idles, so the schedule ping-pongs between two buffers in the tile SRAM: load buffer $B$ via the \textbf{dma} engine while the vector unit consumes buffer $A$, then swap, with the task-completion-tokens sequencing the swap \citep{amd2024aie,amd2024xdna}. This halves the usable tile SRAM for the double-buffered operand, which is the residency charge the planner of Chapter~6 must include, and it is why the tile shapes are sized so that two copies of the streamed operand plus the accumulators fit the 64\,KB budget.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The AIE-ML \textbf{dma} is more capable than a simple copy engine, and those features map directly onto \textbf{pipeline} needs. It supports task queues, so multiple transfers can be enqueued and run back-to-back without per-transfer setup from the vector unit, and task-completion-tokens, so the consumer can wait on a specific transfer's completion rather than a coarse fence \citep{amd2024aie}. It also offers multidimensional addressing, which lets a single \textbf{dma} task gather a strided tile---a row of a weight matrix, say---without the vector unit computing addresses, the \textbf{npu} analogue of \textbf{TMA}'s multidimensional descriptor \citep{amd2024aie,amd2024xdna}. These features exist because on a fabric with no cache the \textbf{dma} must do all the work of keeping the compute fed, so it is engineered to run a deep, autonomous \textbf{pipeline} with minimal vector-unit involvement.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The spatial structure gives the \textbf{npu} \textbf{pipeline} a dimension the GPU and \textbf{cpu} lack: the stages can be different physical tiles. A producer tile can stream data into a neighbor's local memory, which computes and forwards to the next tile, so a multi-stage \textbf{pipeline} is laid out across the array with each tile a fixed stage and the \textbf{dma}/stream interconnect carrying data between them \citep{amd2024xdna,amd2024aie}. This is the spatial analogue of a deep software \textbf{pipeline}: instead of one unit cycling through buffers, several units form an assembly line, and the on-chip \textbf{dma} keeps each stage fed. The decode payoff is the same as everywhere---intermediate results never leave on-chip SRAM, so only inputs and final outputs traverse DDR \citep{dao2022flashattention,memoryfloor2026}.
 
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The trade the spatial \textbf{pipeline} makes is depth for latency and balance. A pipeline spread across $k$ tiles can keep $k$ stages busy and hide more latency, but it also has a longer fill and drain, and it requires the per-stage work to be balanced so no tile becomes the bottleneck that starves the rest \citep{amd2024xdna,amd2024aie}. Because the assignment of stages to tiles is fixed at configuration time, the compiler must balance the stages statically---splitting a heavy stage across two tiles, or fusing two light stages onto one---which is the spatial counterpart to choosing a GPU \textbf{pipeline}'s depth. Getting this balance wrong does not merely slow the kernel; on a fabric with no cache fallback it idles whole tiles, so the \textbf{npu} \textbf{pipeline} demands the most careful static planning of the three classes, and rewards it with the most deterministic per-token cost \citep{semianalysis2024tma,patel2025llminference}.
 
-\section{YiRage pipeline gen}
+\begin{table}[t]
+\centering
+\caption{Asynchronous-movement primitive and completion signal per hardware class; all build the same double-buffer pipeline \citep{shah2024flashattention3,amd2024aie}.}
+\label{tab:ch08_async_primitives}
+\begin{tabular}{lll}
+\toprule
+Class & Async primitive & Completion signal \\
+\midrule
+GPU (Hopper) & TMA bulk copy & Transaction (mbarrier) \\
+CPU & Prefetch / DMA engine & Cache fill / engine status \\
+NPU (XDNA) & Tile DMA engine & Task-completion-token \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{YiRage pipeline generation}
 \label{sec:ch08_yirage_pipeline_gen}
 
-The production surprise at \textbf{YiRage pipeline gen} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while pipeline still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+The book's reference compiler turns pipeline construction into a generated, per-target artifact. \textbf{YiRage} carries a \textbf{pipeline}-generation pass that, given a fused region and a target, emits the correct \textbf{double-buffer} \textbf{pipeline}: \textbf{TMA} producer warps plus transaction barriers on \textbf{Hopper}, prefetch-shaped access patterns on a \textbf{cpu}, and ping-pong \textbf{dma} with completion tokens on an XDNA \textbf{npu} \citep{yirage2026,shah2024flashattention3}. Because the residency budget and the role assignment are already fixed by the passes of Chapters~6 and~7, the \textbf{pipeline} pass knows how much fast memory is available for buffers and which units are producers, so it can choose the \textbf{pipeline} depth that fits and wire the completion signals correctly \citep{wu2024mirage,amd2024aie}.
 
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Pipeline depth is the parameter the pass tunes per target. On a \textbf{Hopper} GPU with a 228\,KB shared-memory budget it can afford several \textbf{TMA} buffers in flight, hiding more latency; on a 64\,KB XDNA tile it can usually afford only the mandatory two, so the \textbf{pipeline} is shallow and the tile shapes shrink accordingly \citep{nvidia2022hopper,amd2024aie}. Getting this wrong in either direction is a measurable decode regression: too shallow and the compute units stall on loads, too deep and the buffers crowd out the working set and force a spill that reintroduces the HBM traffic the \textbf{pipeline} was meant to hide \citep{taxbreak2026,memoryfloor2026}. The pass therefore solves depth jointly with the residency check rather than applying a fixed constant.
 
-Compiler/kernel fix: predicate fusion on YiRage/pipeline legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The pass also has to reason about a subtlety the hardware exposes: the \textbf{pipeline} prologue and epilogue. The first $s{-}1$ tiles of an $s$-deep \textbf{pipeline} only fill buffers without producing output (the prologue), and the last $s{-}1$ steps only drain buffers without issuing new loads (the epilogue); these transient phases are not overlapped and their cost is fixed per kernel invocation \citep{shah2024flashattention3,dao2022flashattention}. For a long-running prefill GEMM the prologue cost is negligible against thousands of steady-state steps, but for a short batch-1 decode kernel that processes few tiles per token the prologue can be a meaningful fraction of the runtime. This is precisely why persistent kernels from Chapter~7 matter here: by keeping the kernel resident across tokens, the \textbf{pipeline} stays warm and the prologue is paid once rather than per token, so movement pipelining and static residency reinforce each other \citep{shah2024flashattention3,mpk2025}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked pipeline---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+A second decision the pass makes is whether to pipeline the KV-cache stream separately from the weight stream. The two have different lifetimes and sizes---weights are reused across all positions of a layer while the KV slice grows with context---so a single \textbf{pipeline} depth is rarely optimal for both \citep{kwon2023vllm,dao2023flashdecoding}. The pass can assign separate buffers and depths to each stream, deepening the KV \textbf{pipeline} when context is long and the KV read dominates, and the weight \textbf{pipeline} when the model is wide and weight streaming dominates. This per-stream tuning is the kind of decision that is tedious and error-prone by hand but mechanical for a compiler that knows the shapes and the residency budget, and it is where a generated \textbf{pipeline} can beat a hand-written one that uses a single uniform depth \citep{yirage2026,memoryfloor2026}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep pipeline on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{pipeline theory} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix pipeline and double-buffer together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,yirage2026}.
-
-Hardware truth: GPUs bound pipeline with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pipeline/double-buffer legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pipeline with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked double-buffer---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused schedule must keep double-buffer on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{GPU TMA} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because TMA was planned without Hopper residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: TMA producers must feed Hopper consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for TMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{CPU dma} is not peak FLOPs; it is illegal tier placement: dma spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound dma with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on dma/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize dma with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused dma raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{NPU pipeline} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix NPU and dma together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed dma consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage pipeline gen} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without pipeline residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/pipeline legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked pipeline---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep pipeline on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{pipeline theory} is not peak FLOPs; it is illegal tier placement: pipeline spilling to HBM/DDR while double-buffer still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
-
-Trace residency: pipeline producers must feed double-buffer consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pipeline on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{GPU TMA} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix TMA and Hopper together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound TMA with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on TMA/Hopper legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize TMA with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked Hopper---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused TMA raises bytes/token; fused schedule must keep Hopper on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{CPU dma} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because dma was planned without CPU residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: dma producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for dma on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{NPU pipeline} is not peak FLOPs; it is illegal tier placement: NPU spilling to HBM/DDR while dma still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on NPU/dma legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dma---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused NPU raises bytes/token; fused schedule must keep dma on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage pipeline gen} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix YiRage and pipeline together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed pipeline consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{pipeline theory} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because pipeline was planned without double-buffer residency on the SKU you ship \citep{dao2022flashattention,yirage2026}.
-
-Hardware truth: GPUs bound pipeline with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pipeline/double-buffer legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pipeline with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked double-buffer---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused schedule must keep double-buffer on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{GPU TMA} is not peak FLOPs; it is illegal tier placement: TMA spilling to HBM/DDR while Hopper still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: TMA producers must feed Hopper consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for TMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{CPU dma} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix dma and CPU together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound dma with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on dma/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize dma with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused dma raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{NPU pipeline} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because NPU was planned without dma residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed dma consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage pipeline gen} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while pipeline still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/pipeline legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked pipeline---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep pipeline on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{pipeline theory} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix pipeline and double-buffer together or bytes/token flatlines while kernel microbenchs celebrate \citep{dao2022flashattention,yirage2026}.
-
-Trace residency: pipeline producers must feed double-buffer consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pipeline on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{GPU TMA} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because TMA was planned without Hopper residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound TMA with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on TMA/Hopper legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize TMA with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked Hopper---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused TMA raises bytes/token; fused schedule must keep Hopper on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{CPU dma} is not peak FLOPs; it is illegal tier placement: dma spilling to HBM/DDR while CPU still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: dma producers must feed CPU consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for dma on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{NPU pipeline} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix NPU and dma together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound NPU with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on NPU/dma legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize NPU with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dma---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused NPU raises bytes/token; fused schedule must keep dma on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage pipeline gen} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without pipeline residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed pipeline consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{pipeline theory} is not peak FLOPs; it is illegal tier placement: pipeline spilling to HBM/DDR while double-buffer still pays launch or DMA tax every token \citep{dao2022flashattention,yirage2026}.
-
-Hardware truth: GPUs bound pipeline with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pipeline/double-buffer legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pipeline with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked double-buffer---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pipeline raises bytes/token; fused schedule must keep double-buffer on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pipeline, double-buffer to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{GPU TMA} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix TMA and Hopper together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: TMA producers must feed Hopper consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for TMA on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds TMA, Hopper to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{CPU dma} when TMA Double-Buffer Pipelines and Async Movement looks correct in isolation yet decode telemetry disagrees---usually because dma was planned without CPU residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound dma with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on dma/CPU legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize dma with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked CPU---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused dma raises bytes/token; fused schedule must keep CPU on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds dma, CPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{NPU pipeline} is not peak FLOPs; it is illegal tier placement: NPU spilling to HBM/DDR while dma still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: NPU producers must feed dma consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for NPU on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds NPU, dma to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage pipeline gen} is where TMA Double-Buffer Pipelines and Async Movement meets Chapter~1 counters: fix YiRage and pipeline together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/pipeline legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked pipeline---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep pipeline on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, pipeline to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
+What makes the \textbf{YiRage} \textbf{pipeline} pass composable is that it is the movement counterpart to the static role assignment of Chapter~7: roles decide which unit does what, and the \textbf{pipeline} pass decides when each unit's data arrives \citep{yirage2026,shah2024flashattention3}. Together they realize a fused region as a schedule-free, fully overlapped kernel, and they compose with the megakernel search of Chapter~20---the superoptimizer proposes the fusion, the memory pass certifies its footprint, the tiling pass assigns roles, and the \textbf{pipeline} pass overlaps the movement, all per target and all checked before codegen \citep{wu2024mirage,mpk2025}. The result is that the asynchronous, double-buffered pipeline a CUDA expert once hand-wrote becomes a compiler output, regenerated correctly for each SKU in a heterogeneous fleet.
 
 \section{Key Takeaways}
 \label{sec:ch08_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Pipeline Theory.} Tie pipeline theory to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{GPU TMA.} Tie GPU TMA to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{CPU Dma.} Tie CPU dma to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{NPU Pipeline.} Tie NPU pipeline to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Pipeline Gen.} Tie YiRage pipeline gen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Overlap movement with compute via a double-buffer pipeline.}
+A synchronous load-then-compute loop exposes full memory latency every step; a double-buffer pipeline hides it behind the previous tile's compute after a one-tile prologue, and deepening the pipeline helps only until the bottleneck stage saturates \citep{dao2022flashattention,semianalysis2024tma}. At batch-1 decode the load stage dominates, so overlap is the win \citep{taxbreak2026}.
+
+\item \textbf{TMA is Hopper's asynchronous movement primitive.}
+Issued by a single thread (saving registers), TMA performs async bulk gmem$\to$smem copies signaled by transaction barriers, with cluster multicast and L2 promotion hints \citep{shah2024flashattention3,nvidia2022hopper}. FlashAttention-3 pairs TMA producers with WGMMA consumers \citep{semianalysis2024tma}.
+
+\item \textbf{CPU pipelines are prefetch- and cache-shaped.}
+With no scratchpad, a CPU overlaps through hardware prefetch, software prefetch distance (its pipeline depth), and sometimes a DMA engine; the kernel shapes access patterns so the hardware builds the pipeline \citep{dlbook,memoryfloor2026}. Residency is governed by the cache.
+
+\item \textbf{NPU double buffering is mandatory and explicit.}
+An XDNA tile's DMA engine ping-pongs two buffers in 64\,KB SRAM with task-completion-tokens, and multi-stage pipelines span physical tiles across the array \citep{amd2024aie,amd2024xdna}. With no cache fallback on the fabric, a stalled DMA simply idles the whole compute tile.
+
+\item \textbf{Generate the pipeline per target.}
+The YiRage pipeline pass emits TMA+barriers, prefetch patterns, or ping-pong DMA per class and solves pipeline depth jointly with the residency budget, with separate depths for the weight and KV streams \citep{yirage2026,nvidia2022hopper}. Too shallow stalls; too deep spills \citep{taxbreak2026}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch08_conclusion}
 
-TMA Double-Buffer Pipelines and Async Movement is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume TMA Double-Buffer Pipelines and Async Movement baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Asynchronous movement is what keeps the statically assigned consumers of Chapter~7 from stalling: a double-buffer pipeline overlaps the load of the next tile with the compute on the current one, hiding the memory latency that otherwise dominates batch-1 decode \citep{shah2024flashattention3,memoryfloor2026}. Each hardware class provides the primitive---TMA with transaction barriers on Hopper, prefetch and DMA engines on a CPU, ping-pong tile DMA with completion tokens on an XDNA NPU---and the YiRage pipeline pass generates the correct, depth-tuned pipeline per target, with separate depths for the weight and KV streams where their sizes differ, composing with the residency, role, and search passes of the surrounding chapters \citep{yirage2026,amd2024aie,wu2024mirage}. A pipeline only works if its stages synchronize correctly, however, and at the scale of a megakernel spanning many units the synchronization itself becomes a design problem---which is the subject of Chapter~\ref{chap:ch09}: hierarchical synchronization and communication across threads, warps, tiles, and devices \citep{taxbreak2026,patel2025llminference}.
 
 \typeout{END_CHAPTER "ch08" \theabspage}

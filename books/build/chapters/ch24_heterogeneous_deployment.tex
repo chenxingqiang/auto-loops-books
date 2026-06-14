@@ -2,314 +2,139 @@
 \label{chap:ch24}
 \typeout{START_CHAPTER "ch24" \theabspage}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+Production LLM serving is no longer a single-GPU problem; it is a fleet problem, where prefill and decode run on different pools, edge and datacenter run different models, and the same logical workload must compile for GPUs, CPUs, and NPUs that have nothing in common but the math \citep{patel2025llminference,iree2024}. This chapter is where every per-target decision from the MegaKernel and compiler chapters becomes a deployment-level routing decision across a heterogeneous \textbf{cluster}. The decode metrics still govern: dense Llama-3.2-1B issues 847.5 launches per token on H100 and OLMoE-1B/7B issues 9{,}305, and removing host overhead bought $1.259\times$ on a Qwen-2.5-7B cell---gains that must now be preserved across a mix of silicon, not a single SKU \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs}.
+The mistake to avoid is deploying one hand-tuned artifact everywhere. A kernel optimal on an H100 is illegal on an XDNA tile and wasteful on a CPU, so heterogeneous deployment demands per-target compilation with a unified front end and a runtime that adapts to the hardware it finds \citep{amd2024xdna,rotem2018glow}.
+\index{Heterogeneous deployment}
+\index{Multi-hardware}
 
-\section{hetero cluster}
+\section{Heterogeneous cluster}
 \label{sec:ch24_hetero_cluster}
 
 % AUTO_VISUAL:fig_hetero_cluster_pipeline
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Hetero Cluster};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+\begin{tikzpicture}[vis base, scale=0.86, transform shape]
+ \node[vis pipeline node] (s0) at (-5.4,0) {\footnotesize Request\\route by phase};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Prefill pool\\(GPU, batched)};
+ \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Decode pool\\(GPU/NPU, batch-1)};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Edge\\(CPU/NPU)};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Hetero Cluster optimization pipeline in Heterogeneous Compilation and Multi-Hardware Deployment.}
+\caption{A heterogeneous serving cluster routes work by phase and target: batched prefill, batch-1 decode, and edge each map to different silicon.}
 \label{fig:hetero_cluster_pipeline}
 \end{figure}
 
-Teams hit \textbf{hetero cluster} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because hetero was planned without cluster residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+A \textbf{hetero}geneous \textbf{cluster} exists because prefill and decode have opposite hardware appetites. Prefill is compute-bound and batches well, so it maps to dense GPU pools; decode is memory- and orchestration-bound at batch-1, so it is provisioned differently and far more heavily \citep{taxbreak2026,kwon2023vllm}. DeepSeek-V3's production layout is the canonical evidence: its minimum prefill unit spans 4 nodes (32 GPUs) while its minimum decode unit spans 40 nodes (320 GPUs), a roughly $10\times$ capacity skew that reflects how differently the two phases use silicon \citep{patel2025llminference}. Disaggregating them into separate pools lets each be optimized and scaled independently, which is the cluster-level form of the prefill/decode split this book has drawn since Chapter~1.
 
-Hardware truth: GPUs bound hetero with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The \textbf{hetero}geneous dimension deepens when the \textbf{cluster} mixes vendor silicon. A fleet may run datacenter GPUs for high-throughput decode, CPUs for low-QPS or cost-sensitive endpoints, and NPUs for edge or power-constrained deployment, each with the distinct residency and synchronization models of Chapters~6--9 \citep{amd2024xdna,amd2024aie,rotem2018glow}. The deployment decision is which target each slice of traffic routes to, and the answer is workload-specific: a high-reuse decode layer justifies a searched GPU megakernel, while an edge endpoint wants a Glow-style AOT bundle \citep{mpk2025,rotem2018glow}. Routing across this \textbf{cluster} is the deployment-level analogue of the per-region compiler choice of Chapter~21.
 
-Compiler/kernel fix: predicate fusion on hetero/cluster legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\begin{table}[t]
+\centering
+\caption{Roles in a heterogeneous serving cluster; each target owns a slice of traffic with a preferred compiled artifact \citep{patel2025llminference,mpk2025}.}
+\label{tab:ch24_cluster_roles}
+\begin{tabular}{lll}
+\toprule
+Hardware & Typical role & Preferred artifact \\
+\midrule
+Datacenter GPU & High-throughput decode & Searched megakernel \\
+CPU & Cost-sensitive / low-QPS & AOT bundle, cache-blocked \\
+NPU / edge & Power-constrained & AOT bundle, static tiling \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hetero with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cluster---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+The reason routing beats standardizing is the same one this book has argued since Chapter~1: the optimal schedule is hardware-specific, so a single artifact is either illegal or leaves performance on the table somewhere in the \textbf{cluster} \citep{amd2024xdna,semianalysis2024tma}. A \textbf{hetero}geneous deployment embraces this by compiling per target and routing each request to the silicon whose strengths match the work, rather than forcing a lowest-common-denominator kernel across the fleet. The routing policy itself becomes an artifact to maintain---which traffic class goes to which pool---and it shifts as models and hardware evolve, which is why encoding the rationale rather than hand-wiring the routes matters at fleet scale \citep{patel2025llminference,yirage2026}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hetero raises bytes/token; fused schedule must keep cluster on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hetero, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{unified stack}
+\section{Unified stack}
 \label{sec:ch24_unified_stack}
 
 % AUTO_VISUAL:fig_unified_stack_architecture
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.86, transform shape]
+ \node[vis arch node] (s0) at (-5.4,0) {\footnotesize One model\\(framework IR)};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize MLIR\\unified IR};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize Per-target\\codegen};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize GPU / CPU / NPU\\artifacts};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Unified Stack block diagram for Heterogeneous Compilation and Multi-Hardware Deployment.}
+\caption{A unified MLIR-based stack lowers one model description to per-target artifacts, sharing front-end optimizations across hardware.}
 \label{fig:unified_stack_architecture}
 \end{figure}
 
-The production surprise at \textbf{unified stack} is not peak FLOPs; it is illegal tier placement: MLIR spilling to HBM/DDR while unified still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Heterogeneous deployment is only tractable with a \textbf{unified} compiler front end, and \textbf{mlir} has become the de facto substrate for one. By providing a common, extensible IR that many backends share, \textbf{mlir} lets a single model description carry through shared high-level optimizations before forking into per-target codegen, rather than maintaining a separate compiler per vendor \citep{iree2024,lai2023relax}. IREE is the concrete instance: it is an \textbf{mlir}-native compiler and runtime that lowers one input through its dialect stack to llvm-cpu, CUDA, ROCm, Vulkan, Metal, and experimental AMD AIE, giving a genuinely \textbf{unified} path across the matrix \citep{iree2024}. TVM's Relax and Triton's TritonGPU dialect are further evidence that the field is converging on \textbf{mlir}-style staged lowering as the way to span hardware \citep{lai2023relax,tillet2019triton}.
 
-Trace residency: MLIR producers must feed unified consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The value of a \textbf{unified} stack for decode specifically is that the residency, role, pipeline, and synchronization passes of Chapters~6--9 can be written once against the shared IR and specialized per target, rather than reimplemented per backend \citep{yirage2026,wu2024mirage}. This is what makes the per-target guarantees of those chapters scalable across a fleet: the same memory pass checks a 228\,KB H100 budget and a 64\,KB XDNA tile, the same sync pass proves deadlock-freedom on both, because they operate on one \textbf{unified} representation \citep{nvidia2022hopper,amd2024aie}. Without a \textbf{unified} stack, heterogeneous deployment degenerates into a matrix of separately maintained, separately verified kernels.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+It is worth being clear about what \textbf{mlir} does and does not solve. It provides the shared infrastructure---a common IR, a pass framework, reusable dialects---so that backends do not each reinvent the lowering machinery, and it lets cross-level optimizations be expressed once \citep{lai2023relax,iree2024}. What it does not do is make the per-target decisions for free: a residency budget, a role split, and a pipeline depth still differ per device, and \textbf{mlir} only ensures those decisions are made on a common substrate rather than in incompatible silos. The \textbf{unified} stack is therefore a force multiplier for the per-target passes, not a replacement for them---it is what lets one team maintain those passes across a growing matrix instead of one team per vendor \citep{yirage2026,wu2024mirage}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for MLIR on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: MLIR/IR GPU/CPU/NPU.
+The convergence on \textbf{mlir} across TVM (Relax), Triton (TritonGPU), and IREE is itself a signal that the industry has accepted heterogeneity as permanent \citep{lai2023relax,tillet2019triton,iree2024}. Rather than betting on one winning architecture, these stacks bet on a \textbf{unified} compiler layer that can absorb whatever silicon arrives, which is the only durable response to a hardware landscape that adds a new accelerator class every year \citep{amd2024aie,chen2018tvm}.
 
-\paragraph{Scope.} This section binds MLIR, unified to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{runtime adapt}
+\section{Runtime adaptation}
 \label{sec:ch24_runtime_adapt}
 
-\textbf{runtime adapt} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix runtime and detect together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+A \textbf{unified} build still has to meet the specific device it runs on, which is the job of \textbf{runtime} adaptation. The cleanest model is the ahead-of-time fat binary: IREE compiles a FlatBuffers \texttt{.vmfb} that carries host instructions and device kernels for multiple targets, and at load time the \textbf{runtime} probes the device and dispatches the matching kernel, so one artifact serves a heterogeneous fleet without a JIT \citep{iree2024}. The \textbf{runtime}'s ability to \textbf{detect} the hardware---its vendor, its memory sizes, its feature set---is what lets it pick the right kernel variant, and the fat binary can carry several specializations (aligned vs unaligned shapes, large vs small matmuls) for the \textbf{runtime} to choose among \citep{iree2024}.
 
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The \textbf{detect}-and-adapt pattern also covers graceful fallback. When a preferred path is unavailable---an NPU backend that is experimental, or a GPU feature the device lacks---the \textbf{runtime} must fall back to a kernel that runs, even if slower, rather than fail \citep{iree2024,rotem2018glow}. For decode this matters because the residency-optimal path differs per device, so the \textbf{runtime} adaptation is not cosmetic: detecting an H100 versus a smaller GPU should select a different pipeline depth and tile size, the very parameters Chapters~6--8 tuned per target \citep{nvidia2022hopper,memoryfloor2026}. Runtime adaptation is thus the deployment-time completion of compile-time per-target specialization. The division of labor is clean: the compiler decides everything it can ahead of time, per target, and the \textbf{runtime} decides only what genuinely depends on the device it lands on. For a heterogeneous fleet this keeps the per-request path thin while still letting one binary serve many targets, which is the property that makes large-scale deployment manageable rather than a per-device build explosion \citep{iree2024,patel2025llminference}.
 
-Compiler/kernel fix: predicate fusion on runtime/detect legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+There is a tension between adaptation and predictability that a serving team must manage. The more the \textbf{runtime} adapts---probing the device, selecting among kernel variants, falling back when needed---the more paths exist that must be tested, and the harder it is to guarantee a specific latency on a specific device \citep{iree2024,patel2025llminference}. The AOT fat binary mitigates this by resolving most choices at build time and leaving the \textbf{runtime} only a fast \textbf{detect}-and-dispatch, so the per-request path is short and predictable, in contrast to a JIT that recompiles on first use \citep{iree2024,rotem2018glow}. For interactive decode, where tail latency is the product metric, this argues for front-loading adaptation into the build and keeping the \textbf{runtime} decision to a quick device \textbf{detect}, not a recompilation.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked detect---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep detect on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds runtime, detect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{version regression}
+\section{Version regression}
 \label{sec:ch24_version_regression}
 
-Teams hit \textbf{version regression} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because version was planned without regression residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+Deploying across many targets multiplies the surface for \textbf{regression}, so a heterogeneous fleet needs disciplined \textbf{version} management and automated \textbf{regression} testing. A kernel \textbf{version} that improves decode on one GPU generation can regress on another, and a model or compiler \textbf{version} bump can silently change which fusion is chosen, so every target-\textbf{version} pair must be benchmarked on the same decode metrics rather than assumed equivalent \citep{taxbreak2026,patel2025llminference}. This is the deployment-scale form of the book's measurement discipline: track bytes/token and launches/token per target-\textbf{version}, and gate a rollout on no \textbf{regression} across the matrix.
 
-Trace residency: version producers must feed regression consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The autobooks-style loop that produced this book is itself a model for \textbf{regression} control: a fixed harness scores every change, improvements are kept and \textbf{regression}s reverted via version control, and a results log records each experiment \citep{yirage2026}. Applied to deployment, the same pattern is a \textbf{regression} matrix---each target a row, each kernel or model \textbf{version} a column, each cell a decode benchmark---that must stay green before a \textbf{version} ships. Reproducibility is the prerequisite: pinned configurations, recorded inputs, and logged measurements, the transparency standard the fact-verification gate of this book applies to its own numbers \citep{memoryfloor2026,dlbook}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The combinatorics are what make automation essential here. With several hardware targets, multiple model \textbf{version}s, and a range of decode shapes (context lengths, batch sizes), the \textbf{regression} matrix has too many cells to check by hand, so the testing must be scripted and run on every change \citep{patel2025llminference}. The autobooks loop's keep/revert discipline scales to this directly: a change is kept only if it improves or holds the metric across the matrix, and reverted otherwise, with the results log providing an audit trail of which \textbf{version} was good on which target \citep{yirage2026,taxbreak2026}. Crucially, the metric must be the decode goodput metric---bytes/token and launches/token---not a microbenchmark, because a \textbf{version} that wins an isolated GEMM can still regress end-to-end latency, the recurring trap of this book \citep{memoryfloor2026}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for version on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds version, regression to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{industrial cases}
+\section{Industrial cases}
 \label{sec:ch24_industrial_cases}
 
-The production surprise at \textbf{industrial cases} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while production still pays launch or DMA tax every token \citep{patel2025llminference,memoryfloor2026}.
+The clearest industrial \textbf{case} is again disaggregated \textbf{production} serving. DeepSeek-V3's separate prefill and decode pools, with the $10\times$ capacity skew, show a \textbf{production} system mapping each phase to the hardware footprint it needs rather than forcing both onto one uniform pool \citep{patel2025llminference}. The lesson generalizes: a \textbf{production} deployment that measures its phases separately will provision them separately, because the decode pool's bottleneck (memory and orchestration at batch-1) is different from the prefill pool's (compute throughput) \citep{taxbreak2026,kwon2023vllm}.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+A second \textbf{case} class is the megakernel in \textbf{production}. Mirage Persistent Kernel compiles an LLM forward pass into a single megakernel and reports $1.2$--$6.7\times$ end-to-end latency reduction over kernel-per-operator serving, a \textbf{production}-relevant result precisely because it attacks the launch storm that dominates batch-1 decode \citep{mpk2025,memoryfloor2026}. A third is edge \textbf{production} on NPUs and CPUs, where Glow-style AOT bundles deploy quantized models within fixed memory budgets \citep{rotem2018glow,amd2024aie}. Each \textbf{case} is the right answer for its slice of the fleet, which is exactly why a heterogeneous deployment routes rather than standardizes.
 
-Compiler/kernel fix: predicate fusion on case/production legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked production---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep production on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+A useful \textbf{production} pattern that ties the cases together is the cost-versus-latency frontier. A datacenter GPU pool delivers the lowest decode latency but at the highest cost per token; a CPU pool is cheaper per token at low utilization but cannot meet aggressive tail-latency targets; an edge NPU trades absolute throughput for power and locality \citep{patel2025llminference,rotem2018glow}. A \textbf{production} deployment places each traffic class on the point of that frontier its service-level objective demands---interactive chat to the low-latency GPU pool, batch or background generation to cheaper hardware---and the heterogeneous \textbf{cluster} is what makes that placement possible. The compiler's role is to ensure that whichever point is chosen, the artifact for it is residency-correct and decode-optimal, so the frontier is defined by genuine hardware trade-offs rather than by which target happened to get a hand-tuned kernel \citep{yirage2026,memoryfloor2026}.
 
 \section{YiRage cluster}
 \label{sec:ch24_yirage_cluster}
 
-\textbf{YiRage cluster} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix YiRage and cluster together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+The book's reference compiler is the cross-\textbf{cluster} router that ties these threads together. \textbf{YiRage} compiles one model description to multiple backends---CUDA, CPU, Triton, and more---and carries the Chapter~2 residency rules as checkable IR metadata, so each target gets a verified, per-hardware artifact from a single source \citep{yirage2026}. Across a heterogeneous \textbf{cluster} it makes the routing decision measurable: a high-reuse decode layer on a datacenter GPU routes to a searched megakernel, an edge endpoint to an AOT bundle, a broad-portability target to whole-program scheduling, each choice backed by the same bytes/token and launches/token metrics \citep{mpk2025,iree2024,rotem2018glow}.
 
-Trace residency: YiRage producers must feed cluster consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+What makes \textbf{YiRage} a \textbf{cluster}-level tool rather than a single-kernel one is that the residency, role, pipeline, and sync passes of Chapters~6--9 all run per target from the \textbf{unified} representation, so deploying to a new device in the \textbf{cluster} is a recompile-and-verify, not a hand-port \citep{yirage2026,wu2024mirage}. The metadata that records why a target was routed a certain way also survives model and hardware changes, so the routing decision does not have to be re-litigated each release---the deployment-scale payoff of encoding intent rather than hand-tuning \citep{patel2025llminference,memoryfloor2026}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. Spec hint: YiRage ClusterTopology.
-
-\paragraph{Scope.} This section binds YiRage, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{hetero cluster} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix hetero and cluster together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound hetero with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hetero/cluster legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hetero with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cluster---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hetero raises bytes/token; fused schedule must keep cluster on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hetero, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{unified stack} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because MLIR was planned without unified residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: MLIR producers must feed unified consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for MLIR on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds MLIR, unified to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{runtime adapt} is not peak FLOPs; it is illegal tier placement: runtime spilling to HBM/DDR while detect still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on runtime/detect legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked detect---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep detect on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds runtime, detect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{version regression} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix version and regression together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: version producers must feed regression consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for version on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds version, regression to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{industrial cases} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because case was planned without production residency on the SKU you ship \citep{patel2025llminference,memoryfloor2026}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/production legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked production---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep production on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage cluster} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while cluster still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed cluster consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{hetero cluster} is not peak FLOPs; it is illegal tier placement: hetero spilling to HBM/DDR while cluster still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Trace residency: hetero producers must feed cluster consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hetero on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hetero, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{unified stack} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix MLIR and unified together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound MLIR with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on MLIR/unified legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize MLIR with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked unified---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused MLIR raises bytes/token; fused schedule must keep unified on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds MLIR, unified to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{runtime adapt} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because runtime was planned without detect residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: runtime producers must feed detect consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for runtime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds runtime, detect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{version regression} is not peak FLOPs; it is illegal tier placement: version spilling to HBM/DDR while regression still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound version with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on version/regression legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize version with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked regression---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused version raises bytes/token; fused schedule must keep regression on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds version, regression to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{industrial cases} is where Heterogeneous Compilation and Multi-Hardware Deployment meets Chapter~1 counters: fix case and production together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,memoryfloor2026}.
-
-Trace residency: case producers must feed production consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, production to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage cluster} when Heterogeneous Compilation and Multi-Hardware Deployment looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without cluster residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/cluster legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked cluster---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep cluster on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, cluster to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+This closes the arc the book has traced. The residency budgets of Chapter~6, the static roles of Chapter~7, the pipelines of Chapter~8, and the synchronization of Chapter~9 were each presented as a per-target compiler pass; the compiler survey of Chapters~16--21 showed which existing stacks implement pieces of that vision; and this chapter assembles them into a fleet-level deployment where one model description compiles, via a \textbf{unified} \textbf{mlir} stack, to verified per-hardware artifacts that a \textbf{runtime} dispatches and a \textbf{regression} matrix guards \citep{yirage2026,iree2024,wu2024mirage}. \textbf{YiRage} is the name this book gives to the compiler that does all of it together across a heterogeneous \textbf{cluster}, and the reason every earlier chapter measured against it is that it is where the book's recurring thesis---decode is bound by movement and orchestration, fixable only by residency-aware, schedule-free, per-target compilation---is operationalized at scale \citep{taxbreak2026,mpk2025}.
 
 \section{Key Takeaways}
 \label{sec:ch24_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Hetero Cluster.} Tie hetero cluster to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Unified Stack.} Tie unified stack to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Runtime Adapt.} Tie runtime adapt to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Version Regression.} Tie version regression to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Industrial Cases.} Tie industrial cases to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Disaggregate by phase across the cluster.}
+Prefill is compute-bound and batches; decode is memory- and orchestration-bound at batch-1, so they provision differently---DeepSeek-V3 runs a $10\times$ larger decode pool than prefill pool \citep{patel2025llminference,taxbreak2026}. Measure the two phases separately, and you will end up provisioning them separately \citep{kwon2023vllm}.
+
+\item \textbf{Unify the front end with MLIR.}
+A shared MLIR-based IR (IREE, Relax, TritonGPU) lets one model carry shared optimizations before per-target codegen, so the residency/role/pipeline/sync passes are written once and specialized per target \citep{iree2024,lai2023relax}. Without it, deployment becomes an unwieldy matrix of hand-maintained kernels \citep{yirage2026}.
+
+\item \textbf{Adapt at runtime by detecting the device.}
+A fat binary carrying multiple target kernels lets the runtime probe the hardware and dispatch the right variant, with graceful fallback when a path is unavailable \citep{iree2024,rotem2018glow}. Detected device sizes should select pipeline depth and tile size \citep{nvidia2022hopper}.
+
+\item \textbf{Gate rollouts on a per-target regression matrix.}
+A kernel or model version that helps one target can regress another, so benchmark every target-version pair on bytes/token and launches/token and require no regression before shipping \citep{taxbreak2026,memoryfloor2026}. Reproducibility (pinned configs, logged measurements) is the prerequisite \citep{dlbook}.
+
+\item \textbf{Route, don't standardize.}
+Each production case---searched megakernel on GPU ($1.2$--$6.7\times$), AOT bundle on edge, whole-program scheduling for breadth---owns a slice of the fleet, and YiRage routes per slice with verified per-target artifacts \citep{mpk2025,rotem2018glow,yirage2026}. One artifact everywhere is the anti-pattern, because a kernel optimal on one target is illegal or wasteful on another \citep{amd2024xdna}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch24_conclusion}
 
-Heterogeneous Compilation and Multi-Hardware Deployment is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Heterogeneous Compilation and Multi-Hardware Deployment baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Heterogeneous deployment is where the book's per-target discipline becomes a fleet-level routing problem: disaggregate prefill and decode, unify the front end with MLIR so the residency, role, pipeline, and synchronization passes run once and specialize per target, adapt at runtime by detecting the device, and gate every rollout on a per-target regression matrix \citep{patel2025llminference,iree2024,taxbreak2026}. The YiRage compiler is the cross-cluster router that makes this measurable, compiling one model to verified per-hardware artifacts and recording the routing intent as metadata so it survives change \citep{yirage2026,mpk2025}. Deployment, however, is increasingly something compilers do for themselves: Chapter~\ref{chap:ch25} turns to auto-optimization and AI-assisted compilation, where the search and routing decisions of this book are themselves driven by learned and automated systems \citep{wu2024mirage,memoryfloor2026}.
 
 \typeout{END_CHAPTER "ch24" \theabspage}

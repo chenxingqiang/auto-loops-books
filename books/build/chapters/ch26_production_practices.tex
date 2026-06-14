@@ -129,11 +129,20 @@ Cost-aware fleet scheduling trades spot GPU pools against SLO headroom---compile
 \label{sec:ch26_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Env packaging.} Immutable images pin compiler SHA, drivers, fingerprints, and decode harness \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Multi-HW ops.} Tier runbooks + counter dashboards + fingerprint rollback \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,dlbook,kwon2023vllm,liu2024deepseekv3,memoryfloor2026,taxbreak2026,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Pitfalls.} Driver skew, bucket mismatch, benchmark theater, cross-tier promotion \citep{nvidia2024cudagraphs,memoryfloor2026,patel2025llminference,taxbreak2026,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Scheduling.} Separate prefill/decode pools; tag fingerprints per tier; decode-aware autoscale \citep{patel2025llminference,liu2024deepseekv3,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,amd2024aie,dlbook,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
-\item \textbf{Measure useful decode work.} Production SLOs track bytes/token and launches/token, not peak FLOPs \citep{patel2025llminference,dlbook,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,amd2024aie,semianalysis2024tma,amd2024xdna,dao2022flashattention,dao2023flashdecoding,nvidia2024cudagraphs,nvidia2022hopper}.
+\item \textbf{Package the whole compile, not just the model.}
+A deployable unit must bind the compiler git SHA, the LLVM/Triton/CUDA toolkit versions, and the schedule fingerprints into one immutable image, so a rebuild reproduces the exact kernels \citep{chen2020compilerbasedhardw,yirage2026}. Without that pinning, a driver or toolkit drift silently changes the emitted schedule and the decode numbers move for reasons no one can trace \citep{patel2025llminference,memoryfloor2026}.
+
+\item \textbf{Operate multi-hardware with runbooks, dashboards, and rollback.}
+Production stays honest after deploy only with per-tier runbooks, counter dashboards tracking bytes/token and launches/token, and fingerprint-keyed rollback to a known-good schedule \citep{patel2025llminference,yirage2026}. The same model on GPU, CPU, and NPU has different failure modes, so the operational tooling must be tier-aware rather than one-size-fits-all \citep{amd2024xdna,amd2024aie}.
+
+\item \textbf{Know the recurring pitfalls.}
+Driver skew, shape-bucket mismatch, benchmark theater (microbench wins that never move ms/token), and cross-tier promotion of a schedule tuned for the wrong SKU recur across fleets \citep{nvidia2024cudagraphs,taxbreak2026}. Each is invisible to a FLOPs dashboard and visible only to a decode-cell regression on the actual target \citep{memoryfloor2026,patel2025llminference}.
+
+\item \textbf{Schedule prefill and decode as distinct fleet slices.}
+Heterogeneous scheduling places prefill pools, decode pools, MoE expert shards, and CPU/NPU fallbacks on separate slices, each with its own fingerprints and decode-aware autoscaling \citep{patel2025llminference,kwon2023vllm}. Forcing both phases onto one uniform pool wastes the $10\times$ capacity skew that disaggregation exists to exploit \citep{liu2024deepseekv3,memoryfloor2026}.
+
+\item \textbf{Hold SLOs to decode goodput, not peak FLOPs.}
+Production service-level objectives must track bytes/token and launches/token at the real operating point, because those are what predict ms/token and p99 \citep{patel2025llminference,taxbreak2026}. A green FLOPs or utilization dashboard that ignores them is the most common way a regression ships unnoticed \citep{memoryfloor2026,dlbook}.
 \end{itemize}
 
 \section{Conclusion}

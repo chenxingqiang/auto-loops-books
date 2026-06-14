@@ -2,9 +2,11 @@
 \label{chap:ch18}
 \typeout{START_CHAPTER "ch18" \theabspage}
 
-Part~VI treats \emph{IREE} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
-
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+IREE attacks the decode problem from a different angle than a kernel compiler: it compiles the model's \emph{scheduling logic and its device execution together}, ahead of time, into one deployable artifact \citep{iree2024}. Where a Python serving loop decides per-token what to launch at runtime, IREE bakes the host orchestration into virtual-machine bytecode at compile time---which is exactly the lever Chapter~1 identified, because at batch-1 the launch and dispatch path, not the matmul, sets ms/token \citep{taxbreak2026,patel2025llminference}. Dense Llama-3.2-1B already averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9{,}305 \citep{taxbreak2026}. A compiler that schedules the whole program can collapse that orchestration the way captured CUDA Graphs do, but earlier and across more targets \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The catch is the same as every other surface in this Part: IREE will happily produce a correct binary for a target whose schedule still re-reads activations from DRAM every token. This chapter treats IREE as an MLIR-native compiler+runtime graded on bytes/token and launches/token, not as a build-system walkthrough \citep{dlbook}.
+\index{IREE}
+\index{MLIR}
+\index{Hardware abstraction layer}
 
 \section{IREE HW matrix}
 \label{sec:ch18_iree_hw_matrix}
@@ -14,31 +16,25 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\IREE HW Matrix};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize MLIR input\\(linalg)};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Flow / Stream\\schedule};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize HAL executables\\per target};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize \texttt{.vmfb}\\fat binary};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{IREE HW Matrix optimization pipeline in IREE: MLIR-Native Runtime and Compilation.}
+\caption{IREE lowers one MLIR input through whole-program scheduling into a single \texttt{.vmfb} that carries host instructions and per-target device kernels.}
 \label{fig:iree_hw_matrix_pipeline}
 \end{figure}
 
-Teams hit \textbf{IREE HW matrix} when IREE looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without target residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+IREE's support \textbf{matrix} is the broadest in this Part: one MLIR input compiles to llvm-cpu, CUDA, ROCm/HIP, Vulkan/SPIR-V, and Metal, with AMD AIE still experimental \citep{iree2024}. The Hardware Abstraction Layer (HAL) is what makes that breadth tractable---it is a Vulkan-inspired \textbf{target} abstraction, roughly 1:1 with IREE's HAL C API, that exposes buffers, command buffers, and dispatches as a common surface across device types \citep{iree2024}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The honest reading is that a wide build matrix is not a wide \emph{decode} matrix. A green HAL \textbf{target} means the model lowers and runs there; it says nothing about whether the schedule keeps a decoder layer on-chip \citep{taxbreak2026,memoryfloor2026}. The hardware truth is unchanged across the matrix: a \textbf{gpu} is bound by shared-memory residency and tensor-core feeding, a \textbf{cpu} by cache blocking and NUMA, an \textbf{npu} like XDNA/AIE by static tile SRAM and DMA chains---and on the IREE matrix the NPU path is still experimental, so it is exactly where the build-vs-decode gap is widest \citep{nvidia2022hopper,amd2024xdna,amd2024aie}.
 
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+What makes the breadth credible rather than aspirational is that IREE was designed to scale from the datacenter down to mobile and edge, where the same compiled artifact must run under tight memory and power budgets \citep{iree2024}. The runtime is deliberately small and optional: a fully featured server can use the VM for dynamic deployment with multi-threaded dispatch, while an embedded target can bypass the runtime entirely and link the generated kernels directly \citep{iree2024}. For a decode engineer that flexibility is a double-edged sword. The same model that serves on an H100 can be compiled for an edge accelerator, but the residency math is completely different at the two ends of the matrix: an edge SKU with megabytes of on-chip memory cannot hold the working set a datacenter GPU does, so a dispatch-region fusion that is a clear win on H100 can overflow on-chip storage and spill on the edge target.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The same \texttt{.vmfb} can carry kernels for several vendors, and IREE can probe the device at load time to pick one \citep{iree2024}. But a Hopper GPU wants async-copy double buffering while an XDNA fabric wants a static DMA schedule, so the portable artifact still hides per-target residency decisions that decode telemetry will expose \citep{semianalysis2024tma,amd2024aie}. YiRage treats this as a routing problem: it carries the Chapter~2 residency rules as checkable metadata and selects a backend whose machine model fits, rather than trusting that a green matrix cell is decode-legal \citep{yirage2026}.
 
 \section{IREE arch passes}
 \label{sec:ch18_iree_arch_passes}
@@ -47,230 +43,94 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.6,0) {\footnotesize \texttt{linalg}\\input};
+ \node[vis arch node] (s1) at (-2.8,0) {\footnotesize \texttt{flow}\\dispatch regions};
+ \node[vis arch node] (s2) at (0,0) {\footnotesize \texttt{stream}\\async + timepoints};
+ \node[vis arch node] (s3) at (2.8,0) {\footnotesize \texttt{hal}\\executables};
+ \node[vis arch node] (s4) at (5.6,0) {\footnotesize \texttt{vm}\\bytecode};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
+ \draw[vis arrow] (s3.east) -- (s4.west);
 \end{tikzpicture}
-\caption{IREE Arch Passes block diagram for IREE: MLIR-Native Runtime and Compilation.}
+\caption{IREE's dialect pipeline: \texttt{flow} forms dispatch regions, \texttt{stream} schedules them asynchronously with timepoints, \texttt{hal} translates per target, \texttt{vm} emits host bytecode.}
 \label{fig:iree_arch_passes_architecture}
 \end{figure}
 
-The production surprise at \textbf{IREE arch passes} is not peak FLOPs; it is illegal tier placement: pass spilling to HBM/DDR while lower still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+IREE's compilation is a sequence of MLIR \textbf{dialect}s, and the \textbf{pass} pipeline is where decode goodput is decided long before any device code is generated \citep{iree2024}. After the input \textbf{dialect} (linalg and friends), dispatch-creation fuses operations and forms \emph{dispatch regions}---the unit of work that becomes one kernel; the \texttt{flow} dialect models data flow and partitioning; the \texttt{stream} dialect \textbf{lower}s tensors into opaque resources and schedules the dispatches asynchronously using \emph{timepoints} so independent work overlaps; the \texttt{hal} dialect translates each executable per target; and the \texttt{vm} dialect emits the host bytecode \citep{iree2024}.
 
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+\begin{table}[t]
+\centering
+\caption{IREE's ahead-of-time compilation phases; \texttt{flow} fusion sets bytes/token and \texttt{stream} scheduling sets launches/token \citep{iree2024}.}
+\label{tab:ch18_iree_phases}
+\begin{tabular}{ll}
+\toprule
+Phase & What it does \\
+\midrule
+Input & Lower to core dialects (\texttt{linalg}, etc.) \\
+Flow & Form and fuse dispatch regions; partition \\
+Stream & Async schedule with timepoints; encode resources \\
+HAL & Per-target executable translation (codegen) \\
+VM & Emit host scheduling bytecode \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Two of these passes are the ones a decode engineer must watch. Dispatch-region formation is the \textbf{optim}ization that sets bytes/token: if it fuses a decoder layer's element-wise and reduction work into one region, intermediates stay on-chip; if it leaves them separate, each boundary is a DRAM round trip \citep{taxbreak2026,memoryfloor2026}. Stream scheduling is the one that sets launches/token: by sequencing dispatches with timepoints instead of a host-side wait per kernel, it removes exactly the per-launch orchestration that dominates batch-1 \citep{iree2024,nvidia2024cudagraphs}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{What to inspect before merge.} IREE can dump the executable for each dispatch region (\texttt{--iree-hal-dump-executable-*}), so diff which operators were fused into a region and which spilled out; an aggressive-fusion flag exists, but more fusion is only a win until register or shared-memory pressure forces a spill \citep{iree2024,patel2025llminference}. A regression here is silent: the binary is correct, only bytes/token moved \citep{dlbook}.
 
 \section{IREE codegen}
 \label{sec:ch18_iree_codegen}
 
-\textbf{IREE codegen} is where IREE meets Chapter~1 counters: fix codegen and backend together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+IREE's \textbf{codegen} runs per dispatch region during the HAL executable-translation stage, and each \textbf{backend} \textbf{emit}s a different low-level form: PTX for CUDA, HSACO for ROCm/HIP, SPIR-V for Vulkan, and native code for the CPU \citep{iree2024}. Because compilation is ahead-of-time, the \textbf{platform} mix is resolved on the build host and packaged into the FlatBuffers \texttt{.vmfb} fat binary, which carries host VM instructions alongside the device kernels so the runtime can dispatch without a JIT \citep{iree2024}.
 
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The decode-relevant point is that IREE's runtime is not a Python loop; the VM replays a compiled schedule, so the host orchestration cost is paid at compile time rather than per token \citep{iree2024,taxbreak2026}. This is structurally the same win that capturing a launch graph buys on a GPU---the Memory-Floor study recovered roughly $1.26\times$ on an H100 decode cell purely by removing host overhead---except IREE bakes it into the deployable artifact and extends it to CPU and Vulkan targets \citep{memoryfloor2026,nvidia2024cudagraphs}. What IREE cannot do is rescue a poorly fused dispatch region: if codegen emits a layer as many small kernels because fusion failed upstream, no amount of clean scheduling removes the HBM traffic those kernels create \citep{dao2022flashattention}.
 
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The fat-binary format is itself a decode-relevant design choice. Because the kernels are committed at build time, IREE can ship several specialized variants of the same dispatch region---aligned and unaligned shapes, large and small matmuls---and let the runtime probe the device and select one without a JIT step \citep{iree2024}. For batch-1 decode that avoids the warmup and recompilation stalls a JIT stack pays on the first request after a shape change, which is precisely the moment an interactive session is most latency-sensitive. The cost is binary size and a build matrix that grows with every target and specialization, so a serving team trades disk and compile time for predictable per-token latency---usually the right trade for an interactive product, the wrong one for a one-off batch job.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The HAL maps the same dispatch onto workgroups that become GPU thread blocks or CPU threads, and subgroups that become GPU SIMT lanes or CPU SIMD \citep{iree2024}. The abstraction is genuine, but the best tile shape and async depth still differ per target, so one dispatch region's codegen is not optimal everywhere \citep{semianalysis2024tma,nvidia2022hopper}.
 
 \section{IREE tuning}
 \label{sec:ch18_iree_tuning}
 
-Teams hit \textbf{IREE tuning} when IREE looks correct in isolation yet decode telemetry disagrees---usually because tun was planned without profile residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+IREE \textbf{tun}ing happens at compile time through target configuration: the executable-configurations stage selects a translation strategy per dispatch region, and flags steer dispatch-region fusion and per-target codegen \citep{iree2024}. Because the schedule is compiled, \textbf{profile}-first discipline shifts earlier than with a JIT stack---you compile a candidate, run it, and read where time went before changing flags, rather than letting a runtime autotuner converge.
 
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+There is a second discipline that whole-program compilation rewards: compile-time visibility. Because every dispatch region and its scheduling are decided before deployment, the compiler can report exactly which operators fused, how many regions a layer became, and how they are sequenced---information a runtime-dispatched stack only learns by profiling the live system. A decode team should treat that report as the first artifact to read after a build, comparing the dispatch-region count per layer against expectation before ever launching the model. When the region count is higher than the number of fused units you designed for, fusion failed somewhere upstream, and the fix belongs in the compilation flags, not in a runtime workaround.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{pitfall} is benchmarking the wrong shape and the wrong layer. Prefill compiles into large, well-fused dispatch regions that look excellent in isolation; decode is dominated by the thin, latency-bound per-token path where dispatch granularity and host scheduling matter more than peak occupancy \citep{kwon2023vllm,taxbreak2026}. Compile and profile at the batch-1 decode operating point, decompose end-to-end ms/token into bytes/token and launches/token, and only then adjust fusion and codegen flags \citep{patel2025llminference,memoryfloor2026}. The right configuration is \textbf{hardware}-specific: the CPU path wants cache-blocked dispatch regions, the CUDA path wants fused kernels plus async copy, and the experimental AIE path wants static tiling---so the tuned configuration for one HAL target does not transfer to another \citep{amd2024xdna,dlbook}.
 
 \section{IREE case study}
 \label{sec:ch18_iree_case_study}
 
-The production surprise at \textbf{IREE case study} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Take a single decoder layer compiled through IREE as the \textbf{case}, and \textbf{benchmark} it at the decode operating point on more than one HAL target \citep{iree2024,taxbreak2026}. The reading matches the book's thesis: a layer that compiles into one fused dispatch region with stream-scheduled launches keeps activations on-chip and pays host orchestration once; a layer that fragments into many dispatch regions re-reads activations from DRAM and pays a launch per region every token \citep{memoryfloor2026,dao2022flashattention}. The arithmetic is the same as for any fusion: at hidden size $4096$ in BF16 each materialized activation vector is $8\,$KB, so a handful of avoided round trips per layer is tens of kilobytes of HBM traffic removed per token before the KV cache is even read \citep{taxbreak2026}. Across the full depth of a model that avoided traffic accumulates into a meaningful fraction of the per-token memory budget, which is why the dispatch-region count, not the peak throughput of any single region, is the number that tracks decode latency. The same compiled layer that fragments into a dozen regions will read and rewrite those vectors a dozen times, and the runtime schedule cannot recover bytes the compiler chose to spill.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{IREE HW matrix} is where IREE meets Chapter~1 counters: fix hardware and target together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{IREE arch passes} when IREE looks correct in isolation yet decode telemetry disagrees---usually because pass was planned without lower residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{IREE codegen} is not peak FLOPs; it is illegal tier placement: codegen spilling to HBM/DDR while backend still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{IREE tuning} is where IREE meets Chapter~1 counters: fix tun and profile together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{IREE case study} when IREE looks correct in isolation yet decode telemetry disagrees---usually because case was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{IREE HW matrix} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while target still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: hardware producers must feed target consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{IREE arch passes} is where IREE meets Chapter~1 counters: fix pass and lower together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pass/lower legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lower---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pass raises bytes/token; fused schedule must keep lower on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{IREE codegen} when IREE looks correct in isolation yet decode telemetry disagrees---usually because codegen was planned without backend residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: codegen producers must feed backend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for codegen on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{IREE tuning} is not peak FLOPs; it is illegal tier placement: tun spilling to HBM/DDR while profile still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound tun with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on tun/profile legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize tun with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked profile---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tun raises bytes/token; fused schedule must keep profile on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{IREE case study} is where IREE meets Chapter~1 counters: fix case and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: case producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{cross-hardware} conclusion is where IREE's breadth helps and where it stops. Because IREE keeps the same dispatch-region formation across targets, a layer fused well on the CPU path is usually fused on the CUDA path too, which makes A/B comparison and bring-up faster \citep{iree2024}. But the experimental AIE/NPU path is exactly where a green build hides an unfinished decode story, and a Vulkan target on a phone has different residency limits than an H100 \citep{amd2024aie,nvidia2022hopper}. \textbf{YiRage} uses IREE-style MLIR lowering as one path while enforcing the Chapter~2 residency rules as checkable IR metadata, so a dispatch region that would spill is rejected at compile time and non-GPU work is routed to a backend whose machine model fits \citep{yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch18_key_takeaways}
 
 \begin{itemize}
-\item \textbf{IREE HW Matrix.} Tie IREE HW matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{IREE Arch Passes.} Tie IREE arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{IREE Codegen.} Tie IREE codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{IREE Tuning.} Tie IREE tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{IREE Case Study.} Tie IREE case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{IREE compiles scheduling and execution together.}
+Host orchestration is baked into VM bytecode ahead of time, so the per-token launch path is set at compile time, not by a runtime loop \citep{iree2024,taxbreak2026}. That is the structural fix for the launches/token problem decode hits \citep{patel2025llminference}.
+
+\item \textbf{Dispatch-region fusion sets bytes/token.}
+Whether the \texttt{flow} stage fuses a decoder layer into one region decides how many DRAM round trips survive; dump and diff the executables before trusting a build \citep{iree2024,memoryfloor2026}. A correct binary can still be a slow token \citep{dlbook}.
+
+\item \textbf{Stream scheduling sets launches/token.}
+The \texttt{stream} dialect sequences dispatches with timepoints, removing per-kernel host waits the way a captured launch graph does---worth roughly $1.26\times$ on an H100 decode cell from host-overhead removal alone \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\item \textbf{A wide build matrix is not a wide decode matrix.}
+IREE targets CPU, CUDA, ROCm, Vulkan, and Metal, but the NPU/AIE path is experimental and a green target only means it lowers and runs \citep{iree2024,amd2024xdna}. Validate each target against decode metrics, not compilation success \citep{amd2024aie}.
+
+\item \textbf{Tuned configurations are per-HAL-target.}
+Cache-blocked CPU dispatch, fused CUDA kernels, and static AIE tiling are different strategies, so a configuration tuned for one HAL target does not transfer \citep{semianalysis2024tma,nvidia2022hopper}. Compile and profile at the batch-1 decode shape \citep{kwon2023vllm}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch18_conclusion}
 
-IREE is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume IREE baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+IREE's contribution is to make whole-program scheduling a compiler artifact: by lowering through Flow, Stream, HAL, and VM it compiles host orchestration and device kernels together and packages them into one retargetable binary \citep{iree2024}. For interactive serving that matters because it attacks launches/token at compile time and dispatch-region fusion attacks bytes/token---provided both are graded at the batch-1 decode operating point rather than on prefill-shaped regions \citep{taxbreak2026,memoryfloor2026}. That is the same residency contract YiRage enforces as IR metadata across backends \citep{yirage2026}. IREE also shows that breadth and depth are different axes: a wide HAL matrix still needs per-target residency proof, which sets up the next surface---Chapter~\ref{chap:ch19} turns to Glow, a lighter-weight AI compiler that makes the opposite trade between generality and a focused lowering path \citep{dlbook}.
 
 \typeout{END_CHAPTER "ch18" \theabspage}
