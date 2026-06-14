@@ -44,25 +44,24 @@
 
 - **通用化可迁移**：从Pythia-2.8B/Qwen2.5案例提炼通用方法论，可迁移至所有LLM Decoder内核、各类数据流AI加速器、全品类主流硬件
 
-### 2. 全书结构规划
+### 2. 全书结构规划（对标 Fregly 全栈目录）
 
-全书分为**七大模块，层层递进、逻辑闭环**，从思维革新→硬件总纲→编译理论→主流编译器跨硬件实战→手工内核落地→自动化编译进阶→工程量产落地，形成完整知识体系：
+**组织金标准：** [`chapter1-AI Systems Performance Engineering - Chris Fregly.pdf`](chapter1-AI%20Systems%20Performance%20Engineering%20-%20Chris%20Fregly.pdf) 目录 + [`reference-chapter-1.pdf`](reference-chapter-1.pdf) 章骨架。原则：**问题/产出优先**（非工具名堆砌）、**全栈递进**（goodput → 硬件 → CUDA 机制 → MegaKernel → Graph → 编译栈 → 推理 fleet）、**小节标题可检索**（TMA / Continuous Batching / FlashMLA 等具名机制）。
 
-1. **思维革新篇**：打破传统算子优化思维，建立数据流驱动的内核设计理念
+全书 **8 个 Part、30 章**，LaTeX 章 id（ch01–ch30）保持不变；**目录叙事**按 Fregly 价值链重排读者预期：
 
-2. **硬件基础篇**：搭建全品类AI硬件架构标准体系，明确编译优化硬件约束边界
+| Part | Fregly 对标层 | 本书 Part 主题 | 章 |
+|------|----------------|----------------|-----|
+| I | Ch1 Introduction & Goodput | 瓶颈、goodput、数据流思维 | ch01–02 |
+| II | Ch2 Hardware Overview | 全栈硬件约束总纲 | ch03 |
+| III | Ch6–7 CUDA memory & access | Hopper CUDA + XDNA 数据流对标 | ch04–05 |
+| IV | Ch9–10 Kernel fusion & MegaKernels | 片上驻留、流水线、同步 | ch06–09 |
+| V | Ch10–12 Persistent kernels & CUDA Graphs | MegaKernel 实现与执行模式 | ch10–12 |
+| VI | Ch13–14 PyTorch & compiler backends | 编译理论 + MLIR→生产后端 lowering 弧 | ch13–21 |
+| VII | Ch15–19 Inference at scale & adaptive | Profiling、异构部署、MoE、自动调优 | ch22–27 |
+| VIII | Ch16–18 Frameworks & KV / disagg | 推理框架、YiRage runtime、三方 co-design | ch28–30 |
 
-3. **编译理论篇**：夯实AI编译核心理论，绑定多硬件差异化优化逻辑
-
-4. **编译器实战篇**：主流AI编译器全解析，每类工具配套跨硬件适配与调优实战
-
-5. **手工极致实战篇**：从零实现跨硬件适配的LLM Decoder MegaKernel
-
-6. **自动化与高阶进阶篇**：YiRage编译引擎落地、异构集群编译、AI自动调优
-
-7. **工程落地篇**：端到端调优、生产部署、跨硬件工程最佳实践
-
-8. **Runtime 与推理框架篇（新增）**：推理框架调度、YiRage Persistent Kernel 运行时、框架–编译器–运行时协同设计（`deps/YiRage` 子模块为工程锚点）
+**与旧版差异（为何旧目录「无价值感」）：** 旧 Part 名（「思维革新」「MegaKernel Core Techniques」）不告诉读者**学完能做什么**；Part VI 把 MLIR/XLA/TVM… 平铺成「编译器图鉴」，缺少 Fregly 式 **一条 lowering 故事线**。新版目录每章小节按 **机制/指标/案例** 命名，编译器章归入「Backend Lowering Arc」而非独立产品宣传。
 
 ## 三、现有框架核心短板与优化思路
 
@@ -122,317 +121,330 @@
 
 新增**异构编译与多硬件部署专项章节**，补齐工业级异构集群、跨平台统一编译、动态硬件适配核心能力。
 
-## 五、全书最终定型完整目录（逻辑闭环·可直接出书）
+## 四点五、Fregly 目录对标原则（2026-06 目录迭代）
+
+| Fregly 章节主题 | 本书承接章 | 本书增量（相对 Fregly） |
+|-----------------|------------|-------------------------|
+| Introduction, Goodput, Mechanical Sympathy | ch01–02 | TaxBreak / Memory-Floor 计数器；数据流 vs 算子驱动 |
+| AI System Hardware Overview | ch03–05 | XDNA/AIE 静态数据流 + triplet 硬件标尺 |
+| GPU Architecture & Memory Hierarchy | ch04, ch06–08 | Hopper TMA/Cluster；编译 legality 不变量 |
+| Persistent Kernels & Megakernels | ch10–12 | 950 行 Decoder MegaKernel；三种执行模式 |
+| CUDA Graphs & Orchestration | ch12, ch28 | Graph bucket + 框架 continuous batching |
+| Profiling & Scaling PyTorch | ch13, ch22 | 编译器瓶颈 vs framework queue 分离 |
+| torch.compile, Triton, XLA | ch14–20 | **多后端 lowering 弧**（非单章工具手册） |
+| Multinode Inference & Decoding | ch23, ch28–30 | MoE 编译 + vLLM/YiRage 协同 |
+| Disaggregated Prefill/Decode & KV | ch24, ch28 | DeepEP / FlashMLA / paging ABI |
+| Dynamic & AI-Assisted Optimization | ch25–27 | RL autotune + YiRage search |
+| 175+ Item Checklist (Appendix) | 附录 A–H | 跨硬件 + 编译 + runtime 双维 checklist |
+
+**目录写作硬规则（loops 扩章时强制）：**
+
+1. 章标题 = **读者能力产出**（例：Profiling Hopper Decode Changes），禁止仅写产品名（例：MLIR Chapter）。
+2. 小节标题 = **可检索机制**（TMA、PagedAttention、FlashMLA、Continuous Batching），禁止「1.1 概述」式空壳。
+3. 每章必须显式挂钩 Chapter~1 三角：**launches/token · bytes/token · ms/token（goodput）**。
+4. Part VI 编译器章统一叙事：**同一 IR → 多后端 legality → 同模型 triplet benchmark**（对齐 Fregly Ch14 把 PyTorch Compiler/Triton/XLA 串成一条线）。
 
-### 第一篇 思维革新：重构AI内核优化设计理念（第1-2章）
+## 五、全书目录（Fregly 全栈对标版 · ch01–ch30）
 
-#### 第1章 LLM推理性能瓶颈：从现象到本质
+### Part I — Introduction, Goodput & Dataflow Mindset（ch01–02）
 
-**核心目标**：让工程师看懂传统推理框架的核心缺陷，理解极致优化与跨硬件编译的必要性
+> **Fregly 对标：** Ch1 *Introduction and AI System Overview* — mechanical sympathy、goodput、benchmarking discipline。
 
-**章节核心新增**：多硬件场景下的推理瓶颈差异化表现、不同硬件的优化优先级差异
+#### 第1章 LLM Inference Performance Bottlenecks: From Symptoms to Root Causes（ch01）
 
-**章节内容**：
+**读者产出：** 用 TaxBreak / Memory-Floor 工作表定位 decode 根因，拒绝「先调 Tensor Core」。
 
-- 1.1 LLM推理两大阶段：Prefill与Decode的场景差异与性能特征
+- The AI Compiler Performance Engineer（编译器×硬件×推理三角角色）
+- Benchmarking and Profiling Decode（launches/token、bytes/token、Nsight 分工）
+- Measuring Goodput Useful Throughput（ms/token 必须与 counter 同屏）
+- Prefill Versus Decode: Different Bottleneck Profiles
+- Kernel Launch Storms and Framework Orchestration Tax
+- Memory Bandwidth Versus Arithmetic Intensity at Batch-1
+- Multi-Hardware Pain Points: GPU / CPU / NPU Priority Matrix
+- DeepSeek-Scale Inference Under Export Hardware Constraints（案例）
+- Mechanical Sympathy: Hardware–Software Codesign for Decode
+- YiRage Triplet Preview: Same IR, Three Backends
+- Key Takeaways · Conclusion · Worksheet Gate
 
-- 1.2 Decode阶段致命痛点：单Token、低Batch下的延迟瓶颈
+#### 第2章 Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven（ch02）
 
-- 1.3 传统PyTorch/HuggingFace推理方案的底层问题：算子拆分、多Kernel调度、Global Memory频繁读写
+**读者产出：** 选择 data-residency-first 设计，并解释对 triplet 编译 legality 的影响。
 
-- 1.4 性能损耗量化分析：Kernel Launch开销、访存延迟、调度开销占比实测
+- Operator Lists First: Why Frameworks Split Decode into Dozens of Kernels
+- Data Residency First: On-Chip Lifetime Before Compute Ordering
+- Dataflow Philosophy: Static Roles, Streamed DMA, Minimal Sync
+- Cross-Hardware Paradigm: CUDA Discipline vs XDNA Static Tiles vs CPU Cache Locality
+- Iron Rules: Register → Shared → Global（分硬件落地表）
+- MegaKernel Preview: One Fused Decode Cell Versus Thirteen Launches
+- Automation Path: Hand-Tuned Dataflow → YiRage Compiler Passes
+- Key Takeaways · Conclusion
 
-- 1.5 误区纠正：Decode阶段瓶颈不在算力，在数据搬运与调度
+---
 
-- 1.6 多硬件场景痛点区分：GPU/CPU/NPU推理优化核心差异
+### Part II — Full-Stack Hardware & Compiler Constraints（ch03）
 
-- 1.7 行业实测数据：原生框架与融合内核的性能差距（RTX5090/AMD AIE/x86全维度对比）
+> **Fregly 对标：** Ch2 *AI System Hardware Overview* — 具体 SKU、互联、roofline；本书增 **XDNA + 编译约束矩阵**。
 
-- 1.8 YiRage多硬件编译优化方案开篇案例与性能基准
+#### 第3章 AI Hardware Architecture and Compiler Constraints（ch03）
 
-#### 第2章 两种内核设计思维：算子驱动VS数据流驱动
+**读者产出：** 用统一约束矩阵解释「同一 Pass 在 GPU/CPU/NPU 上为何 legality 不同」。
 
-**核心目标**：完成思维迭代，建立硬件级数据流设计思维，铺垫跨硬件统一优化范式
+- Mainstream AI Hardware Landscape（NVIDIA / AMD / x86 / ARM / Edge NPU）
+- Constraint Matrix: Bandwidth, Hierarchy, Parallel Grain, ISA
+- GPU Compiler Constraints: Warp, Shared Memory, Tensor Core Trade-offs
+- CPU Compiler Constraints: Cache, SIMD, NUMA, Pipeline
+- Edge NPU Constraints: Static Schedules, Shape Limits, Memory Walls
+- Hardware-Aware Tiling, Layout, and Parallel Rules
+- Cross-Hardware Benchmark Methodology（统一模型·统一指标）
+- YiRage ChipArchitecture Modeling
+- Key Takeaways · Conclusion
 
-**章节核心新增**：不同硬件架构对两种设计思维的适配偏好、收益差异
+---
 
-**章节内容**：
+### Part III — Hopper CUDA & XDNA Dataflow Architecture（ch04–05）
 
-- 2.1 传统思维：算子列表优先，先定义计算、再适配数据
+> **Fregly 对标：** Ch6–7 GPU architecture & memory access + Ch9 TMA/tensor cores；本书增 **XDNA 静态数据流对标**。
 
-- 2.2 极致思维：数据驻留优先，先定义数据位置、再规划计算流程
+#### 第4章 CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds（ch04）
 
-- 2.3 数据流架构的核心哲学：静态分工、片上驻留、流式搬运、最小同步
+**读者产出：** 列出 Hopper decode 优化边界表；Profiling 顺序：bytes → launches → TC。
 
-- 2.4 跨硬件统一范式：XDNA硬件强制约束 VS CUDA软件主动自律 VS CPU Cache局部性约束
+- CUDA Memory Hierarchy for Decode MegaKernels（Table: tier assignments）
+- Tensor Memory Accelerator: Async Bulk Copy and Legality at Batch-1
+- Thread Block Clusters and Distributed Shared Memory
+- Synchronization: Warp Shuffle → Block → Cluster → Grid（选型规则）
+- Tensor Core Bounds at Batch-1 Decode（何时 TC 是干扰项）
+- PTX and Online Softmax Micro-ops（exp2, FTZ, ABI stability）
+- YiRage CUDA Backend Legality Invariants
+- Profiling Hopper Decode Changes（Nsight Systems + Compute）
+- Hopper Decode Engineering Patterns and Worked Layer Example
+- Hopper Decode Benchmarking Methodology（counter worksheet + CI gate）
+- Compiler Author Checklist and Handoff to XDNA（Ch5）
+- Key Takeaways · Conclusion
 
-- 2.5 极致优化核心铁律：Register优先、Shared复用、Global少访（多硬件差异化落地）
+#### 第5章 AMD XDNA/AIE Dataflow Architecture（ch05）
 
-- 2.6 案例预览：单950行MegaKernel替代13个原生Kernel的性能跃迁
+**读者产出：** 完成 CUDA↔XDNA 原语映射表；解释 static legality 如何约束 IR。
 
-- 2.7 工业化演进方向：手工数据流优化 → YiRage编译器自动化跨硬件量产
+- XDNA/AIE Tiles, Local Memory, and DMA Pipelines
+- Hardware-Forced Dataflow Rules（no dynamic scheduler）
+- CUDA ↔ XDNA Primitive Mapping（TMA ↔ buffer descriptors）
+- Online Softmax Carriers on XDNA Versus CUDA Registers
+- Architecture Trade-offs: Freedom Versus Static Enforcement
+- Cross-Hardware Conclusion: Dataflow as Optimal Inference Form
+- Ryzen AI Decode Benchmarking（DDR bytes/token, DMA edges）
+- YiRage XDNA Backend Passes and Codegen
+- Key Takeaways · Conclusion
 
-### 第二篇 硬件基础：AI硬件架构与编译约束总纲（第3章·新增核心章节）
+---
 
-#### 第3章 AI Hardware Architecture & Compiler Constraints
+### Part IV — On-Chip Residency, Pipelining & Synchronization（ch06–09）
 
-**核心目标**：搭建全书硬件适配统一标尺，建立「硬件特性决定编译策略」的核心认知
+> **Fregly 对标：** Ch7–8 memory access & occupancy + Ch9 fusion/arithmetic intensity + Ch10 intra-kernel pipelining。
 
-**章节内容**：
+#### 第6章 Data Residency and On-Chip Memory Design（ch06）
 
-- 3.1 主流AI硬件架构全景解析：NVIDIA GPU/AMD GPU/x86 CPU/ARM CPU/端侧NPU/XDNA/AIE
+- Lifetime Planning Across GPU / CPU / NPU Tiers
+- GPU Shared-Memory Budgeting for Fused Decode Regions
+- CPU Cache-Aware Layout and NUMA Pinning
+- NPU SRAM Slot Assignment and Time Multiplexing
+- YiRage Bufferization and Memory Reuse Passes
 
-- 3.2 硬件核心约束横向对比：存储层级、带宽、计算单元、指令集、执行模型、并行粒度
+#### 第7章 Static Role Assignment and Schedule-Free Kernels（ch07）
 
-- 3.3 GPU类硬件编译约束：Warp/SP调度、共享内存、张量核、CUDA/HIP指令差异化适配
+- Static Warp/Tile Roles Versus Runtime Schedulers
+- Thread Mapping Without Dispatch Queues
+- Multi-Hardware Static Partitioning Rules
+- YiRage Dimension Tiling for Heterogeneous Cores
 
-- 3.4 CPU类硬件编译约束：多级Cache、SIMD/AVX向量化、多核并行、NUMA架构、指令流水线
+#### 第8章 TMA Double-Buffer Pipelines and Async Copy（ch08）
 
-- 3.5 端侧NPU编译约束：静态调度、专用算子单元、内存墙、动态形状限制、极简指令集
+- Double-Buffering TMA with MMA Overlap（Hopper）
+- CPU DMA and NPU Pipeline Equivalents
+- Compiler-Generated Pipeline Stages and Hazard Checks
+- YiRage Auto-Pipeline Insertion
 
-- 3.6 硬件感知编译核心原理：架构自适应Tiling、数据布局变换、跨层级并行策略
+#### 第9章 Four-Level Synchronization and Communication（ch09）
 
-- 3.7 跨硬件编译评测基准：统一模型、统一指标、差异化性能对比方法论
+- Picking the Narrowest Sync Scope for Each Seam
+- GPU Barriers Versus Warp Shuffles in Softmax Loops
+- Cross-Hardware Sync Cost Models
+- YiRage Sync Optimization and Deadlock Detection
 
-- 3.8 YiRage硬件建模体系：ChipArchitecture模块多硬件统一抽象实现
+---
 
-### 第三篇 硬件原理：CUDA与XDNA/AIE数据流架构深度解析（第4-5章）
+### Part V — MegaKernel Implementation & Execution Modes（ch10–12）
 
-#### 第4章 CUDA Hopper/Blackwell硬件底层特性与优化边界
+> **Fregly 对标：** Ch10 Persistent Kernels & Megakernels + Ch11 Streams + Ch12 CUDA Graphs。
 
-**核心目标**：吃透新一代CUDA硬件特性，掌握GPU专属编译优化约束与落地逻辑
+#### 第10章 Attention Online Softmax Optimization（ch10）
 
-**章节新增适配**：配套CUDA硬件的编译器专属Pass、Tiling策略、内存规划方案，联动YiRage CUDA后端实现
+- Online Softmax Numerics and Carrier Layout
+- FlashAttention / Flash-Decoding Control-Flow Spine
+- Paged KV and Softmax Carrier Residency
+- Cross-Hardware Softmax Lowering
 
-**章节内容**：
+#### 第11章 Complete Decoder MegaKernel Implementation（ch11）
 
-- 4.1 CUDA存储层级：Register/Shared Memory/Global Memory的带宽、延迟、容量约束
+- End-to-End Fused Decode Cell Structure
+- QKV → Attention → Softmax → MLP Seam Planning
+- PagedAttention Gather Inside MegaKernel
+- Source Walkthrough and Profiling Gates
 
-- 4.2 TMA张量内存加速器原理：硬件异步搬运、批量传输、地址预解析
+#### 第12章 Three Kernel Execution Modes（ch12）
 
-- 4.3 Cluster协作架构与DSM分布式共享内存：跨Block通信机制
+- Eager Launches Versus CUDA Graph Capture Versus Persistent MegaKernel
+- Graph Buckets, Memory Pools, and Context-Length Growth
+- When Frameworks Must Stay Eager（sampling hull）
+- Mode Selection Worksheet for Fleet Goodput
 
-- 4.4 四级同步机制原理：Warp Shuffle/Block Sync/Cluster DSM/Grid Sync
+---
 
-- 4.5 Tensor Core适用边界：为什么Decode阶段必须放弃Tensor Core
+### Part VI — Compiler Theory & Multi-Backend Lowering Arc（ch13–21）
 
-- 4.6 PTX硬件指令集：快速exp2、FTZ归零、浮点原子操作底层原理
+> **Fregly 对标：** Ch13–14 PyTorch profiling + torch.compile/Triton/XLA **一条 lowering 线**；本书扩展为 MLIR 基础设施 + 多生产后端 + **triplet 基准**（非九本独立产品手册）。
 
-- 4.7 编译适配落地：YiRage针对CUDA硬件的自动约束适配、流水线代码生成
+**Arc 叙事（目录强制顺序）：** 理论柱（ch13）→ MLIR 基础设施（ch14）→ 生产编译器后端（ch15–20，各章含 HW matrix / passes / codegen / tuning / case study）→ 统一 benchmark（ch21）。
 
-#### 第5章 AMD XDNA/AIE专用数据流架构对标解析
+#### 第13章 Core Compiler Theory for AI Workloads（ch13）
 
-**核心目标**：打通通用GPU与专用NPU技术同源性，掌握专用数据流硬件的编译差异化逻辑
+- Five Pillars: Tiling, Fusion, Layout, Parallelism, Memory Planning
+- Hardware-Bound Split for GPU / CPU / NPU
+- Decode-Specific Fusion Granularity Rules
+- Roofline-Guided Pass Ordering
 
-**章节新增适配**：XDNA/AIE硬件专属编译策略、与CUDA编译方案横向对比、YiRage多后端适配逻辑
+#### 第14章 MLIR: Modern Compiler Infrastructure（ch14）
 
-**章节内容**：
+- Dialect Stack and Bufferization for Decode IR
+- Hardware Target Matrix and Lowering Pipeline
+- MLIR Decode Benchmarking Methodology
+- YiRage MLIR Integration Points
 
-- 5.1 XDNA/AIE核心架构：静态Tile分工、本地存储、DMA流水线、物理连线通信
+#### 第15章 XLA: Production-Grade Graph Compiler（ch15）
 
-- 5.2 硬件强制数据流规则：无动态调度、数据按阶段流转、内存时间复用
+- XLA GPU/CPU/TPU Split and Fusion Limits
+- Same-Model Cross-Hardware Case Study
+- Versus YiRage LLM-Specialized Legality
 
-- 5.3 XDNA与CUDA核心原语一一映射：Buffer Descriptor=TMA、Ping-pong缓冲=双缓冲复用
+#### 第16章 TVM & AutoTVM / Ansor（ch16）
 
-- 5.4 Online Softmax的硬件载体：XDNA Carrier机制与CUDA寄存器迭代的同源性
+- Schedule Templates Across Hardware
+- Search-Space Differences by SKU
+- Versus YiRage RL Hardware-Aware Search
 
-- 5.5 两种架构的优劣与约束：CUDA自由性 VS XDNA硬件强制性
+#### 第17章 OpenAI Triton: Pythonic GPU Kernels（ch17）
 
-- 5.6 跨硬件优化通用结论：数据流架构是AI推理的最优硬件形态
+- Triton on NVIDIA Versus AMD HIP
+- Autotune and Register Pressure at Batch-1
+- YiRage Triton Backend Hooks
 
-- 5.7 编译差异化落地：YiRage XDNA后端专属Pass与代码生成逻辑
+#### 第18章 IREE: MLIR-Native Runtime Stack（ch18）
 
-### 第四篇 核心技术：MegaKernel极致优化全栈技术拆解（第6-9章）
+- Unified Deployment IR and Runtimes
+- GPU/CPU/Edge Codegen Paths
+- Versus YiRage Five-Layer Stack
 
-#### 第6章 数据驻留与片上内存精细化设计
+#### 第19章 Glow: Lightweight Edge Compiler（ch19）
 
-**核心目标**：掌握多硬件适配的数据生命周期与存储布局规划方法论
+- CPU/Edge NPU Constraints and Static Graphs
+- Low-Power Codegen Patterns
 
-**章节新增适配**：GPU/CPU/NPU三级存储差异化分配策略、YiRage自动化内存复用编译逻辑
+#### 第20章 Mirage & Emerging AI Compilers（ch20）
 
-#### 第7章 静态角色分配与无调度内核架构
+- Emerging Tooling Limits on LLM Decode
+- YiRage as Multi-Hardware LLM Compiler Benchmark
 
-**核心目标**：实现多硬件通用的编译时静态固化计算逻辑，消除运行时调度开销
+#### 第21章 Unified Compiler Analysis & Cross-Hardware Benchmark（ch21）
 
-**章节新增适配**：不同硬件的线程/核数静态分工差异、YiRage自适应维度切分逻辑
+- Cross-Compiler × Cross-Hardware Rating Matrix
+- Compile Time Versus Runtime Goodput
+- YiRage Benchmark Suite and Triplet Regression Policy
 
-#### 第8章 TMA双缓冲流水线与异步搬运优化
+---
 
-**核心目标**：实现多硬件访存与计算重叠，掩盖不同硬件访存延迟瓶颈
+### Part VII — Fleet Tuning, Heterogeneous Deploy & Auto-Optimization（ch22–27）
 
-**章节新增适配**：GPU TMA、CPU DMA、NPU流水线的编译适配差异、YiRage自动流水线生成
+> **Fregly 对标：** Ch15–19 multinode inference, profiling at scale, disagg P/D, KV/FlashMLA, dynamic adaptive + RL。
 
-#### 第9章 四级分层同步与通信机制最优选型
+#### 第22章 Compiler-Driven End-to-End Performance Tuning Workflow（ch22）
 
-**核心目标**：基于硬件特性选择最优同步策略，最小化跨层级通信开销
+- Hardware-Aware Profiling（framework queue vs in-step counters）
+- Nsight / PyTorch Profiler / Roofline for Compile Bottlenecks
+- Parameter Sweeps Tied to TaxBreak Cells
 
-**章节新增适配**：多硬件同步机制选型规则、编译器静态死锁检测、YiRage同步优化Pass
+#### 第23章 LLM & MoE Specialized Compilation（ch23）
 
-### 第五篇 实战落地：从零实现跨硬件LLM融合MegaKernel（第10-12章）
+- MoE Routing, Expert Parallelism, and Compile Schedules
+- KV Hardware Layout and Paging ABI
+- Heterogeneous MoE Load Balancing
 
-#### 第10章 Attention Online Softmax极致优化
+#### 第24章 Heterogeneous Compilation & Multi-Hardware Deployment（ch24）
 
-#### 第11章 完整Decoder MegaKernel编码实现
+- GPU+CPU Cluster Graph Splitting
+- Unified MLIR/IR Multi-Target Deploy
+- DeepSeek Infra: FlashMLA, DeepEP, DeepGEMM, eplb, 3FS（deps 锚点）
+- Runtime Hardware Detect and Fallback
 
-#### 第12章 三种内核执行模式工程适配
+#### 第25章 Auto-Optimization & AI-Assisted Compiler Technology（ch25）
 
-### 第六篇 AI编译器原理与跨硬件实战（第13-19章·核心升级模块）
+- RL Autotune with Hardware-Aware Rewards
+- Search Budgets per Registry SKU
+- YiRage superoptimize in CI
 
-#### 第13章 核心理论框架：AI编译通用优化原理
+#### 第26章 Production Deployment & Engineering Best Practices（ch26）
 
-**升级重点**：全理论绑定硬件约束，新增分硬件差异化优化逻辑
+- Multi-Hardware Build Matrices and Submodule Pinning
+- Framework–Compiler–Runtime Runbooks
+- Fleet Rollout and Artifact Manifests
 
-**核心增补**：Tiling策略（GPU共享内存复用/CPU Cache适配）、算子融合粒度（GPU粗粒度/CPU细粒度/NPU全融合）、数据布局差异化设计、多级并行调度硬件适配规则
+#### 第27章 Future Trends of AI Compilers（ch27）
 
-#### 第14章 MLIR — Modern Compiler Infrastructure Foundation
+- Co-Design, Edge–Cloud Adaptive Compile, Autonomous Kernel Gen
+- Bridge to Part VIII Serving Stack
 
-**标准化新增5大硬件适配小节**：硬件支持矩阵、跨硬件Dialect、硬件专属Lowering Pass、多平台代码生成、分硬件调优实战、同模型跨硬件编译对比案例
+---
 
-**YiRage植入**：YiRage基于MLIR的多硬件后端架构、Linalg算子跨硬件实现、MLIR JIT硬件自适应逻辑
+### Part VIII — Inference Frameworks, Runtime & Full-Stack Co-Design（ch28–30）
 
-#### 第15章 XLA — Production-Grade AI Compiler
+> **Fregly 对标：** Ch16 Continuous Batching / KV / quantization + Ch17–18 disagg P/D & FlashMLA + runtime orchestration；本书以 **vLLM + YiRage PK** 为参考栈。
 
-**标准化新增5大硬件适配小节**：XLA GPU/CPU/TPU差异化优化、硬件专属融合Pass、跨平台适配局限、工业级分硬件调优方案
+#### 第28章 LLM Inference Frameworks and Serving Runtimes（ch28）
 
-**横向对比**：XLA通用编译逻辑 VS YiRage LLM专用硬件感知编译逻辑
+- Framework Landscape: Eager / Partial Export / Compiler-Owned Core
+- Continuous Batching and Fleet Goodput Versus BS=1 Counters
+- PagedAttention: Framework Memory vs Compiler Layout IR
+- Framework Bottlenecks: Scheduling, Python Tax, Unfused Chains
+- Compiler Insertion Points and CUDA Graph Buckets
 
-#### 第16章 TVM & Apache TVM Stack
+#### 第29章 YiRage Runtime Layer and Persistent Kernel Execution（ch29）
 
-**标准化新增5大硬件适配小节**：TVM多硬件调度模板、AutoTVM/Ansor跨硬件搜索空间差异、GPU/CPU/NPU调优取舍、跨平台移植踩坑
+- Five-Layer Stack: API → Backend → Search → Threadblock → PK Runtime
+- PersistentKernel Decode Mode and superoptimize Handoff
+- HardwareRegistry / detect_current_chip and Fleet Labels
+- deps/YiRage Native Build and Same-Backend Rule
+- YiRage Runtime Decode Benchmarking Methodology
 
-**横向对比**：TVM启发式搜索 VS YiRage RL分层硬件感知搜索
+#### 第30章 Framework, Compiler, and Runtime Co-Design（ch30）
 
-#### 第17章 OpenAI Triton — Pythonic GPU Kernel Compiler
+- Three-Party Responsibility Table
+- Prefill/Decode Split and Sampling Eager Hull
+- vLLM Paging + YiRage Fused Decode Integration Pattern
+- Fleet Mode Selection: Eager / Graph / MegaKernel
+- Submodule Pin, Triplet Regression, PK Warmup CI
+- Conclusion: Full-Stack Goodput Checklist（对接附录 F）
 
-**标准化新增5大硬件适配小节**：Triton NVIDIA原生优化、AMD HIP适配差异、CPU编译限制、硬件内核调优技巧、多硬件性能取舍
+---
 
-**YiRage植入**：YiRage Triton后端多硬件适配、自动Tile调优、硬件感知内核生成
+### 目录—正文一致性说明
 
-#### 第18章 IREE — MLIR-Native Runtime & Compilation Stack
+| 层级 | 文件 | 作用 |
+|------|------|------|
+| 意图 | 本文件 §五 | Fregly 式 Part/章/机制小节（中文 spec） |
+| 机器 | `outline_extended.json` + `book_prepare.py` OUTLINE | 章 id、SectionSpec、min_words gate |
+| 排版 | `books/main.tex` | `\input` 顺序（当前与 ch01–ch30 一致，**未物理重排**） |
 
-**标准化新增5大硬件适配小节**：IREE全平台部署架构、GPU/CPU/端侧统一编译方案、硬件专属运行时适配、异构调度逻辑
+**后续 loop 动作：** 扩章时优先补 **Fregly 式具名小节**（非 numbered 空壳）；Part VI 写作按 **Lowering Arc** 互引，禁止孤立「编译器宣传章」。
 
-**架构对标**：IREE一体化架构 VS YiRage五层软硬件协同编译架构
-
-#### 第19章 Glow — Lightweight AI Compiler
-
-**标准化新增5大硬件适配小节**：Glow CPU/边缘NPU轻量化编译优化、硬件适配边界、低功耗硬件专属策略、端侧部署落地
-
-#### 第20章 Mirage & Emerging AI Compilers
-
-**标准化新增5大硬件适配小节**：新兴编译器硬件定位、Mirage原生硬件局限、YiRage多硬件架构升级、LLM场景硬件专属优化落地
-
-#### 第21章 Unified Analysis of AI Compilers + Cross-Hardware Benchmark【全新升级】
-
-**升级核心**：从单一编译器对比升级为**跨编译器+跨硬件联合对比**
-
-**新增内容**：各编译器多硬件适配能力评级、编译开销与运行性能差异化数据、硬件绑定程度分类、自动调优搜索空间硬件差异、YiRage基准测试套件全维度对比实战
-
-### 第七篇 高阶编译与工程量产（第22-27章）
-
-#### 第22章 Compiler-Driven End-to-End Performance Tuning Workflow
-
-**新增核心**：硬件感知Profiling体系、多硬件瓶颈定位方法、基于硬件指标的编译参数调优工作流
-
-#### 第23章 LLM & MoE Specialized Compilation Optimization
-
-**新增核心**：多硬件下LLM/MoE差异化编译调度、KV Cache硬件适配优化、异构场景MoE负载均衡策略
-
-#### 第24章 Heterogeneous Compilation & Multi-Hardware Deployment【新增·高阶核心章节】
-
-**核心目标**：补齐工业级异构集群编译与多硬件量产落地能力
-
-**章节内容**：
-
-- 24.1 异构集群编译原理：GPU+CPU混合架构计算图拆分与动态调度
-
-- 24.2 统一编译栈实战：一套MLIR/IR跨GPU/CPU/NPU多端部署
-
-- 24.3 动态硬件适配：运行时硬件探测、编译策略自动切换、容错降级
-
-- 24.4 多硬件编译版本管理、性能回归测试与工程规范
-
-- 24.5 工业级实战案例：云端异构训练、边缘多芯片LLM推理
-
-- 24.6 YiRage ClusterTopology多硬件集群管理与异构编译落地
-
-- 24.7 DeepSeek 推理基建 deps：`FlashMLA` / `DeepEP` / `DeepGEMM` / `eplb` / `3FS`（`deps/` 子模块；完整推理引擎见 `open-infra-index` 文档，尚未全量开源）
-
-#### 第25章 Auto-Optimization & AI-Assisted Compiler Technology
-
-**新增核心**：多硬件下RL自动调优搜索空间差异化、硬件感知奖励函数设计、YiRage跨硬件智能优化实战
-
-#### 第26章 Production Deployment & Engineering Best Practices
-
-**新增核心**：多硬件编译环境配置、跨平台打包部署、不同硬件生产环境踩坑指南、集群异构调度最佳实践
-
-#### 第27章 Future Trends of AI Compilers
-
-**新增核心**：软硬件协同设计趋势、新硬件架构适配编译演进、端云一体跨硬件自适应编译、AI自主硬件适配内核生成
-
-**与 Part VIII 衔接**：趋势章收束 Part VII；框架–编译器–运行时协同见第 28–30 章
-
-### 第八篇 Runtime、推理框架与 YiRage 协同（第 28–30 章·新增）
-
-> **工程锚点**：[`deps/`](deps/) git submodules — YiRage + MLIR (llvm-project), XLA, TVM, Triton, IREE, Glow；见 [`deps/README.md`](deps/README.md)
-
-#### 第28章 LLM Inference Frameworks and Serving Runtimes
-
-**核心目标**：厘清推理框架（HF / vLLM / SGLang / TRT-LLM）与编译器的职责边界；连续批处理、Paged KV 属于框架层；bytes/token 与 launches/token 仍须在 decode step 内优化
-
-**章节内容**：
-
-- 28.1 推理框架全景与融合深度差异（eager / partial export / compiler-owned core）
-
-- 28.2 Continuous batching 与 fleet goodput vs BS=1 单请求 counter
-
-- 28.3 PagedAttention / KV 分页：框架内存管理 vs 编译器 layout IR
-
-- 28.4 框架层瓶颈：调度、Python 调度、未融合算子链
-
-- 28.5 编译器接入点：FX/ONNX 导出、custom op、CUDA Graph bucket、PersistentKernel 调用
-
-#### 第29章 YiRage Runtime Layer and Persistent Kernel Execution
-
-**核心目标**：YiRage 五层架构之 Layer 5（Persistent Kernel runtime）；`PersistentKernel` / `superoptimize` / `HardwareRegistry`；子模块构建与 same-backend 规则
-
-**章节内容**：
-
-- 29.1 五层栈：Python API → Backend Manager → Search → Threadblock → PK runtime
-
-- 29.2 Decode 模式 PersistentKernel 与 fallback_backends
-
-- 29.3 superoptimize 到 runtime launch 的 handoff 与 fingerprint 缓存
-
-- 29.4 HardwareRegistry / detect_current_chip 与搜索空间
-
-- 29.5 deps/YiRage 子模块 init、native build（yirage.core + libyirage_runtime）
-
-#### 第30章 Framework, Compiler, and Runtime Co-Design
-
-**核心目标**：生产级「框架调度 + 编译器融合 + 运行时发射」三联契约；vLLM + YiRage 参考栈；与 Ch12 执行模式、Ch13 编译理论对齐
-
-**章节内容**：
-
-- 30.1 三方职责表（framework / compiler / runtime）
-
-- 30.2 Prefill/decode 分工与 sampling  eager hull
-
-- 30.3 vLLM paging + YiRage fused decode core 集成模式
-
-- 30.4 Fleet 级 eager / graph / MegaKernel 选型
-
-- 30.5 子模块版本 pin、triplet regression、PK warmup CI
-
-### 第七篇后续章（第 22–27 章）与 Part VIII 重构说明
-
-- **第 22 章**：Profiling 须区分 framework queue time 与 in-step compiler counter
-
-- **第 24 章**：runtime_adapt 与 Ch29 PK runtime / Ch28 框架探测对齐
-
-- **第 26 章**：生产部署增加 framework–compiler–runtime runbook 与 deps 子模块 pin
-
-- **第 27 章**：趋势展望引用 Part VIII 协同栈，而非重复框架教程
 
 ## 六、全书附录体系（升级补齐跨硬件工程能力）
 

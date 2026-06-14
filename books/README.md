@@ -83,16 +83,16 @@ Re-run `uv run book-loop insert-visuals --chapter ch01` to sync after plan chang
 
 **Status:** `uv run book-loop status` — currently **30/30** chapters pass gates (Parts I–VIII).
 
-| Part | IDs | Theme |
-|------|-----|-------|
-| I | ch01–02 | Mindset / dataflow |
-| II | ch03 | Hardware constraints |
-| III | ch04–05 | CUDA Hopper + XDNA/AIE |
-| IV | ch06–09 | MegaKernel core |
-| V | ch10–12 | MegaKernel implementation |
-| VI | ch13–21 | AI compilers + benchmarks |
-| VII | ch22–27 | Production + future trends |
-| VIII | ch28–30 | Frameworks, YiRage runtime, co-design |
+| Part | IDs | Theme (Fregly-aligned) |
+|------|-----|------------------------|
+| I | ch01–02 | Goodput, bottlenecks, dataflow mindset |
+| II | ch03 | Full-stack hardware & compiler constraints |
+| III | ch04–05 | Hopper CUDA + XDNA dataflow architecture |
+| IV | ch06–09 | On-chip residency, pipeline, sync |
+| V | ch10–12 | MegaKernel implementation & execution modes |
+| VI | ch13–21 | Compiler theory & multi-backend lowering arc |
+| VII | ch22–27 | Fleet tuning, hetero deploy, auto-optimization |
+| VIII | ch28–30 | Inference frameworks, YiRage runtime, co-design |
 
 Gold voice references: **ch01** (book rhythm), **ch12–13** (Fregly depth), [`reference-chapter-1.pdf`](../reference-chapter-1.pdf) (O'Reilly skeleton). List rubric: `uv run book_prepare.py --list`. Full 目录: [`book_content.md`](../book_content.md).
 

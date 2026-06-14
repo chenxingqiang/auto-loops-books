@@ -2,7 +2,7 @@
   "parts": [
     [
       "part01",
-      "Mindset Revolution",
+      "Goodput Foundations & Dataflow Mindset",
       [
         "ch01",
         "ch02"
@@ -10,14 +10,14 @@
     ],
     [
       "part02",
-      "Hardware Foundation",
+      "Full-Stack Hardware & Compiler Constraints",
       [
         "ch03"
       ]
     ],
     [
       "part03",
-      "CUDA & XDNA Architecture",
+      "Hopper CUDA & XDNA Dataflow Architecture",
       [
         "ch04",
         "ch05"
@@ -25,7 +25,7 @@
     ],
     [
       "part04",
-      "MegaKernel Core Techniques",
+      "On-Chip Residency, Pipeline & Sync",
       [
         "ch06",
         "ch07",
@@ -35,7 +35,7 @@
     ],
     [
       "part05",
-      "MegaKernel Implementation",
+      "MegaKernel Implementation & Execution Modes",
       [
         "ch10",
         "ch11",
@@ -44,7 +44,7 @@
     ],
     [
       "part06",
-      "AI Compilers & Cross-HW Practice",
+      "Compiler Theory & Multi-Backend Lowering",
       [
         "ch13",
         "ch14",
@@ -59,7 +59,7 @@
     ],
     [
       "part07",
-      "Advanced Compilation & Production",
+      "Fleet Tuning, Heterogeneous Deploy & Auto-Optimization",
       [
         "ch22",
         "ch23",
@@ -71,7 +71,7 @@
     ],
     [
       "part08",
-      "Runtime, Inference Frameworks & YiRage Co-Design",
+      "Inference Frameworks, Runtime & Co-Design",
       [
         "ch28",
         "ch29",
