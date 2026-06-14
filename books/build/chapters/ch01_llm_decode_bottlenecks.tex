@@ -306,7 +306,7 @@ Three optimization anti-patterns recur in decode programs that miss SLOs despite
 \label{sec:ch01_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Prefill and decode are different regimes.} Optimize them separately; disaggregated fleets skew capacity toward decode \citep{dao2023flashdecoding,kwon2023vllm,patel2025llminference}.
+\item \textbf{Prefill and decode are different regimes.} Prefill is compute-bound and batches well, while batch-1 decode is bandwidth- and orchestration-bound, so a single optimization playbook for both leaves decode SLOs unmet \citep{dao2023flashdecoding,kwon2023vllm}. Production fleets disaggregate the two into separate pools and skew capacity heavily toward decode for exactly this reason \citep{patel2025llminference}.
 \item \textbf{Measure useful decode work (goodput).} Track kernels/token, bytes/token, HDBI, and $R_{\mathrm{floor}}$---not peak tensor FLOPs or utilization alone \citep{taxbreak2026,memoryfloor2026,dlbook}.
 \item \textbf{Mechanical sympathy.} Schedules must match memory hierarchy residency; FlashAttention and vLLM fix slices of the stack, not layer-scale fusion \citep{dao2022flashattention,kwon2023vllm,yirage2026}.
 \item \textbf{Framework fragmentation is a tax.} PyTorch + Hugging Face eager paths amplify launches and HBM round trips at batch-1 \citep{taxbreak2026,memoryfloor2026}.

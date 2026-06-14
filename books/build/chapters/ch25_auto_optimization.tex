@@ -171,7 +171,7 @@ When external LLM tools suggest fusion patterns, treat output as \emph{hints} fe
 \item \textbf{Hardware-aware reward.} Composite $R$ over ms/token, bytes/token, launches/token, and legality---SKU-specific weights, shared methodology \citep{patel2025llminference,semianalysis2024tma,amd2024xdna}.
 \item \textbf{YiRage auto.} Closed-loop `superoptimize` + `HardwareRegistry` + fingerprint caches; quarantine cross-backend winners \citep{yirage2026,kwon2023vllm,liu2024deepseekv3}.
 \item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs when ranking autotune trials \citep{patel2025llminference,dlbook,memoryfloor2026}.
-\item \textbf{Mechanical sympathy.} Legality oracles before GPU-hour search; residency accounting in every reward \citep{dao2022flashattention,chen2020compilerbasedhardw,amd2024aie}.
+\item \textbf{Mechanical sympathy bounds the search.} Run legality oracles before spending GPU-hours so the autotuner never explores schedules that cannot fit the target's residency budget \citep{dao2022flashattention,chen2020compilerbasedhardw}. Folding residency accounting into every reward keeps the search anchored to on-chip behavior rather than to a microbenchmark the policy can game \citep{amd2024aie,memoryfloor2026}.
 \end{itemize}
 
 \section{Conclusion}

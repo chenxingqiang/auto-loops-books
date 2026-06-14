@@ -354,13 +354,20 @@ Compiler authors lowering decode IR to CUDA need a checklist tighter than a hard
 \label{sec:ch04_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Mechanical sympathy on Hopper.} TMA, clusters, and shared memory keep decode data on-chip \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention}.
-\item \textbf{Profile before TC tuning.} Low $R_{\mathrm{floor}}$ means fix launches and bytes first \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
-\item \textbf{TMA overlap $\neq$ fusion.} Async copies hide latency; MegaKernels cut activation HBM traffic \citep{semianalysis2024tma,memoryfloor2026,yirage2026}.
-\item \textbf{Sync sparingly.} Warp shuffles and planned barriers beat grid sync in token loops \citep{nvidia2022hopper,nvidia2024cudagraphs,dao2022flashattention}.
-\item \textbf{PTX for softmax.} Stable online softmax ties to SFU/PTX choices \citep{dao2022flashattention,liu2024deepseekv3,dlbook}.
-\item \textbf{YiRage legality.} CUDA backend rejects illegal residency \citep{yirage2026,chen2020compilerbasedhardw,amd2024aie}.
-\item \textbf{Goodput metrics.} Always pair kernels/token and bytes/token with ms/token \citep{taxbreak2026,memoryfloor2026}.
+\item \textbf{Mechanical sympathy on Hopper.}
+TMA bulk copies, thread-block clusters, and the 228\,KB shared memory exist precisely to keep decode data on-chip, and a kernel that ignores them streams activations through HBM every token \citep{nvidia2022hopper,semianalysis2024tma}. Using these features is the difference between a decode kernel that hides memory latency and one that exposes it \citep{dao2022flashattention}.
+
+\item \textbf{Profile before tuning tensor cores.}
+At batch-1 the arithmetic intensity is low, so the limiter is launches and bytes, not tensor-core throughput; tuning MMA tiles first optimizes the wrong term \citep{memoryfloor2026,taxbreak2026}. Fix launches/token and bytes/token, then revisit the tensor-core schedule \citep{patel2025llminference}.
+
+\item \textbf{Async copy hides latency; fusion removes traffic.}
+TMA overlap and double buffering hide the latency of a load, but they do not reduce how many bytes move---only fusing the layer into a MegaKernel cuts the activation HBM traffic itself \citep{semianalysis2024tma,memoryfloor2026}. The two are complementary: overlap what you must move, fuse so you move less \citep{yirage2026}.
+
+\item \textbf{Synchronize at the narrowest scope.}
+Warp shuffles and planned producer/consumer barriers coordinate decode work far more cheaply than a grid-wide sync, which stalls every CTA \citep{nvidia2022hopper,dao2022flashattention}. Keeping coordination on-chip is also what lets a captured launch graph replay without host round trips \citep{nvidia2024cudagraphs}.
+
+\item \textbf{Grade on goodput, and let YiRage enforce legality.}
+Always pair kernels/token and bytes/token with ms/token so a microbenchmark win that does not move the token cannot masquerade as progress \citep{taxbreak2026,memoryfloor2026}. The YiRage CUDA backend rejects a schedule whose residency is illegal on the target SKU before it ships, turning these metrics into a build-time gate \citep{yirage2026,chen2020compilerbasedhardw}.
 \end{itemize}
 
 \section{Conclusion}

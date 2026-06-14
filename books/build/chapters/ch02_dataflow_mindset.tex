@@ -254,18 +254,25 @@ When automation path disagrees with microbenchmarks, trust fleet telemetry: fix 
 \label{sec:ch02_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Operator First.} Tie operator first to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Data Residency.} Tie data residency to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Dataflow Philosophy.} Tie dataflow philosophy to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Cross Hardware.} Tie cross hardware to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Iron Rules.} Tie iron rules to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Operator-first thinking is the default trap.}
+Listing a decoder as LayerNorm, QKV, attention, MLP, and residuals and tuning each kernel in isolation stitches them with separate launches, so the failure is structural rather than per-kernel \citep{dao2023flashdecoding,taxbreak2026}. No amount of single-operator tuning removes the launch-and-spill tax that the operator boundaries themselves create \citep{memoryfloor2026}.
+
+\item \textbf{Residency, not FLOPs, is the root cause.}
+Activations that could live in registers or shared memory across the QKV$\rightarrow$attention$\rightarrow$MLP chain are instead materialized to HBM at every operator boundary, which is the real source of decode latency \citep{memoryfloor2026,dao2022flashattention}. The dataflow mindset names the schedule and tensor lifetimes before operators so those activations stay on-chip \citep{yirage2026}.
+
+\item \textbf{The iron rules assign each tier its job.}
+Registers hold ephemeral scalars and narrow vectors, on-chip SRAM holds fusion regions up to its capacity, and a spill is the signal the split is wrong---these are checkable invariants, not guidelines \citep{yirage2026,dlbook}. Encoding them as metadata is what lets a compiler reject an illegal schedule before codegen \citep{chen2020compilerbasedhardw}.
+
+\item \textbf{Cross-hardware is a design input, not an appendix.}
+A GPU-tuned schedule silently fails on an edge NPU's static fabric and underperforms on a co-located CPU node, so the mindset must be multi-target from the start \citep{amd2024xdna,amd2024aie}. The same dataflow plan yields different bytes/token per class, which only a cross-hardware comparison reveals \citep{taxbreak2026}.
+
+\item \textbf{The MegaKernel is the mindset materialized.}
+Dispatching an entire decoder layer with activations resident across QKV, attention, MLP, norms, and residuals is the antithesis of the operator graph, and YiRage automates it by planning lifetimes globally from one dataflow IR \citep{yirage2026,memoryfloor2026}. The shift is from optimizing kernels to optimizing the schedule that ties them together \citep{patel2025llminference}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch02_conclusion}
 
-Two Kernel Design Mindsets is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Two Kernel Design Mindsets baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+The operator-driven and dataflow-driven mindsets are not two styles of the same craft; they are different theories of what a decoder layer \emph{is}---a list of kernels to tune versus a schedule of residency to plan \citep{taxbreak2026,memoryfloor2026}. The dataflow mindset is the one this book commits to, because at batch-1 decode the operator boundaries themselves are the cost, and only a residency-first schedule---materialized as a MegaKernel and enforced by YiRage's iron rules---removes them \citep{yirage2026,dao2022flashattention}. That mindset is empty, however, without the hardware facts it must plan against: Chapter~\ref{chap:ch03} supplies the concrete memory hierarchies, parallelism grains, and scheduling models of GPUs, CPUs, and NPUs that every later compiler pass encodes \citep{nvidia2022hopper,amd2024aie}.
 
 \typeout{END_CHAPTER "ch02" \theabspage}

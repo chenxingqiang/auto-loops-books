@@ -377,18 +377,25 @@ When YiRage XDNA backend disagrees with microbenchmarks, trust fleet telemetry: 
 \label{sec:ch05_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Xdna Tiles.} Tie xdna tiles to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Static Dataflow Rules.} Tie static dataflow rules to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Cuda Xdna Mapping.} Tie cuda xdna mapping to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Online Softmax Hw.} Tie online softmax hw to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Architecture Tradeoffs.} Tie architecture tradeoffs to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{The tile grid is fixed and the SRAM is small.}
+XDNA appears in Ryzen AI NPUs paired with x86 cores, with a per-SKU compute-tile grid and tens of kilobytes of deterministic tile SRAM rather than a large banked shared memory \citep{amd2024xdna,amd2024aie}. Engineers who oversize tiles ``because HBM is huge'' fail XDNA legality immediately, so the compiler must size to the tile budget up front \citep{nvidia2022hopper}.
+
+\item \textbf{Static dataflow shifts work to compile time.}
+The host configures graph runners and submits execute calls but must not allocate or copy full tensors per token; KV growth appends through pre-planned DDR regions \citep{amd2024xdna,patel2025llminference}. There is no runtime scheduler, so the entire tile-and-DMA plan is fixed before execution and the per-token cost is deterministic \citep{amd2024aie}.
+
+\item \textbf{Map from CUDA by translating, not transplanting.}
+GPU shared memory is explicitly sized and banked while tile SRAM is smaller but deterministic, so a CUDA schedule cannot be transplanted---it must be re-tiled to the AIE fabric \citep{nvidia2022hopper,amd2024xdna}. Online softmax in particular must preserve a stable accumulation order across spatial reductions to stay numerically equivalent to the reference \citep{dao2022flashattention,dao2023flashdecoding}.
+
+\item \textbf{Optimize watt/token, not just ms/token.}
+Edge products advertise watt/token while cloud products advertise ms/token under load, so XDNA wins on power efficiency where CUDA wins on elastic throughput \citep{amd2024xdna,patel2025llminference}. The right target is the one whose binding constraint---power and locality versus peak latency---matches the deployment \citep{taxbreak2026}.
+
+\item \textbf{Gate XDNA decode on static legality.}
+Review gates must confirm no simultaneous buffers exceed per-tile SRAM caps and no dynamic dimensions appear on the hot path without a bucket recompile \citep{amd2024aie,yirage2026}. YiRage compiles the same decoder export for CUDA and XDNA on every merge and publishes the legality diffs, so a residency violation is caught at build time \citep{yirage2026,chen2020compilerbasedhardw}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch05_conclusion}
 
-AMD XDNA/AIE Dataflow Architecture is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume AMD XDNA/AIE Dataflow Architecture baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+AMD XDNA/AIE shows the opposite end of the architecture spectrum from the CUDA GPU of Chapter~4: a spatial-dataflow fabric of fixed compute tiles with small deterministic SRAM, no hardware cache, and a statically configured schedule, where decode latency is bought with compile-time tile and DMA planning rather than runtime flexibility \citep{amd2024xdna,amd2024aie}. The lesson is that the same decoder math demands a fundamentally different compilation per class, and a schedule transplanted from the GPU is illegal here---which is precisely why residency must be planned, not assumed \citep{semianalysis2024tma,yirage2026}. With both hardware extremes now mapped, Chapter~\ref{chap:ch06} opens Part~IV's MegaKernel techniques by making on-chip data residency a budgeted, checkable property across all three classes \citep{memoryfloor2026,taxbreak2026}.
 
 \typeout{END_CHAPTER "ch05" \theabspage}

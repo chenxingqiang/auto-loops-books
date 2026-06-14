@@ -314,7 +314,7 @@ Graph speedup without bytes win & Orchestration only & Pursue Boundary B \\
 \paragraph{Energy angle.} HBM reads dominate decode energy \citep{memoryfloor2026,patel2025llminference}. Online softmax reduces unnecessary DRAM toggling---relevant for edge Ryzen AI and cloud TCO even when ms/token gains look modest \citep{amd2024xdna,amd2024aie,dlbook}. Energy-aware fleets should log bytes/token alongside power counters \citep{yirage2026,taxbreak2026}.
 
 \begin{itemize}
-\item \textbf{Stream, do not materialize.} Maintain $(m,\ell,o)$ across KV blocks; never write $P$ to HBM in decode \citep{dao2022flashattention,memoryfloor2026}.
+\item \textbf{Stream, do not materialize.} Maintain the running statistics $(m,\ell,o)$ across KV blocks so the softmax probability matrix $P$ is never written to HBM during decode \citep{dao2022flashattention,memoryfloor2026}. Materializing $P$ even as a thin $1\times T$ vector per head per token is catastrophic once block boundaries export it, which is exactly the traffic online softmax removes \citep{taxbreak2026,kwon2023vllm}.
 \item \textbf{Max before \textbf{exp}.} Stability is part of performance---unstable online paths force FP32 fallbacks that break fusion \citep{dao2022flashattention,patel2025llminference}.
 \item \textbf{Measure attention goodput.} Track bytes/token and launches/token alongside ms/token; FLOPs mis-rank bottlenecks at batch-1 \citep{taxbreak2026,dlbook}.
 \item \textbf{Mechanical sympathy across targets.} GPU registers, XDNA SRAM slots, and CPU SIMD accumulators implement the same invariants with different legality rules \citep{amd2024xdna,semianalysis2024tma,dlbook}.
@@ -322,7 +322,7 @@ Graph speedup without bytes win & Orchestration only & Pursue Boundary B \\
 \item \textbf{Split-KV needs in-kernel merge.} Flash-Decoding wins require second-stage online reduction without extra launches \citep{dao2023flashdecoding,taxbreak2026}.
 \item \textbf{Profile-driven gates.} Long-context numerical tests and buffer accounting block merges---not microbench GEMM tweaks \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\item \textbf{Pair metrics like Fregly pairs goodput with utilization.} Always report kernels/token and bytes/token with ms/token on the same chart \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+\item \textbf{Pair the metrics, as Fregly pairs goodput with utilization.} Always report kernels/token and bytes/token alongside ms/token on the same chart, because either number alone hides the other limiter at batch-1 \citep{taxbreak2026,memoryfloor2026}. A softmax change that improves one while quietly regressing the other is invisible unless the metrics are shown together \citep{patel2025llminference,dlbook}.
 \item \textbf{Reject graph-only wins.} Orchestration speedups without residency relief are partial fixes---label them explicitly in benchmark tables \citep{nvidia2024cudagraphs,memoryfloor2026}.
 \item \textbf{Document dtype and context buckets.} Fleet configs must pin max context, block size, and carrier dtypes per compiled graph \citep{kwon2023vllm,yirage2026,amd2024aie}.
 \end{itemize}

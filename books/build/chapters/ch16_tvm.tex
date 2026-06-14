@@ -2,9 +2,11 @@
 \label{chap:ch16}
 \typeout{START_CHAPTER "ch16" \theabspage}
 
-Part~VI treats \emph{TVM and Apache TVM Stack} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
-
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+Apache TVM made one bet that still defines the stack: separate \emph{what} a tensor operator computes from \emph{how} it is scheduled onto silicon, then let a learning-based cost model search the schedule space instead of a vendor library author \citep{chen2018tvm}. That decoupling is why a single operator definition can lower to x86, ARM, CUDA, and FPGA back-ends without rewriting the math \citep{chen2018tvm,chen2020compilerbasedhardw}. It is also why teams misread TVM in production: they tune a model until prefill GEMMs look excellent, ship it, and then watch interactive batch-1 decode miss p99 anyway \citep{taxbreak2026,kwon2023vllm}.
+The reason is the same one Chapter~1 established. Dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 (BS${=}4$, SL${=}2048$); OLMoE-1B/7B averages 9{,}305 \citep{taxbreak2026}. A correct, well-tuned TVM operator schedule does nothing about that launch storm unless the compiler is also asked to fuse and capture the decode loop \citep{memoryfloor2026,nvidia2024cudagraphs}. This chapter treats TVM as a production residency contract under decode metrics---bytes/token and launches/token---not as a tutorial on schedule primitives \citep{patel2025llminference}.
+\index{TVM}
+\index{Apache TVM}
+\index{TensorIR}
 
 \section{TVM HW matrix}
 \label{sec:ch16_tvm_hw_matrix}
@@ -14,31 +16,25 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\TVM HW Matrix};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Tensor expression\\(target-agnostic)};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Schedule + lower\\TensorIR};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Codegen\\LLVM / CUDA / BYOC};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Target binary\\GPU / CPU / NPU};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{TVM HW Matrix optimization pipeline in TVM and Apache TVM Stack.}
+\caption{One tensor-expression definition fans out across the TVM hardware/target matrix: schedule and lower to TensorIR, then emit per-backend code.}
 \label{fig:tvm_hw_matrix_pipeline}
 \end{figure}
 
-Teams hit \textbf{TVM HW matrix} when TVM and Apache TVM Stack looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without target residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+TVM's selling point is a hardware/target support \textbf{matrix}: write the compute once, lower it to many back-ends \citep{chen2018tvm}. In practice that matrix is necessary but not sufficient for decode. A target that \emph{builds} is not a target that is decode-legal, and most ``mysterious'' regressions come from treating the two as the same thing \citep{taxbreak2026,patel2025llminference}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The hardware truth underneath the matrix is the usual split. GPUs bound a schedule by shared-memory capacity and tensor-core feeding; CPUs by cache blocking and NUMA locality; NPUs and XDNA/AIE fabrics by static tile SRAM and DMA chains that must be assigned at compile time \citep{nvidia2022hopper,amd2024xdna,dlbook}. At batch-1, decode stays bandwidth- and orchestration-limited on all three---the per-token matmul is too thin to amortize either HBM traffic or launch overhead \citep{memoryfloor2026,taxbreak2026}.
 
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+TVM earns the matrix because the same tensor expression carries no target assumptions: the compute is declared once, and a separate schedule chooses tiling, vectorization, thread binding, and memory scope per target \citep{chen2018tvm}. That is genuinely more than vendor libraries deliver, where each new SKU or accelerator demands a hand-written kernel \citep{chen2020compilerbasedhardw}. The catch for serving is that the matrix is graded at \emph{build} time---does the target lower and run---while decode goodput is a \emph{runtime} property of bytes moved and kernels launched. A green build matrix cell tells you the operator exists on that target; it tells you nothing about whether the lowered schedule keeps the decoder layer on-chip.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The same TVM operator definition takes a different legal schedule per class: a Hopper GPU wants TMA-fed double buffering and a captured launch graph; an x86 CPU wants cache-blocked tiles and SIMD; an XDNA NPU wants a static tile-to-DMA assignment with no dynamic dispatch at all \citep{semianalysis2024tma,amd2024xdna,amd2024aie}. Identical math, three different bytes/token outcomes. This is exactly the residency reasoning YiRage encodes as checkable IR metadata so the matrix entry is rejected before it ships, not after p99 slips \citep{yirage2026}.
 
 \section{TVM arch passes}
 \label{sec:ch16_tvm_arch_passes}
@@ -48,229 +44,93 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Relax graph IR\\(\texttt{relax.Function})};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Graph passes\\fuse / layout};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize TensorIR\\(\texttt{tir::PrimFunc})};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize TIR passes\\tile / vectorize};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{TVM Arch Passes block diagram for TVM and Apache TVM Stack.}
+\caption{TVM's two-level pass pipeline: graph-level Relax transforms feed loop-level TensorIR transforms inside one \texttt{IRModule}.}
 \label{fig:tvm_arch_passes_architecture}
 \end{figure}
 
-The production surprise at \textbf{TVM arch passes} is not peak FLOPs; it is illegal tier placement: pass spilling to HBM/DDR while lower still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+TVM runs optimization at two IR levels, and the production surprise is almost never a missing peak-FLOPs pass---it is an \textbf{optim}ization that is legal in isolation but spills a fused producer to HBM between levels \citep{chen2018tvm,yirage2026}. The modern stack makes the two levels explicit. A graph-level \texttt{relax.Function} carries the dataflow; a \texttt{tir::PrimFunc} carries the loop nest; both live in one \texttt{IRModule}, and \texttt{call\_tir} lowers a graph node into a loop-level kernel in destination-passing style so intermediate buffers can be planned globally \citep{lai2023relax}. Relax replaced the older Relay model precisely because Relay treated tensor programs as opaque foreign functions and could not track dynamic shapes---or residency---across the boundary \citep{lai2023relax}.
 
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+This is a deliberately different choice from an open dialect tower. Where MLIR exposes many progressively lowered \emph{dialect}s, TVM commits to a fixed graph$\to$TensorIR pair and pushes its leverage into schedule search rather than dialect proliferation \citep{chen2018tvm,lai2023relax}. The engineering consequence: graph passes like operator fusion must be co-designed with the TensorIR \textbf{lower}ing that follows, or fusion ``succeeds'' on paper while the lowered kernel still round-trips activations through DRAM.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+Concretely, the graph-level passes that decide decode residency are a short list, and each has a loop-level consequence. \texttt{FuseOps} merges a chain of element-wise and reduction operators into one \texttt{call\_tir} target so the lowered kernel keeps intermediates in registers or shared memory instead of HBM \citep{chen2018tvm}. \texttt{ToMixedPrecision} and layout-rewrite passes change how many bytes each activation costs and whether the tensor-core or vector path is even reachable on the target \citep{lai2023relax}. \texttt{StaticPlanBlockMemory} and the destination-passing-style contract behind \texttt{call\_tir} let the compiler allocate one intermediate buffer and reuse it across the fused region, which is the difference between a decoder layer that streams its working set once and one that re-reads it per operator \citep{lai2023relax,memoryfloor2026}. Run these in the wrong order---layout after fusion, say---and the fused kernel is forced back through a transpose that re-materializes the very activations fusion was meant to keep on-chip.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{What to diff before merge.} Lower the same module twice and diff the generated TIR (or CUDA) for new buffer allocations; count launches/token on the GPU path and DMA edges on the NPU path \citep{taxbreak2026,amd2024aie}. A silent spill introduced by a reordered pass reads downstream as an unexplained p99 regression, and graph-capture legality must hold on the GPU path while static-allocation legality must hold on XDNA \citep{nvidia2024cudagraphs,amd2024xdna}.
 
 \section{TVM codegen}
 \label{sec:ch16_tvm_codegen}
 
-\textbf{TVM codegen} is where TVM and Apache TVM Stack meets Chapter~1 counters: fix codegen and backend together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Codegen} is where the matrix meets Chapter~1's counters. TVM emits through several back-ends: LLVM for x86 and ARM CPUs, CUDA/NVRTC (or source handed to NVCC) for NVIDIA GPUs, ROCm for AMD, and Bring-Your-Own-Codegen (BYOC) to \textbf{emit} calls into vendor libraries or an NPU runtime for any \textbf{platform} TVM does not natively target \citep{chen2018tvm,chen2020compilerbasedhardw}. The \textbf{backend} you pick decides the unit of work the host must launch.
 
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The trap is to grade codegen by the quality of a single emitted matmul. At batch-1 decode the emitted MMA is rarely the limiter; the limiter is how many distinct kernels the host launches per token and how many HBM round trips survive lowering \citep{taxbreak2026,memoryfloor2026}. A backend that emits a beautiful per-operator kernel but leaves a decoder layer as a dozen separate launches loses to a coarser fused kernel that the runtime can capture once. On the GPU path this is why graph capture matters: replaying a captured launch sequence removes per-kernel host dispatch and recovered roughly $1.26\times$ on a Qwen-2.5-7B batch-1 decode cell on H100 in the Memory-Floor study---without changing a single MMA tile \citep{memoryfloor2026,nvidia2024cudagraphs}. On the CPU path the equivalent win is fusing through cache-resident tiles so the emitted code never spills the working set; on an NPU it is emitting a static DMA schedule rather than dynamic dispatch \citep{amd2024xdna,amd2024aie}.
 
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The other codegen decision that decode telemetry punishes is the runtime that wraps the emitted kernels. TVM can package a model as a graph executor, a relax VM, or an ahead-of-time (AOT) module, and each carries a different per-token host cost \citep{chen2018tvm,lai2023relax}. A Python-driven graph executor adds interpreter and dispatch overhead on every operator---tolerable for batched prefill, fatal for batch-1 decode where that overhead is paid once per token with nothing to amortize it against \citep{taxbreak2026,kwon2023vllm}. The AOT path and a captured launch graph collapse that orchestration into a single replayable sequence, which is the codegen-level lever that actually moves ms/token \citep{nvidia2024cudagraphs,memoryfloor2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The CUDA backend can hide latency with asynchronous copy and double buffering, so its codegen can afford a dynamic schedule; the XDNA/AIE backend cannot, because its tiles and DMA descriptors are fixed before runtime \citep{semianalysis2024tma,amd2024aie}. The same Relax module therefore emits genuinely different control flow per platform, and grading both against one microbenchmark hides the decode cost \citep{dlbook}.
 
 \section{TVM tuning}
 \label{sec:ch16_tvm_tuning}
 
-Teams hit \textbf{TVM tuning} when TVM and Apache TVM Stack looks correct in isolation yet decode telemetry disagrees---usually because tun was planned without profile residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+TVM's auto-tuning lineage is the part most teams adopt and the part most likely to mislead. AutoTVM came first: a template-based tuner that learns a statistical cost model (gradient-boosted trees or TreeGRU) over hand-written schedule templates, uses transfer learning across workloads, and explores with simulated annealing---reporting $1.2$--$3.8\times$ end-to-end gains over hand-tuned libraries on CPU, mobile GPU, and server GPU \citep{chen2018autotvm}. Ansor removed the templates: it samples complete programs from a hierarchical search space, fine-tunes with evolutionary search and a learned cost model, and uses a task scheduler to spend \textbf{tun}ing budget where it moves end-to-end latency most \citep{zheng2020ansor}. MetaSchedule later unified these search strategies over TensorIR.
 
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+\begin{table}[t]
+\centering
+\caption{Ansor template-free auto-scheduling: reported maximum end-to-end DNN speedups over prior search/library baselines, by hardware class \citep{zheng2020ansor}.}
+\label{tab:ch16_ansor_speedup}
+\begin{tabular}{llc}
+\toprule
+Hardware class & Representative target & Max speedup \\
+\midrule
+Server / desktop CPU & Intel x86 (AVX-512) & $3.8\times$ \\
+Edge / mobile CPU & ARM (NEON) & $2.6\times$ \\
+Server GPU & NVIDIA (CUDA) & $1.7\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The search budget is itself a hardware-bound decision. AutoTVM's transfer learning lets a cost model trained on one workload warm-start another, which matters because each candidate schedule must be compiled and measured on real silicon---thousands of trials per operator on a GPU, far more on a slow edge target \citep{chen2018autotvm}. Ansor's task scheduler spends that budget where it changes end-to-end latency rather than spreading it uniformly, so a long-tail operator that dominates decode is not starved while a cheap one is over-tuned \citep{zheng2020ansor}. For a serving team the practical reading is that auto-tuning is not free wall-clock time; it is a measured search whose payoff depends on tuning the operators that actually appear on the batch-1 decode critical path.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{pitfall} is the operating point. Auto-tuning maximizes whatever workload you \textbf{profile} against, and the default reflex is to tune on large, batched, prefill-shaped GEMMs because they are easy to benchmark and show big numbers \citep{kwon2023vllm}. Schedules tuned at that shape over-tile for throughput and assume launch cost is amortized across many tokens---both assumptions break at batch-1 decode, where the GEMM is a thin matrix-vector product and the launch floor dominates \citep{taxbreak2026,memoryfloor2026}. The fix is mechanical: tune on the decode operating point (BS${=}1$, realistic context), and rank candidates by measured ms/token after decomposing bytes/token and launches/token, not by the tuner's raw cost-model score on a synthetic shape \citep{patel2025llminference,dlbook}. The same discipline differs by \textbf{hardware} class: GPU tuning chases coalescing and occupancy, CPU tuning chases cache locality and vector width, NPU ``tuning'' is mostly static tile assignment with little runtime freedom \citep{amd2024xdna,nvidia2022hopper}.
 
 \section{TVM case study}
 \label{sec:ch16_tvm_case_study}
 
-The production surprise at \textbf{TVM case study} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Make the contradiction concrete with one decoder layer as the \textbf{case}. Tune it with Ansor on three targets and \textbf{benchmark} at the decode operating point, not the tuner's default \citep{zheng2020ansor,taxbreak2026}. The cross-hardware reading is consistent: per-operator schedules that win an isolated GEMM benchmark can still lose end-to-end because each operator is a separate launch and each unfused boundary is an HBM round trip \citep{memoryfloor2026,dao2022flashattention}. The lever that moves p99 is fusing the layer so activations stay on-chip and capturing the launch sequence so the host stops paying per-kernel dispatch every token \citep{nvidia2024cudagraphs,taxbreak2026}.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The arithmetic makes the lever concrete. Take a decoder layer at hidden size $d{=}4096$ in BF16, where each materialized activation vector costs $4096 \times 2 = 8\,$KB. An unfused schedule that writes and re-reads roughly six such intermediates---layer-norm output, Q/K/V projections, attention output, MLP input---per token spends about $48\,$KB/layer/token of avoidable HBM traffic before the KV cache is even touched \citep{memoryfloor2026,dao2022flashattention}. Fusing the layer so those vectors stay on-chip removes that traffic outright; at 32 layers it is on the order of $1.5\,$MB/token of HBM reads and writes that simply disappear, which is why bytes/token moves even when tensor-core utilization looks unchanged \citep{taxbreak2026}. No tuner finds this if it is pointed at a single isolated GEMM.
 
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{TVM HW matrix} is where TVM and Apache TVM Stack meets Chapter~1 counters: fix hardware and target together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{TVM arch passes} when TVM and Apache TVM Stack looks correct in isolation yet decode telemetry disagrees---usually because pass was planned without lower residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{TVM codegen} is not peak FLOPs; it is illegal tier placement: codegen spilling to HBM/DDR while backend still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{TVM tuning} is where TVM and Apache TVM Stack meets Chapter~1 counters: fix tun and profile together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{TVM case study} when TVM and Apache TVM Stack looks correct in isolation yet decode telemetry disagrees---usually because case was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{TVM HW matrix} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while target still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: hardware producers must feed target consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{TVM arch passes} is where TVM and Apache TVM Stack meets Chapter~1 counters: fix pass and lower together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pass/lower legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lower---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pass raises bytes/token; fused schedule must keep lower on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{TVM codegen} when TVM and Apache TVM Stack looks correct in isolation yet decode telemetry disagrees---usually because codegen was planned without backend residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: codegen producers must feed backend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for codegen on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{TVM tuning} is not peak FLOPs; it is illegal tier placement: tun spilling to HBM/DDR while profile still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound tun with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on tun/profile legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize tun with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked profile---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tun raises bytes/token; fused schedule must keep profile on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{TVM case study} is where TVM and Apache TVM Stack meets Chapter~1 counters: fix case and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: case producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+This \textbf{cross-hardware} story is the book's recurring thesis: the optimization rank differs by silicon, so no single tuned artifact is portable in the way the build matrix suggests \citep{patel2025llminference}. On the GPU the win is fusion plus graph capture; on the CPU it is cache-resident fusion and SIMD; on the XDNA NPU it is a static tile/DMA schedule with the fusion decided entirely at compile time \citep{amd2024xdna,amd2024aie}. \textbf{YiRage} operationalizes the case: it carries the Chapter~2 residency rules as checkable IR metadata, so a TVM-style schedule that would spill between graph and TensorIR levels is rejected at compile time across CUDA, CPU, and NPU back-ends rather than discovered in production telemetry \citep{yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch16_key_takeaways}
 
 \begin{itemize}
-\item \textbf{TVM HW Matrix.} Tie TVM HW matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{TVM Arch Passes.} Tie TVM arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{TVM Codegen.} Tie TVM codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{TVM Tuning.} Tie TVM tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{TVM Case Study.} Tie TVM case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{The build matrix is not the decode matrix.}
+TVM lowers one tensor-expression definition to CPU, GPU, and accelerator back-ends, but a target that compiles is not automatically decode-legal \citep{chen2018tvm}. Validate each matrix entry against bytes/token and launches/token at batch-1, not against a per-operator microbenchmark \citep{taxbreak2026,memoryfloor2026}.
+
+\item \textbf{Co-design graph and TensorIR passes.}
+Relax graph fusion and TensorIR lowering live in one \texttt{IRModule} and must be optimized together; fusion that ``succeeds'' at the graph level still loses if lowering spills the fused producer to DRAM \citep{lai2023relax,yirage2026}. Diff lowered IR for new allocations before merge \citep{chen2018tvm}.
+
+\item \textbf{Grade codegen by orchestration, not by one kernel.}
+At batch-1 the launch floor and surviving HBM round trips dominate, so a coarser fused-and-captured kernel beats a beautiful per-operator emit \citep{taxbreak2026,nvidia2024cudagraphs}. Graph capture recovered roughly $1.26\times$ on an H100 decode cell with no MMA change \citep{memoryfloor2026}.
+
+\item \textbf{Tune at the decode operating point.}
+AutoTVM and Ansor maximize whatever shape you profile; tuning on prefill-shaped GEMMs over-tiles for throughput and breaks at batch-1 \citep{chen2018autotvm,zheng2020ansor}. Profile BS${=}1$ ms/token and decompose it before trusting a cost-model score \citep{patel2025llminference}.
+
+\item \textbf{Optimization rank is hardware-specific.}
+GPU wants coalescing, fusion, and capture; CPU wants cache locality and SIMD; XDNA/AIE wants static tile and DMA assignment \citep{amd2024xdna,amd2024aie}. The same Ansor-tuned definition yields different legal schedules---and different speedups---per class \citep{zheng2020ansor}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch16_conclusion}
 
-TVM and Apache TVM Stack is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume TVM and Apache TVM Stack baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+TVM's compute/schedule split and its learning-based search remain the cleanest demonstration that performance portability is a compiler problem, not a library-porting problem \citep{chen2018tvm,zheng2020ansor}. But the stack only pays off for interactive serving when its graph and TensorIR passes, its codegen back-end, and its auto-tuner are all pointed at the decode operating point and graded on bytes/token and launches/token \citep{taxbreak2026,memoryfloor2026}. That is the same residency contract YiRage enforces as IR metadata, and it is the bridge into the next compiler surface: Chapter~\ref{chap:ch17} turns from TVM's whole-graph search to Triton's Pythonic, block-level GPU kernel compiler, where the same fusion-and-launch discipline reappears at the level of a single hand-written kernel \citep{yirage2026,dlbook}.
 
 \typeout{END_CHAPTER "ch16" \theabspage}

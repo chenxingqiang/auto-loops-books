@@ -2,11 +2,13 @@
 \label{chap:ch07}
 \typeout{START_CHAPTER "ch07" \theabspage}
 
-Parts~I--II established decode metrics and hardware contracts; \emph{Static Role Assignment and Schedule-Free Kernels} shows how those contracts become concrete schedules on silicon \citep{nvidia2022hopper,amd2024xdna,dao2022flashattention}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+Chapter~6 made on-chip residency a budgeted, checkable property; this chapter spends that budget on a specific structural choice---assigning each execution unit a fixed role at compile time so the kernel needs no runtime scheduler at all \citep{shah2024flashattention3,mpk2025}. The motivation is again the launch storm: dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, and most of that orchestration exists only because the work-to-hardware mapping is decided dynamically, per operator, by the host \citep{taxbreak2026}. If instead the mapping is fixed once, at compile time, the host stops dispatching and the kernel becomes ``schedule-free''---a single resident program that already knows what every block and warp should do \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The mistake to avoid is assuming static assignment sacrifices flexibility for speed. On the contrary, fixing roles is what lets the compiler reason about residency and overlap precisely, because it knows in advance which unit produces what and when \citep{dao2022flashattention,wu2024mirage}. This chapter develops static role assignment on GPUs and dataflow NPUs, shows how it eliminates runtime dispatch, and ends with the YiRage tiling pass that assigns roles per target.
+\index{Static role assignment}
+\index{Warp specialization}
+\index{Persistent kernel}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
-
-\section{static roles}
+\section{Static roles}
 \label{sec:ch07_static_roles}
 
 % AUTO_VISUAL:fig_static_roles_pipeline
@@ -14,443 +16,134 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Static Roles};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Compile time\\assign roles};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Producer\\TMA loads};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Consumer\\WGMMA compute};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Resident\\no re-dispatch};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Static Roles optimization pipeline in Static Role Assignment and Schedule-Free Kernels.}
+\caption{Static role assignment fixes each unit's job at compile time---producer warps move data, consumer warps compute---so no runtime scheduler is needed.}
 \label{fig:static_roles_pipeline}
 \end{figure}
 
-Teams hit \textbf{static roles} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because static was planned without role residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+\textbf{Static} \textbf{role} assignment means deciding, at compile time, what each execution unit does for the entire life of the kernel, rather than letting a runtime scheduler reassign work dynamically \citep{shah2024flashattention3}. On a GPU the canonical instance is warp specialization: the warps of a thread block are partitioned into producer warps that only ever issue data movement and consumer warps that only ever issue computation \citep{shah2024flashattention3}. FlashAttention-3 makes this concrete on Hopper---producer warps drive the Tensor Memory Accelerator (TMA) to move tiles from global to shared memory, while consumer warps drive Warpgroup Matrix-Multiply-Accumulate (WGMMA) on those tiles---and the paper notes that this separation ``improves the compiler's ability to generate optimal instruction schedules'' \citep{shah2024flashattention3}.
 
-Hardware truth: GPUs bound static with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Static role assignment is, in compiler terms, a form of specialization: the kernel is compiled knowing the role of each unit, so branches that would otherwise select behavior at runtime are resolved away, and each unit's instruction stream contains only the instructions for its role \citep{shah2024flashattention3}. This is why the FA3 authors observe that the separation improves the compiler's ability to schedule instructions---a producer warp's stream is all loads and barrier signals, a consumer warp's stream is all matmuls and barrier waits, and neither contains the other's instructions to get in the way \citep{shah2024flashattention3}. A unified, non-specialized warp would interleave both and force the instruction scheduler to reason about dependencies that the static split makes structural.
 
-Compiler/kernel fix: predicate fusion on static/role legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The reason a fixed \textbf{role} helps is mechanical sympathy with asynchrony. Modern GPU data movement and compute are asynchronous: TMA copies and WGMMA matmuls run on separate hardware paths and signal completion through barriers \citep{semianalysis2024tma,nvidia2022hopper}. If a single warp had to both load and compute, it would stall waiting on its own loads; by giving each warp one \textbf{static} \textbf{role}, the producer can run ahead filling buffers while the consumer drains them, and the two overlap naturally. This is the same double-buffering idea from Chapter~6, but expressed as a division of labor among units rather than among buffers.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize static with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked role---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Static \textbf{role} assignment is not GPU-specific; it is the native model of a dataflow NPU. On the AMD XDNA fabric each compute tile has a fixed \textbf{role} in a spatial pipeline, with its DMA engine and vector unit assigned a specific stage of the computation at compile time, and data flowing between neighboring tiles through configured streams \citep{amd2024xdna,amd2024aie}. There is no runtime that decides which tile does what---the array is configured before execution and holds that configuration. The GPU and NPU therefore arrive at the same place from opposite directions: the GPU adds static specialization on top of a dynamically scheduled machine, while the NPU is statically scheduled by construction. This convergence is a useful design signal: when two very different architectures both reward fixing roles at compile time, it suggests the benefit is fundamental to memory-bound, low-parallelism workloads rather than an artifact of one machine's quirks \citep{amd2024aie,shah2024flashattention3}. The book's recurring thesis---that decode is bound by movement and orchestration, not arithmetic---predicts exactly this, because static assignment attacks orchestration directly while leaving the arithmetic untouched \citep{taxbreak2026,memoryfloor2026}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused static raises bytes/token; fused schedule must keep role on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+It is worth being precise about what ``schedule-free'' does and does not mean. It does not mean the kernel performs no scheduling---there is still an order in which a consumer warp processes its tiles. It means the \emph{assignment} of work to units is not recomputed at runtime: no host scheduler decides which kernel runs next, and no hardware block scheduler streams fresh CTAs through the machine per operator \citep{shah2024flashattention3,mpk2025}. The distinction matters because the two kinds of scheduling have very different costs. Ordering within a resident unit is nearly free; reassigning work across units, especially when it requires a host round trip, is the expensive part, and it is the part static assignment removes \citep{taxbreak2026}.
 
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+A second clarification is why this is specifically a decode technique. During prefill there is abundant parallelism---many prompt tokens processed at once---so a dynamic scheduler has plenty of independent work to keep units busy and its overhead amortizes across a large batch \citep{kwon2023vllm}. At batch-1 decode there is exactly one token of work per step, so any scheduling overhead is paid against a tiny amount of useful computation, and the ratio of overhead to work is at its worst \citep{memoryfloor2026,patel2025llminference}. Static role assignment is therefore not a universal speedup; it is the right structure precisely when parallelism is scarce and overhead dominates, which is the decode regime this book targets.
 
-\section{thread mapping}
+Taken to its limit, static \textbf{role} assignment produces a megakernel. Mirage Persistent Kernel assigns every streaming multiprocessor a \textbf{role} in an SM-level task graph and runs the entire model forward pass as one kernel, with the SMs cooperating through in-kernel scheduling rather than returning to the host between operators \citep{mpk2025,wu2024mirage}. The \textbf{static} structure is what makes this possible: because each SM's sequence of tasks is known at compile time, there is no need to re-launch or re-dispatch, and the megakernel reduces per-token launches from thousands to one \citep{taxbreak2026,memoryfloor2026}. The lesson that carries forward is that flexibility at runtime is precisely the thing decode cannot afford---every dynamic decision is overhead paid per token.
+
+\section{Thread mapping}
 \label{sec:ch07_thread_mapping}
 
 % AUTO_VISUAL:fig_thread_mapping_architecture
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.84, transform shape]
+ \node[vis arch node] (s0) at (-5.5,0) {\footnotesize Thread\\$\le$256 regs};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Warp\\32 threads};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize Warpgroup\\4 warps / WGMMA};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize CTA / cluster\\SM / GPC};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Thread Mapping block diagram for Static Role Assignment and Schedule-Free Kernels.}
+\caption{The Hopper thread hierarchy; static role assignment maps work to this structure at the warp and warpgroup granularity.}
 \label{fig:thread_mapping_architecture}
 \end{figure}
 
-The production surprise at \textbf{thread mapping} is not peak FLOPs; it is illegal tier placement: thread spilling to HBM/DDR while warp still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
+Assigning roles requires knowing the \textbf{thread} hierarchy precisely, because roles are assigned at its granularities. On Hopper the hierarchy runs from threads, to \textbf{warp}s of 32 threads, to warpgroups of 4 contiguous \textbf{warp}s, to thread blocks (CTAs), to thread-block clusters, to the grid \citep{shah2024flashattention3}. Each \textbf{thread} has at most 256 registers private to it; shared memory is addressable by all threads in a CTA; and CTAs in a cluster are co-scheduled on the same GPC with fast access to each other's shared memory \citep{shah2024flashattention3,nvidia2022hopper}. These groupings are not bookkeeping---they are the units to which roles are bound.
 
-Trace residency: thread producers must feed warp consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The warpgroup is the key granularity for decode kernels because WGMMA, the high-throughput Hopper matmul, is issued collectively by a warpgroup of four \textbf{warp}s \citep{shah2024flashattention3}. Warp specialization therefore typically assigns one warpgroup the consumer \textbf{role} (issuing WGMMA) and dedicates other \textbf{warp}s to the producer \textbf{role} (issuing TMA). A subtlety that matters for residency is register reallocation: because producers issuing TMA need few registers while consumers running WGMMA need many, Hopper allows warpgroup-wide register reallocation to give the consumer warpgroup a larger share of the register file \citep{shah2024flashattention3}. This is static role assignment paying off directly in the residency budget of Chapter~6---the fixed roles let the compiler skew registers toward the units that need them.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+\textbf{Thread} mapping also determines how overlap is achieved within and across warpgroups. FlashAttention-3 overlaps the softmax computation of one warpgroup with the GEMM of another using pingpong scheduling driven by synchronization barriers, reporting an improvement from roughly 580 to 640 TFLOPS in BF16 from that inter-warpgroup overlap alone \citep{shah2024flashattention3}. The reason overlap is necessary is a throughput mismatch: in the FA3 analysis the special-function exponentials of softmax take about half the cycles of the tensor-core matmul, so leaving them un-overlapped idles the tensor cores for a substantial fraction of the time \citep{shah2024flashattention3}. Static role assignment is what makes the overlap schedulable, because the compiler knows which warpgroup is doing softmax and which is doing GEMM and can place the barriers accordingly.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for thread on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The cluster level adds a mapping option that did not exist before Hopper and that static assignment can exploit. Thread-block clusters group several CTAs that are co-scheduled on the same GPC and can read each other's shared memory directly through distributed shared memory, and TMA loads can be multicast to all CTAs in a cluster in one operation \citep{nvidia2022hopper,shah2024flashattention3}. For a decode kernel that means a producer role can load a weight tile once and multicast it to the consumers in several CTAs of a cluster, rather than each CTA loading its own copy---a residency win that is only schedulable because the cluster membership and the producer/consumer split are both fixed in advance. Mapping work to the cluster granularity is thus another static decision the compiler makes, trading a larger co-scheduled group for cheaper data sharing.
 
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+There is an interplay between role mapping and the occupancy budget of Chapter~6 that the compiler must resolve jointly. Dedicating warps to a producer role consumes warp slots that could otherwise run consumers, so the split is not free: too many producers and the consumers starve for compute slots, too few and the consumers stall waiting on data \citep{shah2024flashattention3,nvidia2022hopper}. The right ratio depends on the throughput mismatch between data movement and compute for the specific kernel, which is exactly the kind of target- and shape-specific decision that argues for a compiler pass over a hand-tuned constant. At batch-1 decode, where the matmul is a thin matrix-vector product, the balance often tilts toward fewer compute warps and more attention to keeping them fed, the opposite of a throughput-shaped prefill kernel \citep{kwon2023vllm,taxbreak2026}.
 
-\section{no runtime sched}
+On a CPU or NPU the mapping granularities differ but the principle holds. A CPU maps roles to \textbf{thread}s and SIMD lanes, pinning a decode \textbf{thread} to a core and a NUMA node as Chapter~6 described; an NPU maps roles to tiles in its array, with each tile a fixed stage \citep{dlbook,amd2024aie}. In every case the mapping is chosen so that the units that must communicate are close in the hierarchy---warps in a CTA sharing shared memory, tiles adjacent in the array sharing a stream---so that the data a role produces reaches the role that consumes it without leaving fast memory \citep{semianalysis2024tma,amd2024xdna}.
+
+\section{No runtime scheduling}
 \label{sec:ch07_no_runtime_sched}
 
-\textbf{no runtime sched} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix runtime and dispatch together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+The payoff of static roles is that the kernel needs no \textbf{runtime} scheduler, which is where the decode latency is won. In a conventional stack the host decides, per operator, which kernel to launch and on what data, paying a \textbf{dispatch} cost for every one of the thousands of launches a token requires \citep{taxbreak2026}. A schedule-free kernel moves that decision to compile time: the work-to-unit mapping is baked in, so the only \textbf{runtime} activity is the computation itself \citep{mpk2025,shah2024flashattention3}.
 
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The persistent kernel is the GPU mechanism that eliminates \textbf{runtime} \textbf{dispatch} for the multi-tile case. Instead of launching one CTA per work tile and relying on the hardware's block scheduler to stream them, a persistent kernel launches a fixed number of CTAs equal to the SM count---132 CTAs on an H100 SXM5, one per SM---and each CTA loops over a fraction of the work tiles, assigned by an in-kernel tile scheduler \citep{shah2024flashattention3}. This decouples physical CTAs from logical work, so the kernel can overlap the epilogue of the current tile with the prologue loads of the next, and avoids re-incurring launch and prologue cost for every tile \citep{shah2024flashattention3}. The tile scheduler is a small piece of in-kernel logic, not a host round trip, so the \textbf{dispatch} decision never leaves the GPU.
 
-Compiler/kernel fix: predicate fusion on runtime/dispatch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+\begin{table}[t]
+\centering
+\caption{Where work-to-unit \textbf{dispatch} happens, and the per-token cost it implies for batch-1 decode \citep{taxbreak2026,shah2024flashattention3}.}
+\label{tab:ch07_dispatch}
+\begin{tabular}{lll}
+\toprule
+Model & Dispatch decided & Per-token launch cost \\
+\midrule
+Per-operator kernels & Host, at runtime & Thousands of launches \\
+Persistent + tile scheduler & In-kernel, at runtime & Fixed CTA count \\
+Static megakernel (MPK) & Compile time & One launch \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dispatch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+Mirage Persistent Kernel takes the elimination of \textbf{runtime} \textbf{dispatch} to the whole model. Its SM-level task graph is built at compile time, and an in-kernel parallel \textbf{runtime} executes the tasks with decentralized scheduling across SMs, so the entire forward pass runs as one launch with no host involvement between operators \citep{mpk2025}. The reported $1.2$--$6.7\times$ end-to-end latency reduction over kernel-per-operator serving is, in large part, the cost of \textbf{runtime} \textbf{dispatch} that the static structure removed \citep{mpk2025,memoryfloor2026}. The same principle is the NPU's default: because the array is configured before execution, there is no \textbf{runtime} that decides tile assignment, and the per-token cost is whatever the static schedule fixed \citep{amd2024xdna,amd2024aie}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep dispatch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
+The tile scheduler deserves a closer look because it is where the small amount of necessary dynamism lives. In a persistent kernel the scheduler is in-kernel logic that hands the next work tile to whichever resident CTA is free, which both balances load and lets the kernel decouple the number of physical CTAs from the number of logical tiles \citep{shah2024flashattention3}. CUTLASS generalizes this with schemes like Stream-K, where the scheduler can split a tile's reduction across CTAs and fall back to simpler data-parallel or Split-K modes by heuristic, and on Hopper it constructs the schedule in units of clusters rather than single tiles \citep{shah2024flashattention3}. The important property for decode is that all of this stays on the GPU: the scheduler is a few instructions of in-kernel arithmetic, not a host callback, so it removes launch overhead without reintroducing dispatch latency.
 
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Contrast this with the NPU, where even the in-kernel scheduler disappears. Because the XDNA array is configured before execution and each tile holds a fixed stage, there is no per-token assignment decision at all---the ``schedule'' is the physical configuration of the fabric, and running a token is just clocking data through it \citep{amd2024xdna,amd2024aie}. This is the most extreme point on the static-to-dynamic axis: the GPU per-operator stack recomputes assignment thousands of times per token, the persistent kernel computes it in-kernel a fixed number of times, the megakernel computes it once at compile time, and the static NPU never computes it at runtime at all \citep{taxbreak2026,mpk2025}. Each step down that axis trades flexibility for fewer per-token decisions, and decode rewards moving as far down it as the workload's regularity allows.
+
+There is an honest limit to schedule-free kernels. A fully static assignment can load-balance poorly when work is irregular---the persistent tile scheduler exists precisely to redistribute uneven work, such as the variable row counts under causal masking, while staying in-kernel \citep{shah2024flashattention3}. The design judgment is how much dynamism to keep: enough to balance genuinely irregular work, but not so much that the host re-enters the loop. For batch-1 decode, where the per-token work is regular and small, the answer is to keep almost nothing dynamic, which is why decode is the workload where schedule-free kernels pay off most \citep{kwon2023vllm,patel2025llminference}.
+
+A practical consequence for serving teams is that the win compounds with model depth. Each transformer layer that a per-operator stack executes adds its own quota of launches and dispatch decisions, so a deep model pays the orchestration tax once per layer per token; a static megakernel pays it once per token regardless of depth \citep{taxbreak2026,mpk2025}. This is why the reported megakernel speedups are largest for the deepest, most launch-dense models---the very OLMoE-style mixture-of-experts configurations that issue 9{,}305 launches per token in the TaxBreak measurement \citep{taxbreak2026}. The static structure converts a cost that scaled with the number of operators into a constant, which is the kind of asymptotic improvement that a faster inner loop can never deliver \citep{memoryfloor2026}.
 
 \section{YiRage tiling}
 \label{sec:ch07_yirage_tiling}
 
-Teams hit \textbf{YiRage tiling} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without tiling residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+The book's reference compiler turns static role assignment into a per-target pass. \textbf{YiRage} carries a \textbf{tiling} pass that, given a fused region and a target, chooses tile shapes and assigns each execution unit its static role---which warps are producers and consumers on a GPU, which tiles are which stage on an NPU---and emits the corresponding schedule-free kernel \citep{yirage2026}. Because the residency budget of Chapter~6 and the role assignment of this chapter are decided together, the \textbf{tiling} pass can guarantee that the chosen tiles fit the on-chip memory of the target while the role assignment keeps producers and consumers overlapped \citep{wu2024mirage,shah2024flashattention3}.
 
-Trace residency: YiRage producers must feed tiling consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The \textbf{tiling} decision is genuinely different per target, which is why it must be a pass and not a fixed template. On a GPU the pass picks a tile size that fits the 228\,KB shared-memory budget, assigns a consumer warpgroup for WGMMA and producer warps for TMA, and reallocates registers toward the consumer \citep{nvidia2022hopper,shah2024flashattention3}. On an XDNA NPU the same logical computation is tiled to fit the 64\,KB tile SRAM, with double-buffered DMA and a fixed tile-to-stage assignment \citep{amd2024aie,amd2024xdna}. The math is identical; the \textbf{tiling} and role assignment are not, and a plan transferred blindly from one to the other is either illegal or wasteful \citep{semianalysis2024tma}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The pass must also decide how far to fuse before assigning roles, because the fusion boundary and the role split are coupled. Fuse too little and the kernel is back to per-operator launches with their dispatch tax; fuse too much and the combined working set blows the residency budget or the register file, forcing a spill that negates the win \citep{nvidia2022hopper,memoryfloor2026}. The \textbf{tiling} pass resolves this by growing the fused region while continuously checking the residency metadata, stopping at the largest region whose static role assignment still fits the target's fast memory \citep{yirage2026,shah2024flashattention3}. This is the same stopping rule Chapter~6 stated for fusion in general, now applied with the role assignment in hand: the boundary sits where one more fused operator would force either a spill or a producer/consumer imbalance that starves the tensor cores. Because the check is per target, the boundary lands in a different place on an H100 than on an XDNA tile, which is exactly why a single hand-tuned kernel cannot be the answer across a heterogeneous fleet \citep{amd2024aie,patel2025llminference}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+The pass treats tile-shape selection as a constrained search rather than a lookup. For a GPU consumer the tile must be large enough to amortize the WGMMA setup and keep the tensor cores busy, small enough that the producer can keep its double buffers filled within the shared-memory budget, and shaped so the access pattern is bank-conflict-free---three constraints that interact, so the pass explores shapes rather than applying a fixed one \citep{shah2024flashattention3,nvidia2022hopper}. For an NPU tile the dominant constraint is simply fitting the double-buffered operands in the 64\,KB local SRAM, after which the pass picks the largest tile that maximizes reuse \citep{amd2024aie,amd2024xdna}. The output of the search is not just a number but a complete static plan: tile shape, producer/consumer warp split, register allocation, and the barrier placement that realizes the overlap.
 
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+This is also where the \textbf{tiling} pass interacts with quantization and precision. A lower-precision tile---FP8 or int8---moves fewer bytes and fits more elements per buffer, which loosens the residency constraint and can change the optimal tile shape and even the producer/consumer ratio \citep{shah2024flashattention3,dlbook}. The pass therefore cannot choose tiles independently of the numeric format; it must co-decide them, because the format determines how much of the working set is resident and therefore how the roles should be balanced. For a memory-bound decode kernel this coupling is the whole game: the format choice and the \textbf{tiling} together set bytes/token, and the role assignment sets whether the movement of those bytes overlaps the compute \citep{taxbreak2026,memoryfloor2026}.
 
-\textbf{static roles} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix static and role together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound static with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on static/role legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize static with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked role---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused static raises bytes/token; fused schedule must keep role on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{thread mapping} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because thread was planned without warp residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: thread producers must feed warp consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for thread on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{no runtime sched} is not peak FLOPs; it is illegal tier placement: runtime spilling to HBM/DDR while dispatch still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on runtime/dispatch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dispatch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep dispatch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage tiling} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix YiRage and tiling together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed tiling consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{static roles} is not peak FLOPs; it is illegal tier placement: static spilling to HBM/DDR while role still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Trace residency: static producers must feed role consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for static on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{thread mapping} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix thread and warp together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound thread with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on thread/warp legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize thread with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked warp---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused thread raises bytes/token; fused schedule must keep warp on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{no runtime sched} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because runtime was planned without dispatch residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: runtime producers must feed dispatch consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for runtime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage tiling} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while tiling still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/tiling legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep tiling on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{static roles} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because static was planned without role residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound static with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on static/role legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize static with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked role---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused static raises bytes/token; fused schedule must keep role on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{thread mapping} is not peak FLOPs; it is illegal tier placement: thread spilling to HBM/DDR while warp still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: thread producers must feed warp consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for thread on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{no runtime sched} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix runtime and dispatch together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on runtime/dispatch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dispatch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep dispatch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage tiling} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without tiling residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed tiling consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{static roles} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix static and role together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: static producers must feed role consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for static on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{thread mapping} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because thread was planned without warp residency on the SKU you ship \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound thread with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on thread/warp legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize thread with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked warp---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused thread raises bytes/token; fused schedule must keep warp on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{no runtime sched} is not peak FLOPs; it is illegal tier placement: runtime spilling to HBM/DDR while dispatch still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Trace residency: runtime producers must feed dispatch consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for runtime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage tiling} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix YiRage and tiling together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/tiling legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep tiling on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{static roles} is not peak FLOPs; it is illegal tier placement: static spilling to HBM/DDR while role still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound static with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on static/role legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize static with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked role---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused static raises bytes/token; fused schedule must keep role on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{thread mapping} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix thread and warp together or bytes/token flatlines while kernel microbenchs celebrate \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Trace residency: thread producers must feed warp consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for thread on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{no runtime sched} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because runtime was planned without dispatch residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound runtime with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on runtime/dispatch legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize runtime with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked dispatch---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused runtime raises bytes/token; fused schedule must keep dispatch on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{YiRage tiling} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while tiling still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed tiling consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{static roles} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because static was planned without role residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: static producers must feed role consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for static on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds static, role to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{thread mapping} is not peak FLOPs; it is illegal tier placement: thread spilling to HBM/DDR while warp still pays launch or DMA tax every token \citep{nvidia2022hopper,semianalysis2024tma}.
-
-Hardware truth: GPUs bound thread with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on thread/warp legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize thread with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked warp---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused thread raises bytes/token; fused schedule must keep warp on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds thread, warp to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{no runtime sched} is where Static Role Assignment and Schedule-Free Kernels meets Chapter~1 counters: fix runtime and dispatch together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: runtime producers must feed dispatch consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for runtime on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds runtime, dispatch to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage tiling} when Static Role Assignment and Schedule-Free Kernels looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without tiling residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/tiling legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked tiling---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep tiling on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, tiling to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
+What makes the \textbf{YiRage} \textbf{tiling} pass composable with the rest of the book's machinery is that it consumes the same residency metadata the memory pass produces and feeds the megakernel search of Chapter~20. The superoptimizer proposes a fusion; the memory pass certifies its footprint fits; the \textbf{tiling} pass assigns static roles and tiles that realize the fusion as a schedule-free kernel on the target \citep{yirage2026,wu2024mirage,mpk2025}. The result is that ``static role assignment'' stops being a hand-coding technique a CUDA expert applies and becomes a compiler decision that is made, checked, and re-made per target automatically.
 
 \section{Key Takeaways}
 \label{sec:ch07_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Static Roles.} Tie static roles to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Thread Mapping.} Tie thread mapping to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{No Runtime Sched.} Tie no runtime sched to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Tiling.} Tie YiRage tiling to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Fix roles at compile time to remove runtime scheduling.}
+Assigning each unit a static role---producer or consumer on a GPU, a fixed stage on an NPU---lets the kernel run without a host scheduler, removing the per-token dispatch that dominates batch-1 \citep{shah2024flashattention3,taxbreak2026}. Flexibility at runtime is overhead paid per token \citep{memoryfloor2026}.
+
+\item \textbf{Warp specialization overlaps data movement and compute.}
+Producer warps issuing TMA and consumer warpgroups issuing WGMMA overlap naturally, and pingpong scheduling overlapped softmax with GEMM for ~580$\to$640 TFLOPS in FlashAttention-3 \citep{shah2024flashattention3}. Static roles are what make the overlap schedulable \citep{semianalysis2024tma}.
+
+\item \textbf{Map roles to the right hierarchy granularity.}
+Roles bind to warps and warpgroups on a GPU (WGMMA is warpgroup-collective), threads and SIMD lanes on a CPU, and tiles on an NPU; co-locate communicating roles so produced data reaches its consumer on chip \citep{shah2024flashattention3,amd2024aie}. Register reallocation skews the file toward consumers \citep{nvidia2022hopper}.
+
+\item \textbf{Persistent kernels keep dispatch in-kernel.}
+Launching CTAs equal to the SM count (132 on H100 SXM5) with an in-kernel tile scheduler eliminates per-tile launch overhead and overlaps epilogue with prologue \citep{shah2024flashattention3}. MPK extends this to one launch for the whole model, reporting 1.2--6.7$\times$ end-to-end latency reduction over kernel-per-operator serving \citep{mpk2025}.
+
+\item \textbf{Make role assignment a per-target compiler pass.}
+The YiRage tiling pass chooses tiles and assigns static roles per target, composing with the residency memory pass and megakernel search \citep{yirage2026,wu2024mirage}. The same math gets a different, checked schedule on each class, and the fusion boundary lands wherever the target's residency budget allows \citep{amd2024xdna}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch07_conclusion}
 
-Static Role Assignment and Schedule-Free Kernels is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Static Role Assignment and Schedule-Free Kernels baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Static role assignment is the structural move that turns Chapter~6's residency budget into a schedule-free kernel: fix what each warp, warpgroup, or tile does at compile time, and the runtime scheduler---and its per-token dispatch cost---disappears \citep{shah2024flashattention3,mpk2025}. Warp specialization and persistent kernels show the GPU path, the XDNA array shows the natively static NPU path, and MPK shows the limit case of one launch per token; in every case the win is that dynamism removed at compile time is overhead not paid at runtime \citep{taxbreak2026,memoryfloor2026}. The YiRage tiling pass makes the assignment a per-target compiler decision rather than a hand-coding feat, choosing tile shapes and role splits that fit each target's residency budget automatically \citep{yirage2026}. Static roles, however, only pay off if the data each role needs arrives on time, which is the subject of Chapter~\ref{chap:ch08}: TMA double-buffer pipelines and the asynchronous movement that keeps producer and consumer roles fed, so the statically assigned consumers never stall waiting on data \citep{semianalysis2024tma,dao2022flashattention}.
 
 \typeout{END_CHAPTER "ch07" \theabspage}

@@ -206,14 +206,20 @@ vLLM custom op wrapping YiRage superoptimized decode cell: framework passes bloc
 \label{sec:ch28_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Frameworks schedule; compilers fuse.} Continuous batching raises fleet utilization without fixing BS${=}1$ bytes/token \citep{kwon2023vllm,taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026}.
-\item \textbf{Paged KV is framework layout.} Compilers must lower page tables as first-class IR \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
-\item \textbf{Measure both layers.} Queue time and in-step ms/token/bytes/token \citep{patel2025llminference,taxbreak2026,memoryfloor2026,dlbook}.
-\item \textbf{Integration hooks are contracts.} Export regions must preserve softmax carriers and capture legality \citep{dao2022flashattention,yirage2026,nvidia2024cudagraphs,chen2020compilerbasedhardw}.
-\item \textbf{Multi-hardware parity.} Framework defaults are CUDA-centric; YiRage backends require explicit triplet tests \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,patel2025llminference}.
-\item \textbf{Migration discipline.} Move bucket by shrinking decode export boundaries; never confuse paging wins with fusion wins \citep{kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
-\item \textbf{ABI paired releases.} Framework paging and compiler plugins must version together with golden-token tests \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dlbook}.
-\item \textbf{End-to-end worksheet.} Before PersistentKernel work, log bucket, decode box boundaries, queue wait, and in-step counters at ctx 512/2k/8k \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,dlbook}.
+\item \textbf{Frameworks schedule; compilers fuse.}
+Continuous batching interleaves prefill and decode requests to raise GPU occupancy and fleet utilization, but it does nothing about the batch-1 bytes/token inside a single decode step \citep{kwon2023vllm,patel2025llminference}. The framework owns request scheduling and the compiler owns intra-step fusion, so a serving win at one layer must not be mistaken for a win at the other \citep{taxbreak2026,memoryfloor2026}.
+
+\item \textbf{Paged KV is framework layout the compiler must lower.}
+PagedAttention treats the KV cache as allocatable blocks---framework memory management, not compiler math---but the compiler must still lower those page tables as first-class IR so fusion can see page boundaries \citep{kwon2023vllm,yirage2026}. Hiding the paging from the compiler forces gather/scatter that breaks on-chip residency at the attention seam \citep{chen2020compilerbasedhardw,patel2025llminference}.
+
+\item \textbf{Measure both layers, not one.}
+Framework bottlenecks mirror Chapter~1---launches/token, bytes/token, orchestration tax---but are often introduced \emph{above} the kernel by Python loops and dispatcher churn, so the diagnosis must report queue/scheduling time alongside in-step ms/token and bytes/token \citep{taxbreak2026,patel2025llminference}. A fast kernel behind a slow scheduler still misses the SLO \citep{memoryfloor2026,dlbook}.
+
+\item \textbf{Integration hooks are contracts, and parity is explicit.}
+The seams where a compiler attaches---exported FX/ONNX regions, custom-op plugins, CUDA-graph capture buckets, PersistentKernel call sites---must preserve softmax carriers and capture legality across the boundary, or fusion silently regresses \citep{dao2022flashattention,yirage2026,nvidia2024cudagraphs}. Framework defaults are CUDA-centric, so multi-hardware parity requires explicit triplet tests on the YiRage backends rather than assumed equivalence \citep{amd2024xdna,amd2024aie}.
+
+\item \textbf{Migrate by shrinking the decode export, and version the ABI.}
+Move a workload bucket by bucket, shrinking the decode export boundary, and never confuse a paging win with a fusion win; before any PersistentKernel work, log the bucket, decode-box boundaries, queue wait, and in-step counters at context 512/2k/8k \citep{kwon2023vllm,patel2025llminference}. Framework paging and compiler plugins must release together with golden-token tests, since an ABI skew between them corrupts output in ways a counter dashboard will not catch \citep{yirage2026,memoryfloor2026}.
 \end{itemize}
 
 \section{Conclusion}

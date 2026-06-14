@@ -2,9 +2,11 @@
 \label{chap:ch17}
 \typeout{START_CHAPTER "ch17" \theabspage}
 
-Part~VI treats \emph{OpenAI Triton} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
-
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+Triton made GPU kernel authoring look like Python and still hit cuBLAS/cuDNN-class throughput, which is exactly why it is dangerous in a decode pipeline if you stop at ``the kernel is fast'' \citep{tillet2019triton}. The language is built around one abstraction---the \emph{tile}, a statically shaped multi-dimensional sub-array---so a programmer writes a per-block program over tiles and the compiler handles coalescing, shared-memory staging, and instruction scheduling \citep{tillet2019triton}. That productivity is real: FlashAttention-style fused attention is practical to write and maintain in Triton in a way it never was in raw CUDA \citep{dao2022flashattention}.
+The decode trap is the same one Chapter~16 raised for TVM. A beautiful Triton matmul does nothing for batch-1 latency if the decoder layer still dispatches a dozen separate kernels per token. Dense Llama-3.2-1B already averages 847.5 GPU kernel launches per output token on H100; OLMoE-1B/7B averages 9{,}305 \citep{taxbreak2026}. Triton helps only when it is used to \emph{fuse} the decode loop into fewer, residency-aware kernels, and when those kernels are captured to amortize host launch cost \citep{memoryfloor2026,nvidia2024cudagraphs}. This chapter treats Triton as a block-level kernel compiler graded on bytes/token and launches/token, not as a Python tutorial \citep{patel2025llminference}.
+\index{Triton}
+\index{Tile programming model}
+\index{TritonGPU IR}
 
 \section{Triton HW matrix}
 \label{sec:ch17_triton_hw_matrix}
@@ -14,31 +16,25 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Triton HW Matrix};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Python \texttt{@triton.jit}\\tile program};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Block tiling\\shared mem / regs};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused decode\\kernel};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize GPU target\\PTX / AMDGCN};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Triton HW Matrix optimization pipeline in OpenAI Triton: Pythonic GPU Kernel Compiler.}
+\caption{Triton compiles a per-block Python tile program to a fused GPU kernel; the block model assumes a GPU memory hierarchy.}
 \label{fig:triton_hw_matrix_pipeline}
 \end{figure}
 
-Teams hit \textbf{Triton HW matrix} when OpenAI Triton looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without target residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+Triton's support \textbf{matrix} is deliberately narrower than a general tensor compiler's, and pretending otherwise is the first \textbf{hardware} mistake. Triton is GPU-first: the production back-ends emit NVIDIA PTX and AMD AMDGCN, with CPU and Intel GPU back-ends emerging \citep{tritonlang2024}. Its programming model assumes a SIMT machine with warps, shared memory, and a coalesced global-memory \textbf{target}---so it maps cleanly onto GPUs and not onto static-dataflow fabrics \citep{nvidia2022hopper,tillet2019triton}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The honest multi-hardware reading is that Triton is the right abstraction on one class and the wrong one on another. On a \textbf{gpu} it lets you express residency---which tiles live in shared memory, how loads are pipelined---at exactly the granularity decode needs \citep{tillet2019triton,memoryfloor2026}. On a \textbf{cpu} the same block program can be lowered but loses its raison d'\^etre, since cache blocking and SIMD want a different schedule \citep{dlbook}. On an \textbf{npu} such as XDNA/AIE the block-over-warps model does not apply at all: those fabrics demand static tile-to-DMA assignment decided at compile time, not a SIMT block grid \citep{amd2024xdna,amd2024aie}.
 
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+Triton's design point also explains where it fits between raw CUDA and a whole-graph compiler. It abstracts away intra-block concerns---thread indexing, explicit shared-memory management, and memory coalescing are the compiler's job, not the author's---while leaving inter-block tiling and the fusion boundary to the programmer \citep{tillet2019triton}. That is more control than a graph compiler that decides fusion for you and more productivity than CUDA where you manage every load by hand. For decode the consequence is specific: Triton gives you exactly the knob that matters---where the fusion boundary sits---but it does not decide that boundary for you, so a careless kernel can still be fast in isolation and wasteful in a layer \citep{taxbreak2026,memoryfloor2026}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} A Hopper GPU lets a Triton kernel hide latency with asynchronous copy and pipelined loads; an XDNA NPU cannot run the block model and needs a different compiler path entirely \citep{semianalysis2024tma,amd2024aie}. This is why a serving stack treats Triton as one back-end among several rather than a universal target, and why YiRage carries Triton as a GPU code path while routing NPU work elsewhere \citep{yirage2026}.
 
 \section{Triton arch passes}
 \label{sec:ch17_triton_arch_passes}
@@ -48,229 +44,96 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+ \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Triton IR\\(TTIR)};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize TritonGPU IR\\(TTGIR)};
+ \node[vis arch node] (s2) at (1.67,0) {\footnotesize LLVM IR\\};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize PTX / AMDGCN\\};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Triton Arch Passes block diagram for OpenAI Triton: Pythonic GPU Kernel Compiler.}
+\caption{Triton's MLIR pass pipeline: the Triton dialect (TTIR) is lowered to the TritonGPU dialect (TTGIR), then to LLVM and a GPU assembly target.}
 \label{fig:triton_arch_passes_architecture}
 \end{figure}
 
-The production surprise at \textbf{Triton arch passes} is not peak FLOPs; it is illegal tier placement: pass spilling to HBM/DDR while lower still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Modern Triton's backend was rewritten on MLIR, so the \textbf{pass} pipeline is an explicit \textbf{dialect} tower: the Triton \textbf{dialect} (TTIR) captures the tile program; the TritonGPU dialect (TTGIR) attaches GPU-specific layout and scheduling; both then \textbf{lower} to LLVM IR and a GPU assembly target \citep{tritonlang2024}. Unlike TVM's fixed two-level IR, Triton commits to this progressive-lowering dialect stack and concentrates its \textbf{optim}ization in the TTGIR stage \citep{chen2020compilerbasedhardw,tillet2019triton}.
 
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+\begin{table}[t]
+\centering
+\caption{Triton's MLIR lowering stages and what each level controls; the TTGIR stage is where decode residency is decided \citep{tritonlang2024}.}
+\label{tab:ch17_triton_stages}
+\begin{tabular}{lll}
+\toprule
+Stage & Dialect / form & What it controls \\
+\midrule
+TTIR & Triton dialect & Tile program, target-agnostic \\
+TTGIR & TritonGPU dialect & Layout, coalescing, pipelining \\
+LLVM IR & LLVM & Scalar/vector lowering, registers \\
+PTX / AMDGCN & GPU assembly & Final emit (\texttt{ptxas} / ROCm) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The TTGIR passes are where decode residency is won or lost. Layout assignment decides whether a tile lives in registers, shared memory, or an MMA-friendly layout for tensor cores; coalescing passes decide whether global loads are contiguous; the software-pipelining pass overlaps loads with compute by issuing them \texttt{num\_stages} iterations ahead \citep{tritonlang2024,semianalysis2024tma}. Get the layout pass wrong and the kernel silently spills a tile to global memory between blocks---which reads downstream as an unexplained bytes/token regression rather than a compile error \citep{memoryfloor2026,taxbreak2026}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
+Triton's layout system is the part most CUDA programmers underestimate. A blocked layout distributes a tile across threads for coalesced loads; an MMA layout matches the register fragment shape a tensor-core instruction expects; a shared layout stages data for cross-thread reuse \citep{tritonlang2024}. The compiler inserts conversions between layouts automatically, and an unnecessary conversion is a hidden shared-memory round trip---cheap in a throughput kernel, measurable in a batch-1 decode kernel that runs thousands of times per token window \citep{taxbreak2026,semianalysis2024tma}. This is the level at which fusion either keeps the decoder layer on-chip or quietly does not.
 
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{What to inspect before merge.} Triton can dump every stage (\texttt{TRITON\_KERNEL\_DUMP}, \texttt{MLIR\_ENABLE\_DUMP}); diff the TTGIR and the emitted PTX for new shared-memory allocations or un-pipelined loads, and count launches/token at the call site \citep{tritonlang2024,nvidia2024cudagraphs}. A pass reorder that breaks pipelining will not change correctness, only p99 \citep{patel2025llminference}.
 
 \section{Triton codegen}
 \label{sec:ch17_triton_codegen}
 
-\textbf{Triton codegen} is where OpenAI Triton meets Chapter~1 counters: fix codegen and backend together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Codegen} in Triton is per-GPU and explicit. The NVIDIA \textbf{backend} lowers LLVM IR to PTX and runs \texttt{ptxas} to \textbf{emit} a CUBIN; the AMD backend emits AMDGCN for ROCm \citep{tritonlang2024}. The \textbf{platform} you target therefore changes the final assembly, but the controlling knobs are the same two parameters that govern the emitted schedule: \texttt{num\_warps} (warps per CTA, hence threads $=$ \texttt{num\_warps}$\times 32$) and \texttt{num\_stages} (software-pipelining depth) \citep{tritonlang2024}.
 
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The trap is grading the emitted kernel by its standalone throughput. At batch-1 decode the dominant cost is host orchestration and surviving HBM round trips, not the quality of a single emitted MMA \citep{taxbreak2026,memoryfloor2026}. Two codegen decisions actually move ms/token. First, fuse: emit one kernel for the decoder layer (e.g.\ a Triton FlashAttention plus the projection epilogue) so activations never leave the chip between operators \citep{dao2022flashattention}. Second, capture: wrap the fused launch sequence in a CUDA Graph so the host stops paying per-kernel dispatch every token---the Memory-Floor study recovered roughly $1.26\times$ on an H100 Qwen-2.5-7B decode cell from capture alone, with no change to the emitted math \citep{memoryfloor2026,nvidia2024cudagraphs}.
 
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+There is a second-order codegen cost that decode exposes: register pressure. The LLVM stage allocates registers per thread, and a kernel that fuses an entire decoder layer can exceed the per-thread budget, forcing spills to local memory or capping occupancy through \texttt{maxnreg} \citep{tritonlang2024,nvidia2022hopper}. On a throughput kernel low occupancy is often fine because each block does enough work; on a batch-1 decode kernel the launch is already thin, so a register spill is pure overhead with nothing to hide behind \citep{taxbreak2026,memoryfloor2026}. The practical consequence is that ``fuse everything'' is not free---past a point, a slightly less fused kernel with healthy occupancy beats a maximally fused one that spills.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} Raising \texttt{num\_stages} prefetches more aggressively and hides latency on a Hopper GPU with deep async-copy queues, but it costs shared memory and can reduce occupancy on a smaller SKU \citep{semianalysis2024tma,nvidia2022hopper}. The same Triton source therefore wants a different \texttt{num\_stages} per GPU generation, and none of it transfers to a static NPU fabric \citep{amd2024xdna}.
 
 \section{Triton tuning}
 \label{sec:ch17_triton_tuning}
 
-Teams hit \textbf{Triton tuning} when OpenAI Triton looks correct in isolation yet decode telemetry disagrees---usually because tun was planned without profile residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+Triton's auto-tuning is a decorator, not a search service: \texttt{@triton.autotune} takes a list of \texttt{triton.Config} entries---block sizes plus \texttt{num\_warps} and \texttt{num\_stages}---benchmarks them at runtime for a given key, and caches the winner \citep{tritonlang2024}. Because the candidate set is author-supplied, the quality of \textbf{tun}ing is bounded by which configurations you thought to list. This is leaner than TVM's learned-cost-model search but puts the burden on the engineer to enumerate sensible blocks.
 
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+Autotuning is also not free at runtime. Each config in the list must be compiled and benchmarked the first time a new key is seen, so a large config set inflates warmup latency and the first request after a shape change pays the search \citep{tritonlang2024}. In a serving context that means the config list should be curated for the shapes you actually decode at, not a kitchen-sink sweep---and the cache key must include the dimensions that change the optimal schedule, or the autotuner silently reuses a config tuned for the wrong shape.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{pitfall} is the operating point you \textbf{profile}. The reflexive config list is copied from a GEMM example tuned for large, batched, prefill-shaped matmuls: big \texttt{BLOCK\_M}/\texttt{BLOCK\_N}, high \texttt{num\_stages} \citep{kwon2023vllm}. At batch-1 decode the attention and projection GEMMs are matrix-vector products, so a large block tile is mostly idle lanes and a deep pipeline over-allocates shared memory for loads that never amortize \citep{taxbreak2026,memoryfloor2026}. The fix is mechanical: autotune at the decode shape (BS${=}1$, realistic context), include small-block and low-\texttt{num\_stages} configs, and rank candidates by measured end-to-end ms/token after decomposing bytes/token and launches/token---not by the kernel's isolated GB/s \citep{patel2025llminference,dlbook}. The right config is also \textbf{hardware}-specific: a Hopper SKU tolerates a deeper pipeline than a memory-smaller inference GPU, so the cached winner does not port across generations \citep{nvidia2022hopper}.
 
 \section{Triton case study}
 \label{sec:ch17_triton_case_study}
 
-The production surprise at \textbf{Triton case study} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Make it concrete with a fused decode attention kernel as the \textbf{case}. Writing FlashAttention in Triton keeps the query--key--value tiles and the running softmax state on-chip, so the kernel computes attention without materializing the full score matrix to HBM \citep{dao2022flashattention,tillet2019triton}. \textbf{Benchmark} it at the decode operating point and the reading matches the book's thesis: an isolated per-operator kernel can win a microbenchmark yet lose end-to-end because each unfused boundary is an HBM round trip and each kernel is a separate launch \citep{taxbreak2026,memoryfloor2026}.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The arithmetic shows why fusion is the lever. A non-fused attention step writes the full score vector for the new query against the cached context to HBM and reads it back for the softmax; at context length $L{=}2048$ in FP32 that score vector is $2048 \times 4 = 8\,$KB written and re-read per head per token \citep{dao2022flashattention}. A Triton FlashAttention kernel keeps the running max and sum in registers and never materializes that vector, so across many heads and 32 layers it removes on the order of hundreds of kilobytes of avoidable HBM traffic per token---bytes/token drops even though the multiply-accumulate count is unchanged \citep{taxbreak2026,memoryfloor2026}. An isolated GEMM benchmark cannot see this win because it never had the inter-operator round trip in the first place.
 
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+This case also points at where Triton meets the book's megakernel thesis. Fusing one attention block is a start, but the larger decode win comes from collapsing a whole decoder layer, or even several, into one persistent kernel that keeps weights and running state resident and issues a single launch per token rather than dozens. Triton makes that practical to express, because the programmer controls exactly where the fusion boundary sits and can widen it until register pressure or shared memory pushes back. The discipline is to grow the fused region while watching occupancy and the launch count together, stopping at the point where one more fused operator would force a spill that costs more than the launch it saved. That trade is measured per token and per hardware generation, never assumed, which is precisely the residency contract the rest of this book builds on.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{Triton HW matrix} is where OpenAI Triton meets Chapter~1 counters: fix hardware and target together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Triton arch passes} when OpenAI Triton looks correct in isolation yet decode telemetry disagrees---usually because pass was planned without lower residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Triton codegen} is not peak FLOPs; it is illegal tier placement: codegen spilling to HBM/DDR while backend still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Triton tuning} is where OpenAI Triton meets Chapter~1 counters: fix tun and profile together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Triton case study} when OpenAI Triton looks correct in isolation yet decode telemetry disagrees---usually because case was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Triton HW matrix} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while target still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: hardware producers must feed target consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Triton arch passes} is where OpenAI Triton meets Chapter~1 counters: fix pass and lower together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pass/lower legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lower---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pass raises bytes/token; fused schedule must keep lower on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Triton codegen} when OpenAI Triton looks correct in isolation yet decode telemetry disagrees---usually because codegen was planned without backend residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: codegen producers must feed backend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for codegen on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Triton tuning} is not peak FLOPs; it is illegal tier placement: tun spilling to HBM/DDR while profile still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound tun with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on tun/profile legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize tun with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked profile---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tun raises bytes/token; fused schedule must keep profile on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Triton case study} is where OpenAI Triton meets Chapter~1 counters: fix case and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: case producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{cross-hardware} conclusion is the honest limit of Triton. On the GPU, the fused-and-captured Triton kernel is close to the best available decode path; on a CPU the same tile program is a poor fit for cache-blocked SIMD; on an XDNA/AIE NPU the block-over-warps model does not lower at all and a static-dataflow compiler is required instead \citep{amd2024xdna,amd2024aie,dlbook}. \textbf{YiRage} reflects this directly: it uses Triton as its GPU kernel back-end while carrying the Chapter~2 residency rules as checkable IR metadata, so a Triton schedule that would spill a tile between blocks is rejected at compile time, and non-GPU targets are routed to backends whose machine model actually fits \citep{yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch17_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Triton HW Matrix.} Tie Triton HW matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Triton Arch Passes.} Tie Triton arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Triton Codegen.} Tie Triton codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Triton Tuning.} Tie Triton tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Triton Case Study.} Tie Triton case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Triton is a GPU block compiler, not a universal target.}
+Its tile/SIMT model maps to NVIDIA PTX and AMD AMDGCN but not to static-dataflow NPUs, so treat it as one back-end in a multi-hardware stack \citep{tillet2019triton,tritonlang2024}. The build matrix is GPU-shaped \citep{amd2024xdna}.
+
+\item \textbf{Win residency in the TTGIR passes.}
+Layout assignment, coalescing, and software pipelining at the TritonGPU dialect decide whether tiles stay on-chip; a bad layout pass spills silently and shows up only as a bytes/token regression \citep{tritonlang2024,memoryfloor2026}. Dump and diff the IR before merge \citep{taxbreak2026}.
+
+\item \textbf{Grade codegen by orchestration, not one kernel.}
+At batch-1 the launch floor and HBM round trips dominate, so fuse the decoder layer and capture the launch sequence; capture alone recovered roughly $1.26\times$ on an H100 decode cell \citep{memoryfloor2026,nvidia2024cudagraphs}. A fast standalone MMA is not a fast token \citep{dao2022flashattention}.
+
+\item \textbf{Autotune at the decode operating point.}
+\texttt{@triton.autotune} only explores the configs you list; default GEMM configs over-tile and over-pipeline for batch-1 \citep{tritonlang2024,kwon2023vllm}. Include small-block, low-\texttt{num\_stages} configs and rank by ms/token \citep{patel2025llminference}.
+
+\item \textbf{Tuned kernels do not port across GPUs.}
+Optimal \texttt{num\_warps}/\texttt{num\_stages} depend on shared-memory size and async-copy depth, so a cached winner must be re-tuned per generation \citep{nvidia2022hopper,semianalysis2024tma}. Portability is a re-tune, not a copy \citep{dlbook}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch17_conclusion}
 
-OpenAI Triton is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume OpenAI Triton baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Triton's tile abstraction and MLIR dialect pipeline are the cleanest way to write fused, residency-aware GPU kernels at Python productivity, and they are why decode-critical kernels like FlashAttention are now maintainable \citep{tillet2019triton,dao2022flashattention}. But the payoff is conditional: Triton helps interactive serving only when its TTGIR passes, its PTX/AMDGCN codegen, and its autotuner are aimed at the batch-1 decode shape and graded on bytes/token and launches/token \citep{taxbreak2026,memoryfloor2026}. That is the residency contract YiRage enforces as IR metadata across its backends \citep{yirage2026}. Triton also exposes the limit of a GPU-only kernel compiler, which motivates the next surface: Chapter~\ref{chap:ch18} turns to IREE, an MLIR-native compiler and runtime that carries the same dialect-lowering discipline across a wider hardware matrix \citep{dlbook}.
 
 \typeout{END_CHAPTER "ch17" \theabspage}

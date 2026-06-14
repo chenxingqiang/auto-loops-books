@@ -57,3 +57,36 @@ ch14-202606101206	100.0	4652	52	95.6	keep	deep-rewrite
 ch14-202606101218	100.0	4223	52	94.5	keep	deep-rewrite
 ch12-202606112315	100.0	3354	17	95.1	keep	deep-rewrite
 ch13-202606112324	100.0	4880	19	94.8	keep	deep-rewrite
+ch16-202606131301	100.0	2169	17	94.1	keep	deep-rewrite: replace ch16 TVM pad filler with verified Relax/TIR/AutoTVM/Ansor content
+ch17-202606131315	100.0	2117	15	94.0	keep	deep-rewrite: replace ch17 Triton pad filler with verified tile/TTGIR/autotune content
+ch18-202606131328	100.0	2038	13	94.1	keep	deep-rewrite: replace ch18 IREE pad filler with verified Flow/Stream/HAL/VM content
+ch19-202606140415	100.0	2019	14	94.0	keep	deep-rewrite: replace ch19 Glow pad filler with verified two-phase IR/operator-stacking/PGQ content
+ch20-202606140427	100.0	2109	17	94.0	keep	deep-rewrite: replace ch20 Mirage pad filler with verified uGraph/superopt/MPK content
+ch21-202606140445	100.0	2103	20	94.0	keep	deep-rewrite: replace ch21 unified-benchmark pad filler with verified cross-compiler comparison
+ch06-202606140458	100.0	3503	16	94.0	keep	deep-rewrite: replace ch06 residency pad filler with verified GPU/CPU/NPU on-chip memory content
+ch07-202606140522	100.0	3500	15	94.0	keep	deep-rewrite: replace ch07 static-role pad filler with verified warp-specialization/persistent-kernel content
+ch08-202606140543	100.0	3500	16	94.0	keep	deep-rewrite: replace ch08 pad filler with verified TMA/double-buffer/async pipeline content
+ch09-202606140606	100.0	3501	13	94.0	keep	deep-rewrite: replace ch09 pad filler with verified sync-hierarchy/deadlock content
+ch24-202606140620	100.0	2401	18	94.0	keep	deep-rewrite: replace ch24 pad filler with verified heterogeneous-deployment content (pad-residual backlog cleared)
+ch03-202606140636	100.0	4004	20	94.0	keep	deep-rewrite: replace ch03 hardware-constraints template filler with verified GPU/CPU/NPU content
+ch15-202606140650	100.0	1682	18	95.3	keep	deep-rewrite: expand thin XLA chapter to sibling depth with verified HLO/fusion/command-buffer content
+ch02-202606140659	100.0	4072	19	97.2	keep	key-takeaways: replace placeholder takeaways with Fregly bold-title+paragraph form
+ch04-202606140659	100.0	4149	15	94.4	keep	key-takeaways: upgrade single-line takeaways to Fregly paragraph form
+ch05-202606140659	100.0	4547	15	95.3	keep	key-takeaways: replace placeholder takeaways with Fregly bold-title+paragraph form
+ch14-202606140659	100.0	4143	15	94.3	keep	key-takeaways: replace placeholder takeaways with Fregly bold-title+paragraph form
+ch13-202606140705	100.0	3143	15	94.2	keep	key-takeaways: upgrade to Fregly bold-title+paragraph form
+ch26-202606140705	100.0	1155	15	94.3	keep	key-takeaways: replace placeholder takeaways with Fregly paragraph form
+ch27-202606140705	100.0	1171	15	94.4	keep	key-takeaways: replace placeholder takeaways with Fregly paragraph form
+ch22-202606140712	100.0	1719	15	94.4	keep	key-takeaways: upgrade to Fregly bold-title+paragraph form
+ch23-202606140712	100.0	1371	15	94.3	keep	key-takeaways: upgrade to Fregly bold-title+paragraph form
+ch28-202606140712	100.0	3691	15	94.4	keep	key-takeaways: upgrade to Fregly bold-title+paragraph form
+ch01-202606140720	100.0	3600	28	94.3	keep	key-takeaways: expand final borderline item to paragraph (book-wide KT audit complete)
+ch10-202606140720	100.0	4063	15	94.2	keep	key-takeaways: upgrade weak items to Fregly paragraph form
+ch25-202606140720	100.0	2586	15	94.2	keep	key-takeaways: upgrade weak item to Fregly paragraph form
+ch29-202606140720	100.0	4212	15	94.4	keep	key-takeaways: upgrade weak items to Fregly paragraph form
+ch30-202606140720	100.0	4100	15	94.2	keep	key-takeaways: upgrade weak items to Fregly paragraph form
+ch02-202606140728	100.0	0	0	97.4	keep	conclusion: real synthesis + bridge to ch03
+ch03-202606140728	100.0	0	0	94.0	keep	conclusion: fix mis-bridge (ch06->ch04 next chapter)
+ch05-202606140728	100.0	0	0	95.5	keep	conclusion: real synthesis + bridge to ch06
+ch14-202606140728	100.0	0	0	94.5	keep	conclusion: real synthesis + bridge to ch15
+ch22-202606140728	100.0	0	0	94.4	keep	conclusion: add bridge to ch23
