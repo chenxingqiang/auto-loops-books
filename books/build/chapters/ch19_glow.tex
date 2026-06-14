@@ -2,9 +2,11 @@
 \label{chap:ch19}
 \typeout{START_CHAPTER "ch19" \theabspage}
 
-Part~VI treats \emph{Glow} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
-
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
+Glow is the compiler in this Part that optimizes for the opposite end of the hardware spectrum from a datacenter GPU: it targets CPUs, accelerators, and memory-constrained edge devices, and it makes a deliberate bet that ahead-of-time compilation into a self-contained object file beats a runtime interpreter \citep{rotem2018glow,pytorchglow2024}. That bet matters for the same reason Chapter~1 gave: eliminating per-operator dispatch overhead is the lever that moves batch-1 latency, and Glow removes it at compile time by emitting one bundle with a single entry function rather than dispatching operators through a framework \citep{taxbreak2026,patel2025llminference}.
+The honest framing is that Glow is not where you optimize H100 LLM decode---it has no CUDA-graph-class GPU path---but it is exactly where you optimize decode on a Cortex-M or a small accelerator, and its design choices (graph lowering to a few primitives, operator stacking, profile-guided quantization) are the ones a residency-first engineer should recognize \citep{memoryfloor2026,dlbook}. This chapter treats Glow as a lightweight AOT compiler graded on bytes/token and launches/token at the edge, not as a build-tool tutorial \citep{nvidia2024cudagraphs}.
+\index{Glow}
+\index{Operator stacking}
+\index{Profile-guided quantization}
 
 \section{Glow HW matrix}
 \label{sec:ch19_glow_hw_matrix}
@@ -14,31 +16,23 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Glow HW Matrix};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Model\\(ONNX / TFLite)};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Lower to\\LA primitives};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Operator-stacked\\kernel};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize AOT bundle\\CPU / MCU};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Glow HW Matrix optimization pipeline in Glow: Lightweight AI Compiler.}
+\caption{Glow lowers a model to a few linear-algebra primitives, stacks element-wise work into single-traversal kernels, and emits a self-contained AOT bundle.}
 \label{fig:glow_hw_matrix_pipeline}
 \end{figure}
 
-Teams hit \textbf{Glow HW matrix} when Glow looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without target residency on the SKU you ship \citep{amd2024xdna,amd2024aie}.
+Glow's support \textbf{matrix} is shaped by one design decision: rather than implement every operator on every \textbf{target}, the compiler lowers the high-level graph to a small set of linear-algebra primitives, so a new \textbf{hardware} backend only has to implement those primitives \citep{rotem2018glow}. That is why Glow spreads cheaply across accelerators and edge parts, and why its production sweet spot is the LLVM CPU backend cross-compiled to embedded cores like Arm Cortex-M, not a server GPU \citep{pytorchglow2024}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The honest multi-hardware reading inverts the usual GPU-first story. On a \textbf{cpu} or microcontroller Glow is excellent: the AOT bundle removes interpreter and dispatch overhead and fits a fixed memory budget \citep{rotem2018glow,taxbreak2026}. On a \textbf{gpu} Glow exists (an OpenCL backend) but is not the decode tool---there is no captured-launch-graph story to rival the CUDA path Chapters~16--18 described \citep{memoryfloor2026,nvidia2024cudagraphs}. On an \textbf{npu} or custom accelerator Glow's small-primitive lowering is precisely the abstraction that makes a new backend tractable, which is its strategic value to silicon vendors \citep{amd2024xdna,amd2024aie}.
 
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} The same model compiles to an x86 bundle for a host and a Cortex-M bundle for an edge device, but the residency math differs by orders of magnitude: an MCU with kilobytes of SRAM cannot hold the working set an x86 cache can, so a fusion that helps on the host may not even fit on the edge target \citep{dlbook,amd2024aie}. YiRage treats this as routing: it carries the Chapter~2 residency rules as checkable metadata and selects an edge-style AOT path or a GPU path per target rather than assuming one bundle is universally optimal \citep{yirage2026}.
 
 \section{Glow arch passes}
 \label{sec:ch19_glow_arch_passes}
@@ -47,230 +41,92 @@ Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.86, transform shape]
+ \node[vis arch node] (s0) at (-5.4,0) {\footnotesize High-level\\graph IR};
+ \node[vis arch node] (s1) at (-1.8,0) {\footnotesize IRGen\\(lowering)};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize Low-level\\address-only IR};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize LLVM\\codegen};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Glow Arch Passes block diagram for Glow: Lightweight AI Compiler.}
+\caption{Glow's two-phase IR: a high-level node graph for domain-specific optimization, lowered via IRGen to a low-level address-only instruction IR before code generation.}
 \label{fig:glow_arch_passes_architecture}
 \end{figure}
 
-The production surprise at \textbf{Glow arch passes} is not peak FLOPs; it is illegal tier placement: pass spilling to HBM/DDR while lower still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Glow's \textbf{pass} pipeline is built on a two-phase strongly-typed IR, and each phase owns a different class of \textbf{optim}ization \citep{rotem2018glow}. The high-level IR is a static-shaped dataflow node graph where domain-specific rewrites live: merge batch-norm into convolution, change a matrix layout, eliminate a numeric rescale. IRGen then \textbf{lower}s each high-level node into one or more low-level instructions, producing an address-only IR whose operands are typed pointers to buffers; this is where memory optimizations run---instruction scheduling, static memory allocation, and copy elimination \citep{rotem2018glow}.
 
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+\begin{table}[t]
+\centering
+\caption{Glow's two-phase IR and the optimization class each level owns \citep{rotem2018glow}.}
+\label{tab:ch19_glow_ir}
+\begin{tabular}{lll}
+\toprule
+IR level & Form & Optimizations \\
+\midrule
+High-level & Node dataflow graph & Domain-specific (BN+conv, layout, rescale) \\
+Low-level & Address-only instructions & Scheduling, static alloc, copy elimination \\
+Codegen & LLVM IR & Stacked kernels, target-specific emit \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+It is worth being precise about what Glow is and is not here. Glow predates the MLIR \textbf{dialect} approach that IREE and modern TVM use, and instead of an open, extensible dialect tower it hard-codes this fixed two-level design \citep{rotem2018glow}. The trade is less generality but a shorter, more predictable lowering path---appropriate for an edge compiler where build reproducibility and a tight memory plan matter more than supporting every research IR. For decode, the low-level IR's static memory allocation is the feature that matters: a fixed buffer plan computed at compile time is what lets a bundle run in a known footprint without an allocator in the hot path \citep{taxbreak2026,patel2025llminference}.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{What to inspect before merge.} Because both IR levels are dumpable, diff the low-level IR for buffer reuse and copy elimination, and confirm that element-wise chains were stacked rather than left as separate traversals \citep{rotem2018glow,memoryfloor2026}. A regression shows up as extra buffers or extra tensor passes, not as a wrong answer \citep{dlbook}.
 
 \section{Glow codegen}
 \label{sec:ch19_glow_codegen}
 
-\textbf{Glow codegen} is where Glow meets Chapter~1 counters: fix codegen and backend together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
+Glow's primary \textbf{codegen} path is its LLVM-based CPU \textbf{backend}, and its signature trick is operator stacking: instead of one kernel per element-wise operator, Glow generates LLVM IR for a single stacked kernel that performs all the chained operations during one traversal of the tensor \citep{pytorchglow2024,rotem2018glow}. That is the bytes/token lever in its purest form---an unstacked chain reads and writes the tensor once per operator, while the stacked kernel touches it once \citep{taxbreak2026,memoryfloor2026}.
 
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Because the backend is LLVM, Glow can \textbf{emit} a self-contained object file (a bundle) and cross-compile it for a different \textbf{platform} via standard LLVM target flags---for example an Arm Cortex-M7 core on an embedded board \citep{pytorchglow2024}. The decode-relevant consequence is that the bundle has a single inference entry point and no framework dispatch, so the per-token launch overhead that dominates batch-1 on a Python stack simply does not exist; the work is one compiled function call \citep{taxbreak2026,nvidia2024cudagraphs}. This is the AOT counterpart to capturing a launch graph on a GPU, achieved by never having a launch loop in the first place \citep{memoryfloor2026}.
 
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+There is a subtler reason operator stacking matters more at the edge than the headline FLOP count suggests. On a memory-constrained device the limiter is rarely arithmetic; it is the bandwidth between the compute core and whatever memory tier holds the activations, and every extra tensor traversal pays that bandwidth tax again \citep{taxbreak2026,memoryfloor2026}. By collapsing a chain of element-wise operators---bias add, activation function, rescale---into one traversal, Glow turns several bandwidth-bound passes into one, which on a small core is often a larger win than any single-operator speedup \citep{rotem2018glow}. The same logic is why the static memory plan matters: with buffers assigned at compile time, the bundle reuses a small pool of scratch memory instead of allocating per operator, so the resident footprint stays inside the device's on-chip budget and the allocator never appears in the per-token path \citep{dlbook,patel2025llminference}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+\paragraph{Multi-hardware delta.} On a CPU or MCU the stacked kernel plus a static buffer plan is close to the best available edge decode path; on a GPU the same approach does not exploit warps or tensor cores, so Glow's CPU strength does not transfer upward \citep{nvidia2022hopper,semianalysis2024tma}. The lowering-to-primitives design is what lets a new accelerator backend reuse the high-level optimizations without reimplementing them \citep{amd2024aie}.
 
 \section{Glow tuning}
 \label{sec:ch19_glow_tuning}
 
-Teams hit \textbf{Glow tuning} when Glow looks correct in isolation yet decode telemetry disagrees---usually because tun was planned without profile residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+Glow's most distinctive tuning mechanism is \textbf{profile}-guided quantization, and it is profile-first by construction \citep{rotem2018glow}. The flow is two-phase: statically instrument the network with profiling nodes, run inference on representative data to record the numeric range of each activation, then recompile using that profile to convert the float network into int8 islands of computation, fusing away rescales between nodes \citep{pytorchglow2024}. On a memory-bound edge target this is a direct bytes/token win---int8 activations and weights move a quarter of the bytes of float32---and it reduces the model footprint enough to fit parts that float32 never would \citep{taxbreak2026,memoryfloor2026}.
 
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{pitfall} is the profiling data and the operating point. The recorded ranges are only as representative as the inputs you profiled, so a profile captured on prefill-style batches can mis-estimate the activation ranges seen during long-context batch-1 decode, producing saturation or precision loss exactly where it hurts output quality \citep{kwon2023vllm,dlbook}. Two disciplines follow: profile on decode-representative sequences at the context lengths you actually serve, and re-profile when the workload shifts, because the AOT bundle freezes the quantization decision at compile time. As always the right configuration is \textbf{hardware}-specific---an MCU may force int8 everywhere while a host CPU can keep sensitive layers in float---so the tuned bundle for one target does not transfer to another \citep{amd2024xdna,patel2025llminference}.
 
 \section{Glow case study}
 \label{sec:ch19_glow_case_study}
 
-The production surprise at \textbf{Glow case study} is not peak FLOPs; it is illegal tier placement: case spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+Take a small decoder model compiled to an edge bundle as the \textbf{case}, and \textbf{benchmark} the int8 AOT bundle against a float interpreter at the decode operating point \citep{rotem2018glow,taxbreak2026}. The reading matches the book's thesis from the edge side: the win is not a faster matmul but the removal of dispatch overhead and HBM/DRAM round trips---the stacked kernel keeps element-wise work in one traversal and the static buffer plan avoids allocator churn, so bytes/token and launches/token both drop while the arithmetic is unchanged \citep{memoryfloor2026,dao2022flashattention}. The quantization adds a second bytes/token win by shrinking every activation to int8 \citep{pytorchglow2024}. The arithmetic is direct: a decoder layer that moves float32 activations spends four bytes per element, and converting to int8 cuts that to one, so on a bandwidth-bound edge core the memory traffic for those activations drops by roughly four times before any kernel fusion is counted \citep{taxbreak2026}. That is the dominant reason int8 bundles are recommended for memory-constrained deployment: the speedup comes from moving fewer bytes, not from faster multiplies.
 
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The comparison also exposes a limit worth stating plainly. An interpreter dispatches each operator through a generic runtime, paying overhead per node that, at batch-1, has no batch to amortize against---which is precisely the per-token tax Chapter~1 measured on the Python stack \citep{taxbreak2026,kwon2023vllm}. The AOT bundle removes that tax structurally by compiling the whole network into one function, so the speedup over an interpreter widens as the model gets deeper and the per-operator overhead would otherwise accumulate \citep{rotem2018glow,memoryfloor2026}.
 
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+A second lesson from the case is about debuggability under quantization. Because Glow emits debug information in terms of its own IR rather than raw machine code, a precision regression introduced by an int8 conversion can be traced back to the specific node whose recorded range was too tight, rather than guessing from a wrong output \citep{rotem2018glow}. For an edge decode deployment that traceability is the difference between a quick re-profile of one layer and a blind re-quantization of the whole model, and it is the kind of compile-time visibility the AOT path buys that a runtime interpreter cannot \citep{pytorchglow2024,patel2025llminference}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{Glow HW matrix} is where Glow meets Chapter~1 counters: fix hardware and target together or bytes/token flatlines while kernel microbenchs celebrate \citep{amd2024xdna,amd2024aie}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/target legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked target---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep target on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Glow arch passes} when Glow looks correct in isolation yet decode telemetry disagrees---usually because pass was planned without lower residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: pass producers must feed lower consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for pass on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Glow codegen} is not peak FLOPs; it is illegal tier placement: codegen spilling to HBM/DDR while backend still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound codegen with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on codegen/backend legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize codegen with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked backend---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused codegen raises bytes/token; fused schedule must keep backend on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Glow tuning} is where Glow meets Chapter~1 counters: fix tun and profile together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Trace residency: tun producers must feed profile consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for tun on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Glow case study} when Glow looks correct in isolation yet decode telemetry disagrees---usually because case was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound case with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on case/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize case with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused case raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Glow HW matrix} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while target still pays launch or DMA tax every token \citep{amd2024xdna,amd2024aie}.
-
-Trace residency: hardware producers must feed target consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, target, matrix, GPU, CPU, NPU to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Glow arch passes} is where Glow meets Chapter~1 counters: fix pass and lower together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound pass with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on pass/lower legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize pass with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked lower---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused pass raises bytes/token; fused schedule must keep lower on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds pass, lower, optim, dialect to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{Glow codegen} when Glow looks correct in isolation yet decode telemetry disagrees---usually because codegen was planned without backend residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: codegen producers must feed backend consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for codegen on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds codegen, backend, platform, emit to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{Glow tuning} is not peak FLOPs; it is illegal tier placement: tun spilling to HBM/DDR while profile still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound tun with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on tun/profile legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize tun with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked profile---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused tun raises bytes/token; fused schedule must keep profile on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds tun, profile, hardware, pitfall to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{Glow case study} is where Glow meets Chapter~1 counters: fix case and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: case producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for case on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds case, benchmark, cross-hardware, YiRage to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The \textbf{cross-hardware} conclusion is where Glow's scope is honest. The same bundle source cross-compiles from x86 to Cortex-M, but the two targets have wildly different residency budgets, so the fusion and quantization plan that fits the host may overflow the MCU's SRAM \citep{rotem2018glow,amd2024aie}. And none of Glow's CPU/edge strength competes with a CUDA-graph-captured Triton or IREE path on a datacenter GPU---which is the correct division of labor, not a deficiency \citep{nvidia2024cudagraphs,semianalysis2024tma}. \textbf{YiRage} reflects exactly this: it uses Glow-style AOT lowering and operator stacking for edge and CPU targets while routing datacenter-GPU decode to its GPU backends, and carries the Chapter~2 residency rules as checkable IR metadata so an edge bundle that would overflow on-chip memory is rejected at compile time \citep{yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch19_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Glow HW Matrix.} Tie Glow HW matrix to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Glow Arch Passes.} Tie Glow arch passes to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Glow Codegen.} Tie Glow codegen to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Glow Tuning.} Tie Glow tuning to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Glow Case Study.} Tie Glow case study to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Glow is the edge/CPU compiler, not the GPU-decode tool.}
+Its LLVM CPU backend and AOT bundles target memory-constrained devices, and lowering to a few linear-algebra primitives makes new accelerator backends cheap \citep{rotem2018glow,pytorchglow2024}. For datacenter GPU decode, prefer the CUDA-graph paths of Chapters~16--18 \citep{nvidia2024cudagraphs}.
+
+\item \textbf{Operator stacking is the bytes/token lever.}
+Glow's stacked kernel performs chained element-wise work in a single tensor traversal instead of one kernel per operator, removing redundant DRAM round trips \citep{pytorchglow2024,memoryfloor2026}. Confirm chains were stacked by diffing the low-level IR \citep{taxbreak2026}.
+
+\item \textbf{AOT bundles remove the launch loop entirely.}
+A self-contained object file with a single inference entry point has no framework dispatch, so the batch-1 launch overhead that dominates a Python stack does not exist \citep{rotem2018glow,taxbreak2026}. It is the edge counterpart to capturing a launch graph \citep{nvidia2024cudagraphs}.
+
+\item \textbf{Profile-guided quantization needs decode-representative data.}
+Glow records activation ranges by running inference, then recompiles to int8; a profile captured on the wrong shape mis-estimates ranges and loses precision where decode needs it \citep{rotem2018glow,kwon2023vllm}. Profile at served context lengths and re-profile on workload shift \citep{patel2025llminference}.
+
+\item \textbf{The two-phase IR trades generality for a predictable footprint.}
+A fixed high-level graph plus low-level address-only IR (with static memory allocation) is less general than an MLIR dialect tower but yields a known memory plan---the right trade for the edge \citep{rotem2018glow,dlbook}. Tuned bundles are per-target \citep{amd2024xdna}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch19_conclusion}
 
-Glow is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Glow baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Glow shows that the residency-first thesis is not GPU-specific: at the edge, lowering to a few primitives, stacking operators into single-traversal kernels, statically planning memory, and quantizing under a recorded profile are the moves that drop bytes/token and erase launch overhead \citep{rotem2018glow,pytorchglow2024}. Its deliberate scope---CPU, accelerators, and memory-constrained devices rather than datacenter GPUs---makes it the right backend for one slice of the hardware matrix and the wrong one for another, which is exactly the routing decision YiRage encodes as IR metadata \citep{yirage2026,taxbreak2026}. The broader point is that a lightweight compiler is not a lesser one: by giving up generality it buys a predictable memory plan and a dispatch-free runtime, and those are precisely the properties that make decode latency stable on a small device where a heavyweight stack would never fit \citep{rotem2018glow,patel2025llminference}. Having now surveyed established compiler surfaces from TVM through Glow, Chapter~\ref{chap:ch20} turns to Mirage and the emerging wave of AI compilers that push these ideas---whole-program scheduling, superoptimization, and residency-aware fusion---past what today's production stacks ship \citep{memoryfloor2026,dlbook}.
 
 \typeout{END_CHAPTER "ch19" \theabspage}
