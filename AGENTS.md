@@ -424,7 +424,8 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R18（2026-06-09，harness+内容轨）**：`pad_restart_index` 增强 — case-insensitive 钩子 + `\paragraph{Scope.}` 计数（>n sections ⇒ 截断）；**ch22 Fregly deep-rewrite** — E2E 四站 workflow + profiling 表；1652→**1545** words（去 pad），`min_words` 1650→**1500**，q=**95.4**；audit ch15/22–23/26–27 现可检出 residual pad。
 - **Loop R19（2026-06-09，内容轨）**：**ch23 Fregly deep-rewrite** — LLM decode / MoE scheduling / KV hardware / hetero MoE 四节 + invariants 表；1662→**1192** words（去 pad），`min_words` 1650→**1150**，q=**95.9**；**30/30** ready。Part VI ch15–21 residual pad 仅 audit 标记，禁止 blind batch strip（→~880w）。
 - **Loop R24（2026-06-14，目录+内容轨）**：全书 **`min_words` 统一 5000**（`outline_extended.json` + `book_prepare.py` ch01–03 + `book_pad_dedup` floor）；**ch05 扩写** — Ryzen AI decode benchmarking 节 + 表；4617→**5000** words，q=**99.9**；**2/30** ready（ch05/ch11）。
-- **内容 R-next**：按缺口排序扩写 ch14/ch29/ch04…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
+- **Loop R25（2026-06-09，内容轨）**：**ch14 扩写** — MLIR decode benchmarking 节 + 表 + operator/CI 段落；4221→**5000** words，q=**94.0**，cov=100%；**3/30** ready（ch05/ch11/ch14）。
+- **内容 R-next**：按缺口排序扩写 ch29/ch04/ch02…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
 - **Loop R22（2026-06-09，harness+内容轨）**：`iterate.py status` 输出 **Pad residual** 列表（`pad_residual_chapters`）；**ch15 Fregly deep-rewrite** — XLA HW matrix/passes/codegen/tuning/case study + backend 表；2090→**825** words，`min_words` 2050→**800**，q=**97.4**，pad **OK**；**30/30** ready。
 - **内容 R-next**：Part VI **ch16–17** 逐章 Fregly deep-rewrite；**ch24** residual pad。
 - **Harness R-next**：`iterate.py` 在 non-ready 章也显示 pad residual 优先级。
