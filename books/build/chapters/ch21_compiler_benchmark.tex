@@ -2,11 +2,12 @@
 \label{chap:ch21}
 \typeout{START_CHAPTER "ch21" \theabspage}
 
-Part~VI treats \emph{Unified AI Compiler Analysis and Cross-Hardware Benchmark} as a production compiler surface---not a tutorial. Every section ties IR, passes, and backends to bytes/token and launches/token \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026}. The mistake to avoid is optimizing prefill FLOPs while batch-1 decode misses p99 SLOs \citep{dao2023flashdecoding,kwon2023vllm}. Problem-first, hardware-bound, multi-target---same bar as Chapter~1 \citep{dlbook,semianalysis2024tma,amd2024aie}.
+Each compiler in this Part advertises its own headline number on its own favored workload, which makes them almost impossible to compare honestly. This chapter does the comparison the projects do not: it rates TVM, Triton, IREE, Glow, and Mirage on one axis that actually predicts interactive serving cost---how well each collapses a token's work into few, resident kernel launches---rather than on peak GEMM throughput \citep{chen2018tvm,tillet2019triton,iree2024,rotem2018glow,wu2024mirage}. The yardstick is the one Chapter~1 set: dense Llama-3.2-1B averages 847.5 GPU launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, so the metric that matters is launches/token and bytes/token at batch-1, not datasheet FLOPs \citep{taxbreak2026,memoryfloor2026}.
+The point is not to crown a winner but to show that these stacks occupy different niches, and that the right choice is a routing decision---which is exactly what the book's YiRage compiler encodes \citep{yirage2026,patel2025llminference}.
+\index{Compiler comparison}
+\index{Cross-hardware benchmark}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; OLMoE-1B/7B averages 9,305 \citep{taxbreak2026}. Memory-Floor CUDA Graphs on Qwen-2.5-7B (BS${=}1$, ctx${=}2048$) yields $1.259\times$ on H100 by removing host overhead---yet cannot fix illegal HBM traffic \citep{memoryfloor2026,nvidia2024cudagraphs}.
-
-\section{compiler ratings}
+\section{Compiler ratings}
 \label{sec:ch21_compiler_ratings}
 
 % AUTO_VISUAL:fig_compiler_ratings_pipeline
@@ -14,263 +15,117 @@ TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Input\\Compiler Ratings};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip\\Tiling / residency};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Fused compute\\MegaKernel stage};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Output\\Next layer / KV};
+ \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Same model\\+ decode shape};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Each compiler\\fuse + schedule};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Measure\\bytes/launches per token};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Rating\\per niche};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Compiler Ratings optimization pipeline in Unified AI Compiler Analysis and Cross-Hardware Benchmark.}
+\caption{A fair comparison rates each \textbf{compiler} on the same decode metrics---bytes/token and launches/token---instead of each project's favored microbenchmark.}
 \label{fig:compiler_ratings_pipeline}
 \end{figure}
 
-Teams hit \textbf{compiler ratings} when Unified AI Compiler Analysis and Cross-Hardware Benchmark looks correct in isolation yet decode telemetry disagrees---usually because compiler was planned without rating residency on the SKU you ship \citep{patel2025llminference,dlbook}.
+A useful \textbf{compiler} \textbf{rating} for decode is not a single score; it is a profile across five axes: decode-fusion strength, launch collapse, multi-hardware breadth, search/compile cost, and correctness guarantee \citep{patel2025llminference}. Rated this way the stacks separate cleanly. TVM is broad and search-driven but graph-and-TensorIR-staged; Triton is a GPU block compiler with hand-placed fusion boundaries; IREE is the widest hardware matrix with whole-program scheduling; Glow is the edge/CPU specialist; Mirage is the superoptimizer that discovers fusion and verifies it \citep{chen2018tvm,tillet2019triton,iree2024,rotem2018glow,wu2024mirage}.
 
-Hardware truth: GPUs bound compiler with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+\begin{table}[t]
+\centering
+\caption{Decode-oriented \textbf{rating} of the surveyed compilers; ``launch collapse'' is the batch-1 lever and the column that most predicts ms/token \citep{taxbreak2026,memoryfloor2026}.}
+\label{tab:ch21_compiler_ratings}
+\begin{tabular}{lll}
+\toprule
+Compiler & Primary niche & Launch-collapse mechanism \\
+\midrule
+TVM & Broad, search-driven & Fusion + graph executor / AOT \\
+Triton & GPU block kernels & Hand-placed fusion + CUDA Graphs \\
+IREE & Widest HW matrix & Whole-program stream scheduling \\
+Glow & Edge / CPU & AOT bundle (no launch loop) \\
+Mirage & GPU superoptimizer & Searched megakernel \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Compiler/kernel fix: predicate fusion on compiler/rating legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+It is worth being explicit about why the niches are real and not marketing. The differences trace to architectural commitments made early in each project. TVM committed to a learned-cost-model search over a graph-plus-TensorIR split, which buys breadth and automation at the cost of a staged lowering that can leave fusion on the table \citep{chen2018tvm,zheng2020ansor}. Triton committed to a Python tile abstraction over a GPU SIMT machine, which buys productivity and precise GPU control but leaves the fusion boundary to the author and excludes static NPUs \citep{tillet2019triton,tritonlang2024}. IREE committed to whole-program compilation through an MLIR dialect stack and a hardware abstraction layer, which buys the widest matrix and compiled host scheduling at the cost of hiding per-target residency \citep{iree2024}. Glow committed to a two-level IR and AOT bundles, which buys a predictable edge footprint by giving up datacenter-GPU depth \citep{rotem2018glow}. Mirage committed to multi-level superoptimization with verification, which buys reachable megakernels at the cost of search time \citep{wu2024mirage}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize compiler with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked rating---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
+The rating exposes a recurring truth: a stack can score high on isolated kernel quality and low on launch collapse, and at batch-1 the second column is the one that moves p99 \citep{taxbreak2026,nvidia2024cudagraphs}. On a GPU the launch-collapse mechanisms differ---Triton relies on the author to widen the fused region then captures it, IREE schedules the whole program, Mirage searches for the megakernel---but all three are attacking the same orchestration tax \citep{memoryfloor2026,mpk2025}. The mistake a team makes is to read one project's headline speedup as a global ranking; the speedups are measured against different baselines on different workloads, and only a common decode harness makes them comparable \citep{patel2025llminference,dlbook}.
 
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused compiler raises bytes/token; fused schedule must keep rating on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds compiler, rating to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{compile overhead}
+\section{Compile overhead}
 \label{sec:ch21_compile_overhead}
 
 % AUTO_VISUAL:fig_compile_overhead_architecture
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
- \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+\begin{tikzpicture}[vis base, scale=0.86, transform shape]
+ \node[vis arch node] (s0) at (-5.4,0) {\footnotesize JIT autotune\\(TVM/Triton)};
+ \node[vis arch node] (s1) at (-1.8,0) {\footnotesize AOT compile\\(IREE/Glow)};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize Superopt search\\(Mirage)};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Runtime\\dispatch};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Compile Overhead block diagram for Unified AI Compiler Analysis and Cross-Hardware Benchmark.}
+\caption{Where each stack pays its \textbf{compile} cost: JIT autotuning, ahead-of-time compilation, or superoptimization search.}
 \label{fig:compile_overhead_architecture}
 \end{figure}
 
-The production surprise at \textbf{compile overhead} is not peak FLOPs; it is illegal tier placement: compile spilling to HBM/DDR while overhead still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
+The second axis is \textbf{compile} \textbf{overhead}, and it is the cost teams under-budget. The stacks pay in different places. TVM's Ansor and AutoTVM pay a measured search---thousands of on-device trials per operator---reporting up to $3.8\times$ (Ansor, Intel CPU) and $1.2$--$3.8\times$ (AutoTVM) in exchange \citep{zheng2020ansor,chen2018autotvm}. Triton pays a per-shape autotune warmup the first time a kernel key is seen, so the first request after a shape change is slow \citep{tritonlang2024}. IREE and Glow pay their cost ahead of time, producing a deployable artifact with no runtime compile \citep{iree2024,rotem2018glow}. Mirage pays the largest one-time cost---superoptimization search plus probabilistic verification---and reports $1.1$--$2.9\times$, with its MPK megakernel reaching $1.2$--$6.7\times$ \citep{wu2024mirage,mpk2025}.
 
-Trace residency: compile producers must feed overhead consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+The shape of the overhead also differs in ways that matter operationally, not just in total cost. A JIT autotuner's cost is incremental and amortizing: it is paid lazily, per new shape, and warm shapes are free---but it makes the first request after any shape change slow, which is visible to a user at exactly the wrong moment \citep{tritonlang2024,kwon2023vllm}. An AOT compile front-loads everything into the build, so runtime latency is predictable and there is no first-request penalty, at the cost of a longer build and a larger artifact that must be regenerated when the model or target changes \citep{iree2024,rotem2018glow}. A superoptimization search is the most expensive but also the most one-time: once a megakernel is found and verified for a model-target pair, it serves every subsequent token with no further search \citep{wu2024mirage,mpk2025}. A team that values predictable tail latency leans AOT or pre-searched; a team iterating rapidly on shapes tolerates JIT.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
+The engineering rule that falls out is to match the \textbf{overhead} model to the deployment. A served LLM whose decode layers are reused across billions of tokens justifies an expensive one-time search or AOT compile, because the cost amortizes; a rapidly changing or one-off graph does not, and there a JIT autotuner's incremental cost or a lighter pass pipeline wins \citep{kwon2023vllm,patel2025llminference}. The \textbf{compile}-time/runtime-latency trade is itself a design decision, not an afterthought.
 
-\paragraph{Review gate.} Attach roofline or buffer accounting for compile on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds compile, overhead to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{HW binding}
+\section{Hardware binding}
 \label{sec:ch21_hw_binding}
 
-\textbf{HW binding} is where Unified AI Compiler Analysis and Cross-Hardware Benchmark meets Chapter~1 counters: fix hardware and binding together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
+The third axis is how each stack performs \textbf{hardware} \textbf{binding}---how late and how flexibly it commits to a target. TVM binds through target strings and forks schedules per backend; Triton binds to a GPU through its TritonGPU dialect and PTX/AMDGCN codegen and does not target static NPUs; IREE binds latest, through a Vulkan-inspired HAL that abstracts CPU, GPU, and more behind one interface; Glow binds through LLVM and cross-compiles to edge cores; Mirage binds to the GPU compute hierarchy by construction \citep{chen2018tvm,tritonlang2024,iree2024,rotem2018glow,wu2024mirage}.
 
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+Binding time is really a question of where the abstraction boundary sits between the program and the silicon. TVM's target strings bind at schedule-selection time, so the same compute is re-scheduled per backend with a fork in the pass pipeline \citep{chen2018tvm}. IREE's HAL pushes the boundary as late as possible---the dispatch regions are formed once and only the executable translation is per-target---so one program description fans out to many devices \citep{iree2024}. Glow binds through LLVM, inheriting LLVM's target support for free and gaining cross-compilation to embedded cores as a side effect \citep{rotem2018glow}. Triton and Mirage bind earliest and narrowest, to a GPU machine model, which is why their reasoning about shared memory and launches is the most precise and least portable \citep{tillet2019triton,wu2024mirage}.
 
-Compiler/kernel fix: predicate fusion on hardware/binding legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
+The decode consequence of late versus early \textbf{binding} is concrete. A late-binding HAL like IREE's makes a model portable across a wide matrix but hides per-target residency decisions that only batch-1 telemetry exposes, so a green build is not a green decode \citep{iree2024,taxbreak2026}. An early, narrow binding like Triton's or Mirage's gives up breadth but lets the compiler reason precisely about one machine's shared memory and launch model, which is why the deepest decode wins are GPU-specific \citep{memoryfloor2026,semianalysis2024tma}. Across all of them the hardware truth is unchanged: GPUs are bound by shared-memory residency, CPUs by cache, NPUs by static tile/DMA plans, so no single binding is optimal everywhere \citep{nvidia2022hopper,amd2024xdna,amd2024aie}.
 
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked binding---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep binding on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, binding to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\section{search space}
+\section{Search space}
 \label{sec:ch21_search_space}
 
-Teams hit \textbf{search space} when Unified AI Compiler Analysis and Cross-Hardware Benchmark looks correct in isolation yet decode telemetry disagrees---usually because search was planned without autotun residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
+The fourth axis is the \textbf{search} space each stack explores and how it is navigated, because that determines what optimizations are even reachable. AutoTVM searches hand-written schedule templates with a learned cost model; Ansor removed the templates and samples a hierarchical space, \textbf{autotun}ing with evolutionary search and a task scheduler that spends budget where it moves end-to-end latency \citep{chen2018autotvm,zheng2020ansor}. Triton's autotuner explores only the configuration list the author supplies---leaner, but bounded by human imagination \citep{tritonlang2024}. Mirage searches the largest space of all: a multi-level $\mu$Graph that can invent new custom kernels, pruned by abstraction and certified by probabilistic equivalence \citep{wu2024mirage}.
 
-Trace residency: search producers must feed autotun consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
+There is a spectrum here from human-specified to machine-discovered optimization, and it correlates with the verification burden. At the human-specified end, Triton's config list and AutoTVM's templates are trustworthy by construction---the schedules are variations a human vetted---but they cannot exceed human imagination \citep{tritonlang2024,chen2018autotvm}. At the machine-discovered end, Mirage's superoptimizer can synthesize a kernel no one wrote, which is powerful precisely because it is not bounded by templates, but that power forces the question of correctness: a discovered kernel must be proven equivalent, which is why probabilistic equivalence verification is not optional for it \citep{wu2024mirage}. Ansor sits in between, sampling a structured space without explicit templates but within a fixed schedule grammar \citep{zheng2020ansor}.
 
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for search on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds search, autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+The reachability difference is the point. A template-bounded \textbf{search} can only find schedules a human anticipated, so it cannot discover a megakernel; a superoptimizer's search can, which is why Mirage and MPK reach fusions the others structurally cannot \citep{wu2024mirage,mpk2025}. The cost, as the overhead axis noted, is search time---so the right \textbf{autotun}ing strategy depends on how reused the program is and how much of the optimization you are willing to let the compiler discover rather than specify \citep{kwon2023vllm,dlbook}.
 
 \section{YiRage benchmark}
 \label{sec:ch21_yirage_benchmark}
 
-The production surprise at \textbf{YiRage benchmark} is not peak FLOPs; it is illegal tier placement: YiRage spilling to HBM/DDR while benchmark still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
+This is where the book's yardstick is defined. \textbf{YiRage} is the Mirage-lineage compiler used throughout the book to \textbf{benchmark} the others, and its discipline is to measure every stack on the same two decode quantities---bytes/token and launches/token at batch-1---rather than each project's preferred microbenchmark \citep{yirage2026,taxbreak2026}. It generalizes Mirage's searched-and-verified megakernel across multiple backends (CUDA, CPU, Triton, and more) and carries the Chapter~2 residency rules as checkable IR metadata, so a candidate schedule that would spill is rejected before it ships \citep{yirage2026,wu2024mirage}.
 
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
+The reason a common yardstick is necessary rather than pedantic is that the alternative---trusting each project's published number---systematically misleads. Ansor's $3.8\times$, AutoTVM's $1.2$--$3.8\times$, Mirage's $1.1$--$2.9\times$, and MPK's $1.2$--$6.7\times$ are all real, but each is measured against a different baseline, on a different workload, often at a throughput-shaped operating point rather than batch-1 decode \citep{zheng2020ansor,chen2018autotvm,wu2024mirage,mpk2025}. Reduced to one harness that fixes the model, the decode shape, and the metric, the numbers become comparable and the niches become visible: the megakernel path wins where launches dominate, the AOT bundle wins where the device is small, and the broad scheduler wins where portability is the constraint \citep{taxbreak2026,memoryfloor2026}.
 
-Compiler/kernel fix: predicate fusion on YiRage/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, benchmark to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-\textbf{compiler ratings} is where Unified AI Compiler Analysis and Cross-Hardware Benchmark meets Chapter~1 counters: fix compiler and rating together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound compiler with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on compiler/rating legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize compiler with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked rating---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused compiler raises bytes/token; fused schedule must keep rating on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds compiler, rating to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{compile overhead} when Unified AI Compiler Analysis and Cross-Hardware Benchmark looks correct in isolation yet decode telemetry disagrees---usually because compile was planned without overhead residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: compile producers must feed overhead consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for compile on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds compile, overhead to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{HW binding} is not peak FLOPs; it is illegal tier placement: hardware spilling to HBM/DDR while binding still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound hardware with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on hardware/binding legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize hardware with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked binding---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused hardware raises bytes/token; fused schedule must keep binding on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds hardware, binding to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{search space} is where Unified AI Compiler Analysis and Cross-Hardware Benchmark meets Chapter~1 counters: fix search and autotun together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: search producers must feed autotun consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for search on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds search, autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{YiRage benchmark} when Unified AI Compiler Analysis and Cross-Hardware Benchmark looks correct in isolation yet decode telemetry disagrees---usually because YiRage was planned without benchmark residency on the SKU you ship \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound YiRage with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on YiRage/benchmark legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize YiRage with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked benchmark---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused YiRage raises bytes/token; fused schedule must keep benchmark on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds YiRage, benchmark to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{compiler ratings} is not peak FLOPs; it is illegal tier placement: compiler spilling to HBM/DDR while rating still pays launch or DMA tax every token \citep{patel2025llminference,dlbook}.
-
-Trace residency: compiler producers must feed rating consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for compiler on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds compiler, rating to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{compile overhead} is where Unified AI Compiler Analysis and Cross-Hardware Benchmark meets Chapter~1 counters: fix compile and overhead together or bytes/token flatlines while kernel microbenchs celebrate \citep{patel2025llminference,dlbook}.
-
-Hardware truth: GPUs bound compile with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on compile/overhead legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize compile with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked overhead---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused compile raises bytes/token; fused schedule must keep overhead on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds compile, overhead to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-Teams hit \textbf{HW binding} when Unified AI Compiler Analysis and Cross-Hardware Benchmark looks correct in isolation yet decode telemetry disagrees---usually because hardware was planned without binding residency on the SKU you ship \citep{patel2025llminference,dlbook}.
-
-Trace residency: hardware producers must feed binding consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for hardware on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds hardware, binding to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-The production surprise at \textbf{search space} is not peak FLOPs; it is illegal tier placement: search spilling to HBM/DDR while autotun still pays launch or DMA tax every token \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Hardware truth: GPUs bound search with shared memory/TMA; CPUs with cache/NUMA; NPUs with static tile SRAM and DMA chains \citep{nvidia2022hopper,amd2024xdna,dlbook}. Decode at batch-1 stays bandwidth- and orchestration-limited---thin matmuls rarely dominate \citep{memoryfloor2026,taxbreak2026}.
-
-Compiler/kernel fix: predicate fusion on search/autotun legality before codegen; fork passes per target \citep{chen2020compilerbasedhardw,yirage2026}. YiRage encodes iron rules from Chapter~2 as checkable IR metadata \citep{kwon2023vllm,liu2024deepseekv3}.
-
-\paragraph{Multi-hardware delta.} Hopper may legalize search with TMA double-buffer; XDNA requires static tile assignment; CPU needs cache-blocked autotun---identical math, different bytes/token \citep{semianalysis2024tma,amd2024xdna,dlbook}.
-
-\begin{example}
-Decode cell (BS${=}1$, ctx${=}2048$): unfused search raises bytes/token; fused schedule must keep autotun on-chip across GPU, CPU, and NPU baselines \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-\end{example}
-
-\paragraph{Scope.} This section binds search, autotun to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
-
-
-
-\textbf{YiRage benchmark} is where Unified AI Compiler Analysis and Cross-Hardware Benchmark meets Chapter~1 counters: fix YiRage and benchmark together or bytes/token flatlines while kernel microbenchs celebrate \citep{yirage2026,chen2020compilerbasedhardw}.
-
-Trace residency: YiRage producers must feed benchmark consumers without a DDR round trip \citep{dao2022flashattention,yirage2026}. Silent spill reads as ``mysterious'' p99 regression \citep{patel2025llminference,semianalysis2024tma}.
-
-Operational fix: diff IR or CUDA for new allocs; count launches/token (GPU) or DMA edges (NPU); require graph capture legality on GPU and static legality on XDNA \citep{nvidia2024cudagraphs,amd2024aie}.
-
-\paragraph{Review gate.} Attach roofline or buffer accounting for YiRage on target SKU before merge \citep{memoryfloor2026,yirage2026}. 
-
-\paragraph{Scope.} This section binds YiRage, benchmark to decode residency and orchestration metrics on GPU, CPU, and NPU targets \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Run as a \textbf{benchmark} harness, YiRage reframes the comparison as a routing problem: on a datacenter GPU it favors a searched megakernel path of the kind MPK demonstrates ($1.2$--$6.7\times$); on an edge CPU it favors a Glow-style AOT bundle; on a broad portability target it favors IREE-style whole-program scheduling \citep{mpk2025,rotem2018glow,iree2024}. The \textbf{cross-hardware} reading is that no single compiler dominates---each is the right answer for a region of the hardware matrix---and the value of a unified yardstick is that it makes the routing decision measurable instead of tribal \citep{patel2025llminference,memoryfloor2026}. Concretely, the routing inputs are the target class and the reuse profile of the workload: a high-reuse decode layer on a datacenter GPU routes to a searched megakernel because the one-time search amortizes and the launch collapse is largest there, while the same layer on a memory-constrained edge part routes to an AOT bundle because the binding fits the device and there is no launch loop to begin with \citep{mpk2025,rotem2018glow}. Encoding that decision as metadata rather than tribal preference is what lets the choice survive a model or hardware change without re-litigating it \citep{yirage2026}.
 
 \section{Key Takeaways}
 \label{sec:ch21_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Compiler Ratings.} Tie compiler ratings to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Compile Overhead.} Tie compile overhead to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{HW Binding.} Tie HW binding to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Search Space.} Tie search space to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{YiRage Benchmark.} Tie YiRage benchmark to bytes/token and multi-hardware legality \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-\item \textbf{Measure useful decode work.} Prefer kernels/token and bytes/token over peak FLOPs \citep{patel2025llminference,dlbook}.
-\item \textbf{Mechanical sympathy.} Co-design schedules with on-chip residency \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item \textbf{Rate compilers on launch collapse, not peak FLOPs.}
+At batch-1, launches/token and bytes/token predict ms/token; a stack can win an isolated kernel benchmark and lose end-to-end \citep{taxbreak2026,memoryfloor2026}. The launch-collapse column is the one that matters \citep{nvidia2024cudagraphs}.
+
+\item \textbf{Match compile-overhead model to deployment.}
+TVM/Triton pay JIT search; IREE/Glow pay AOT; Mirage pays superoptimization search \citep{zheng2020ansor,iree2024,wu2024mirage}. Expensive one-time compilation amortizes over a reused decode layer but not a one-off graph \citep{kwon2023vllm}.
+
+\item \textbf{Binding time trades breadth for depth.}
+Late-binding HALs (IREE) maximize portability but hide per-target residency; early, narrow bindings (Triton, Mirage) give up breadth for precise GPU reasoning \citep{iree2024,tritonlang2024}. A green build is not a green decode \citep{taxbreak2026}.
+
+\item \textbf{Search reachability sets the ceiling.}
+Template search finds only anticipated schedules; a $\mu$Graph superoptimizer can invent megakernels \citep{chen2018autotvm,wu2024mirage}. What the search space contains bounds what the compiler can ever find \citep{zheng2020ansor}.
+
+\item \textbf{No compiler dominates; routing does.}
+Each stack owns a region of the hardware matrix, so the win is a measured routing decision on common decode metrics---the YiRage discipline \citep{yirage2026,patel2025llminference}. Megakernel on GPU, AOT bundle on edge, whole-program scheduling for breadth, and the routing itself recorded as metadata so it survives the next model or accelerator \citep{mpk2025,rotem2018glow}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch21_conclusion}
 
-Unified AI Compiler Analysis and Cross-Hardware Benchmark is a residency contract under decode metrics Chapter~1 established \citep{taxbreak2026,memoryfloor2026}. Later chapters assume Unified AI Compiler Analysis and Cross-Hardware Benchmark baselines when fusing decoder schedules. Gate merges on buffer accounting, not microbench FLOPs alone \citep{yirage2026,semianalysis2024tma,amd2024aie}.
+Compared on one honest axis---how few, how resident the kernel launches per token---the surveyed compilers stop looking like competitors and start looking like specialists: TVM and IREE for breadth, Triton for GPU kernel authoring, Glow for the edge, and Mirage for searched-and-verified megakernels \citep{chen2018tvm,iree2024,tillet2019triton,rotem2018glow,wu2024mirage}. The unifying contribution of a benchmark like YiRage's is to make that specialization measurable, so a serving team routes a workload to the stack whose niche it falls in rather than arguing microbenchmarks \citep{yirage2026,memoryfloor2026}. The practical payoff is that compiler selection stops being a one-time religious choice and becomes a per-workload, per-target decision backed by the same two numbers the whole book has tracked, which is the only form of comparison that survives the next model release or the next accelerator \citep{taxbreak2026,patel2025llminference}. With the compilers now rated on common ground, Chapter~\ref{chap:ch22} turns from comparing stacks to driving one end to end: a compiler-driven performance-tuning workflow that takes a model from profile to shipped decode kernel \citep{taxbreak2026,patel2025llminference}.
 
 \typeout{END_CHAPTER "ch21" \theabspage}
