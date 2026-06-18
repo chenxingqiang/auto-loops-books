@@ -426,11 +426,12 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R24（2026-06-14，目录+内容轨）**：全书 **`min_words` 统一 5000**（`outline_extended.json` + `book_prepare.py` ch01–03 + `book_pad_dedup` floor）；**ch05 扩写** — Ryzen AI decode benchmarking 节 + 表；4617→**5000** words，q=**99.9**；**2/30** ready（ch05/ch11）。
 - **Loop R25（2026-06-09，内容轨）**：**ch14 扩写** — MLIR decode benchmarking 节 + 表 + operator/CI 段落；4221→**5000** words，q=**94.0**，cov=100%；**3/30** ready（ch05/ch11/ch14）。
 - **Loop R26（2026-06-09，内容轨）**：**ch29 扩写** — YiRage runtime decode benchmarking 节 + 表 + PK/CI/operator 段落；4212→**5000** words，q=**94.0**，cov=100%；**4/30** ready（ch05/ch11/ch14/ch29）。
+- **Loop R31（2026-06-09，内容轨）**：**ch28 扩写** — `Framework decode benchmarking methodology` 节 + 表 + scheduler/paging/plugin 段落；3691→**5000** words，q=**94.0**，cov=100%；**8/30** ready；Part VIII **3/3** ✓。
 - **Loop R30（2026-06-09，内容轨）**：**ch30 扩写** — `Co-design decode benchmarking methodology` 节 + 表 + framework/compiler/runtime 三方可计数段落；4100→**5000** words，q=**94.0**，cov=100%；**7/30** ready（ch02/ch04/ch05/ch11/ch14/ch29/ch30）；Part VIII **2/3**。
 - **Loop R29（2026-06-09，内容轨）**：**ch02 扩写** — 剥离 pad 模板段 + `Dataflow mindset benchmarking methodology` 节 + 表 + export/triplet/CI/MoE/FlashAttention 段落；4140→**5000** words，q=**94.0**，cov=100%；**6/30** ready（ch02/ch04/ch05/ch11/ch14/ch29）。
 - **Loop R28（2026-06-09，目录轨）**：对标 Fregly PDF 全栈目录 — `book_content.md` §2/§4.5/§五 重写（产出导向 Part 名、具名机制小节、Lowering Arc）；`outline_extended.json` Part 标题同步；**未**物理重排 ch01–30 tex。
 - **Loop R27（2026-06-09，内容轨）**：**ch04 扩写** — Hopper decode benchmarking 节 + 表 + Nsight/CI/operator 段落；4149→**5000** words，q=**94.0**，cov=100%；**5/30** ready（ch04/ch05/ch11/ch14/ch29）。
-- **内容 R-next**：按 Fregly 目录补具名小节 + 扩写 ch03/ch01/ch28…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
+- **内容 R-next**：按 Fregly 目录补具名小节 + 扩写 ch03/ch01…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
 - **Loop R22（2026-06-09，harness+内容轨）**：`iterate.py status` 输出 **Pad residual** 列表（`pad_residual_chapters`）；**ch15 Fregly deep-rewrite** — XLA HW matrix/passes/codegen/tuning/case study + backend 表；2090→**825** words，`min_words` 2050→**800**，q=**97.4**，pad **OK**；**30/30** ready。
 - **内容 R-next**：Part VI **ch16–17** 逐章 Fregly deep-rewrite；**ch24** residual pad。
 - **Harness R-next**：`iterate.py` 在 non-ready 章也显示 pad residual 优先级。
