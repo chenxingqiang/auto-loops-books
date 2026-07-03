@@ -35,7 +35,7 @@ from book_prepare import (  # noqa: E402
     CHAPTERS,
     OUTLINE,
     ChapterSpec,
-    compile_book,
+    compile_chapter,
     evaluate_chapter,
     read_chapter_text,
 )
@@ -814,10 +814,12 @@ def run_deep_rewrite(
 
     compile_ok = True
     if not skip_compile:
-        compile_ok = compile_book()
-        report.actions.append(f"compile: {'ok' if compile_ok else 'failed'}")
+        compile_ok = compile_chapter(spec.chapter_id)
+        report.actions.append(
+            f"compile: {'ok' if compile_ok else 'failed'} (pdf/{spec.chapter_id}.pdf)"
+        )
         if not compile_ok:
-            report.errors.append("make.sh failed")
+            report.errors.append(f"make-chapter failed for {spec.chapter_id}")
 
     ev = evaluate_chapter(spec, compile_ok)
     report.evaluation = ev
@@ -950,10 +952,12 @@ def run_step(
 
     compile_ok = True
     if not skip_compile:
-        compile_ok = compile_book()
-        report.actions.append(f"compile: {'ok' if compile_ok else 'failed'}")
+        compile_ok = compile_chapter(spec.chapter_id)
+        report.actions.append(
+            f"compile: {'ok' if compile_ok else 'failed'} (pdf/{spec.chapter_id}.pdf)"
+        )
         if not compile_ok:
-            report.errors.append("make.sh failed")
+            report.errors.append(f"make-chapter failed for {spec.chapter_id}")
 
     ev = evaluate_chapter(spec, compile_ok)
     report.evaluation = ev

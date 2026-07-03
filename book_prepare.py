@@ -2,8 +2,9 @@
 Fixed book preparation and evaluation harness for autobooks experiments.
 
 Usage:
-    uv run book_prepare.py                    # evaluate all chapters
-    uv run book_prepare.py --chapter ch01     # evaluate one chapter
+    uv run book_prepare.py                    # evaluate all chapters (full book compile)
+    uv run book_prepare.py --chapter ch01     # evaluate one chapter (standalone ch01.pdf)
+    uv run book_prepare.py --chapter ch01 --full-book  # evaluate ch01 metrics, compile main.pdf
     uv run book_prepare.py --list             # show outline
 
 Do not change scoring logic during loops. The OUTLINE tuple may grow or change when 目录 iterates (see program_books.md).
@@ -13,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -21,7 +23,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
+PDF_DIR = BOOKS / "pdf"
+BUILD_DIR = BOOKS / "build"
 CHAPTER_INPUT_DIR = "build/chapters"
+CHAPTER_COMPILE_TIMEOUT = 180
+BOOK_COMPILE_TIMEOUT = 900
 _build_chapters = BOOKS / "build" / "chapters"
 _legacy_chapters = BOOKS / "chapters"
 CHAPTERS = (
@@ -218,19 +224,111 @@ def sync_main_tex_inputs() -> list[str]:
     return [s.chapter_id for s in specs]
 
 
-def compile_book() -> bool:
+def chapter_spec_by_id(chapter_id: str) -> ChapterSpec | None:
+    for spec in OUTLINE:
+        if spec.chapter_id == chapter_id:
+            return spec
+    return None
+
+
+def write_standalone_tex(spec: ChapterSpec) -> Path:
+    BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    target = BUILD_DIR / f"{spec.chapter_id}.tex"
+    target.write_text(
+        f"""\\documentclass[11pt,oneside,a4paper]{{book}}
+\\input{{chapter_preamble.tex}}
+
+\\title{{AI Compiler Performance Engineering}}
+\\author{{Auto-Loops Books — {spec.chapter_id}}}
+\\date{{}}
+
+\\begin{{document}}
+
+\\setlength{{\\parskip}}{{0.25 \\baselineskip}}
+\\newlength{{\\figwidth}}
+\\setlength{{\\figwidth}}{{26pc}}
+
+\\frontmatter
+\\maketitle
+\\tableofcontents
+\\mainmatter
+
+\\input{{build/chapters/{spec.filename}}}
+
+\\small{{
+\\bibliography{{book,citations_merged}}
+\\bibliographystyle{{natbib}}
+\\clearpage
+}}
+\\printindex
+
+\\end{{document}}
+""",
+        encoding="utf-8",
+    )
+    return target
+
+
+def compile_stem(stem: str, *, verbose: bool = False) -> bool:
+    env = os.environ.copy()
+    env["BOOK"] = stem
     try:
-        sync_main_tex_inputs()
         proc = subprocess.run(
             ["bash", "make.sh"],
             cwd=BOOKS,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=900,
+            capture_output=not verbose,
+            text=True,
+            timeout=CHAPTER_COMPILE_TIMEOUT if stem != "main" else BOOK_COMPILE_TIMEOUT,
             check=False,
+            env=env,
         )
-        return proc.returncode == 0
     except (subprocess.TimeoutExpired, OSError):
+        return False
+
+    pdf_src = BOOKS / f"{stem}.pdf"
+    if not pdf_src.exists():
+        if not verbose:
+            tail = (proc.stdout or "") + (proc.stderr or "")
+            if tail.strip():
+                print(tail[-5000:], file=sys.stderr)
+        return False
+
+    if stem != "main":
+        PDF_DIR.mkdir(parents=True, exist_ok=True)
+        dest = PDF_DIR / f"{stem}.pdf"
+        dest.write_bytes(pdf_src.read_bytes())
+        if verbose:
+            print(f"Wrote {dest}")
+    elif verbose:
+        print(f"Wrote {pdf_src}")
+    return True
+
+
+def compile_chapter(chapter_id: str, *, verbose: bool = False) -> bool:
+    spec = chapter_spec_by_id(chapter_id)
+    if not spec:
+        return False
+    if not (CHAPTERS / spec.filename).exists():
+        return False
+    write_standalone_tex(spec)
+    return compile_stem(spec.chapter_id, verbose=verbose)
+
+
+def compile_all_chapters(*, verbose: bool = False) -> bool:
+    ok = True
+    for spec in OUTLINE:
+        if not (CHAPTERS / spec.filename).exists():
+            continue
+        if not compile_chapter(spec.chapter_id, verbose=verbose):
+            ok = False
+    return ok
+
+
+def compile_book(*, verbose: bool = False) -> bool:
+    try:
+        sync_main_tex_inputs()
+        return compile_stem("main", verbose=verbose)
+    except OSError:
         return False
 
 
@@ -308,6 +406,18 @@ def print_summary(result: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--chapter", help="chapter id, e.g. ch01")
+    parser.add_argument(
+        "--full-book",
+        action="store_true",
+        help="with --chapter, compile main.pdf instead of standalone chapter PDF",
+    )
+    parser.add_argument(
+        "--compile-all-chapters",
+        action="store_true",
+        help="build pdf/chXX.pdf for every existing chapter tex",
+    )
+    parser.add_argument("--skip-compile", action="store_true")
+    parser.add_argument("--verbose-compile", action="store_true")
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args()
 
@@ -316,7 +426,20 @@ def main() -> int:
             print(f"{spec.chapter_id}\t{spec.filename}\t{spec.title}")
         return 0
 
-    compile_ok = compile_book()
+    if args.compile_all_chapters:
+        if args.skip_compile:
+            print("skip-compile: no PDFs built", file=sys.stderr)
+            return 0
+        ok = compile_all_chapters(verbose=args.verbose_compile)
+        return 0 if ok else 1
+
+    compile_ok = True
+    if not args.skip_compile:
+        if args.chapter and not args.full_book:
+            compile_ok = compile_chapter(args.chapter, verbose=args.verbose_compile)
+        else:
+            compile_ok = compile_book(verbose=args.verbose_compile)
+
     specs = OUTLINE
     if args.chapter:
         specs = tuple(s for s in OUTLINE if s.chapter_id == args.chapter)

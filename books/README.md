@@ -12,8 +12,13 @@ English manuscript for the autobooks loop ([`program_books.md`](../program_books
 
 ```bash
 bash make.sh                    # full book → main.pdf (OUTLINE order via main.tex)
-bash make-chapter.sh ch01       # standalone chapter → pdf/ch01.pdf
-bash make-chapter.sh --all      # pdf/ch01.pdf, pdf/ch02.pdf, pdf/ch03.pdf
+bash make-chapter.sh ch01       # standalone chapter → pdf/ch01.pdf (~2 min)
+bash make-chapter.sh --all      # pdf/ch01.pdf … pdf/ch30.pdf (every existing chapter)
+bash make-chapter.sh --list     # chapter ids
+python3 ../book_prepare.py --chapter ch01           # compile + gate metrics (single chapter)
+python3 ../book_prepare.py --compile-all-chapters   # all standalone PDFs
+python3 ../book_prepare.py --chapter ch01 --full-book  # metrics for ch01, compile main.pdf
+uv run python build_chapter.py --chapter ch01 --verbose
 uv run python build_chapter.py --sync-main --main
 ```
 
@@ -22,9 +27,10 @@ uv run python build_chapter.py --sync-main --main
 | Output | Contents |
 |--------|----------|
 | `main.pdf` | Cover + notation + all chapters in OUTLINE order + bibliography |
-| `pdf/chXX.pdf` | Single-chapter PDF (`make-chapter.sh`) |
+| `pdf/chXX.pdf` | Single-chapter PDF (`make-chapter.sh` / `book_prepare --chapter`) |
+| `build/chXX.tex` | Generated wrapper (title + one `\input{build/chapters/...}` + bib) |
 
-The loop runs compile via `book-loop step` → `book_prepare.compile_book()` (900s timeout; auto-syncs `main.tex`).
+The loop runs **per-chapter** compile via `book-loop step` → `book_prepare.compile_chapter(chXX)` (180s timeout; writes `pdf/chXX.pdf`). Full `main.pdf` is CI / release only (`bash make.sh` or `--full-book`).
 
 ## Layout
 

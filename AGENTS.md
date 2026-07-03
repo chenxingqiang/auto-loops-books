@@ -427,11 +427,13 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R25（2026-06-09，内容轨）**：**ch14 扩写** — MLIR decode benchmarking 节 + 表 + operator/CI 段落；4221→**5000** words，q=**94.0**，cov=100%；**3/30** ready（ch05/ch11/ch14）。
 - **Loop R26（2026-06-09，内容轨）**：**ch29 扩写** — YiRage runtime decode benchmarking 节 + 表 + PK/CI/operator 段落；4212→**5000** words，q=**94.0**，cov=100%；**4/30** ready（ch05/ch11/ch14/ch29）。
 - **Loop R31（2026-06-09，内容轨）**：**ch28 扩写** — `Framework decode benchmarking methodology` 节 + 表 + scheduler/paging/plugin 段落；3691→**5000** words，q=**94.0**，cov=100%；**8/30** ready；Part VIII **3/3** ✓。
+- **Loop R32（2026-07-04，harness 轨）**：**每章单独构建** — `book_prepare.compile_chapter()` + `--chapter` 默认单章 PDF（`books/pdf/chXX.pdf`）；`book-loop step`/`deep-rewrite` 改单章编译；`make-chapter.sh --all` → `--compile-all-chapters`；全书仍 `bash make.sh` / CI。
+- **Loop R33（2026-07-04，内容轨）**：**ch01 外部审稿修订 + 5000w** — 结构重组（roofline 前置、diagnostic 并入 overhead、anti-patterns 后置）、引用/数据/术语规范化（TaxBreak/LIMINAL/MMA/ADF、三层优化边界、10:1 decode:prefill）；扩写 workload/benchmark/MoE/KV 段落；3729→**5000** words，q=**94.0**，cov=100%；`python3 book_prepare.py --chapter ch01` → ready；**9/30** ready；Part I **2/2** ✓。
 - **Loop R30（2026-06-09，内容轨）**：**ch30 扩写** — `Co-design decode benchmarking methodology` 节 + 表 + framework/compiler/runtime 三方可计数段落；4100→**5000** words，q=**94.0**，cov=100%；**7/30** ready（ch02/ch04/ch05/ch11/ch14/ch29/ch30）；Part VIII **2/3**。
 - **Loop R29（2026-06-09，内容轨）**：**ch02 扩写** — 剥离 pad 模板段 + `Dataflow mindset benchmarking methodology` 节 + 表 + export/triplet/CI/MoE/FlashAttention 段落；4140→**5000** words，q=**94.0**，cov=100%；**6/30** ready（ch02/ch04/ch05/ch11/ch14/ch29）。
 - **Loop R28（2026-06-09，目录轨）**：对标 Fregly PDF 全栈目录 — `book_content.md` §2/§4.5/§五 重写（产出导向 Part 名、具名机制小节、Lowering Arc）；`outline_extended.json` Part 标题同步；**未**物理重排 ch01–30 tex。
 - **Loop R27（2026-06-09，内容轨）**：**ch04 扩写** — Hopper decode benchmarking 节 + 表 + Nsight/CI/operator 段落；4149→**5000** words，q=**94.0**，cov=100%；**5/30** ready（ch04/ch05/ch11/ch14/ch29）。
-- **内容 R-next**：按 Fregly 目录补具名小节 + 扩写 ch03/ch01…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
+- **内容 R-next**：扩写 ch03…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
 - **Loop R22（2026-06-09，harness+内容轨）**：`iterate.py status` 输出 **Pad residual** 列表（`pad_residual_chapters`）；**ch15 Fregly deep-rewrite** — XLA HW matrix/passes/codegen/tuning/case study + backend 表；2090→**825** words，`min_words` 2050→**800**，q=**97.4**，pad **OK**；**30/30** ready。
 - **内容 R-next**：Part VI **ch16–17** 逐章 Fregly deep-rewrite；**ch24** residual pad。
 - **Harness R-next**：`iterate.py` 在 non-ready 章也显示 pad residual 优先级。
@@ -457,9 +459,10 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 | 进度 | `uv run book-loop status` |
 | 一步 | `uv run book-loop step [--chapter chXX]` |
 | 深度 | `uv run book-loop deep-rewrite --chapter chXX` |
-| 评估 | `uv run book_prepare.py --chapter chXX` |
-| Pad 剥离 | `python3 book_pad_dedup.py --audit --range 14-27` / `--apply chXX --force --adjust-min` |
-| 编译 | `cd books && bash make.sh`（或 CI artifact） |
+| 评估 | `uv run book_prepare.py --chapter chXX`（**单章**编译 → `books/pdf/chXX.pdf`） |
+| 单章 PDF | `cd books && bash make-chapter.sh chXX` |
+| 全书 PDF | `cd books && bash make.sh`（或 CI artifact） |
+| 全章 PDF | `python3 book_prepare.py --compile-all-chapters` |
 
 ### Gotchas
 
@@ -469,6 +472,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **GateGuard** — 必要时 `ECC_GATEGUARD=off` 或 shell heredoc 写 tex
 - **Simplicity** — 一段 strong paragraph > 三段 filler
 - **`main.pdf`** — CI 每 push 重建；仓库内 tracked 副本可能滞后，以 Actions artifact 为准
+- **单章构建** — `book_prepare --chapter chXX` / `book-loop step` 只编译 `pdf/chXX.pdf`（~180s）；全书 `main.pdf` 仅 CI 或 `bash make.sh` / `--full-book`
 - **Pad 去重** — ch14–27 含 `pad_agent_chapter` 近似重复段；盲目 exact dedup 会跌破 `min_words`（需 selective 模板剥离，非 R13）
 
 ### 相关文档
