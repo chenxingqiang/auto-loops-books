@@ -2,25 +2,118 @@
 \label{chap:ch05}
 \typeout{START_CHAPTER "ch05" \theabspage}
 
-GPU teams port a decoder kernel to Ryzen AI and expect ``slower CUDA.'' What they get is often a \emph{compile failure} or a silent fallback to DDR-bound scalar loops \citep{amd2024xdna,amd2024aie}. XDNA is not a SIMT machine with smaller shared memory---it is a spatial \emph{dataflow} array where buffer lifetimes, DMA chains, and tile assignments must be known before the first token \citep{patel2025llminference,chen2020compilerbasedhardw}. Chapter~3 listed NPU static legality in the constraint matrix; this chapter explains AMD's XDNA/AIE tiles, the static scheduling rules that decode must obey, and how those rules map to CUDA concepts (TMA, shared memory, softmax carriers) that GPU engineers already understand \citep{yirage2026,nvidia2022hopper}.
+\section{Why XDNA Is Not a Slower GPU}
+\label{sec:industrial_hook}
 
-The decode metric lens does not change on NPU. TaxBreak still counts launches/token on GPUs; on XDNA the analogue is DMA transactions and DDR egress per token \citep{taxbreak2026,memoryfloor2026}. Batch-1 interactive decode still reads every weight and every KV vector each step---only the orchestration mechanism differs \citep{dao2022flashattention,dlbook}. YiRage's XDNA backend exists because hand-written ``one op at a time'' schedules violate the array's static contract and waste the watt advantage that makes edge NPUs attractive \citep{yirage2026,liu2024deepseekv3}.
+A GPU team ported a Llama decoder to Ryzen AI and expected ``CUDA, but slower.''
+The graph either \textbf{failed to compile} or ran at DDR bandwidth with watt advantages erased \citep{amd2024xdna,amd2024aie}.
+Nsight-on-GPU habits misled them: there is no runtime warp scheduler, no configurable shared memory, and no silent spill to HBM when tile SRAM overflows \citep{yirage2026,nvidia2022hopper}.
 
-Dense Llama-3.2-1B issues 847.5 GPU kernel launches per output token on H100 in TaxBreak decode sweeps; OLMoE-1B/7B issues 9,305 \citep{taxbreak2026}. XDNA cannot interpret those numbers as a launch budget---each logical ``launch'' must become a static DMA edge or be fused away entirely \citep{amd2024xdna,yirage2026}. Memory-Floor shows CUDA Graphs removing ${\approx}3.05$\,ms host overhead per step on Qwen-2.5-7B at BS${=}1$---on XDNA the comparable win is eliminating redundant DDR round trips, not replaying kernels \citep{memoryfloor2026,nvidia2024cudagraphs}.
+\textbf{XDNA is a spatial dataflow array}, not a SIMT machine with smaller scratchpad.
+Every buffer lifetime, DMA edge, and tile assignment must be fixed before the first token \citep{patel2025llminference,chen2020compilerbasedhardw}.
+Illegal plans fail at compile time---or worse, export intermediates to DDR and lose the NPU's watt/token edge \citep{memoryfloor2026}.
 
+\paragraph{Bridge from Chapters~3--4.}
+Chapter~3 listed the NPU row in the constraint matrix; Chapter~4 showed Hopper's \emph{dynamic} tiers (shared memory, TMA, launches) \citep{nvidia2022hopper,semianalysis2024tma}.
+This chapter is the symmetric \emph{static} story: tile SRAM, DMA chains, and shape buckets \citep{amd2024xdna,amd2024aie}.
+The decode metric lens is unchanged---TaxBreak's launches/token on GPU become DMA edges/token and DDR bytes/token here \citep{taxbreak2026,memoryfloor2026}.
 
-\paragraph{Silicon context.} Ryzen AI combines Zen cores with XDNA NPU tiles aimed at laptop and edge inference \citep{amd2024xdna,amd2024aie}. Decode workloads stress DDR interfaces shared with CPU graphics and I/O---contention shows up as tail latency \citep{memoryfloor2026,patel2025llminference,dlbook}. Planning must include system-level bandwidth, not isolated NPU peaks \citep{yirage2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,nvidia2024cudagraphs,semianalysis2024tma,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{Unified optimization logic.}
+Whether the target is HBM or DDR, batch-1 decode still reads every weight and every KV vector each step \citep{dao2022flashattention,dlbook}.
+Cut activation egress first; cut orchestration second; polish MAC utilization last \citep{memoryfloor2026,taxbreak2026}.
+On XDNA, ``orchestration'' is host graph submission plus DMA descriptor setup---not CUDA kernel launches \citep{amd2024xdna,yirage2026}.
 
-\paragraph{Decode vs prefill on NPU.} Prefill parallelizes over prompt tokens; decode appends one token with full KV history \citep{dao2022flashattention,dao2023flashdecoding,patel2025llminference}. Static graphs compiled for long rectangular matmuls may waste tile arrays on thin decode matmuls \citep{amd2024aie,yirage2026,memoryfloor2026,taxbreak2026,amd2024xdna,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper}. Always qualify decode-shaped graphs separately \citep{yirage2026,amd2024xdna,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{What you will be able to do.}
+After this chapter you can (1)~explain why a Hopper-legal fusion may XDNA-reject, (2)~write a tile SRAM line-item budget, (3)~map TMA concepts to ping-pong DMA, (4)~gate merges with five static-legality checks, and (5)~benchmark DDR bytes/token instead of FLOPs \citep{yirage2026,patel2025llminference}.
 
-\section{XDNA tiles}
+\paragraph{Reader prerequisites.}
+Carry Chapter~4's priority pyramid mindset but invert flexibility for determinism \citep{memoryfloor2026}.
+When we reference online softmax, Chapter~10 owns numerics; here we cover \emph{where} carriers must live in tile SRAM \citep{dao2022flashattention}.
+
+\paragraph{Industrial narrative.}
+TaxBreak dense Llama-3.2-1B averages hundreds of GPU kernel launches per output token on H100 \citep{taxbreak2026}.
+XDNA cannot budget ``847 launches''---each logical launch must become a static DMA edge or disappear in fusion \citep{amd2024xdna,yirage2026}.
+Memory-Floor shows CUDA Graphs removing host overhead on GPU; on XDNA the comparable win is eliminating redundant DDR round trips, not replaying kernels \citep{memoryfloor2026,nvidia2024cudagraphs}.
+
+\paragraph{Silicon context.}
+Ryzen AI combines Zen cores with XDNA tiles aimed at laptop inference \citep{amd2024xdna,amd2024aie}.
+Decode workloads stress DDR interfaces shared with CPU graphics and I/O---contention shows up as tail latency, not average MAC utilization \citep{patel2025llminference,dlbook}.
+Planning must include system-level bandwidth, not isolated NPU peaks \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Anti-pattern preview.}
+The five review gates in Section~\ref{sec:ch05_review_gates} map to static-legality failures---use them in design review before merge \citep{yirage2026,amd2024aie}.
+Culture: post Table~\ref{tab:ch05_static_rules} in your compiler team's XDNA doc template \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Cross-chapter dependency map.}
+Chapter~3 listed abstract NPU constraints; Chapter~4 named Hopper mechanisms; Chapters~6--11 specialize residency, sync, softmax, and MegaKernel codegen \citep{chen2020compilerbasedhardw,yirage2026,dao2022flashattention}.
+Skipping here produces schedules that ignore tile SRAM bounds \citep{amd2024xdna,memoryfloor2026}.
+
+\paragraph{How to read this chapter.}
+Skim Table~\ref{tab:cuda_xdna_map} first if you are a GPU engineer \citep{patel2025llminference}.
+Sections~\ref{sec:ch05_xdna_tiles}--\ref{sec:ch05_static_dataflow_rules} are the hardware contract; Section~\ref{sec:ch05_review_gates} is the merge workflow; Section~\ref{sec:ch05_ryzen_benchmark} is verification only \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Organization map.}
+Tiles (\S\ref{sec:ch05_xdna_tiles}), static rules (\S\ref{sec:ch05_static_dataflow_rules}), CUDA mapping (\S\ref{sec:ch05_cuda_xdna_mapping}), softmax (\S\ref{sec:ch05_online_softmax_hw}), tradeoffs (\S\ref{sec:ch05_architecture_tradeoffs}), dataflow conclusions (\S\ref{sec:ch05_dataflow_conclusion}), YiRage (\S\ref{sec:ch05_yirage_xdna_backend}), gates (\S\ref{sec:ch05_review_gates}), verify (\S\ref{sec:ch05_ryzen_benchmark}) \citep{yirage2026,amd2024xdna}.
+
+\paragraph{What this chapter is not.}
+Not a Ryzen AI marketing brief; not a substitute for AMD vendor programming guides \citep{amd2024xdna,amd2024aie}.
+We document optimization \emph{bounds} for batch-1 decode residency on spatial dataflow silicon \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Failure story catalog (short).}
+Tile SRAM overflow at max ctx; illegal DMA on paged KV; bucket mismatch after driver upgrade; softmax carrier width drift; host alloc sneaking into hot path \citep{yirage2026,amd2024xdna,dao2023flashdecoding,patel2025llminference,kwon2023vllm}.
+Map symptoms to static rules in Table~\ref{tab:ch05_static_rules} before tuning MAC tile sizes \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{Teaching versus production stacks.}
+Courses emphasize rectangular GEMM throughput; production decode emphasizes DDR bytes/token and watt/token counters \citep{dlbook,taxbreak2026,memoryfloor2026}.
+This chapter bridges that gap for XDNA specifically \citep{amd2024aie,yirage2026,patel2025llminference}.
+
+\paragraph{DeepSeek deployment reminder.}
+Decode pools dominate GPU counts in large deployments; edge assistants invert the story---watt caps and locality dominate \citep{patel2025llminference,liu2024deepseekv3,amd2024xdna,taxbreak2026,memoryfloor2026}.
+Pick silicon against the binding metric, not die marketing \citep{yirage2026,dlbook}.
+
+\paragraph{Priority contrast with Chapter~4.}
+Chapter~4's pyramid starts with fusion and graphs, then TMA, then TC polish \citep{memoryfloor2026,taxbreak2026,semianalysis2024tma}.
+XDNA's pyramid is stricter: static legality and DDR bytes/token first---MAC polish is still last, but compile failure blocks all runtime tuning \citep{amd2024xdna,yirage2026,patel2025llminference}.
+Never invert the order by opening MAC configurators while buffer tables overflow \citep{amd2024aie,memoryfloor2026}.
+
+\paragraph{Who should read this chapter.}
+GPU kernel engineers porting to Ryzen AI, compiler authors lowering MLIR to AIE, and serving teams splitting cloud GPU pools from edge NPU nodes \citep{yirage2026,patel2025llminference,nvidia2022hopper}.
+CUDA-only deployers should still read the mapping and tradeoff sections---they explain why GPU recipes fail on NPU fleets \citep{amd2024xdna,chen2020compilerbasedhardw}.
+
+\paragraph{Reader exercises.}
+(1) Sketch tile SRAM allocation for one fused layer at $d{=}2048$. (2) Explain why Hopper TMA overlap does not reduce DDR bytes. (3) Fill Table~\ref{tab:ch05_worked_results} for your model \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,dao2022flashattention,amd2024aie}.
+
+\paragraph{Onboarding sentence for teams.}
+Post in your compiler design doc: \emph{``We do not merge XDNA decode changes without static buffer tables, shape buckets, and DDR goodput counters.''} \citep{yirage2026,taxbreak2026,memoryfloor2026,amd2024xdna}
+CI enforces the sentence; posters alone do not \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Open research threads.}
+Dynamic shapes without recompile, multi-chip XDNA graphs, and MoE expert-local fusion remain active \citep{liu2024deepseekv3,kwon2023vllm,patel2025llminference,yirage2026,amd2024aie}.
+This chapter documents single-NPU batch-1 baselines engineers can extend \citep{taxbreak2026,memoryfloor2026,amd2024xdna}.
+
+\paragraph{Industrial narrative (closing hook).}
+Goodput engineering on XDNA is measurable: DDR bytes/token, DMA edges/token, ms/token, and watt/token together \citep{taxbreak2026,memoryfloor2026,patel2025llminference,dlbook,amd2024xdna}.
+Skillful static residency beats SKU shopping when DDR roofline binds \citep{memoryfloor2026,taxbreak2026,dao2022flashattention,yirage2026,amd2024aie}.
+
+\index{XDNA}
+\index{AIE}
+\index{dataflow}
+
+\section{XDNA Tile Hardware: Fixed SRAM, No Runtime Scheduler}
 \label{sec:ch05_xdna_tiles}
 
-\paragraph{Ryzen AI deployment context.} XDNA appears in Ryzen AI NPUs paired with x86 cores---decode often splits pre/post on CPU and MegaKernel on AIE \citep{amd2024xdna,patel2025llminference,dlbook}. The tile grid is fixed per SKU; compiler passes must query exact SRAM sizes, not datasheets from a different stepping \citep{amd2024aie,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
+AMD \textbf{XDNA} groups AI Engine (\textbf{AIE}) \textbf{tiles} into a spatial array \citep{amd2024xdna,amd2024aie}.
+Each tile owns local SRAM, connects through stream switches, and executes MAC datapaths under compiler-scheduled DMA---not under a hardware warp scheduler \citep{patel2025llminference}.
 
-\paragraph{DDR vs tile bandwidth.} Decode is DDR-bandwidth bound when weights and KV exceed tile residency \citep{memoryfloor2026,dao2022flashattention}. Roofline on XDNA uses DDR bytes/token as the primary axis---identical to GPU decode thinking once HBM replaces DDR \citep{patel2025llminference,semianalysis2024tma,nvidia2022hopper,liu2024deepseekv3,kwon2023vllm,dao2023flashdecoding,yirage2026,amd2024aie,taxbreak2026,chen2020compilerbasedhardw}.
+\paragraph{Engineering meaning.}
+Tile SRAM is smaller than Hopper shared memory and \emph{fixed} at compile time---there is no ``configure 228\,KB and hope'' knob \citep{nvidia2022hopper,amd2024aie}.
+Overflow does not spill gracefully; it illegalizes the graph or forces DDR round trips \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Common pitfall.}
+Sizing tiles from GPU comfort zones (``HBM is huge'') instead of per-SKU SRAM datasheets \citep{amd2024xdna}.
+\textbf{Debug:} static buffer table high-water versus tile cap; DDR bytes/token rising while MAC active \% stays flat \citep{patel2025llminference}.
+
 % AUTO_VISUAL:fig_xdna_tiles_pipeline
-
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -36,11 +129,9 @@ Dense Llama-3.2-1B issues 847.5 GPU kernel launches per output token on H100 in 
 \label{fig:xdna_tiles_pipeline}
 \end{figure}
 
-AMD \textbf{XDNA} groups AI Engine (\textbf{AIE}) tiles into a spatial array: each \textbf{tile} owns local SRAM, connects to neighbors through stream switches, and executes MAC-heavy datapaths under compiler-scheduled DMA \citep{amd2024xdna,amd2024aie}. Unlike GPU warps, there is no runtime scheduler to hide a missing buffer plan---if a decoder stage needs a temporary softmax statistic and no tile slot was reserved at compile time, the backend either rejects the graph or spills to DDR \citep{yirage2026,memoryfloor2026}.
-
 \begin{table}[t]
 \centering
-\caption{XDNA tile resources vs.\ GPU SM shared memory (conceptual decode comparison).}
+\caption{XDNA tile resources vs.\ Hopper SM (decode comparison).}
 \label{tab:xdna_tiles}
 \begin{tabular}{lcc}
 \toprule
@@ -49,36 +140,75 @@ AMD \textbf{XDNA} groups AI Engine (\textbf{AIE}) tiles into a spatial array: ea
 On-chip scratch & Configurable shared mem & Fixed tile SRAM \\
 Parallel grain & Warp (32 threads) & Spatial PE lane \\
 Scheduling & Runtime + streams & Compile-time DMA graph \\
-Dynamic shapes & Supported (with cost) & Restricted / recompile \\
-Decode failure mode & Launch storms & DDR egress / illegal graph \\
+Dynamic shapes & Supported (with cost) & Bucketed / recompile \\
+Failure mode & Launch storms, spill & Compile fail, DDR egress \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:xdna_tiles} is the mental model GPU engineers need before writing XDNA code: think ``DMA + tile SRAM budget,'' not ``launch another kernel'' \citep{semianalysis2024tma,nvidia2022hopper}. A Llama-class decoder layer that fits in Hopper shared memory with careful tiling may still \emph{illegalize} on XDNA if the same math requires three simultaneous tile-resident tensors---the array enforces a stricter simultaneous residency cap \citep{patel2025llminference,amd2024aie}.
+\paragraph{Core bottleneck.}
+When weights, KV cache, and live intermediates cannot simultaneously fit tile SRAM, decode becomes DDR-bandwidth bound---the NPU roofline collapses to external memory \citep{memoryfloor2026,dao2022flashattention}.
+Chapter~2's export-edge mindset applies: every DDR round trip is a bytes/token bill \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Ryzen AI context.}
+Ryzen AI pairs Zen cores with XDNA for laptop and edge inference \citep{amd2024xdna}.
+DDR is shared with CPU, graphics, and I/O---contention inflates p99 decode even when isolated NPU peaks look healthy \citep{patel2025llminference,dlbook}.
+
+\paragraph{Decode vs prefill.}
+Prefill parallelizes over prompt tokens; decode appends one token with full KV history \citep{dao2022flashattention,dao2023flashdecoding}.
+Graphs compiled for rectangular prefill matmuls may waste tile arrays on thin $M{=}1$ decode---qualify decode-shaped buckets separately \citep{amd2024aie,yirage2026}.
 
 \begin{example}
-A single decode matmul tile on XDNA: weights stream from DDR into tile SRAM while activations arrive on a ping-pong DMA chain; if the compiler assigns overlapping lifetimes to two weight tiles, peak SRAM exceeds hardware limits and compile fails---there is no HBM spill fallback \citep{yirage2026,amd2024xdna}.
+A decode matmul streams weights from DDR into tile SRAM while activations ping-pong on a DMA chain.
+Two weight tiles with overlapping lifetimes exceed SRAM---compile fails with no HBM spill fallback \citep{yirage2026,amd2024xdna}.
 \end{example}
 
-\paragraph{Worked contrast.} Hopper decode can recover from a suboptimal schedule with CUDA Graphs and extra launches \citep{nvidia2024cudagraphs,taxbreak2026}. XDNA decode rarely gets that slack: the graph is static or it does not ship \citep{amd2024aie,yirage2026}. Identical FLOPs, different bytes/token because DDR traffic dominates when tile residency fails \citep{memoryfloor2026,dao2023flashdecoding}.
+\paragraph{Worked contrast.}
+Hopper may recover from a suboptimal schedule with CUDA Graphs and extra launches \citep{nvidia2024cudagraphs,taxbreak2026}.
+XDNA rarely gets that slack: the static graph ships or it does not \citep{amd2024aie,yirage2026}.
 
-\paragraph{Tile array topology.} Multiple AIE tiles connect in a grid; decode megakernels assign each pipeline stage to a tile column or row \citep{amd2024xdna,amd2024aie}. Compiler passes must respect inter-tile bandwidth limits---not every fusion that fits one tile fits the array \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+\paragraph{Tile array topology.}
+Multiple AIE tiles connect in a grid; decode megakernels assign pipeline stages to tile columns or rows \citep{amd2024xdna,amd2024aie}.
+Compiler passes must respect inter-tile stream-switch bandwidth---not every fusion that fits one tile fits the array \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+Oversubscription may not fail compile; it stalls runtime and inflates p99 \citep{memoryfloor2026}.
 
-\section{Static dataflow rules}
+\paragraph{Weight streaming.}
+Weights are read every decode token \citep{dao2022flashattention,dlbook}.
+On GPU, weight bandwidth competes with KV in HBM; on XDNA, weights DMA from DDR unless hot slices pin in tile SRAM across tokens \citep{memoryfloor2026,amd2024xdna}.
+Plans that reload full layers each token saturate DDR regardless of MAC peak \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{KV on DDR.}
+KV typically lives in DDR on edge NPUs; attention reads history each token \citep{kwon2023vllm,dao2023flashdecoding}.
+Paged KV still requires static page tables in many XDNA stacks \citep{yirage2026,memoryfloor2026}.
+Qualify with bytes/token, not parameter count alone \citep{taxbreak2026}.
+
+\paragraph{Rotary and norms.}
+Layer norm and rotary embedding look tiny in FLOPs; unfused they become separate DMA rounds \citep{taxbreak2026,amd2024aie}.
+Fuse into attention or MLP stages where carriers are already resident \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Quantization note.}
+INT8 and INT4 weights reduce DDR pressure---critical on XDNA \citep{amd2024xdna,memoryfloor2026}.
+Quantization scales must embed in static graphs; runtime per-op scale lookup reintroduces dynamicism \citep{amd2024aie,yirage2026}.
+
+\paragraph{Occupancy versus fusion trade.}
+Fewer resident tiles may raise MAC active \% yet lose on ms/token when fusion exports to DDR \citep{memoryfloor2026,patel2025llminference}.
+Optimize MAC charts only after DDR bytes/token improves \citep{yirage2026}.
+
+\paragraph{Tier assignment exercise.}
+For one transformer layer, list every $\Theta(d)$ tensor between attention and MLP: post-norm hidden, Q/K/V fragments, attention output, MLP intermediates, residuals \citep{dao2022flashattention,memoryfloor2026}.
+Mark each as tile SRAM, DDR staging, or illegal export for your XDNA plan \citep{yirage2026,chen2020compilerbasedhardw}.
+Any DDR mark between fused stages is a bytes/token bug unless proven dead \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach a tile SRAM line-item sheet listing every buffer alive during one decode step before requesting codegen \citep{yirage2026,memoryfloor2026}.
+
+\section{Static Dataflow: Four Rules Decode Must Obey}
 \label{sec:ch05_static_dataflow_rules}
 
-\paragraph{Host-side responsibilities.} The host configures graph runners, submits execute calls, and updates KV metadata---but must not allocate or copy full tensors per token. KV growth appends through pre-planned DDR regions referenced by static descriptors. When KV grows beyond compiled max context, the product must recompile or reject---not fall back to unplanned buffers \citep{kwon2023vllm,amd2024xdna,yirage2026}.
+\textbf{Static} XDNA schedules resolve every tensor lifetime, DMA descriptor, and tile assignment at compile time \citep{amd2024xdna,amd2024aie}.
+\textbf{Dataflow} propagates tokens through spatial pipelines---not through a sequence of host-launched kernels \citep{chen2020compilerbasedhardw,yirage2026}.
 
-\paragraph{Synchronization model.} GPUs use cudaDeviceSynchronize at unfortunate times; XDNA relies on DMA completion tokens wired in the dataflow graph. Inserting host waits between stages hides parallelism and adds jitter to p99 decode \citep{amd2024aie,patel2025llminference,memoryfloor2026}. Compiler backends should emit single submission boundaries per decoder step where possible \citep{yirage2026,taxbreak2026}.
-
-\paragraph{Testing static graphs.} Validate graphs at min and max context buckets, not only nominal length. Off-by-one errors in carrier buffer sizes often appear only at max context \citep{dao2023flashdecoding,amd2024aie,memoryfloor2026}. Run byte counters on DDR ports during simulation before silicon \citep{amd2024xdna,chen2020compilerbasedhardw}.
-
-\paragraph{Compiler IR implications.} MLIR and YiRage attach static lifetime intervals to memref views before lowering to AIE \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna}. Generic bufferization that inserts heap fallback breaks static rules immediately \citep{memoryfloor2026,kwon2023vllm,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,amd2024aie,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding}.
-
-\paragraph{Recompile economics.} Static specialization implies compile minutes amortized over thousands of tokens \citep{yirage2026,patel2025llminference,amd2024aie}. Edge products with cold starts must budget compile latency in UX---unlike GPU JIT that hides in first batch \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,chen2020compilerbasedhardw,amd2024xdna,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dao2023flashdecoding,semianalysis2024tma,nvidia2022hopper}.
 % AUTO_VISUAL:fig_static_dataflow_rules_architecture
-
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
@@ -94,359 +224,678 @@ A single decode matmul tile on XDNA: weights stream from DDR into tile SRAM whil
 \label{fig:static_dataflow_rules_architecture}
 \end{figure}
 
-\textbf{Static} XDNA schedules mean every tensor lifetime, DMA descriptor, and tile assignment is resolved at compile time \citep{amd2024xdna,amd2024aie}. \textbf{Dataflow} execution propagates tokens through spatial pipelines rather than a sequence of host-launched kernels \citep{chen2020compilerbasedhardw,yirage2026}. The rules decode compilers must internalize:
+\begin{table}[t]
+\centering
+\caption{Static dataflow iron rules for XDNA decode.}
+\label{tab:ch05_static_rules}
+\begin{tabular}{@{}p{2.4cm}p{4.8cm}@{}}
+\toprule
+\textbf{Rule} & \textbf{Engineering requirement} \\
+\midrule
+No dynamic alloc & Per-token hot path uses compile-time DDR slots; KV growth aliases pre-planned regions \citep{kwon2023vllm}. \\
+No naked dynamic CF & Runtime branches become padded static bucket variants \citep{patel2025llminference}. \\
+Deterministic DMA & Producer--consumer edges map to DMA events with known latency---not ``sync later'' \citep{amd2024aie}. \\
+Fusion all-or-nothing & Partial fusion exporting intermediates to DDR erases watt advantage \citep{yirage2026,taxbreak2026}. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{enumerate}
-\item No hidden host allocations on the per-token path---KV and temporaries alias compile-time buffer slots \citep{kwon2023vllm,memoryfloor2026}.
-\item No dynamic control flow inside the hot dataflow unless specialized into padded static variants \citep{patel2025llminference,liu2024deepseekv3}.
-\item Producer--consumer edges must map to DMA events with known latency; ``sync later'' is not a plan \citep{amd2024aie,semianalysis2024tma}.
-\item Fusion is all-or-nothing for many decode cells: partial fusion that exports intermediates to DDR often erases the NPU watt advantage \citep{yirage2026,taxbreak2026}.
-\end{enumerate}
+\paragraph{Host responsibilities.}
+The host configures graph runners and submits execute calls---but must not allocate full tensors per token \citep{amd2024xdna}.
+When KV exceeds compiled max context, the product recompiles or rejects---not fall back to unplanned buffers \citep{kwon2023vllm,yirage2026}.
 
-PyTorch-style eager op dispatch is the anti-pattern Chapter~1 diagnosed on GPUs---on XDNA it is often unsupported outright \citep{taxbreak2026,amd2024xdna}. The compiler must emit one static graph per shape bucket (batch, context class) and recompile when buckets change, amortizing compile cost across many tokens \citep{yirage2026,patel2025llminference}.
+\paragraph{Synchronization model.}
+GPUs misuse \texttt{cudaDeviceSynchronize}; XDNA relies on DMA completion tokens wired in the graph \citep{amd2024aie,patel2025llminference}.
+Host waits between stages add jitter to p99 decode \citep{memoryfloor2026}.
 
-\paragraph{Deployment pitfall.} Teams benchmark prefill-length graphs on XDNA, then deploy batch-1 decode with growing KV---dynamic sequence growth violates static buffer tables unless the compiler padded or bucketed context \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}. Treat context buckets as first-class compile parameters, not runtime surprises \citep{kwon2023vllm,yirage2026}.
+\paragraph{Deployment pitfall.}
+Benchmarking prefill-length graphs then deploying batch-1 decode with growing KV violates static buffer tables unless context was bucketed upfront \citep{dao2022flashattention,dao2023flashdecoding}.
+Treat ctx buckets as compile parameters, not runtime surprises \citep{kwon2023vllm,yirage2026}.
 
-\paragraph{Static legality review.} Every merge should attach a buffer lifetime diagram: which tensors live in tile SRAM simultaneously at each decode step \citep{amd2024aie,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
+\paragraph{Recompile economics.}
+Static specialization amortizes compile minutes over thousands of tokens \citep{yirage2026,patel2025llminference}.
+Edge products with cold starts must budget compile latency in UX---unlike GPU JIT hidden in first batch \citep{taxbreak2026,nvidia2024cudagraphs}.
 
-\section{CUDA XDNA mapping}
+\paragraph{Chapter~2 iron rule link.}
+Iron Rule~2 (keep activations on-chip) becomes a \emph{hard} compile gate on XDNA---violations export to DDR, not to a forgiving spill path \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Compiler IR implications.}
+MLIR and YiRage attach static lifetime intervals to memref views before lowering to AIE \citep{yirage2026,chen2020compilerbasedhardw}.
+Generic bufferization that inserts heap fallback breaks static rules immediately \citep{memoryfloor2026,kwon2023vllm}.
+
+\paragraph{Testing static graphs.}
+Validate at min and max context buckets, not only nominal length \citep{dao2023flashdecoding,amd2024aie}.
+Off-by-one carrier sizes often appear only at max context \citep{memoryfloor2026}.
+Run DDR byte counters in simulation before silicon \citep{amd2024xdna}.
+
+\paragraph{Continuous batching.}
+vLLM-style batching on GPU does not port literally---XDNA batching requires padded static batch classes \citep{kwon2023vllm,amd2024xdna,yirage2026}.
+Each batch class is a separate compiled graph with its own buffer table \citep{patel2025llminference}.
+
+\paragraph{PyTorch eager anti-pattern.}
+Chapter~1 diagnosed operator-first GPU stacks; on XDNA eager dispatch is often unsupported outright \citep{taxbreak2026,amd2024xdna}.
+The compiler must emit one static graph per shape bucket and recompile when buckets change \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Static dataflow worked example.}
+Imagine a two-stage decode cell: attention then MLP \citep{dao2022flashattention}.
+Stage one DMA-loads K/V while MAC arrays update softmax carriers entirely in tile SRAM.
+Stage two consumes attention output from stream registers without a DDR round trip \citep{amd2024aie,semianalysis2024tma}.
+If MLP weights DMA mid-stage without double buffering, MAC units stall---visible as higher ms/token despite healthy FLOPs counters \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Every merge attaches a buffer lifetime diagram: which tensors coexist in tile SRAM at each decode step \citep{amd2024aie,yirage2026}.
+
+\section{CUDA $\rightarrow$ XDNA Mapping for GPU Engineers}
 \label{sec:ch05_cuda_xdna_mapping}
 
-\paragraph{Shared memory illusion.} GPU shared memory is explicitly sized and banked; tile SRAM is smaller but deterministic. Engineers who oversize tiles ``because HBM is huge'' fail XDNA legality immediately \citep{nvidia2022hopper,amd2024aie,semianalysis2024tma}. Start from tile SRAM datasheet bytes, not GPU comfort zones \citep{yirage2026,memoryfloor2026}.
-
-\paragraph{TMA lesson transfer.} TMA teaches asynchronous movement while compute runs---XDMA chains must encode the same overlap explicitly. Without overlap, MAC utilization collapses and watt/token rises even if correctness holds \citep{semianalysis2024tma,amd2024xdna,patel2025llminference}. Profile MAC active cycles, not just end-to-end latency \citep{amd2024aie,yirage2026}.
-
-\paragraph{Graph capture analogy.} CUDA Graphs freeze launch order; XDNA freezes DMA order. Mutating either without re-record/re-compile breaks decode silently \citep{nvidia2024cudagraphs,amd2024xdna,taxbreak2026,memoryfloor2026}. Treat shape buckets like graph capture templates \citep{yirage2026,kwon2023vllm}.
-
-\paragraph{Double buffering depth.} Hopper TMA double buffering hides HBM latency; XDNA ping-pong DMA chains require explicit buffer descriptor pairs in the static graph \citep{semianalysis2024tma,nvidia2022hopper,amd2024aie,yirage2026}. Shallow pipelines under-utilize MAC arrays; deep pipelines overflow tile SRAM \citep{memoryfloor2026,patel2025llminference,dao2022flashattention,taxbreak2026,amd2024xdna,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dlbook,dao2023flashdecoding,nvidia2024cudagraphs}.
-
-\paragraph{Host orchestration.} CUDA uses streams; XDNA uses graph runners that submit entire dataflow frames \citep{nvidia2024cudagraphs,amd2024xdna,yirage2026}. Per-token host work must be O(1) and allocation-free---TaxBreak's launch tax has a direct analogue in graph submission overhead \citep{taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,amd2024aie,semianalysis2024tma,nvidia2022hopper,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dao2023flashdecoding,dlbook}.
-
-GPU engineers think in TMA descriptors and shared-memory tiles; XDNA engineers think in \textbf{buffer descriptor}s and tile SRAM assignments \citep{nvidia2022hopper,semianalysis2024tma,amd2024xdna}. The mapping is conceptual, not one-to-one:
+GPU engineers think in TMA descriptors and shared-memory tiles; XDNA engineers think in \textbf{buffer descriptor}s and tile SRAM assignments \citep{nvidia2022hopper,semianalysis2024tma,amd2024xdna}.
+The mapping is \emph{conceptual}---CUDA scheduling experience does not transplant \citep{patel2025llminference,yirage2026}.
 
 \begin{table}[t]
 \centering
-\caption{CUDA $\rightarrow$ XDNA concept mapping for decode.}
+\caption{CUDA/Hopper $\rightarrow$ XDNA/AIE concept mapping (decode).}
 \label{tab:cuda_xdna_map}
 \begin{tabular}{ll}
 \toprule
 \textbf{CUDA / Hopper} & \textbf{XDNA / AIE} \\
 \midrule
-TMA async copy & DMA into tile SRAM \\
-Shared memory tile & Tile buffer / ping-pong chain \\
-CUDA Graphs capture & Static dataflow graph \\
-Stream launch & Host graph runner invoke \\
-Warp-synchronous softmax & Spatial softmax carrier pipeline \\
+TMA async copy & DMA load into tile SRAM \\
+Shared memory tile & Tile buffer + ping-pong DMA chain \\
+CUDA Graph capture & Static dataflow graph \\
+Stream kernel launch & Host graph runner single submit \\
+Warp online softmax & Spatial softmax carrier pipeline \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Hopper \textbf{TMA} hides DDR latency by double-buffering into shared memory while MMA units compute \citep{semianalysis2024tma,nvidia2022hopper}. XDNA achieves a similar \emph{software pipeline} with ping-pong \textbf{buffer descriptor}s into tile SRAM---but the compiler must assign both buffers and DMA edges statically \citep{amd2024aie,yirage2026}. A decode attention stage that uses TMA-backed softmax carriers on GPU must become a fixed carrier pipeline on AIE; you cannot insert a host-side \texttt{malloc} between carriers \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}.
+\paragraph{TMA lesson transfer.}
+TMA hides HBM latency while MMA computes \citep{semianalysis2024tma,nvidia2022hopper}.
+XDNA needs explicit ping-pong buffer descriptor pairs in the static graph---compiler assigns both buffers and DMA edges \citep{amd2024aie,yirage2026}.
+Without overlap, MAC utilization collapses and watt/token rises \citep{patel2025llminference}.
+
+\paragraph{Graph capture analogy.}
+CUDA Graphs freeze launch order; XDNA freezes DMA order \citep{nvidia2024cudagraphs,amd2024xdna}.
+Mutating either without re-record/re-compile breaks decode silently \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Applicable when.}
+Regular tiles, amortized descriptor setup, steady MegaKernel pipelines inside one shape bucket \citep{amd2024xdna,semianalysis2024tma}.
+
+\paragraph{Avoid when.}
+Expecting dynamic batching, speculative branches, or per-token \texttt{malloc} on the hot path \citep{patel2025llminference,liu2024deepseekv3}.
+
+\paragraph{Common pitfall.}
+Mandating DMA on micro-copies where descriptor tax exceeds copy benefit---mirror Chapter~4's thin-$M$ TMA anti-pattern on DDR \citep{taxbreak2026,yirage2026}.
+
+\paragraph{Debug.}
+MAC active \% versus DDR throughput; DMA edges/token versus graph submission time \citep{amd2024aie,patel2025llminference}.
 
 \begin{example}
-GPU decode step: TMA loads Q tile while previous softmax partials remain in shared memory. XDNA equivalent: DMA chain loads Q into tile $A$ while tile $B$ holds running max/sum carriers---both buffers named in the static graph; swapping roles is compile-time ping-pong, not runtime alloc \citep{yirage2026,amd2024xdna,semianalysis2024tma}.
+GPU: TMA loads Q while softmax partials stay in shared memory.
+XDNA: DMA chain loads Q into tile $A$ while tile $B$ holds running max/sum carriers---roles swap at compile-time ping-pong, not runtime alloc \citep{yirage2026,dao2022flashattention}.
 \end{example}
 
-\paragraph{Review gate.} Before merging XDNA backend changes, diff static buffer tables against tile SRAM caps and list every DDR transaction per decode step \citep{amd2024aie,memoryfloor2026,yirage2026}. If DDR bytes/token exceed GPU baselines, residency planning failed---not ``the NPU is slow'' \citep{patel2025llminference,taxbreak2026}.
+\paragraph{Double buffering depth.}
+Hopper TMA double buffering hides HBM latency; XDNA ping-pong DMA chains require explicit buffer descriptor pairs in the static graph \citep{semianalysis2024tma,nvidia2022hopper,amd2024aie,yirage2026}.
+Shallow pipelines under-utilize MAC arrays; deep pipelines overflow tile SRAM \citep{memoryfloor2026,patel2025llminference}.
 
-\section{Online softmax HW}
+\paragraph{Buffer descriptors in practice.}
+A buffer descriptor names source address, destination tile buffer, length, and stride---analogous to TMA copy descriptors on Hopper \citep{nvidia2022hopper,amd2024xdna}.
+Ping-pong uses two descriptors alternating roles each token step \citep{yirage2026,kwon2023vllm}.
+Decode graphs freeze descriptor contents per shape bucket; changing context without recompile implies descriptors were padded for max context upfront \citep{patel2025llminference,amd2024aie}.
+
+\paragraph{Host orchestration.}
+CUDA uses streams; XDNA uses graph runners that submit entire dataflow frames \citep{nvidia2024cudagraphs,amd2024xdna,yirage2026}.
+Per-token host work must be O(1) and allocation-free---TaxBreak's kernel launch overhead has a direct analogue in graph submission overhead \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Diff static buffer tables against tile SRAM caps; list every DDR transaction per decode step \citep{memoryfloor2026,amd2024aie}.
+
+\section{Online Softmax on Spatial Hardware}
 \label{sec:ch05_online_softmax_hw}
 
-\paragraph{Numerical stability.} Online softmax relies on stable accumulation order; spatial reductions must preserve mathematical equivalence to reference implementations \citep{dao2022flashattention,dao2023flashdecoding}. Validation should compare logits against GPU reference on short contexts before trusting long-context deployments \citep{memoryfloor2026,amd2024aie,yirage2026}.
+Attention decode needs numerically stable \textbf{softmax} over growing KV context \citep{dao2022flashattention,dao2023flashdecoding}.
+FlashAttention-style algorithms keep running max and sum in on-chip \textbf{carriers} rather than materializing full attention maps to DDR \citep{memoryfloor2026}.
 
-\paragraph{Carrier placement.} Assign carrier buffers adjacent to attention tiles in the dataflow to minimize stream latency. Poor placement increases stage cycles without changing FLOPs---visible only in cycle-accurate simulation \citep{amd2024xdna,patel2025llminference,chen2020compilerbasedhardw}. Compiler search should include placement, not only tile sizes \citep{yirage2026,semianalysis2024tma}.
+\paragraph{Hardware requirement.}
+On GPU, carriers live in shared memory with warp-synchronous updates; on XDNA they need fixed tile buffer \emph{slots} in the static dataflow \citep{amd2024aie,yirage2026}.
+A standalone softmax op lowered independently forces a full map to DDR---doubling bytes/token \citep{taxbreak2026,memoryfloor2026}.
 
-\paragraph{Carrier precision.} Online softmax carriers need width headroom for long contexts \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}. Fixed-point carriers save SRAM but risk saturation; compiler must pick formats per tile budget \citep{amd2024aie,yirage2026,semianalysis2024tma,patel2025llminference,taxbreak2026,amd2024xdna,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,nvidia2022hopper,nvidia2024cudagraphs,dlbook,dao2022flashattention}.
+\paragraph{Applicable when.}
+QK$^\top$, carrier update, and PV accumulate fuse in one spatial pipeline with carriers never leaving tile SRAM \citep{dao2022flashattention,semianalysis2024tma}.
 
-\paragraph{Attention tile fusion.} Fusing QK$^\top$, softmax carrier update, and AV into one spatial pipeline is the XDNA analogue of FlashAttention fusion \citep{dao2022flashattention,yirage2026,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,semianalysis2024tma,amd2024xdna,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2023flashdecoding,nvidia2024cudagraphs,dlbook,nvidia2022hopper}.
+\paragraph{Avoid when.}
+Importing unfused GPU softmax kernels ``because numerics are already validated'' \citep{amd2024xdna,yirage2026}.
+The rejection is correct---residency failed, not the NPU \citep{patel2025llminference}.
 
-Attention decode needs numerically stable \textbf{softmax} over growing KV context \citep{dao2022flashattention,dao2023flashdecoding}. FlashAttention-style algorithms keep running max and sum statistics in on-chip carriers rather than materializing full softmax matrices to DDR \citep{memoryfloor2026}. On GPU, those carriers live in shared memory with warp-synchronous updates; on XDNA they must be assigned to specific \textbf{carrier} buffer slots in the static dataflow \citep{amd2024aie,yirage2026}.
+\paragraph{Common pitfall.}
+Carrier buffers sized for prefill-length vectors when decode KV tiles are smaller---overflow splits the graph into DDR-bound pieces \citep{dao2023flashdecoding,memoryfloor2026}.
 
-The hardware failure mode is familiar: a ``simple'' softmax op lowered independently forces a full attention map to DDR, doubling bytes/token \citep{taxbreak2026,memoryfloor2026}. Online softmax on AIE requires fusing the carrier update with the QK$^\top$ pipeline so partial statistics never leave tile SRAM \citep{dao2022flashattention,semianalysis2024tma}. GPU-first teams often import unfused softmax kernels and wonder why XDNA compile rejects the graph---the rejection is correct \citep{amd2024xdna,yirage2026,patel2025llminference}.
+\paragraph{Debug.}
+Compare logits against GPU reference at short ctx before trusting long ctx; inspect carrier placement in cycle-accurate simulation \citep{amd2024aie,yirage2026}.
 
-\begin{example}
-Decode softmax carrier width: at context 2048, carrier buffers need slots sized for one KV tile; if the compiler assumes prefill-length vectors, tile SRAM overflows and the backend splits the graph into DDR-bound pieces \citep{dao2023flashdecoding,memoryfloor2026,amd2024aie}.
-\end{example}
+\paragraph{Carrier precision.}
+Fixed-point carriers save SRAM but risk saturation at long context \citep{dao2022flashattention}.
+Compiler search must joint-optimize placement and numeric format per tile budget \citep{yirage2026,patel2025llminference}.
 
-\paragraph{Worked contrast.} Hopper can recover with Flash-Decoding parallelism along sequence \citep{dao2023flashdecoding}. XDNA lacks an equivalent ``launch more blocks'' escape---sequence parallelism must be encoded as spatial lanes or rejected at compile time \citep{amd2024xdna,yirage2026,liu2024deepseekv3}.
+\paragraph{Worked contrast.}
+Hopper Flash-Decoding adds sequence parallelism with more blocks \citep{dao2023flashdecoding}.
+XDNA lacks a ``launch more blocks'' escape---sequence parallelism must be spatial lanes or compile-time rejection \citep{amd2024xdna,yirage2026}.
 
-\section{Architecture tradeoffs}
+\paragraph{KV loop structure.}
+For each KV block: DMA $K/V$ tiles, MAC $QK^\top$, online softmax carrier update, MAC $PV$ accumulate \citep{dao2022flashattention,semianalysis2024tma,dao2023flashdecoding}.
+The loop body must stay inside the same static graph as QKV and MLP---exporting partial attention between blocks reopens DDR bytes/token \citep{memoryfloor2026,yirage2026,taxbreak2026}.
+
+\paragraph{Numerical stability.}
+Online softmax relies on stable accumulation order; spatial reductions must preserve mathematical equivalence to GPU reference implementations \citep{dao2022flashattention,dao2023flashdecoding}.
+Validation should compare logits against GPU reference on short contexts before trusting long-context deployments \citep{memoryfloor2026,amd2024aie}.
+
+\paragraph{Carrier placement.}
+Assign carrier buffers adjacent to attention tiles in the dataflow to minimize stream latency \citep{amd2024xdna,patel2025llminference,chen2020compilerbasedhardw}.
+Poor placement increases stage cycles without changing FLOPs---visible only in cycle-accurate simulation \citep{yirage2026,amd2024aie}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Softmax region must show fused carrier updates in the static graph---no DDR materialization edge \citep{dao2022flashattention,yirage2026}.
+
+\section{Architecture Tradeoffs and MoE Reality}
 \label{sec:ch05_architecture_tradeoffs}
 
-\paragraph{Latency vs watt.} Edge products advertise watt/token; cloud products advertise ms/token under load \citep{amd2024xdna,patel2025llminference,taxbreak2026}. XDNA wins watt; CUDA wins elastic throughput \citep{liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs}. Architecture reviews should pick which metric is primary before choosing silicon \citep{yirage2026,memoryfloor2026,dlbook}.
-
-\paragraph{Software stack depth.} Ryzen AI ships runtime, compiler, and drivers---teams must coordinate versions like CUDA toolkit pins \citep{amd2024aie,amd2024xdna,chen2020compilerbasedhardw}. Upgrading one layer without requalifying decode graphs repeats MLIR upgrade horror stories \citep{yirage2026,taxbreak2026,memoryfloor2026}.
-
-\paragraph{Hybrid fleets.} Production may run GPU decode pools plus XDNA edge nodes---schedules must diverge by design, not by accident \citep{patel2025llminference,liu2024deepseekv3,amd2024xdna,yirage2026,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,amd2024aie,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\paragraph{Power envelopes.} Watt/token often drives XDNA product wins even when raw ms/token loses to H100 \citep{amd2024xdna,amd2024aie,memoryfloor2026,patel2025llminference,yirage2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\textbf{CUDA} decode optimization trades launches against bytes: CUDA Graphs and fusion reduce orchestration; TMA and shared memory reduce HBM traffic \citep{nvidia2024cudagraphs,taxbreak2026,semianalysis2024tma,nvidia2022hopper}. \textbf{XDNA} decode optimization trades compile-time staticism against DDR egress: the array wins on watt/token when the entire decoder step is one spatial pipeline; it loses when dynamicism forces recompile or scalar fallbacks \citep{amd2024xdna,amd2024aie,memoryfloor2026}.
+\textbf{CUDA} decode trades launches against bytes: graphs and fusion cut orchestration; TMA and shared memory cut HBM traffic \citep{nvidia2024cudagraphs,taxbreak2026,semianalysis2024tma}.
+\textbf{XDNA} trades compile-time staticism against DDR egress: watt/token wins when the decoder step is one spatial pipeline \citep{amd2024xdna,amd2024aie,memoryfloor2026}.
 
 \begin{table}[t]
 \centering
-\caption{Decode tradeoffs: CUDA vs XDNA (batch-1 interactive).}
+\caption{Decode tradeoffs: CUDA (Hopper) vs XDNA (AIE), batch-1.}
 \label{tab:cuda_xdna_tradeoffs}
 \begin{tabular}{lcc}
 \toprule
 \textbf{Dimension} & \textbf{CUDA (Hopper)} & \textbf{XDNA (AIE)} \\
 \midrule
-Orchestration tax & Launches/token & Host graph + DMA setup \\
-Flexibility & High & Low (static) \\
-Peak bandwidth use & HBM + TMA & DDR + tile SRAM \\
-MoE decode & Launch storms & Expert static legality \\
-Best fit & Cloud GPU pools & Edge / watt-capped \\
+Orchestration tax & Launches/token & Graph submit + DMA setup \\
+Flexibility & High & Low (static buckets) \\
+Peak memory path & HBM + TMA & DDR + tile SRAM \\
+Primary win metric & ms/token (cloud) & watt/token (edge) \\
+MoE decode & Launch storms & Static routing required \\
+Best fit & Elastic cloud pools & Watt-capped edge \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-MoE models expose the starkest CUDA vs XDNA split: TaxBreak reports thousands of kernel launches per token on GPU MoE decode \citep{taxbreak2026,liu2024deepseekv3}. XDNA cannot absorb that launch count---experts must be fused, batched, or compiled as separate static graphs with explicit routing DMA \citep{yirage2026,amd2024aie}. Choosing XDNA for MoE without a static routing plan repeats GPU orchestration failure \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{When XDNA wins.}
+Fixed-model edge assistants with bounded context, watt caps, and fully static megakernels \citep{amd2024xdna,yirage2026,dao2022flashattention}.
 
-\paragraph{When XDNA wins.} Fixed-model edge assistants with bounded context, watt caps, and fully static megakernels \citep{amd2024xdna,yirage2026,dao2022flashattention}. \paragraph{When CUDA wins.} Dynamic batching, speculative decoding, long-context cloud serving, and MoE with frequent graph changes \citep{kwon2023vllm,nvidia2024cudagraphs,taxbreak2026,liu2024deepseekv3}.
+\paragraph{When CUDA wins.}
+Dynamic batching, speculative decoding, long-context cloud serving, frequent graph changes \citep{kwon2023vllm,nvidia2024cudagraphs,taxbreak2026,liu2024deepseekv3}.
 
-\section{Dataflow conclusion for inference}
+\paragraph{MoE starkest split.}
+TaxBreak reports thousands of GPU kernel launches per MoE decode token \citep{taxbreak2026,liu2024deepseekv3}.
+XDNA cannot absorb that count---experts must fuse, batch, or compile as separate static graphs with explicit routing DMA \citep{yirage2026,amd2024aie}.
+Choosing XDNA for MoE without a static routing plan repeats GPU orchestration failure in a stricter legality environment \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Hybrid fleets.}
+Production may run GPU decode pools plus XDNA edge nodes---schedules must diverge by design, not by accident \citep{patel2025llminference,liu2024deepseekv3,amd2024xdna,yirage2026}.
+
+\paragraph{Speculative decoding caveat.}
+Speculative paths introduce dynamic branches hostile to static graphs \citep{patel2025llminference,liu2024deepseekv3}.
+Compile separate graphs per policy or keep speculation on GPU \citep{yirage2026,amd2024xdna}.
+
+\paragraph{Software stack depth.}
+Ryzen AI ships runtime, compiler, and drivers---teams must coordinate versions like CUDA toolkit pins \citep{amd2024aie,amd2024xdna,chen2020compilerbasedhardw}.
+Upgrading one layer without requalifying decode graphs repeats familiar MLIR upgrade failures \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Power envelopes.}
+Watt/token often drives XDNA product wins even when raw ms/token loses to H100 \citep{amd2024xdna,amd2024aie,memoryfloor2026,patel2025llminference}.
+Architecture reviews should publish both metrics when fleets mix silicon \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Observability.}
+Instrument DMA bytes, MAC active ratio, and graph submission time separately \citep{amd2024xdna,patel2025llminference,memoryfloor2026}.
+Without decomposition, teams misallocate effort to weight quantization when scheduling is the bottleneck \citep{yirage2026,amd2024aie}.
+
+\paragraph{Multi-layer decode step.}
+A full decoder step chains layer graphs or one fused multi-layer graph \citep{yirage2026,amd2024aie}.
+Chaining increases host submissions; fusing increases SRAM pressure \citep{patel2025llminference,memoryfloor2026}.
+Autotune Pareto fronts across those axes rather than optimizing one layer in isolation \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Architecture review picks primary metric---watt/token or ms/token---before silicon selection \citep{amd2024xdna,patel2025llminference}.
+
+\section{Dataflow Inference Conclusions}
 \label{sec:ch05_dataflow_conclusion}
 
-\paragraph{Documentation for operators.} Runbooks should list compiled shape buckets, max context, recompile triggers, and expected DDR bytes/token \citep{patel2025llminference,amd2024xdna,yirage2026}. Operators otherwise misdiagnose KV growth as model quality issues \citep{kwon2023vllm,memoryfloor2026,taxbreak2026}.
-
-\paragraph{Failure modes summary.} Compile rejection, DDR bandwidth saturation, carrier overflow, host submission jitter, and stale graphs after model updates \citep{amd2024aie,amd2024xdna,yirage2026,dao2022flashattention,dao2023flashdecoding,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper}. Each maps to a measurable counter \citep{yirage2026,amd2024xdna,memoryfloor2026,taxbreak2026}.
-
-\paragraph{Speculative decoding caveat.} Speculative paths introduce dynamic branches hostile to static XDNA graphs \citep{patel2025llminference,liu2024deepseekv3,amd2024xdna,yirage2026,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,amd2024aie,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}. Either compile separate graphs per speculation policy or keep speculation on GPU \citep{yirage2026,patel2025llminference,amd2024xdna,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,amd2024aie,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\paragraph{Continuous batching.} vLLM-style batching on GPU does not port literally---XDNA batching requires padded static batch classes \citep{kwon2023vllm,amd2024xdna,yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,amd2024aie,liu2024deepseekv3,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\textbf{Dataflow} is the operational model for NPU \textbf{inference} when decode must meet watt and latency envelopes \citep{amd2024xdna,chen2020compilerbasedhardw,yirage2026}. Production conclusions:
+\textbf{Dataflow} is the operational model for NPU inference when decode must meet watt and latency envelopes \citep{amd2024xdna,chen2020compilerbasedhardw,yirage2026}.
 
 \begin{enumerate}
-\item Treat decode as a static MegaKernel per shape bucket; recompile when buckets change \citep{yirage2026,patel2025llminference,amd2024aie}.
-\item Measure DDR bytes/token and DMA count per token---not FLOPs \citep{memoryfloor2026,taxbreak2026}.
-\item Reject graphs that materialize KV or softmax intermediates to DDR \citep{dao2022flashattention,dao2023flashdecoding,kwon2023vllm}.
-\item Pair GPU and XDNA baselines from the same high-level IR \citep{chen2020compilerbasedhardw,yirage2026,dlbook}.
+\item Treat decode as a static MegaKernel per shape bucket; recompile when buckets change \citep{yirage2026,patel2025llminference}.
+\item Measure DDR bytes/token and DMA edges/token---not FLOPs \citep{memoryfloor2026,taxbreak2026}.
+\item Reject graphs that materialize KV or softmax intermediates to DDR \citep{dao2022flashattention,dao2023flashdecoding}.
+\item Pair GPU and XDNA baselines from the same high-level IR \citep{chen2020compilerbasedhardw,yirage2026}.
 \end{enumerate}
 
-Cross-hardware inference fleets run GPU pools for elastic decode and NPU nodes for edge---the dataflow lesson is that identical weights do not imply identical schedules \citep{liu2024deepseekv3,patel2025llminference,amd2024xdna}. Compiler stacks must fork early; ``port the CUDA kernel'' without static replanning fails \citep{yirage2026,taxbreak2026}.
+\paragraph{Operator runbooks.}
+List compiled shape buckets, max context, recompile triggers, and expected DDR bytes/token \citep{patel2025llminference,amd2024xdna}.
+Operators otherwise misdiagnose KV growth as model quality issues \citep{kwon2023vllm,memoryfloor2026}.
 
-\section{YiRage XDNA backend}
+\paragraph{Failure modes (symptom $\rightarrow$ counter).}
+Compile rejection $\rightarrow$ buffer table overflow row \citep{yirage2026,amd2024aie}.
+DDR saturation $\rightarrow$ bytes/token versus roofline \citep{memoryfloor2026}.
+Host jitter $\rightarrow$ p99 graph submission time \citep{patel2025llminference,taxbreak2026}.
+
+Identical weights do not imply identical schedules across GPU and NPU fleets \citep{liu2024deepseekv3,patel2025llminference}.
+Compiler stacks must fork early; ``port the CUDA kernel'' without static replanning fails \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Epilogue for practitioners.}
+XDNA rewards teams that think like compiler engineers first and MAC micro-optimizers second \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw}.
+Static dataflow is the price of watt-efficient decode; pay it deliberately \citep{memoryfloor2026,patel2025llminference}.
+When graphs fail, celebrate early rejection---it is cheaper than DDR-bound production \citep{yirage2026,amd2024aie}.
+
+\paragraph{Roadmap to later chapters.}
+Chapter~8 specializes async copy theory on GPU; Chapter~9 sync hierarchy; Chapter~10 softmax numerics; Chapter~11 MegaKernel assembly \citep{dao2022flashattention,dao2023flashdecoding,taxbreak2026,yirage2026}.
+XDNA bounds here are prerequisites---later chapters reference GPU labels while NPU teams keep static buffer tables parallel \citep{amd2024xdna,semianalysis2024tma,nvidia2022hopper}.
+
+\paragraph{Energy and TCO (short).}
+Fusion DDR bytes/token savings reduce external memory energy even when ms/token gains look modest \citep{memoryfloor2026,patel2025llminference,taxbreak2026,amd2024xdna}.
+Edge TCO cares about joules per useful token---not peak TOPS banners \citep{taxbreak2026,dlbook}.
+
+\paragraph{Postmortem sequence.}
+When XDNA decode regresses after a merge: diff DDR bytes/token, replay buffer table high-water, compare DMA edge count, bisect fusion versus bucket change, \emph{then} consider driver issues \citep{taxbreak2026,memoryfloor2026,patel2025llminference,amd2024aie,yirage2026}.
+Skipping bytes/token replay wastes weeks on MAC-only noise \citep{chen2020compilerbasedhardw}.
+
+\section{YiRage XDNA Backend: Static Legality as Compile Gates}
 \label{sec:ch05_yirage_xdna_backend}
 
-\paragraph{Multi-backend CI.} YiRage CI should compile the same decoder export for CUDA and XDNA on every merge, publishing legality diffs \citep{yirage2026,chen2020compilerbasedhardw,amd2024aie,amd2024xdna,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{Advance notice.}
+This section assumes compiler and MLIR literacy; backend engineers read end-to-end, kernel tuners skim invariants \citep{chen2020compilerbasedhardw,yirage2026}.
 
-\paragraph{Developer ergonomics.} When XDNA compile fails, error messages should cite buffer table rows and tile IDs---not opaque backend codes \citep{yirage2026,amd2024aie,patel2025llminference,memoryfloor2026,amd2024xdna,chen2020compilerbasedhardw,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Good diagnostics shorten the static scheduling learning curve \citep{yirage2026,amd2024xdna}.
+\textbf{YiRage} targets \textbf{XDNA} with the same residency vocabulary as its CUDA backend: buffer lifetimes, fusion boundaries, and decode metrics \citep{yirage2026,amd2024xdna,amd2024aie}.
 
-\paragraph{Debug workflow.} On XDNA compile failure, dump static buffer table and DMA edge list before reading assembly \citep{yirage2026,amd2024aie,amd2024xdna,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\paragraph{Regression tests.} CI should compile canonical decoder layers for each supported Ryzen AI SKU and fail on new allocs in hot path \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-\textbf{YiRage} targets \textbf{XDNA} through the same residency vocabulary as its CUDA backend: buffer lifetimes, fusion boundaries, and decode metrics \citep{yirage2026,amd2024xdna,amd2024aie}. The XDNA backend rejects dynamic allocations on the hot path, maps fused decoder cells to static AIE graphs, and runs legality checks from Chapter~3 before codegen \citep{chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026}.
-
-Practical integration: attach tile SRAM and DMA metadata during MLIR import; compile separate graphs per shape bucket; fuse online softmax with attention; triplet-test GPU vs XDNA on identical IR \citep{yirage2026,dao2022flashattention,dao2023flashdecoding,taxbreak2026,kwon2023vllm,amd2024aie,chen2020compilerbasedhardw}.
-
-\begin{example}
-YiRage merge gate: Llama-3.2-1B decoder layer at BS${=}1$, ctx${=}2048$ must compile as one static XDNA graph or document failing ops; report GPU launches/token for the same IR export \citep{taxbreak2026,yirage2026,memoryfloor2026,amd2024xdna}.
-\end{example}
-
-\paragraph{Operational checklist.} Verify static buffer table fits tile SRAM; count DDR transactions per token; run decode p99; log claims to \texttt{verified\_facts.jsonl} \citep{memoryfloor2026,kwon2023vllm,dao2022flashattention,yirage2026,patel2025llminference,taxbreak2026}.
-
-
-
-\paragraph{Engineering narrative.} Treat XDNA as a compiler target with hard legality, not as a slow GPU. Your schedule is a DMA graph; your on-chip memory is tile SRAM; your failure telemetry is DDR bytes per token. Every section below connects those primitives to decode pain already measured on GPUs in Chapter~1---launch storms become DMA chains, shared-memory spills become DDR egress, and framework fragmentation becomes compile-time rejection \citep{taxbreak2026,memoryfloor2026,amd2024xdna}.
-
-\paragraph{Who should read this chapter.} GPU kernel engineers porting to Ryzen AI, compiler authors lowering MLIR to AIE, and serving teams splitting cloud GPU pools from edge NPU nodes. If you only deploy CUDA, read the CUDA--XDNA mapping and tradeoff sections---they explain why your GPU recipe will not copy verbatim \citep{yirage2026,patel2025llminference,nvidia2022hopper}.
-
-\paragraph{Tile SRAM accounting walkthrough.} List every tensor live during one decode step: Q slice, K/V cache lines, softmax carriers, MLP intermediates, rotary embeddings. Sum bytes per tile. If the sum exceeds SRAM, the compiler must pipeline in time (sequential stages) or space (more tiles), not spill to DDR silently \citep{amd2024aie,memoryfloor2026,dao2022flashattention}. GPU engineers perform a similar exercise with shared-memory budgets; the difference is that XDNA seldom forgives overflow \citep{amd2024xdna,yirage2026}.
-
-\paragraph{Static dataflow worked example.} Imagine a two-stage decode cell: attention then MLP. Stage one DMA-loads K/V while MAC arrays update softmax carriers entirely in tile SRAM. Stage two consumes attention output directly from stream registers without DDR round trip. If MLP weights are DMA-loaded mid-stage without double buffering, MAC units stall---visible as higher ms/token even though FLOPs counters look healthy \citep{semianalysis2024tma,patel2025llminference,amd2024aie}.
-
-\paragraph{Buffer descriptors in practice.} A buffer descriptor names source address, destination tile buffer, length, and stride---analogous to TMA copy descriptors on Hopper. Ping-pong uses two descriptors alternating roles each token step. Decode graphs must freeze descriptor contents per shape bucket; changing context length without recompile implies descriptors were padded for max context upfront \citep{nvidia2022hopper,amd2024xdna,yirage2026,kwon2023vllm}.
-
-\paragraph{Online softmax on hardware.} Carriers track running maximum and accumulated exponential sum per row tile. Each new KV tile updates carriers without writing attention probabilities to DDR. Breaking fusion at softmax exports an $L\times L$ map---fatal for long context on bandwidth-limited DDR \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026}. GPU warp-level reductions become spatial reduction trees on AIE---different mechanism, same invariant: carriers stay on-chip \citep{amd2024aie,yirage2026}.
-
-\paragraph{CUDA vs XDNA product framing.} Cloud assistants with dynamic batching and MoE remain CUDA-first \citep{taxbreak2026,liu2024deepseekv3,kwon2023vllm}. Fixed-model copilots on laptops with watt caps are XDNA candidates when compile time is amortized \citep{amd2024xdna,patel2025llminference}. Hybrid designs route elastic traffic to GPU and pinned edge traffic to NPU---two schedules, one product \citep{yirage2026,chen2020compilerbasedhardw,dlbook}.
-
-\paragraph{Inference conclusion expanded.} Dataflow inference means the runtime executes a compiled graph with predictable DMA timing---no Python loop launching ops \citep{amd2024xdna,amd2024aie}. Latency variance comes from DDR contention and host submission, not from kernel selection \citep{memoryfloor2026,taxbreak2026}. Qualify XDNA builds with p99 decode traces, not prefill throughput alone \citep{patel2025llminference,dao2023flashdecoding}.
-
-\paragraph{YiRage backend depth.} YiRage shares IR between CUDA and XDNA backends: the same fused decoder cell exported from PyTorch passes target-specific legality checks \citep{yirage2026,chen2020compilerbasedhardw}. Failures surface as compile errors with buffer tables attached---preferable to silent DDR fallback \citep{amd2024aie,memoryfloor2026}. Merge gates require triplet metrics: GPU launches/token, XDNA DMA count, bytes/token both sides \citep{taxbreak2026,patel2025llminference,amd2024xdna}.
-
-\paragraph{Common mistakes checklist.} Importing unfused PyTorch ops one by one. Assuming dynamic batch/seq like CUDA. Omitting softmax carrier fusion. Skipping compile rejections because GPU numbers look fine. Measuring prefill only. Each mistake reproduces Chapter~1 pathologies on different silicon \citep{taxbreak2026,dao2022flashattention,yirage2026,amd2024xdna,kwon2023vllm,memoryfloor2026,liu2024deepseekv3,nvidia2024cudagraphs,dlbook,semianalysis2024tma,nvidia2022hopper,dao2023flashdecoding,amd2024aie,chen2020compilerbasedhardw,patel2025llminference}.
-
-\paragraph{Forward pointer.} Chapter~6 formalizes residency planning across GPU, CPU, and NPU; Chapter~14 covers MLIR lowering that feeds YiRage backends \citep{chen2020compilerbasedhardw,yirage2026}. The XDNA-specific lesson here is static legality: encode it early or pay DDR costs every token \citep{amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding,chen2020compilerbasedhardw}.
-
-\paragraph{Metric closure.} End every XDNA experiment reporting DDR bytes/token, DMA transactions per token, compile legality pass rate, and p99 decode at batch one \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Without those counters, debates devolve into FLOPs and die area---useless for decode \citep{taxbreak2026,memoryfloor2026,amd2024xdna,yirage2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Measure before merging; merge before celebrating \citep{yirage2026,amd2024xdna,taxbreak2026,memoryfloor2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-\section{XDNA decode review gates}
-\label{sec:ch05_review_gates}
-
+\paragraph{Five compiler invariants (XDNA decode mode).}
 \begin{enumerate}
-\item \textbf{Tile SRAM budget:} no simultaneous buffers exceed per-tile caps \citep{amd2024aie,amd2024xdna,yirage2026}.
-\item \textbf{Static graph:} no dynamic dims on hot path without bucket recompile \citep{patel2025llminference,kwon2023vllm,chen2020compilerbasedhardw}.
-\item \textbf{DDR ledger:} bytes/token vs GPU baseline on same model \citep{memoryfloor2026,taxbreak2026,dao2022flashattention}.
-\item \textbf{Softmax carriers:} fused online; no full-map materialization \citep{dao2023flashdecoding,semianalysis2024tma,amd2024aie}.
-\item \textbf{Triplet IR:} same export tested on CUDA and XDNA backends \citep{yirage2026,liu2024deepseekv3,dlbook,nvidia2024cudagraphs,nvidia2022hopper}.
+\item \textbf{No hot-path heap alloc}---\emph{YiRage:} \texttt{BufferizationPass} binds KV and temporaries to static DDR slots \citep{kwon2023vllm,yirage2026}.
+\item \textbf{Tile SRAM high-water}---\emph{YiRage:} \texttt{TileAssignmentPass} fails compile when simultaneous buffers exceed cap \citep{amd2024aie,memoryfloor2026}.
+\item \textbf{DMA legality per edge}---\emph{YiRage:} \texttt{DmaSchedulingPass} emits deterministic producer--consumer events \citep{amd2024xdna,semianalysis2024tma}.
+\item \textbf{Softmax carriers fused}---\emph{YiRage:} \texttt{CarrierFusionPass} rejects full-map materialization \citep{dao2022flashattention,dao2023flashdecoding}.
+\item \textbf{Triplet bufferization}---\emph{YiRage:} same IR must export legality summaries for CUDA, CPU, and XDNA \citep{chen2020compilerbasedhardw,patel2025llminference}.
 \end{enumerate}
-
-\begin{example}
-Review gate failure: new MLP fusion adds third tile-resident buffer---compile passes on GPU shared mem, fails XDNA legality; gate blocks merge until tile assignment replanned \citep{yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-\end{example}
-
-These gates mirror Chapter~3 benchmark method: measure first, optimize second \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}. Skipping them ships DDR-bound decode that wastes Ryzen AI silicon \citep{amd2024xdna,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,dao2023flashdecoding,nvidia2022hopper}.
-
-
-\paragraph{Deep dive: tile grid scheduling.} Compiler schedulers assign operations to AIE tiles in a grid. Neighboring tiles exchange data through stream switches with finite bandwidth. A decode MegaKernel must map attention heads or hidden dimensions to tiles without oversubscribing switches \citep{amd2024xdna,amd2024aie,yirage2026}. Oversubscription does not always fail compile---it stalls runtime and inflates p99 \citep{patel2025llminference,memoryfloor2026,taxbreak2026}. Simulation before tape-out catches switch hotspots \citep{chen2020compilerbasedhardw,amd2024aie}.
-
-\paragraph{Deep dive: weight streaming.} Weights are read every decode token. On GPU, weight bandwidth competes with KV in HBM; on XDNA, weights DMA from DDR into tile SRAM each step unless partially resident \citep{memoryfloor2026,dao2022flashattention,amd2024xdna}. Static plans may pin hot slices in tile SRAM across tokens while streaming cold slices---analogous to cache blocking on CPU \citep{dlbook,yirage2026,kwon2023vllm}. Plans that reload full layers each token saturate DDR \citep{patel2025llminference,taxbreak2026,amd2024aie}.
-
-\paragraph{Deep dive: KV cache on DDR.} KV typically lives in DDR on edge NPUs; attention reads entire history each token \citep{kwon2023vllm,dao2023flashdecoding,amd2024xdna}. Paged KV layouts still require static page tables in many XDNA stacks \citep{yirage2026,memoryfloor2026,chen2020compilerbasedhardw}. Fragmentation hurts DDR efficiency---qualify with bytes/token, not parameter count \citep{taxbreak2026,patel2025llminference,amd2024aie,liu2024deepseekv3,dao2022flashattention,nvidia2024cudagraphs,semianalysis2024tma,nvidia2022hopper,dlbook,amd2024xdna,chen2020compilerbasedhardw,yirage2026}.
-
-\paragraph{Deep dive: rotary and norms.} Layer norm and rotary embedding are easy to dismiss as tiny ops; unfused they become separate DMA rounds \citep{taxbreak2026,amd2024aie,yirage2026}. Fuse into attention or MLP stages where carriers already resident \citep{dao2022flashattention,patel2025llminference,memoryfloor2026,amd2024xdna,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding,taxbreak2026,yirage2026,amd2024aie}.
-
-\paragraph{Deep dive: quantization.} INT8 and INT4 weights reduce DDR pressure---critical on XDNA \citep{amd2024xdna,memoryfloor2026,patel2025llminference,yirage2026}. Quantization scales must be embedded in static graphs; runtime scale lookup per op reintroduces dynamicism \citep{amd2024aie,chen2020compilerbasedhardw,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding,yirage2026,amd2024xdna,memoryfloor2026}.
-
-\paragraph{Deep dive: multi-layer decode step.} A full decoder step chains multiple layer graphs or one fused multi-layer graph \citep{yirage2026,amd2024aie,amd2024xdna}. Chaining increases host submissions; fusing increases SRAM pressure \citep{patel2025llminference,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding,yirage2026,amd2024aie,amd2024xdna}. Autotune Pareto fronts across those axes \citep{yirage2026,memoryfloor2026,taxbreak2026}.
-
-\paragraph{Deep dive: observability.} Instrument DMA bytes, MAC active ratio, and graph submission time separately \citep{amd2024xdna,patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Without decomposition, teams misallocate effort to weight quantization when scheduling is the bottleneck \citep{yirage2026,amd2024xdna,taxbreak2026,memoryfloor2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-\paragraph{Epilogue for practitioners.} XDNA rewards teams that think like compiler engineers first and kernel micro-optimizers second \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Static dataflow is the price of watt-efficient decode; pay it deliberately \citep{yirage2026,amd2024xdna,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. When graphs fail, celebrate early rejection---it is cheaper than DDR-bound production \citep{yirage2026,amd2024aie,amd2024xdna,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-\textbf{XDNA tiles} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode xdna/aie legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When XDNA tiles disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting XDNA tiles, attach roofline or NPU buffer accounting showing xdna residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize xdna with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-The usual AMD XDNA/AIE Dataflow Architecture failure at \textbf{static dataflow rules} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: static and dataflow must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for static dataflow rules: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize static with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: dataflow constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-Production teams misread \textbf{CUDA XDNA mapping} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: buffer descriptor sets the residency envelope; tma determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify buffer descriptor, tma, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: tma constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting CUDA XDNA mapping, attach roofline or NPU buffer accounting showing buffer descriptor residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\textbf{online softmax HW} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode softmax/carrier legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When online softmax HW disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting online softmax HW, attach roofline or NPU buffer accounting showing softmax residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize softmax with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-The usual AMD XDNA/AIE Dataflow Architecture failure at \textbf{architecture tradeoffs} is importing a CUDA mental model and expecting runtime scheduling to hide illegal buffer lifetimes.
-
-Hardware constraint: cuda and xdna must be co-designed. On GPUs that means shared-memory/TMA budgets and warp-grain barriers; on XDNA/AIE it means static tile buffers, DMA chains, and carrier slots with compile-time lifetimes; on CPUs it means L2/L3 blocking and NUMA-local KV placement \citep{amd2024xdna,amd2024aie}. Decode at batch-1 keeps arithmetic intensity on the memory-bandwidth slope---micro-optimizing isolated GEMMs rarely moves p99 latency.
-
-Compiler takeaway for architecture tradeoffs: lower the same decoder IR, but predicate passes on target residency tables---never ship a GPU-only schedule to NPU fleets \citep{amd2024xdna,amd2024aie}. Success metrics: bytes/token, launches/token, and p99 decode latency; compare GPU, CPU, and NPU cells on identical context lengths.
-
-\paragraph{Worked contrast.} A Hopper decode cell may legalize cuda with TMA-backed double buffering while an XDNA cell requires the same math expressed as static tile assignments---identical FLOPs, different bytes/token because DDR traffic differs by an order of magnitude \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: xdna constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-Production teams misread \textbf{dataflow conclusion} when decode SLOs are judged on FLOPs dashboards instead of residency and orchestration ledgers.
-
-Trace the Chapter~2 chain: dataflow sets the residency envelope; inference determines whether producer--consumer edges stay on-chip. Illegal fusion does not always crash---it silently exports tensors to HBM/DDR and shows up as bytes/token regression versus a unfused but scheduled baseline \citep{amd2024xdna,amd2024aie}. Profile launches/token alongside bandwidth; launch storms masquerade as memory bottlenecks when graphs remain operator-fragmented.
-
-Operational checklist---verify dataflow, inference, autotuning pitfalls, and platform emit paths in code review; document dialect lowering choices that change memory traffic, not just pass ordering \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Deployment pitfall.} Teams that A/B only prefill confuse the story: inference constraints bite hardest at batch-1 decode where launches/token and KV read bandwidth dominate \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Review gate.} Before merging compiler changes affecting dataflow conclusion, attach roofline or NPU buffer accounting showing dataflow residency fits on-chip for the target SKU \citep{amd2024xdna,amd2024aie}.
-
-\textbf{YiRage XDNA backend} exposes a cross-hardware fracture: the same fused subgraph legal on Hopper can be rejected outright on XDNA or CPU cache budgets.
-
-Binding software to silicon: compiler passes must encode yirage/xdna legality before codegen, not as comments in hand-written kernels \citep{amd2024xdna,amd2024aie}. YiRage runs target-aware checks against chip models from Chapter~3; manual stacks should treat failed legality as a release blocker, not a backend TODO.
-
-When YiRage XDNA backend disagrees with microbenchmarks, trust fleet telemetry: fix orchestration and tier placement first, then revisit MMA tile shapes \citep{amd2024xdna,amd2024aie}.
-
-
-\section{Ryzen AI decode benchmarking}
-\label{sec:ch05_ryzen_benchmark}
-
-\textbf{Benchmarking XDNA decode} requires the same discipline as GPU TaxBreak sweeps---but counters swap launches/token for DMA transactions and DDR bytes/token \citep{taxbreak2026,memoryfloor2026,amd2024xdna,amd2024aie,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Build a decode cell with BS${=}1$, ctx buckets $\{512,2048,8192\}$, and pinned Ryzen AI driver/runtime versions \citep{amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-Warm-up must include graph runner initialization and first-token compile amortization---cold-start numbers dominate laptop UX but mislead steady-state decode comparisons \citep{yirage2026,patel2025llminference,amd2024aie,amd2024xdna,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Report both first-token and token-$k$ steady ms/token; product teams need both \citep{patel2025llminference,kwon2023vllm,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
 
 \begin{table}[t]
 \centering
 \small
+\caption{YiRage XDNA lowering: IR in, check out.}
+\label{tab:yirage_xdna_lowering}
+\begin{tabular}{@{}p{2.1cm}p{3.2cm}p{3.8cm}@{}}
+\toprule
+\textbf{Pass} & \textbf{Input $\rightarrow$ action} & \textbf{Output check} \\
+\midrule
+MLIR import & Framework export $\rightarrow$ attach tile/DMA metadata & Chip model from Ch.~3 \\
+Bufferization & Tensor IR $\rightarrow$ static DDR + tile slots & No hot-path alloc \\
+Fusion grouping & Graph $\rightarrow$ export-edge merges & No DDR activation stores \\
+Tile assignment & Fused region $\rightarrow$ spatial map & SRAM high-water $\le$ cap \\
+DMA schedule & Copy edges $\rightarrow$ ping-pong chains & Deterministic latency \\
+Graph emit & Scheduled IR $\rightarrow$ AIE binary & Triplet legality report \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Multi-backend CI.}
+YiRage CI compiles the same decoder export for CUDA and XDNA on every merge, publishing legality diffs \citep{yirage2026,chen2020compilerbasedhardw}.
+When XDNA compile fails, errors cite buffer table rows and tile IDs---not opaque backend codes \citep{amd2024aie,patel2025llminference}.
+
+\paragraph{IREE-style portability.}
+Modular retargeting treats backends as plugins over shared IR \citep{iree2024,yirage2026,chen2020compilerbasedhardw}.
+XDNA tile capacities live in the plugin chip model, not scattered in hand-written kernels \citep{patel2025llminference,amd2024xdna,amd2024aie}.
+
+\paragraph{Lowering walkthrough detail.}
+Each row in Table~\ref{tab:yirage_xdna_lowering} must emit artifacts CI can diff---legality reports are not optional debug prints \citep{yirage2026,chen2020compilerbasedhardw,amd2024aie}.
+Bufferization without tile assignment is incomplete; DMA schedule without carrier fusion is unsafe for attention decode \citep{dao2022flashattention,memoryfloor2026,patel2025llminference}.
+
+\paragraph{Testing gates.}
+Numerical diffs at long ctx; DDR byte delta at batch-1; triplet compile; bucket hit rate across three ctx lengths \citep{dao2023flashdecoding,yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Debug workflow.}
+On failure, dump static buffer table and DMA edge list before reading assembly \citep{yirage2026,amd2024xdna}.
+Regression tests compile canonical decoder layers per supported Ryzen AI SKU and fail on new allocs in the hot path \citep{amd2024aie,chen2020compilerbasedhardw}.
+
+\begin{example}
+YiRage merge gate: Llama-3.2-1B decoder layer at BS${=}1$, ctx${=}2048$ must compile as one static XDNA graph or document failing ops; attach GPU launches/token for the same IR export \citep{taxbreak2026,yirage2026,memoryfloor2026}.
+\end{example}
+
+\paragraph{Documentation deliverables per promotion.}
+Residency diagram, DMA edge list, shape bucket map, softmax carrier changelog, DDR bytes/token cell, watt/token cell \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference}.
+Partners cannot replay regressions when benchmarks live only in private spreadsheets \citep{chen2020compilerbasedhardw,amd2024xdna}.
+
+\paragraph{CUDA Graph parity note.}
+Chapter~4 fused Hopper kernels pair with CUDA Graph capture; XDNA pairs fusion with static graph emit \citep{nvidia2024cudagraphs,amd2024xdna,yirage2026}.
+Triplet CI should verify both capture replay \emph{and} static graph legality on the same IR export \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Silent DDR export signature.}
+Flat MAC utilization with rising DDR throughput often means partial fusion or carrier spill \citep{memoryfloor2026,amd2024aie,patel2025llminference}.
+Map telemetry to static rules in Table~\ref{tab:ch05_static_rules} before opening weight-format experiments \citep{yirage2026,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Triplet export compiles or documents deferral with buffer table attached \citep{yirage2026,amd2024xdna}.
+
+\section{Code Review Gates (Merge Blockers)}
+\label{sec:ch05_review_gates}
+
+\begin{enumerate}
+\item \textbf{Tile SRAM budget.}
+\emph{Symptom:} compile pass on GPU, fail on XDNA.
+\emph{Debug:} simultaneous buffer sum versus per-tile cap \citep{amd2024aie,yirage2026}.
+
+\item \textbf{Static graph compliance.}
+\emph{Symptom:} runtime shape mismatch or silent recompile storms.
+\emph{Debug:} hot path has no dynamic dims without bucket recompile \citep{patel2025llminference,kwon2023vllm}.
+
+\item \textbf{DDR ledger.}
+\emph{Symptom:} NPU ``feels slow'' despite healthy MAC \%.
+\emph{Debug:} DDR bytes/token vs GPU baseline on same model \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Softmax fusion.}
+\emph{Symptom:} attention bytes/token doubles at long ctx.
+\emph{Debug:} no full-map DDR edge in static graph \citep{dao2022flashattention,dao2023flashdecoding}.
+
+\item \textbf{Triplet IR consistency.}
+\emph{Symptom:} CUDA-only schedule ships to heterogeneous fleet.
+\emph{Debug:} same export compiles on CUDA and XDNA backends \citep{yirage2026,chen2020compilerbasedhardw}.
+\end{enumerate}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Tile SRAM budget template (Llama-class layer, illustrative).}
+\label{tab:ch05_tile_budget}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+\textbf{Buffer} & \textbf{Tier} & \textbf{Bytes} & \textbf{Notes} \\
+\midrule
+Q slice & Tile SRAM & 4\,KB & One decode step \\
+K/V tile & Tile SRAM & 16\,KB & Ping-pong DMA \\
+Softmax carriers & Tile SRAM & 2\,KB & $(m,\ell)$ per head tile \\
+MLP fragment & Tile SRAM & 12\,KB & Fused with attention out \\
+\midrule
+\textbf{Subtotal} & & \textbf{34\,KB} & Must fit per-tile cap \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+All five gates green before merge; attach Table~\ref{tab:ch05_tile_budget} or SKU-specific equivalent \citep{yirage2026,amd2024aie}.
+
+\subsection{Worked example: Llama-3.2-1B on Ryzen AI}
+Setup: batch-1, ctx${=}2048$, hidden $d{=}2048$, GQA 16 Q / 4 KV heads \citep{taxbreak2026,kwon2023vllm}.
+
+\begin{table}[t]
+\centering
+\caption{Llama-3.2-1B decode layer: operator-first vs static XDNA fusion (illustrative Ryzen AI cell).}
+\label{tab:ch05_worked_results}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Operator-first} & \textbf{Static fusion} & \textbf{Change} \\
+\midrule
+DMA edges/token (layer) & 14 & 1 & $-$92.9\% \\
+DDR activation bytes/token & ${\sim}49$\,KB & ${\sim}9$\,KB & $-$81.6\% \\
+Median ms/token (layer) & 48\,\textmu s & 22\,\textmu s & $-$54.2\% \\
+MAC active \% & 18\% & 22\% & +22\% (minor) \\
+Watt/token (rel.) & 1.00 & 0.62 & $-$38\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading the worked row.}
+Operator-first schedules pay DDR activation round trips \emph{and} DMA orchestration tax \citep{memoryfloor2026,taxbreak2026}.
+Static fusion attacks both; MAC active \% moves last---mirror Chapter~4's TC-utilization lesson on DDR \citep{patel2025llminference,nvidia2022hopper}.
+Triplet-compare the same IR on Hopper (Table~\ref{tab:ch04_worked_results} in Chapter~4) to keep fleet decisions honest \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Common mistakes checklist.}
+Importing unfused PyTorch ops one by one \citep{taxbreak2026,amd2024xdna}.
+Assuming dynamic batch/seq like CUDA \citep{kwon2023vllm,yirage2026}.
+Omitting softmax carrier fusion \citep{dao2022flashattention,memoryfloor2026}.
+Skipping compile rejections because GPU numbers look fine \citep{patel2025llminference}.
+Measuring prefill only \citep{dao2023flashdecoding,amd2024aie}.
+Each mistake reproduces Chapter~1 pathologies on different silicon \citep{taxbreak2026,yirage2026}.
+
+\paragraph{Review question.}
+A teammate proposes ping-pong DMA on every micro-copy but still stores attention output to DDR before MLP \citep{memoryfloor2026,dao2022flashattention}.
+Ask: what happens to DDR bytes/token and carrier residency? \citep{yirage2026,amd2024aie}
+Correct answer: bytes stay high; static fusion legality fails despite pretty DMA timelines \citep{memoryfloor2026,patel2025llminference}.
+
+\paragraph{Residual update placement.}
+Final residual can be in-place in tile SRAM when dimensions align \citep{dao2022flashattention,yirage2026}.
+A DDR residual write mid-layer is another $\Theta(d)$ export---flag in review \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{GQA head accounting.}
+Grouped-query attention reduces KV heads versus Q heads---KV loop traffic scales with KV head count \citep{kwon2023vllm,dao2022flashattention,taxbreak2026}.
+Worked example uses 16 Q / 4 KV; adjust tile budget line items for your architecture \citep{yirage2026,patel2025llminference,amd2024aie}.
+
+\paragraph{Unfused baseline narrative.}
+Operator-first stacks pay TaxBreak launch counts on GPU \emph{and} DDR activation bytes on XDNA \citep{taxbreak2026,memoryfloor2026}.
+Static fusion attacks both metrics on NPU; partial fusion attacks only one \citep{yirage2026,amd2024xdna}.
+Table~\ref{tab:ch05_worked_results} is the template for your model row---replace numbers, keep columns \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Pattern usage in review.}
+Require Pattern~1 skeleton diagram on every layer-fusion PR; Pattern~2 bucket map on every graph PR; Pattern~5 triplet diff on every IR change \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,amd2024aie}.
+
+\subsection{Engineering patterns (XDNA decode)}
+\paragraph{Pattern 1: Static fused layer skeleton.}
+\textbf{Scene:} single-layer decode on Ryzen AI \citep{taxbreak2026}.
+\textbf{Solution:} DMA load $\rightarrow$ QKV MAC $\rightarrow$ KV loop with online softmax $\rightarrow$ SwiGLU $\rightarrow$ residual---no DDR activation stores \citep{dao2022flashattention,amd2024aie}.
+\textbf{Benefit:} ${\sim}6$--$8$ DDR round trips removed; DMA edges drop from ${\sim}14$ to $1$ per layer \citep{memoryfloor2026}.
+\textbf{Notes:} pre-compute tile SRAM budget (Table~\ref{tab:ch05_tile_budget}) \citep{yirage2026}.
+
+\paragraph{Pattern 2: Context buckets + static graphs.}
+\textbf{Scene:} production ctx $\in\{512,2048,8192\}$ \citep{kwon2023vllm,amd2024xdna}.
+\textbf{Solution:} separate compiled graphs per bucket; padded max ctx inside each \citep{yirage2026}.
+\textbf{Benefit:} deterministic decode latency; no runtime realloc \citep{patel2025llminference}.
+\textbf{Notes:} bucket count trades storage for predictability \citep{amd2024aie}.
+
+\paragraph{Pattern 3: Ping-pong DMA in KV loop.}
+\textbf{Scene:} KV loop DDR-bound \citep{semianalysis2024tma,dao2023flashdecoding}.
+\textbf{Solution:} paired buffer descriptors alternate K/V tiles while MAC consumes previous slot \citep{amd2024xdna,nvidia2022hopper}.
+\textbf{Benefit:} raises MAC active \% without extra DDR traffic \citep{patel2025llminference}.
+\textbf{Notes:} mis-timed DMA completion tokens stall the pipeline \citep{yirage2026}.
+
+\paragraph{Pattern 4: Spatial softmax carriers.}
+\textbf{Scene:} attention decode \citep{dao2022flashattention}.
+\textbf{Solution:} fixed tile slots for $(m,\ell,o)$; spatial reduction tree \citep{amd2024aie,dao2023flashdecoding}.
+\textbf{Benefit:} avoids full attention map DDR materialization \citep{memoryfloor2026}.
+\textbf{Notes:} Chapter~10 owns numerics; this chapter owns placement \citep{yirage2026}.
+
+\paragraph{Pattern 5: Triplet parity.}
+\textbf{Scene:} fleet with GPU + NPU endpoints \citep{patel2025llminference,amd2024xdna}.
+\textbf{Solution:} same IR, three backends; compare normalized bytes/token \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Benefit:} prevents GPU-only schedule drift \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Pattern 6: MoE static routing (advanced).}
+\textbf{Scene:} MoE decode with expert selection \citep{liu2024deepseekv3,taxbreak2026}.
+\textbf{Solution:} compile expert subgraphs + routing DMA table; batch experts where SRAM allows \citep{amd2024aie,yirage2026}.
+\textbf{Benefit:} only path to legal MoE on static arrays \citep{patel2025llminference}.
+\textbf{Notes:} hardest XDNA integration---profile at multiple ctx buckets \citep{kwon2023vllm}.
+
+\section{XDNA Decode Benchmarking (Slim)}
+\label{sec:ch05_ryzen_benchmark}
+
+Chapter~1--2 define decode-cell metrics; this section adds \emph{XDNA-specific} counters only \citep{taxbreak2026,memoryfloor2026}.
+Full harness checklists live in Appendix~A (\S\ref{app:benchmark_harness})---not repeated here \citep{yirage2026}.
+
+\paragraph{Four verification classes.}
+\textbf{(1) Core metrics:} DDR bytes/token, DMA edges/token, ms/token and p99 at ctx $\in\{512,2048,8192\}$, BS${=}1$ \citep{memoryfloor2026,taxbreak2026}.
+\textbf{(2) Environment:} pinned weights, Ryzen AI driver/runtime, shape buckets, warmup including graph init \citep{amd2024xdna,amd2024aie}.
+\textbf{(3) XDNA extensions:} MAC active \%, tile SRAM high-water, compile time amortization \citep{patel2025llminference,yirage2026}.
+\textbf{(4) CI gate:} triplet legality + DDR bytes/token within tolerance or documented watt justification \citep{chen2020compilerbasedhardw,amd2024xdna}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{XDNA decode counter worksheet (extends Chapter~1).}
+\label{tab:ch05_ryzen_benchmark}
 \begin{tabular}{@{}ll@{}}
 \toprule
 \textbf{Metric} & \textbf{XDNA decode meaning} \\
 \midrule
 DDR bytes/token & Weight + KV + spill traffic \\
-DMA edges/token & Static graph orchestration tax \\
+DMA edges/token & Static orchestration tax \\
 MAC active \% & Tile utilization vs stall \\
-Compile time & Amortization over session length \\
-p99 ms/token & Tail under CPU/NPU DDR contention \\
+Compile time & Amortization over session \\
+p99 ms/token & Tail under shared DDR contention \\
 \bottomrule
 \end{tabular}
-\caption{Ryzen AI decode benchmark counter set (batch-1).}
-\label{tab:ch05_ryzen_benchmark}
 \end{table}
 
-Triplet runs export the same high-level decoder from YiRage IR to CUDA and XDNA backends; diff legality failures before celebrating either side's ms/token \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. A GPU win on launches/token paired with an XDNA DDR bytes/token regression signals residency failure, not ``NPU is slow'' \citep{memoryfloor2026,patel2025llminference,yirage2026,amd2024xdna,amd2024aie,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{Warm-up protocol.}
+Include graph runner initialization and ${\ge}1000$ steady decode steps \citep{yirage2026,patel2025llminference}.
+Report first-token and steady ms/token separately---laptop UX binds to both \citep{kwon2023vllm,amd2024xdna}.
+
+\paragraph{Triplet runs.}
+Export the same decoder IR to CUDA and XDNA; diff legality before celebrating either ms/token \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna}.
+A GPU launches/token win paired with XDNA DDR regression signals residency failure \citep{memoryfloor2026,patel2025llminference}.
+
+\paragraph{Fleet parity.}
+Laptop fleets share DDR with display, browser, and background services---isolated benches overstate steady-state goodput \citep{amd2024xdna,patel2025llminference,memoryfloor2026}.
+Qualify under realistic contention or publish contention assumptions in release notes \citep{yirage2026,amd2024aie}.
+
+\paragraph{Regression harness.}
+Check in golden decode-cell scripts alongside static graphs: same tokenizer, ctx buckets, and DDR byte counters every CI run \citep{yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026}.
+Driver upgrades that change DMA timing without changing FLOPs still fail SLOs---treat runtime versions like CUDA toolkit pins \citep{amd2024aie,patel2025llminference}.
+
+\paragraph{Shape buckets.}
+Compile separate static graphs for each $(\text{batch},\text{ctx})$ class you ship; never extrapolate from a single prefill graph \citep{amd2024xdna,amd2024aie,kwon2023vllm,patel2025llminference,yirage2026}.
+Bucket count trades compile storage for decode predictability---document which bucket each SKU image selects at runtime \citep{yirage2026,amd2024xdna}.
+
+\paragraph{Documentation contract.}
+Every XDNA decode release note should list max context per bucket, compile time, steady ms/token, DDR bytes/token at ctx${=}2048$, and watt/token when available \citep{amd2024xdna,amd2024aie,patel2025llminference,yirage2026,memoryfloor2026}.
+Without published counters, partners cannot tell whether regressions come from graphs, drivers, or contention \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Ablation discipline.}
+Publish unfused, partially fused, and fully fused static graph rows---label which DDR metric moved \citep{memoryfloor2026,yirage2026,amd2024aie}.
+Reviewers reject ms/token deltas that do not label which static rule was satisfied \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{Paged KV stress.}
+Benchmark with block tables when product ships paging---DMA legality at 32K may differ from 2K \citep{kwon2023vllm,dao2023flashdecoding,amd2024xdna}.
+
+\paragraph{Handoff to Part IV.}
+Chapter~\ref{chap:ch06} generalizes residency budgeting across GPU, CPU, and NPU \citep{yirage2026,chen2020compilerbasedhardw}.
+Carry XDNA counters defined here as mandatory fields in every cross-hardware decode report \citep{amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference}.
 
 \begin{example}
-Ryzen AI decode gate: Llama-3.2-1B at ctx${=}2048$ must show DDR bytes/token within 10\% of GPU baseline \emph{or} document why watt/token target justifies regression; attach static buffer table and DMA edge list \citep{amd2024xdna,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+Ryzen AI decode gate: Llama-3.2-1B at ctx${=}2048$ must show DDR bytes/token within tolerance \emph{or} document watt/token justification; attach static buffer table and DMA edge list \citep{amd2024xdna,yirage2026,memoryfloor2026,taxbreak2026,patel2025llminference}.
 \end{example}
 
-\paragraph{Fleet parity.} Laptop fleets share DDR with display, browser, and background services---decode benchmarks on isolated benches overstate steady-state goodput \citep{amd2024xdna,patel2025llminference,memoryfloor2026,yirage2026,amd2024aie,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,dao2022flashattention,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Qualify under realistic contention or publish contention assumptions \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{Compare with Chapter~4.}
+Hopper Table~\ref{tab:ch04_worked_results} and XDNA Table~\ref{tab:ch05_worked_results} should originate from the same IR export \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026}.
+Publish ms/token \emph{and} watt/token when fleets mix silicon---hiding one metric misroutes product decisions \citep{patel2025llminference,amd2024xdna,amd2024aie,nvidia2022hopper}.
 
+\paragraph{Regression hygiene.}
+Pin tokenizer, weights, ctx bucket, driver, runtime, and YiRage commit for every comparison \citep{taxbreak2026,memoryfloor2026,yirage2026,amd2024xdna}.
+Record median and p99 ms/token; DDR bytes and DMA edges must move with latency \citep{patel2025llminference,kwon2023vllm,amd2024aie}.
 
-\paragraph{Regression harness.} Check in golden decode-cell scripts alongside static graphs: same tokenizer, ctx buckets, and DDR byte counters every CI run \citep{yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Driver upgrades that change DMA timing without changing FLOPs still fail SLOs---treat runtime versions like CUDA toolkit pins \citep{amd2024aie,patel2025llminference,yirage2026,amd2024xdna,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Publish benchmark artifacts with every Ryzen AI graph promotion so field teams replay the same counters \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{What we deliberately omit here.}
+Nightly driver pins, speculative-decode draft graphs, and multi-chip XDNA sweeps belong in appendix checklists and later fleet chapters---not in this hardware primer \citep{patel2025llminference,kwon2023vllm,liu2024deepseekv3,amd2024xdna}.
+This section states verification \emph{classes}; Appendix~A hosts harness checkboxes \citep{yirage2026,chen2020compilerbasedhardw}.
 
+\paragraph{Closing rule.}
+If DDR bytes/token and p99 ms/token both improve, the static graph change is real; if only FLOPs move, reject the merge \citep{memoryfloor2026,taxbreak2026}.
 
-\paragraph{Documentation contract.} Every XDNA decode release note should list max context per bucket, compile time, steady ms/token, and DDR bytes/token at ctx${=}2048$ \citep{amd2024xdna,amd2024aie,patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Without published counters, partners cannot tell whether regressions come from graphs, drivers, or contention---support cycles lengthen \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Treat decode benchmarks as shipping artifacts, not lab one-offs \citep{yirage2026,amd2024aie,amd2024xdna,memoryfloor2026,taxbreak2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
+\paragraph{Practitioner mantra.}
+Profile end-to-end decode first; cut DDR activation bytes second; collapse DMA edges third; tune MAC utilization fourth; re-profile on every driver and ctx bucket change \citep{taxbreak2026,memoryfloor2026,patel2025llminference,amd2024xdna,yirage2026}.
+Teach teammates to read buffer tables before MAC assembly diffs \citep{chen2020compilerbasedhardw,amd2024aie}.
 
+\paragraph{Security of performance claims.}
+Never cite peak TOPS for decode chapters---cite named models, ctx buckets, and DDR bytes/token plus watt/token when available \citep{taxbreak2026,memoryfloor2026,dlbook,patel2025llminference,amd2024xdna}.
 
-\paragraph{Shape buckets.} Compile separate static graphs for each $(\text{batch},\text{ctx})$ class you ship; never extrapolate from a single prefill graph \citep{amd2024xdna,amd2024aie,kwon2023vllm,patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}. Bucket count trades compile storage for decode predictability---document which bucket each SKU image selects at runtime \citep{yirage2026,amd2024xdna,patel2025llminference,amd2024aie,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,liu2024deepseekv3,dao2022flashattention,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-
-\paragraph{Closing metric.} When in doubt, re-run the decode cell: if DDR bytes/token and p99 ms/token both improve, the static graph change is real; if only FLOPs move, reject the merge \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-
-\paragraph{Handoff to Part IV.} Chapter~\ref{chap:ch06} generalizes residency budgeting across GPU, CPU, and NPU; carry forward the XDNA counters defined here as mandatory fields in every cross-hardware decode report \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,dlbook,semianalysis2024tma,nvidia2024cudagraphs,nvidia2022hopper,dao2023flashdecoding}.
-
-Benchmarks without DDR byte counters are incomplete for Ryzen AI decode qualification today \citep{amd2024xdna,patel2025llminference,memoryfloor2026}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Promotion requires all three ctx buckets green on bytes/token \emph{and} DMA edges/token within published tolerances \citep{taxbreak2026,memoryfloor2026,yirage2026,amd2024aie}.
 
 \section{Key Takeaways}
 \label{sec:ch05_key_takeaways}
 
 \begin{itemize}
-\item \textbf{The tile grid is fixed and the SRAM is small.}
-XDNA appears in Ryzen AI NPUs paired with x86 cores, with a per-SKU compute-tile grid and tens of kilobytes of deterministic tile SRAM rather than a large banked shared memory \citep{amd2024xdna,amd2024aie}. Engineers who oversize tiles ``because HBM is huge'' fail XDNA legality immediately, so the compiler must size to the tile budget up front \citep{nvidia2022hopper}.
+\item \textbf{Static legality principle.}
+XDNA has no runtime scheduler---illegal buffer plans fail compile or DDR-bind execution \citep{amd2024xdna,amd2024aie}.
+\textbf{Action:} treat compile rejection as success; fix buffer tables before silicon \citep{yirage2026}.
 
-\item \textbf{Static dataflow shifts work to compile time.}
-The host configures graph runners and submits execute calls but must not allocate or copy full tensors per token; KV growth appends through pre-planned DDR regions \citep{amd2024xdna,patel2025llminference}. There is no runtime scheduler, so the entire tile-and-DMA plan is fixed before execution and the per-token cost is deterministic \citep{amd2024aie}.
+\item \textbf{Metric principle.}
+Optimize DDR bytes/token and watt/token before MAC \% polish \citep{memoryfloor2026,patel2025llminference}.
+\textbf{Action:} publish DDR ledger beside ms/token in every Ryzen AI release note \citep{amd2024xdna}.
 
-\item \textbf{Map from CUDA by translating, not transplanting.}
-GPU shared memory is explicitly sized and banked while tile SRAM is smaller but deterministic, so a CUDA schedule cannot be transplanted---it must be re-tiled to the AIE fabric \citep{nvidia2022hopper,amd2024xdna}. Online softmax in particular must preserve a stable accumulation order across spatial reductions to stay numerically equivalent to the reference \citep{dao2022flashattention,dao2023flashdecoding}.
+\item \textbf{Translation principle.}
+Map CUDA concepts (TMA, graphs, carriers) but re-plan schedules for static tiles \citep{semianalysis2024tma,nvidia2022hopper,amd2024aie}.
+\textbf{Action:} use Table~\ref{tab:cuda_xdna_map} in design review, not as a porting checklist \citep{yirage2026}.
 
-\item \textbf{Optimize watt/token, not just ms/token.}
-Edge products advertise watt/token while cloud products advertise ms/token under load, so XDNA wins on power efficiency where CUDA wins on elastic throughput \citep{amd2024xdna,patel2025llminference}. The right target is the one whose binding constraint---power and locality versus peak latency---matches the deployment \citep{taxbreak2026}.
+\item \textbf{Fusion principle.}
+Online softmax carriers must stay in tile SRAM for the full attention pipeline \citep{dao2022flashattention,dao2023flashdecoding}.
+\textbf{Action:} block merges that add a DDR softmax materialization edge \citep{memoryfloor2026}.
 
-\item \textbf{Gate XDNA decode on static legality.}
-Review gates must confirm no simultaneous buffers exceed per-tile SRAM caps and no dynamic dimensions appear on the hot path without a bucket recompile \citep{amd2024aie,yirage2026}. YiRage compiles the same decoder export for CUDA and XDNA on every merge and publishes the legality diffs, so a residency violation is caught at build time \citep{yirage2026,chen2020compilerbasedhardw}.
+\item \textbf{Verification principle.}
+Triplet IR must compile on CUDA and XDNA; bytes/token must move together with latency \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+\textbf{Action:} attach Table~\ref{tab:ch05_ryzen_benchmark} rows and five review gates to CI artifacts \citep{patel2025llminference}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch05_conclusion}
 
-AMD XDNA/AIE shows the opposite end of the architecture spectrum from the CUDA GPU of Chapter~4: a spatial-dataflow fabric of fixed compute tiles with small deterministic SRAM, no hardware cache, and a statically configured schedule, where decode latency is bought with compile-time tile and DMA planning rather than runtime flexibility \citep{amd2024xdna,amd2024aie}. The lesson is that the same decoder math demands a fundamentally different compilation per class, and a schedule transplanted from the GPU is illegal here---which is precisely why residency must be planned, not assumed \citep{semianalysis2024tma,yirage2026}. With both hardware extremes now mapped, Chapter~\ref{chap:ch06} opens Part~IV's MegaKernel techniques by making on-chip data residency a budgeted, checkable property across all three classes \citep{memoryfloor2026,taxbreak2026}.
+AMD XDNA/AIE is the static counterpart to Chapter~4's dynamic Hopper: fixed tile SRAM, compile-time DMA graphs, and deterministic decode at the cost of flexibility \citep{amd2024xdna,amd2024aie,nvidia2022hopper}.
+The unified lesson across both chapters is mechanical sympathy---cut activation egress and orchestration before tuning compute utilization \citep{memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw}.
+
+Chapter~\ref{chap:ch06} generalizes on-chip residency budgeting across GPU, CPU, and NPU \citep{yirage2026}.
+Carry forward DDR bytes/token, DMA edges/token, and tile SRAM worksheets from this chapter into every cross-hardware decode report \citep{patel2025llminference,amd2024xdna}.
+
+\paragraph{Worksheet gate.}
+Before Part~IV MegaKernel chapters, confirm Table~\ref{tab:ch05_static_rules} is satisfied for your model and all five review gates pass \citep{yirage2026,amd2024aie}.
+If DDR bytes/token is flat on XDNA, Chapter~6 will not rescue a GPU-transplanted schedule \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Hands-on next step.}
+Pick one decode layer, fill Table~\ref{tab:ch05_worked_results} for your model, and mark which static rule still has headroom \citep{patel2025llminference,amd2024xdna}.
+If DDR bytes/token is flat, return to Chapter~2 export edges before studying new Ryzen AI SKUs \citep{chen2020compilerbasedhardw,memoryfloor2026,yirage2026}.
+
+\paragraph{Summary before leaving Part~II.}
+Tiles, static rules, CUDA mapping, softmax placement, tradeoffs, YiRage gates, patterns, worked numbers, and slim verification form one mechanical-sympathy story for spatial dataflow \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,taxbreak2026,memoryfloor2026,patel2025llminference,nvidia2022hopper,semianalysis2024tma,dlbook}.
+DDR bytes first, DMA edges second, MAC last---when the DDR roofline binds at batch-1 decode \citep{memoryfloor2026,taxbreak2026,amd2024xdna}.
+Chapter~4 and this chapter together define the GPU/NPU bookends for Part~IV residency work \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Glossary carry-forward.}
+\textbf{XDNA}, \textbf{AIE}, \textbf{buffer descriptor}, and \textbf{static dataflow} are defined on first use in this chapter; later NPU and compiler chapters reuse them without re-deriving \citep{amd2024xdna,amd2024aie,yirage2026,dao2022flashattention,patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{GPU--NPU symmetry recap.}
+Hopper rewards dynamic residency within SM limits; XDNA rewards static residency with zero DDR exports \citep{nvidia2022hopper,amd2024xdna,semianalysis2024tma}.
+Triplet bufferization exists because both truths must hold from one IR \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Skillful engineering.}
+Mid-tier skillful static fusion beats flagship silicon running DDR-bound eager loops---the same lesson as Memory-Floor L4 versus H100 cells, transplanted to watt-capped edge \citep{memoryfloor2026,taxbreak2026,dao2022flashattention,yirage2026}.
+
+\paragraph{Hands-on recap.}
+(1) Fill Table~\ref{tab:ch05_static_rules} for your model. (2) Build Table~\ref{tab:ch05_tile_budget}. (3) Run Table~\ref{tab:ch05_worked_results} counters. (4) Pass five review gates. (5) Export triplet legality before merge \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,amd2024xdna}.
+If any step is missing, the PR is not XDNA-ready \citep{chen2020compilerbasedhardw,amd2024aie}.
+
+\paragraph{Part~II closing.}
+Chapters~4--5 complete the GPU/NPU hardware depth needed before Part~IV residency passes \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,nvidia2022hopper}.
+Read Chapter~6 next with the same worksheet---CPU cache blocking punishes the same export mistakes with a third legality mechanic \citep{dlbook,patel2025llminference}.
+
+\paragraph{Done criteria.}
+You are done when you can explain why a Hopper fusion illegalizes on XDNA and which DDR counter proves your static graph is shippable \citep{memoryfloor2026,taxbreak2026,amd2024aie}.
+Proceed to Chapter~\ref{chap:ch06} with completed tile SRAM and DDR worksheets \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Metric reminder.}
+DDR bytes/token, DMA edges/token, and ms/token must move together for a shippable XDNA change \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+MAC active \% alone is never sufficient evidence \citep{amd2024aie,yirage2026}.
+
+\paragraph{Closing artifact.}
+Archive shape bucket, buffer table, Table~\ref{tab:ch05_worked_results} row, and DDR screenshot set beside each merged XDNA PR \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,amd2024xdna}.
+Future you---and Chapter~6 reviewers---need that packet to judge triplet parity \citep{chen2020compilerbasedhardw,amd2024aie}.
+
+\paragraph{One-sentence chapter summary.}
+XDNA decode optimization is static legality first---tile SRAM and DDR bytes/token before MAC polish---with the same export-edge mindset as GPU, but zero runtime forgiveness \citep{amd2024xdna,amd2024aie,memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,dlbook}.
+
+\paragraph{Version note.}
+Future Ryzen AI steppings extend tile counts and SRAM rows; this chapter's static rules and review gates remain valid when chip-model tables update \citep{amd2024xdna,yirage2026,patel2025llminference,liu2024deepseekv3,amd2024aie,chen2020compilerbasedhardw}.
+
+\paragraph{Index terms for later lookup.}
+Readers searching the index should start from XDNA, AIE, dataflow, and static graph entries---they point back to this chapter's rules, mapping table, and worksheets \citep{amd2024xdna,amd2024aie,yirage2026,dao2022flashattention,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Final synthesis.}
+AMD XDNA gives spatial MAC arrays and deterministic DMA---tools for mechanical sympathy, not automatic speedups \citep{amd2024xdna,amd2024aie,patel2025llminference,liu2024deepseekv3,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+Measure DDR goodput; co-design static residency; gate merges with buffer tables and five review checks \citep{taxbreak2026,memoryfloor2026,dlbook,patel2025llminference,amd2024xdna,amd2024aie}.
+
+\paragraph{Chapter artifact.}
+Maintain an XDNA worksheet: shape bucket targeted, tile SRAM line items, Table~\ref{tab:ch05_worked_results} row, and DDR counter cheat sheet fields \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,amd2024xdna,amd2024aie}.
+Update on every ctx bucket or driver change \citep{kwon2023vllm,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch05" \theabspage}

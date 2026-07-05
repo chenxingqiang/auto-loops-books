@@ -2,104 +2,344 @@
 \label{chap:ch04}
 \typeout{START_CHAPTER "ch04" \theabspage}
 
-Can faster Blackwell tensor cores fix batch-1 decode if activations still round-trip through HBM every op boundary? Fregly's mechanical sympathy answer is no: hardware features pay off only when algorithms and kernels are co-designed for the memory hierarchy they run on \citep{nvidia2022hopper,patel2025llminference,semianalysis2024tma}. FlashAttention and DeepSeek MLA succeeded on constrained H800 clusters by reshaping attention around bandwidth and on-chip residency---not by ignoring silicon limits \citep{dao2022flashattention,liu2024deepseekv3,memoryfloor2026}.
+\section{Why Hopper Features Do Not Automatically Speed Up Decode}
+\label{sec:industrial_hook}
 
-This chapter maps Hopper/Blackwell CUDA mechanisms---registers, shared memory, TMA, thread-block clusters, tensor cores, and PTX softmax micro-ops---to decode metrics from Chapter~1: kernels/token, bytes/token, and $R_{\mathrm{floor}}$ \citep{taxbreak2026,memoryfloor2026}. The mistake is treating Hopper as ``more FLOPs'' while launch storms and spill traffic dominate TaxBreak cells \citep{taxbreak2026,nvidia2024cudagraphs}. YiRage's CUDA backend must legalize fusion against these bounds before codegen; Chapter~5 shows contrasting static rules on XDNA \citep{yirage2026,amd2024xdna,chen2020compilerbasedhardw}.
+One production team spent a month raising tensor-core utilization on H100---end-to-end batch-1 decode latency fell only ${\sim}3\%$.
+Nsight showed excellent TMA overlap and higher TC occupancy, but bytes/token and launches/token were unchanged: activations still exported to HBM between every op boundary \citep{memoryfloor2026,taxbreak2026}.
+\textbf{Hopper features hide latency and widen on-chip capacity; they do not remove traffic you never fused away.}
 
-TaxBreak dense Llama-3.2-1B averages 847.5 kernel launches per output token on H100; Memory-Floor reports $R_{\mathrm{floor}}\approx 0.27$ on H100 vs ${\approx}0.81$ on L4 for Qwen-2.5-7B at batch-1 \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. Hopper tuning must follow profile-first ordering from Chapter~1, not datasheet peaks \citep{dlbook,semianalysis2024tma}.
+\paragraph{Bridge from Chapters~2--3.}
+Chapter~2 said plan residency before exports; Chapter~3 gave the byte budgets \citep{yirage2026,chen2020compilerbasedhardw}.
+This chapter instantiates those budgets on Hopper: 228\,KB shared memory, TMA, clusters, and tensor cores as \emph{tools in a fixed optimization order}---not a shopping list \citep{nvidia2022hopper,semianalysis2024tma}.
 
-\paragraph{What this chapter is not.} This is not a CUDA tutorial on writing faster matrix multiply microbenchmarks \citep{dlbook,patel2025llminference}. Nor is it a Blackwell launch brochure \citep{nvidia2022hopper,liu2024deepseekv3}. We document \emph{optimization bounds}: which Hopper mechanisms matter for batch-1 decode residency, which are distractions when $R_{\mathrm{floor}}$ is low, and how a multi-hardware compiler lowers the same IR without forking legality rules \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,amd2024xdna}.
+\paragraph{Hopper decode optimization priority (use this order).}
+\begin{enumerate}
+\item \textbf{Cut activation HBM traffic}---layer fusion (Chapter~2 export-edge mindset); largest gain \citep{memoryfloor2026,dao2022flashattention}.
+\item \textbf{Cut kernel launch overhead}---CUDA Graph + MegaKernel; attacks launches/token \citep{taxbreak2026,nvidia2024cudagraphs}.
+\item \textbf{Hide memory latency}---TMA double-buffer; does not reduce bytes \citep{semianalysis2024tma}.
+\item \textbf{Widen fusion tiles}---thread-block clusters + DSM \citep{nvidia2022hopper}.
+\item \textbf{Minimize sync scope}---warp shuffle before block/cluster barriers \citep{dao2022flashattention}.
+\item \textbf{Tune tensor cores and PTX last}---when bytes/token and launches/token are already clean \citep{patel2025llminference,memoryfloor2026}.
+\end{enumerate}
 
-\paragraph{Reader prerequisites.} You should carry Chapter~1 metrics---kernels/token, bytes/token, ms/token, and $R_{\mathrm{floor}}$---and Chapter~3 hardware vocabulary \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. When this chapter cites FlashAttention or Flash-Decoding, it assumes you accept online softmax as the attention control-flow spine; Chapter~10 derives the numerics \citep{dao2022flashattention,dao2023flashdecoding}.
-
-\paragraph{Organization.} Sections~\ref{sec:cuda_memory_hierarchy}--\ref{sec:sync_mechanisms} map CUDA tiers and synchronization to fusion plans \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention}. Sections~\ref{sec:ch04_tensor_core_bounds}--\ref{sec:ch04_ptx} explain why tensor-core tuning is usually third in the queue and how PTX choices bind softmax stability \citep{memoryfloor2026,patel2025llminference,liu2024deepseekv3}. Sections~\ref{sec:ch04_yirage_cuda_backend}--\ref{sec:ch04_profiling} connect IR lowering and profilers to ship gates \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}. The worked example in Section~\ref{sec:ch04_worked_example} ties the story to one decode layer \citep{taxbreak2026,memoryfloor2026,kwon2023vllm}.
-
-\section{CUDA Memory Hierarchy}
-\label{sec:cuda_memory_hierarchy}
-\paragraph{Memory tier cheat sheet for reviewers.} When reviewing CUDA diffs, ask: where do QKV fragments live between ops? Where do online softmax $(m,\ell,o)$ live during the KV loop? Where does SwiGLU intermediate sit relative to TMA staging buffers? Any answer of ``global'' between fused stages is a bytes/token regression unless proven otherwise \citep{memoryfloor2026,taxbreak2026,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Shared memory is a hard budget: two concurrent $d$-model vectors plus MMA tiles can exceed 228\,KB if planners double-book buffers \citep{semianalysis2024tma,taxbreak2026,yirage2026}.
-
-\paragraph{KV cache traffic.} Weights and KV still live in HBM---fusion removes \emph{activation} round trips, not parameter reads \citep{kwon2023vllm,dlbook,patel2025llminference,dao2022flashattention,memoryfloor2026}. Roofline thinking still applies: decode AI stays on the bandwidth slope for realistic LLM sizes \citep{taxbreak2026,semianalysis2024tma,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dao2023flashdecoding}.
-
-\paragraph{The residency envelope.} Decoder MegaKernels simultaneously hold QKV fragments, online softmax carriers, SwiGLU tiles, and TMA staging buffers \citep{taxbreak2026,dao2022flashattention,yirage2026}. Each temporary must map to a CUDA memory tier for the kernel duration---spill to HBM is a bytes/token bill Chapter~1 measured \citep{memoryfloor2026,patel2025llminference}.
-
-% AUTO_VISUAL:tab_cuda_memory
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.75, transform shape]
+ \node[vis pipeline node, minimum width=2.8cm] (l1) at (0,2.0) {\footnotesize 1. Fusion\\bytes/token};
+ \node[vis arch node, minimum width=2.8cm] (l2) at (0,1.0) {\footnotesize 2. Graphs\\launches/token};
+ \node[vis arch node, minimum width=2.8cm] (l3) at (0,0.0) {\footnotesize 3. TMA\\latency};
+ \node[vis arch node, minimum width=2.8cm] (l4) at (0,-1.0) {\footnotesize 4. Clusters\\tile size};
+ \node[vis arch node, minimum width=2.8cm] (l5) at (0,-2.0) {\footnotesize 5--6. Sync / TC\\last};
+ \draw[vis arrow] (l1) -- (l2) -- (l3) -- (l4) -- (l5);
+\end{tikzpicture}
+\caption{Hopper decode optimization priority pyramid: work top-down; do not invert.}
+\label{fig:hopper_priority_pyramid}
+\end{figure}
 
 \begin{table}[t]
 \centering
-\caption{CUDA memory spaces relevant to decode megakernels (Hopper-class).}
+\small
+\caption{Hopper decode optimization priority and typical batch-1 gains (order matters).}
+\label{tab:hopper_priority_pyramid}
+\begin{tabular}{@{}clcl@{}}
+\toprule
+\textbf{Pri.} & \textbf{Direction} & \textbf{Typical gain} & \textbf{Section} \\
+\midrule
+1 & Operator fusion (cut activation HBM) & 40--80\% bytes/token & \S\ref{sec:cuda_memory_hierarchy} \\
+2 & CUDA Graph + MegaKernel (cut launches) & 30--60\% scheduling overhead & \S\ref{sec:hopper_tuning_practice} \\
+3 & TMA double-buffer (hide latency) & 15--30\% memory stall & \S\ref{sec:tma} \\
+4 & Thread-block cluster + DSM & 10--20\% fusion depth & \S\ref{sec:ch04_cluster_dsm} \\
+5 & Minimal sync scope & 5--15\% pipeline bubbles & \S\ref{sec:sync_mechanisms} \\
+6 & Tensor Core / PTX polish & $<$10\% compute efficiency & \S\S\ref{sec:ch04_tensor_core_bounds}--\ref{sec:ch04_ptx} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Terminology alignment with Chapters~1--3.}
+We use \emph{kernel launch overhead} for per-token launch tax, \emph{scheduling overhead} for host/framework orchestration, and \emph{data residency} for on-chip lifetime of activation carriers \citep{taxbreak2026,chen2020compilerbasedhardw,memoryfloor2026}.
+First-use expansions in this chapter: \textbf{DSM} (distributed shared memory across a thread-block cluster), \textbf{WGMMA} (warpgroup matrix multiply-accumulate), \textbf{SFU} (special function unit for \texttt{exp2}), and \textbf{FTZ} (flush-to-zero mode for subnormal handling in softmax PTX) \citep{nvidia2022hopper,liu2024deepseekv3,dao2022flashattention}.
+
+\paragraph{Composite lesson.}
+TaxBreak reports hundreds of launches per token on unfused stacks; Memory-Floor shows batch-1 decode often bandwidth- and orchestration-bound before tensor cores saturate \citep{taxbreak2026,memoryfloor2026}.
+Profile launches/token and bytes/token first---the same discipline as Chapters~1--3 \citep{patel2025llminference}.
+
+\paragraph{What you will be able to do.}
+After this chapter you can (1)~place Hopper features on the priority pyramid, (2)~write a shared-memory line-item budget for a fused layer, (3)~decide TMA versus manual loads with profiler evidence, (4)~attach ablation rows that separate graph wins from fusion wins, and (5)~map YiRage invariants to review checklists \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+PTX and WGMMA micro-tuning are explicitly last---not because they are unimportant, but because they rarely move batch-1 decode when bytes/token is dirty \citep{patel2025llminference,dao2022flashattention}.
+
+\paragraph{Reader prerequisites.}
+Carry Chapter~1 worksheets (launches/token, bytes/token, $R_{\mathrm{floor}}$) and Chapter~3 H100 capacity rows \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+When we reference online softmax, assume Chapter~10 numerics; here we only cover \emph{where} carriers live on silicon \citep{dao2022flashattention,dao2023flashdecoding}.
+
+\paragraph{Industrial narrative.}
+DeepSeek-scale training stories emphasize co-design under export limits \citep{liu2024deepseekv3,patel2025llminference}.
+Hopper decode repeats the lesson at SM scale: skillful residency beats brute-force TFLOPs marketing \citep{taxbreak2026,memoryfloor2026,dao2022flashattention}.
+Goodput metrics make the case quantitatively---not peak GEMM banners \citep{taxbreak2026,dlbook}.
+
+\paragraph{How to read this chapter.}
+Skim Figure~\ref{fig:hopper_priority_pyramid} first \citep{patel2025llminference}.
+Sections~\ref{sec:cuda_memory_hierarchy}--\ref{sec:sync_mechanisms} are the tool layer; Section~\ref{sec:hopper_tuning_practice} is the workflow; Section~\ref{sec:ch04_hopper_benchmark} is verification only \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Anti-pattern preview.}
+The five concentrated mistakes at the end of Section~\ref{sec:hopper_tuning_practice} map directly to inverted pyramid levels---use them in design review before merge \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+Culture: post the pyramid in your compiler team's Hopper doc template \citep{yirage2026}.
+
+\paragraph{Cross-chapter dependency map.}
+Chapter~3 listed abstract GPU constraints; this chapter names Hopper mechanisms; Chapters~8--11 specialize TMA, sync, softmax, and MegaKernel codegen \citep{semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,yirage2026}.
+Skipping here produces CUDA that ignores residency bounds \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Failure story catalog (short).}
+Shared-memory overflow at max ctx; TMA misalignment on paged KV; illegal cluster on SKU; PTX exp2 drift at long $T$; graph capture invalidated by driver upgrade \citep{yirage2026,nvidia2024cudagraphs,dao2023flashdecoding,patel2025llminference}.
+Map symptoms to pyramid level (Table~\ref{tab:hopper_priority_pyramid}) before tuning TC tiles \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{TaxBreak anchor.}
+Dense Llama-3.2-1B can average hundreds of kernel launches per output token on unfused H100 stacks \citep{taxbreak2026,memoryfloor2026}.
+Those cells are why the pyramid starts with fusion, not TC \citep{taxbreak2026,memoryfloor2026,dlbook}.
+
+\paragraph{What this chapter is not.}
+Not a CUDA tutorial on square GEMM microbenchmarks; we document optimization \emph{bounds} for batch-1 decode residency on Hopper-class silicon \citep{nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Organization map.}
+Memory (\S\ref{sec:cuda_memory_hierarchy}), TMA (\S\ref{sec:tma}), clusters (\S\ref{sec:ch04_cluster_dsm}), sync (\S\ref{sec:sync_mechanisms}), TC/PTX (\S\S\ref{sec:ch04_tensor_core_bounds}--\ref{sec:ch04_ptx}), YiRage (\S\ref{sec:ch04_yirage_cuda_backend}), practice (\S\ref{sec:hopper_tuning_practice}), verify (\S\ref{sec:ch04_hopper_benchmark}) \citep{yirage2026,patel2025llminference}.
+
+\index{Hopper}
+\index{TMA}
+\index{Tensor core}
+
+\section{Hopper Memory Hierarchy: Fusion Hard Boundaries}
+\label{sec:cuda_memory_hierarchy}
+
+Decode MegaKernels hold QKV tiles, online softmax carriers, and SwiGLU fragments simultaneously---each must map to a CUDA tier for the kernel lifetime \citep{dao2022flashattention,yirage2026}.
+Spill to HBM is a bytes/token bill; treat it as a fusion failure \citep{memoryfloor2026}.
+
+% AUTO_VISUAL:tab_cuda_memory
+\begin{table}[t]
+\centering
+\caption{CUDA memory spaces for decode megakernels (Hopper-class).}
 \label{tab:cuda_memory}
 \begin{tabular}{lcc}
 \toprule
 \visTableHeader
 \textbf{Space} & \textbf{Scope} & \textbf{Decode role} \\
 \midrule
-Register & Thread & Online softmax carriers, thin GEMM fragments \\
-Shared memory & Block & Fused QKV/MLP tiles, TMA staging \\
-Global (HBM) & Grid & Weights, KV cache, spill traffic \\
+Register & Thread & Online softmax $(m,\ell,o)$, MMA fragments \\
+Shared memory & CTA & Fused tiles, TMA staging \\
+Global (HBM) & Grid & Weights, KV cache, spill \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:cuda_memory} is the tier model for decode fusion \citep{nvidia2022hopper,semianalysis2024tma}. \textbf{Registers} hold per-thread carriers and MMA fragments; exceeding register caps lowers occupancy and can spill \citep{nvidia2022hopper}. \textbf{Shared memory} is the MegaKernel scratchpad---typically 228\,KB/SM configurable on Hopper---where fused stages exchange data without HBM \citep{semianalysis2024tma,taxbreak2026}. \textbf{Global memory} is for weights, KV cache, and failures \citep{kwon2023vllm,dlbook}.
+\paragraph{Terminology.}
+A \textbf{CTA} (cooperative thread array) is a CUDA thread block---the launch grain that shares one shared-memory pool \citep{nvidia2022hopper}.
+Hopper exposes up to 228\,KB configurable shared memory per SM (227\,KB usable per block after reserve) and a 65{,}536-register file \citep{nvidia2022hopper}.
 
-\paragraph{Register pressure vs fusion depth.} Fusing QKV, attention, and MLP increases live ranges in registers and shared memory \citep{chen2020compilerbasedhardw,yirage2026}. A kernel that fuses FLOPs but spills carriers to global memory loses on bytes/token \citep{memoryfloor2026,dao2022flashattention}. Compiler passes need joint allocation---not per-op peaks \citep{yirage2026,liu2024deepseekv3}.
+\paragraph{Shared memory capacity (constraint loop).}
+\textbf{Engineering meaning:} hard ceiling for fused decode tiles---Chapter~3's GPU row, now Hopper-specific \citep{yirage2026}.
+\textbf{Common pitfall:} tensor bytes only, ignoring padding, double buffers, softmax score tiles \citep{dao2022flashattention}.
+\textbf{Debug:} Nsight Compute shared-memory config; elevated \texttt{local memory traffic} signals spill \citep{patel2025llminference}.
 
-\paragraph{Multi-hardware delta.} Hopper uses shared memory + registers; XDNA uses fixed tile SRAM; CPUs use L2 blocking \citep{amd2024xdna,amd2024aie,dlbook}. Identical math, different legality \citep{patel2025llminference,chen2020compilerbasedhardw}.
+\paragraph{Register pressure.}
+Fusion deepens live ranges; occupancy may drop yet bytes/token still wins when HBM exports disappear \citep{memoryfloor2026,semianalysis2024tma}.
+\textbf{Debug:} registers per thread and spill counters before MMA tile sweeps \citep{yirage2026}.
 
-\begin{example}
-Llama-3.2-1B decode: six $d$-vector HBM round trips per unfused layer vs one fused shared-memory plan---bytes/token drops with unchanged MMA tiles \citep{taxbreak2026,dao2022flashattention,memoryfloor2026}.
-\end{example}
+\paragraph{KV versus activation traffic.}
+Weights and KV legitimately stream from HBM each token---fusion targets \emph{activation} exports between attention, softmax, and MLP \citep{kwon2023vllm,memoryfloor2026,dao2022flashattention}.
+A common review mistake is celebrating lower DRAM traffic while KV alone explains the counter---diff activation bytes specifically \citep{patel2025llminference,taxbreak2026}.
 
-\paragraph{Roofline reminder at batch one.} Decode GEMMs present $M=1$ or small $M$ with large $K/N$ \citep{dlbook,patel2025llminference,nvidia2022hopper}. Arithmetic intensity stays on the memory roof for realistic LLM widths \citep{memoryfloor2026,semianalysis2024tma}. Registers and shared memory are how kernels \emph{buy} effective intensity without changing FLOP counts \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw}. Treat every planned global store of length $d$ as a roofline penalty \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{Roofline at batch one.}
+Decode GEMMs present thin $M$ with large $K/N$; arithmetic intensity stays on the memory roof for realistic LLM widths \citep{dlbook,memoryfloor2026}.
+Registers and shared memory buy effective intensity without changing FLOP counts---that is the mechanical-sympathy lever Hopper provides \citep{nvidia2022hopper,semianalysis2024tma}.
 
-\paragraph{Spill versus intentional global traffic.} Weights, KV cache entries, and final layer outputs legitimately live in HBM \citep{kwon2023vllm,dlbook}. Spilled $(m,\ell,o)$ carriers or softmax score tiles do not \citep{dao2022flashattention,memoryfloor2026,patel2025llminference}. Nsight Compute differentiates them: spilled locals show as local memory loads; intentional KV traffic shows as regular DRAM throughput aligned with cache lines \citep{semianalysis2024tma,patel2025llminference,yirage2026}.
+\paragraph{Blackwell note.}
+Successor SKUs extend TMA and low-precision tensor paths; residency invariants in this section survive---only capacity rows and legality tables change in the chip model \citep{liu2024deepseekv3,yirage2026,patel2025llminference}.
 
-\paragraph{Spill signatures in profilers.} Nsight Compute local memory loads and excessive register usage often precede bytes/token regressions \citep{patel2025llminference,semianalysis2024tma}. Treat spill as a fusion bug, not an occupancy knob \citep{memoryfloor2026,yirage2026}.
-
-\section{Tensor Memory Accelerator (TMA)}
-\label{sec:tma}
-\paragraph{TMA vs manual loads.} Scalar global loads still appear in legacy decode kernels \citep{taxbreak2026,patel2025llminference,semianalysis2024tma,nvidia2022hopper}. TMA reduces instruction overhead and enables asynchronous copy/compute overlap when tile sizes justify descriptor setup \citep{yirage2026,chen2020compilerbasedhardw,dao2023flashdecoding,kwon2023vllm,memoryfloor2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}. Profile both paths on target shapes before mandating TMA in YiRage lowering \citep{yirage2026,taxbreak2026}.
-
-\paragraph{Double-buffer invariant.} At steady state, one buffer is consumed by MMA while TMA fills the other \citep{semianalysis2024tma,dao2022flashattention}. Violating the invariant---compute on a buffer being overwritten---is a silent correctness bug that stability tests may miss if they use small $T$ \citep{dao2023flashdecoding,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}.
-
-\paragraph{Why TMA matters for decode.} Hopper's Tensor Memory Accelerator issues bulk global$\to$shared copies asynchronously while MMA units compute on the previous tile \citep{nvidia2022hopper,semianalysis2024tma}. KV-heavy decode loops use TMA to reduce scalar loads and enable double-buffer pipelines Chapter~8 details \citep{dao2023flashdecoding,kwon2023vllm}.
-
-% AUTO_VISUAL:fig_tma_pipeline
+\paragraph{Cross-hardware note.}
+GPU shared memory is software-managed---flexible but easy to overflow \citep{nvidia2022hopper}.
+XDNA tile SRAM is fixed at compile time---inflexible but deterministic (Chapter~5) \citep{amd2024xdna,amd2024aie}.
+Same Chapter~2 residency goal; different legality mechanics \citep{chen2020compilerbasedhardw}.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.88, transform shape]
- \node[vis pipeline node] (s0) at (-5.10,0) {\footnotesize TMA load\\Async to shared};
- \node[vis arch node] (s1) at (-1.70,0) {\footnotesize MMA compute\\Previous tile};
- \node[vis pipeline node] (s2) at (1.70,0) {\footnotesize Epilogue\\Fused in shared};
- \node[vis arch node] (s3) at (5.10,0) {\footnotesize TMA prefetch\\Next tile};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
- \draw[vis arrow] (s2.east) -- (s3.west);
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis arch node] (rf) at (0,1.4) {\footnotesize Register file\\256 KB/SM};
+ \node[vis arch node] (smem) at (-2.4,0) {\footnotesize Shared mem\\228 KB max};
+ \node[vis arch node] (tma) at (2.4,0) {\footnotesize TMA unit};
+ \node[vis arch node] (tc) at (-1.2,-1.2) {\footnotesize Tensor Core\\WGMMA};
+ \node[vis arch node] (sfu) at (1.2,-1.2) {\footnotesize SFU\\exp2};
+ \node[vis arch node] (warp) at (0,-2.4) {\footnotesize Warp scheduler};
+ \draw[vis arrow] (rf.south) -- (smem.north);
+ \draw[vis arrow] (rf.south) -- (tma.north);
+ \draw[vis arrow] (warp.north) -- (tc.south);
+ \draw[vis arrow] (warp.north) -- (sfu.south);
 \end{tikzpicture}
-\caption{TMA double-buffer pattern: async global-to-shared copy overlaps tensor-core math.}
+\caption{Hopper SM resource sketch for decode planning.}
+\label{fig:hopper_sm_resources}
+\end{figure}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Statically budget shared memory + registers for the full fused region; reject merges that exceed 227\,KB usable before codegen \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Worked tier assignment exercise.}
+For one transformer layer, list every $\Theta(d)$ tensor between attention and MLP: post-norm hidden, Q/K/V fragments, attention output, MLP intermediates, residuals \citep{dao2022flashattention,memoryfloor2026}.
+Mark each as register, shared, or global for your fused plan \citep{yirage2026,chen2020compilerbasedhardw}.
+Any global mark between fused stages is a bytes/token bug unless proven dead \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Spill versus intentional HBM.}
+Intentional traffic: weights, KV appends, final layer outputs to framework buffers \citep{kwon2023vllm,dlbook}.
+Spill traffic: softmax carriers, score tiles, or MLP fragments written because shared memory overflowed \citep{memoryfloor2026,dao2022flashattention,patel2025llminference}.
+Nsight distinguishes them via local memory loads and stack-like access patterns \citep{semianalysis2024tma}.
+
+\paragraph{Occupancy versus fusion trade.}
+High shared-memory configs lower resident blocks per SM yet may still win on ms/token when fusion deletes HBM passes \citep{memoryfloor2026,semianalysis2024tma,taxbreak2026}.
+Optimize occupancy only after proving legality and bytes/token improvement \citep{yirage2026,patel2025llminference}.
+Lab charts that show ``low occupancy'' without bytes/token context mislead reviewers \citep{memoryfloor2026}.
+
+\paragraph{Example unfused traffic.}
+Llama-class stacks often materialize six to eight $\Theta(d)$ activation buffers per layer at batch-1 \citep{taxbreak2026,dao2022flashattention,memoryfloor2026}.
+At $d{=}4096$ BF16, six round trips imply roughly $6 \times 4096 \times 2 \approx 49$\,KB activation traffic per layer per token before KV reads \citep{kwon2023vllm,memoryfloor2026}.
+Fusion targets that bill first \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Shared-memory bank conflicts (constraint loop).}
+\textbf{Engineering meaning:} legal capacity can still serialize when strided layouts hit the same 32-way bank set---Chapter~3's GPU row, now layout-specific \citep{nvidia2022hopper,shah2024flashattention3}.
+\textbf{Common pitfall:} padding score tiles for capacity but leaving WGMMA-unfriendly strides \citep{dao2022flashattention}.
+\textbf{Debug:} Nsight shared-memory conflict counters; compare swizzled versus naive layouts before blaming TMA \citep{yirage2026,patel2025llminference}.
+Hopper fusion must swizzle for \textbf{WGMMA} (warpgroup matrix multiply-accumulate) consumption, not only fit byte totals \citep{semianalysis2024tma,shah2024flashattention3}.
+
+\paragraph{Chapter~2 iron rule link.}
+Iron Rule~2 (keep activations on-chip across stages) is implemented here as shared-memory and register budgets \citep{chen2020compilerbasedhardw,memoryfloor2026,dao2022flashattention}.
+Violating the rule exports to global---bytes/token rises even if TMA overlap looks healthy \citep{semianalysis2024tma,taxbreak2026}.
+
+\paragraph{L2 hidden export.}
+Even legal shared-memory plans can lose if every stage writes full vectors through L2 to HBM \citep{memoryfloor2026,kwon2023vllm}.
+Fusion must minimize round trips, not only fit in shared memory while exporting intermediates \citep{chen2020compilerbasedhardw,dao2022flashattention,yirage2026}.
+
+\paragraph{Multi-hardware delta (again).}
+CPU L3 blocking and XDNA static tiles solve the same export problem with different legality \citep{amd2024xdna,dlbook,rotem2018glow,patel2025llminference}.
+Hopper's programmable shared memory is powerful and easy to overflow---that is the engineering tension \citep{nvidia2022hopper,yirage2026,memoryfloor2026}.
+
+\paragraph{Memory tier cheat sheet for reviewers.}
+When reviewing CUDA diffs ask: where do QKV fragments live between ops? Where do $(m,\ell,o)$ live in the KV loop? Where does SwiGLU intermediate sit? \citep{dao2022flashattention,memoryfloor2026,yirage2026}
+Any answer of ``global'' between fused stages is a regression unless proven dead \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{Tensor Memory Accelerator: Hide Latency, Not Traffic}
+\label{sec:tma}
+
+\textbf{TMA} (Tensor Memory Accelerator) issues asynchronous bulk copies from global memory to shared memory while MMA units compute on the previous tile \citep{nvidia2022hopper,semianalysis2024tma}.
+TMA overlaps latency; only fusion reduces activation bytes/token \citep{memoryfloor2026}.
+
+\paragraph{Applicable when.}
+Tile boxes ${\gtrsim}128{\times}128$ with contiguous global addresses and amortized descriptor setup---weight blocks, contiguous KV slices, steady double-buffer pipelines inside a MegaKernel \citep{semianalysis2024tma,dao2023flashdecoding}.
+
+\paragraph{Avoid when.}
+Batch-1 $M{=}1$ micro-tiles, irregular paged-KV gathers, or descriptor setup dominating copy time \citep{kwon2023vllm,taxbreak2026}.
+Profile TMA versus vector loads on the target shape \citep{yirage2026}.
+
+\paragraph{Common pitfalls.}
+Double-buffer handoff bugs (compute on buffer being overwritten); paged KV non-contiguous addresses; mandating TMA on thin tiles \citep{dao2023flashdecoding,patel2025llminference}.
+
+\paragraph{Debug.}
+Nsight Compute: \texttt{TMA busy cycles} vs \texttt{MMA busy cycles}---ratio below ${\sim}0.3$ suggests weak TMA benefit; check \texttt{local memory loads} for spill \citep{semianalysis2024tma}.
+
+% AUTO_VISUAL:fig_tma_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+ \foreach \x/\label in {-4.2/t=0,0/t=1,4.2/t=2} {
+   \node[font=\scriptsize\bfseries] at (\x,1.6) {Cycle \label};
+ }
+ \node[vis pipeline node, minimum width=2.2cm] at (-4.2,0.6) {\footnotesize TMA load tile 1};
+ \node[vis arch node, minimum width=2.2cm] at (0,0.6) {\footnotesize MMA tile 0};
+ \node[vis pipeline node, minimum width=2.2cm] at (4.2,0.6) {\footnotesize TMA prefetch tile 2};
+ \node[vis arch node, minimum width=2.2cm] at (-4.2,-0.5) {\footnotesize MMA idle};
+ \node[vis pipeline node, minimum width=2.2cm] at (0,-0.5) {\footnotesize TMA load tile 2};
+ \node[vis arch node, minimum width=2.2cm] at (4.2,-0.5) {\footnotesize MMA tile 1};
+ \node[font=\scriptsize, visText] at (0,-1.5) {Steady state: copy and math overlap across buffer slots};
+\end{tikzpicture}
+\caption{TMA double-buffer timeline: async copy overlaps tensor-core math.}
 \label{fig:tma_pipeline}
 \end{figure}
 
-Figure~\ref{fig:tma_pipeline} is the steady-state target \citep{semianalysis2024tma,yirage2026}. TMA overlaps latency; it does not remove weight/KV bytes \citep{memoryfloor2026,patel2025llminference}. When $R_{\mathrm{floor}}$ is low, fusion must still cut activation traffic \citep{memoryfloor2026,taxbreak2026}.
+\paragraph{Paged KV co-design.}
+vLLM block tables map logical tokens to non-contiguous physical blocks \citep{kwon2023vllm}.
+TMA descriptors assume regular layouts---MegaKernels rebuild or index descriptors per block inside the KV loop \citep{dao2023flashdecoding,yirage2026}.
+This is production-hard; Chapter~8 returns to double-buffer theory \citep{semianalysis2024tma}.
 
-\paragraph{Paged KV and descriptors.} vLLM block tables complicate TMA descriptor setup---device-side walks must stay inside MegaKernel loops \citep{kwon2023vllm,patel2025llminference,yirage2026}. Illegal descriptors should fail compile \citep{chen2020compilerbasedhardw}.
+\paragraph{Manual load fallback.}
+Vectorized global loads remain valid when TMA setup dominates---YiRage should lower both paths and select with a profile-guided cost model, not a global compile flag \citep{yirage2026,taxbreak2026,dlbook}.
+Teams that mandate TMA in code review without shapes invite the anti-pattern in Section~\ref{sec:hopper_tuning_practice} \citep{patel2025llminference}.
 
-\paragraph{Batch-1 caveat.} Thin GEMMs may not amortize TMA setup \citep{dlbook,taxbreak2026}. MegaKernels amortize across fused stages in one launch \citep{taxbreak2026,yirage2026,nvidia2024cudagraphs}.
+\paragraph{Batch-1 thin-$M$ reality.}
+Many decode GEMMs present $M{=}1$ with large inner dimension \citep{dlbook,taxbreak2026}.
+TMA shines when copy boxes amortize over deep pipelines inside a MegaKernel---not when each score fragment is a separate descriptor \citep{semianalysis2024tma,yirage2026}.
+Profile on \emph{your} head dimension and KV block size, not a square GEMM microbench \citep{patel2025llminference,memoryfloor2026}.
 
-\paragraph{TMA descriptor lifecycle.} Host code or device-side setup creates a TMA descriptor specifying global tensor layout, shared-memory destination, and copy box sizes \citep{nvidia2022hopper,semianalysis2024tma}. In decode MegaKernels, descriptors for weight tiles are often static per compiled bucket while KV descriptors vary with block table indices \citep{kwon2023vllm,yirage2026,patel2025llminference}. Getting layout wrong produces misaligned copies that are hard to debug without numerical diffs \citep{dao2023flashdecoding,chen2020compilerbasedhardw}.
+\paragraph{Energy angle.}
+HBM transactions dominate decode energy \citep{memoryfloor2026,patel2025llminference}.
+Fusion bytes/token savings matter for TCO even when ms/token gains look modest in lab cells \citep{taxbreak2026,amd2024xdna}.
+TMA overlap saves time; fusion saves joules per token \citep{semianalysis2024tma,memoryfloor2026}.
 
-\paragraph{When manual loads win.} Very thin tiles, irregular paged layouts, or early bring-up before descriptor tooling exists may favor vectorized global loads \citep{taxbreak2026,dlbook,patel2025llminference}. YiRage should preserve both lowering paths and let profile evidence choose \citep{yirage2026,semianalysis2024tma,memoryfloor2026}. Mandating TMA everywhere is an anti-pattern listed later in this chapter \citep{taxbreak2026,nvidia2022hopper}.
+\paragraph{Synchronization case study.}
+Double-buffered TMA needs one barrier after copy completes and one before overwriting the consumed buffer \citep{semianalysis2024tma,yirage2026,nvidia2022hopper}.
+Extra barriers after each warp shuffle in softmax add pipeline bubbles without safety benefit \citep{dao2022flashattention,dlbook}.
+Compiler sync insertion should be edge-driven on the fused DAG \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Long-context stability.}
+TMA misalignment bugs may hide at $T{=}512$ and explode at $T{=}8192$ \citep{dao2023flashdecoding,patel2025llminference}.
+Always include long-ctx buckets in Hopper validation---not only the bucket your laptop tests \citep{kwon2023vllm,yirage2026}.
+
+\paragraph{Observability hooks.}
+Stable kernel names derived from pass hashes help profilers map samples to bufferization tiers \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+Production builds may strip debug tags but should retain residency class notes in release artifacts \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Warp-group context.}
+Hopper issues WGMMA from warpgroups of four warps---thirty-two threads each \citep{shah2024flashattention3,nvidia2022hopper}.
+Fusion planners must align head partitions and tile shapes to warpgroup granularity or leave MMA lanes idle \citep{dao2022flashattention,yirage2026,patel2025llminference}.
+
+\paragraph{First-token versus steady state.}
+Compile and capture costs hit first token; steady decode steps reveal residency wins \citep{nvidia2024cudagraphs,kwon2023vllm,taxbreak2026}.
+Benchmark both when product SLOs include cold start \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Descriptor lifecycle.}
+Host or device code builds a TMA descriptor with global layout, shared destination, and copy box \citep{nvidia2022hopper,semianalysis2024tma}.
+Weight descriptors are often static per compiled bucket; KV descriptors may change with block-table indices each iteration \citep{kwon2023vllm,yirage2026}.
+Misaligned layouts produce silent numerical drift---always pair kernel changes with FP64 reference diffs at long ctx \citep{dao2023flashdecoding}.
+
+\paragraph{Figure~\ref{fig:tma_pipeline} usage.}
+The timeline is the steady-state target---getting there requires correct double-buffer handoffs and legal tile sizes \citep{semianalysis2024tma,yirage2026,dao2022flashattention}.
+If steady state never appears in timelines, fix fusion legality before tuning descriptor fields \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Chapter~2 link.}
+TMA implements \emph{pipeline movement} on-chip---moving data while math runs---but does not replace export-edge removal \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Cluster versus single-block decision tree.}
+If fused tile fits in 227\,KB usable with margin, stay single-block \citep{nvidia2022hopper,yirage2026}.
+If score tile or SwiGLU buffer exceeds block cap but fits pooled DSM, plan cluster \citep{semianalysis2024tma,dao2023flashdecoding}.
+If neither fits, split fusion at Chapter~2 export edge---do not spill \citep{memoryfloor2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Flash-Decoding without extra launches.}
+KV splits across SMs need in-kernel online softmax merges \citep{dao2023flashdecoding,dao2022flashattention}.
+Extra merge kernels reopen launches/token---design cluster or in-kernel merge before accepting multi-kernel fallback \citep{taxbreak2026,nvidia2024cudagraphs,yirage2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Confirm double-buffer invariants in code review; one barrier after TMA complete, one before buffer reuse \citep{yirage2026,semianalysis2024tma}.
 
 \section{Thread Block Clusters and Distributed Shared Memory}
 \label{sec:ch04_cluster_dsm}
-\paragraph{When clusters help softmax.} Online softmax max-reductions across wide score tiles may require cross-block cooperation \citep{dao2022flashattention,dao2023flashdecoding,semianalysis2024tma,nvidia2022hopper}. DSM lets blocks share partial max/sum without writing tiles to HBM \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}. If cluster dims are unavailable, Flash-Decoding-style SM splits need careful merge kernels \citep{dao2023flashdecoding,taxbreak2026}.
 
-\paragraph{Compiler cluster dims.} YiRage must emit explicit cluster launch bounds; illegal combos fail at compile time \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,amd2024aie,memoryfloor2026,patel2025llminference,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024xdna,dlbook,dao2023flashdecoding,taxbreak2026}.
+Hopper \textbf{thread-block clusters} pool \textbf{DSM} (distributed shared memory) across cooperating CTAs---widening the on-chip fusion envelope without an HBM export \citep{nvidia2022hopper,semianalysis2024tma}.
 
-\paragraph{Clusters widen on-chip fusion.} Hopper thread-block clusters expose distributed shared memory (DSM) across cooperating blocks \citep{nvidia2022hopper,semianalysis2024tma}. Decode kernels use clusters for wider softmax reductions and larger fused tiles without HBM export \citep{dao2022flashattention,dao2023flashdecoding}.
+\paragraph{Applicable when.}
+Score tiles or fused buffers exceed single-block shared memory; Flash-Decoding-style KV splits need cross-block softmax reductions \citep{dao2023flashdecoding,dao2022flashattention}.
 
-\paragraph{Legality trade-offs.} Cluster resources are finite; failed plans should fail compile \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}. XDNA uses static multi-tile DMA instead of DSM \citep{amd2024aie,amd2024xdna}.
+\paragraph{Avoid when.}
+Footprint already fits one block---clusters add sync and launch complexity without residency win \citep{yirage2026}.
+
+\paragraph{Common pitfalls.}
+Cluster launch illegal on target SKU; DSM double-counted in planners; fallback merge kernel reintroduces launches/token \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Debug.}
+Compile-time cluster legality report; Nsight timeline for extra barriers; compare launches/token with single-block plan \citep{yirage2026,patel2025llminference}.
 
 \begin{table}[t]
 \centering
@@ -107,350 +347,634 @@ Figure~\ref{fig:tma_pipeline} is the steady-state target \citep{semianalysis2024
 \label{tab:cluster_dsm}
 \begin{tabular}{lcc}
 \toprule
-\textbf{Aspect} & \textbf{Single block} & \textbf{Cluster + DSM} \\
+\textbf{Aspect} & \textbf{Single CTA} & \textbf{Cluster + DSM} \\
 \midrule
-Peak scratch & One SM shared mem & Pooled cluster DSM \\
-Softmax max-reduce & Warp/block scope & Cross-block on-chip \\
-XDNA analogue & Single tile SRAM & Multi-tile DMA graph \\
+Peak scratch & One block SMEM & Pooled DSM \\
+Softmax max-reduce & Warp/block & Cross-CTA on-chip \\
+XDNA analogue & One tile SRAM & Multi-tile DMA graph \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Flash-Decoding link.} KV splits across SMs need in-kernel online softmax merges---extra launches defeat wins \citep{dao2023flashdecoding,taxbreak2026,dao2022flashattention}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+YiRage must reject illegal cluster dims at compile time---no silent multi-kernel fallback \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\section{Synchronization Mechanisms}
+\paragraph{Flash-Decoding link.}
+When KV is split across SMs, partial softmax statistics must merge on-chip \citep{dao2023flashdecoding,dao2022flashattention}.
+An extra merge kernel reopens launches/token---cluster DSM exists to keep the merge inside the MegaKernel capture region \citep{taxbreak2026,nvidia2024cudagraphs}.
+If your SKU forbids the cluster shape, document the multi-kernel fallback cost explicitly in the worksheet \citep{patel2025llminference}.
+
+\paragraph{Capacity accounting with DSM.}
+Cluster pooling increases peak scratch but also increases barrier scope \citep{nvidia2022hopper,semianalysis2024tma}.
+Planners must sum DSM bytes across CTAs in the cluster---double-booking is as fatal as single-block overflow \citep{yirage2026,memoryfloor2026}.
+Chapter~3's inequality mindset applies; only the geometry changes \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Comparison to CPU AVX paths.}
+CPU decode uses cache-blocked GEMMs and vectorized exp2 on softmax \citep{dlbook,patel2025llminference,amd2024xdna}.
+Hopper wins when fusion keeps data on SM; CPU wins when GPU launch storms dominate at low QPS \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Triplet tests prevent declaring victory on GPU ms/token alone \citep{amd2024aie,patel2025llminference}.
+
+\paragraph{Grid sync warning.}
+Device-wide synchronization stalls every CTA and destroys graph-capture friendliness \citep{taxbreak2026,nvidia2024cudagraphs,nvidia2022hopper}.
+If an algorithm seems to need grid sync per token, revisit fusion boundaries or cluster merges first \citep{dao2023flashdecoding,yirage2026}.
+
+\paragraph{Producer-consumer sync edges.}
+List edges in the fused DAG where shared-memory buffers hand off between TMA, MMA, and epilogue phases \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma}.
+Insert barriers only on those edges---extra block syncs show as bubbles in Nsight timelines \citep{patel2025llminference,dao2022flashattention}.
+
+\paragraph{Figure~\ref{fig:cuda_sync_levels} usage.}
+Pick the leftmost mechanism that preserves correctness---grid sync is almost never the answer in per-token decode \citep{taxbreak2026,nvidia2022hopper,dao2022flashattention}.
+Chapter~9 expands sync insertion algorithms \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\section{Synchronization: Narrowest Scope Wins}
 \label{sec:sync_mechanisms}
-\paragraph{Barrier minimization algorithm (informal).} List producer--consumer edges in the fused DAG; place block sync only on edges crossing shared-memory phases \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,dao2022flashattention,taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Extra barriers show up as pipeline bubbles in Nsight timelines \citep{patel2025llminference,semianalysis2024tma}.
 
-\paragraph{Warp shuffle for softmax.} Row-wise max and partial sums can use shuffle before touching shared memory \citep{dao2022flashattention,patel2025llminference,nvidia2022hopper,dlbook,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,amd2024xdna,dao2023flashdecoding}.
+Unnecessary barriers serialize TMA pipelines \citep{semianalysis2024tma}.
+Place sync only on shared-memory phase edges in the fused dataflow graph \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Sync sparingly.} Unnecessary barriers serialize TMA pipelines \citep{semianalysis2024tma,nvidia2022hopper}. MegaKernels need barriers only at buffer handoffs \citep{yirage2026,chen2020compilerbasedhardw}.
+\paragraph{Hierarchy (cheapest first).}
+\textbf{Warp shuffle} for row-wise softmax max/sum \citep{dao2022flashattention}.
+\textbf{CTA block sync} for TMA/MMA buffer handoffs \citep{semianalysis2024tma}.
+\textbf{Cluster barrier} for DSM reductions \citep{nvidia2022hopper}.
+\textbf{Grid sync}---avoid in per-token decode loops \citep{taxbreak2026}.
 
 % AUTO_VISUAL:fig_cuda_sync_levels
-
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
  \node[vis arch node] (s0) at (-5.10,0) {\footnotesize Warp shuffle};
- \node[vis pipeline node] (s1) at (-1.70,0) {\footnotesize Block sync};
+ \node[vis pipeline node] (s1) at (-1.70,0) {\footnotesize CTA sync};
  \node[vis arch node] (s2) at (1.70,0) {\footnotesize Cluster DSM};
  \node[vis pipeline node] (s3) at (5.10,0) {\footnotesize Grid sync};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Cost increases left to right---stay left when safe};
 \end{tikzpicture}
-\caption{CUDA synchronization hierarchy used in decoder megakernels.}
+\caption{CUDA synchronization hierarchy for decoder megakernels.}
 \label{fig:cuda_sync_levels}
 \end{figure}
 
-Figure~\ref{fig:cuda_sync_levels}: warp shuffle for softmax max; block sync for TMA/MMA handoffs; cluster barriers for split-KV; avoid grid sync in per-token loops \citep{dao2022flashattention,nvidia2024cudagraphs,taxbreak2026,kwon2023vllm}. CPU and XDNA use different ordering models \citep{amd2024aie,dlbook,patel2025llminference}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Audit fused kernels for barriers after every shuffle---remove bubbles without safety benefit \citep{dao2022flashattention,dlbook}.
 
-\section{Tensor Core Bounds at Batch-1 Decode}
+\paragraph{CUDA Graphs interaction.}
+Graph capture removes host launch overhead but does not shrink shared-memory footprints \citep{nvidia2024cudagraphs,memoryfloor2026}.
+Capture after fusion is legal; capture instead of fusion is not \citep{taxbreak2026,yirage2026}.
+Systems timelines should show fewer host packets \emph{and} lower DRAM bytes per token when both levers apply \citep{patel2025llminference}.
+
+\paragraph{Warp specialization preview.}
+Persistent decode kernels assign warps to TMA issue, MMA compute, and epilogue roles \citep{semianalysis2024tma,nvidia2022hopper,taxbreak2026}.
+Chapter~11 MegaKernels assume this model \citep{dao2022flashattention,dao2023flashdecoding,yirage2026}.
+Sync placement must respect role boundaries---a barrier in the wrong warp group stalls the whole pipeline \citep{patel2025llminference}.
+
+\section{Tensor Core and PTX: Optimize Last}
 \label{sec:ch04_tensor_core_bounds}
-\paragraph{Worked example (qualitative).} Team A improves MMA tile from 1\% to 3\% tensor util; Team B fuses MLP boundary saving 40\% activation bytes---only Team B moves p99 at batch-1 on H100 when $R_{\mathrm{floor}}$ is low \citep{memoryfloor2026,taxbreak2026,patel2025llminference,semianalysis2024tma,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
 
-\paragraph{Tensor core vs SFU balance.} Attention decode mixes MMA (QKV, $PV$) with SFU-heavy softmax \citep{dao2022flashattention,nvidia2022hopper,patel2025llminference,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Hopper generation shifts this balance---profile both units \citep{patel2025llminference,liu2024deepseekv3}.
-
-\paragraph{TC is rarely first fix.} Batch-1 decode presents thin MMA tiles with low utilization \citep{nvidia2022hopper,memoryfloor2026,taxbreak2026,patel2025llminference,semianalysis2024tma}. Memory-Floor shows H100 decode often orchestration-limited \citep{memoryfloor2026,nvidia2024cudagraphs}.
+At batch-1, MMA tiles are thin---tensor cores often sit idle while DRAM and launches dominate \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+\textbf{Do not open with TC tile sweeps} when $R_{\mathrm{floor}}$ is low (Chapter~1) \citep{memoryfloor2026}.
 
 \begin{table}[t]
 \centering
-\caption{Decode diagnostics on Hopper (qualitative).}
+\caption{Decode diagnostics on Hopper (what to fix first).}
 \label{tab:tc_decode}
 \begin{tabular}{lcc}
 \toprule
 \textbf{Signal} & \textbf{Limiter} & \textbf{First action} \\
 \midrule
-Low $R_{\mathrm{floor}}$, high launches/token & Orchestration & Graphs / MegaKernel \\
-High $R_{\mathrm{floor}}$ & HBM bytes & Fusion / quant \\
-High TC util, flat ms/token & Wrong metric & bytes/token \\
+High launches/token & Scheduling overhead & Graph / MegaKernel \\
+High bytes/token & HBM residency & Fusion \\
+High TC util, flat ms/token & Wrong metric & Return to bytes/token \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-After fusion cuts activation traffic, TMA-fed MMA epilogues matter \citep{semianalysis2024tma,dao2022flashattention,yirage2026}. Blackwell widens low-precision paths but does not fix materialized activations \citep{liu2024deepseekv3,patel2025llminference,memoryfloor2026}.
+\paragraph{Quantitative intuition.}
+Removing six $d$-vector HBM round trips at $d{=}4096$ BF16 saves ${\sim}49$\,KB activation traffic per layer per token---often larger than a 10-point TC utilization gain on $1{\times}4096$ GEMM \citep{memoryfloor2026,taxbreak2026}.
+After fusion cleans bytes/token, TMA-fed MMA epilogues matter \citep{semianalysis2024tma,dao2022flashattention}.
 
-\paragraph{Quantitative intuition.} Suppose fusion removes six $d$-vector HBM round trips at $d=4096$ and BF16 dtype \citep{memoryfloor2026,taxbreak2026,patel2025llminference}. That is roughly $6 \times 4096 \times 2 \approx 49$ KB saved per layer per token in activation traffic alone, before KV reads \citep{kwon2023vllm,dao2022flashattention}. A ten-point gain in tensor-core utilization on a $1\times4096$ GEMM rarely moves ms/token when DRAM was the bound resource \citep{memoryfloor2026,nvidia2022hopper,dlbook}. Use this back-of-envelope to prioritize PR review \citep{taxbreak2026,yirage2026,chen2020compilerbasedhardw}.
+\paragraph{SFU versus MMA balance.}
+Attention decode interleaves WGMMA matmuls with SFU-heavy softmax \citep{dao2022flashattention,nvidia2022hopper}.
+Profiling both pipelines prevents false ``TC-bound'' diagnoses when softmax is the long pole inside the same SM \citep{patel2025llminference,liu2024deepseekv3}.
+Refer back to Section~\ref{sec:ch04_tensor_core_bounds} before opening tile configurators \citep{memoryfloor2026}.
 
-\paragraph{SFU share in attention decode.} Softmax exponentials and reciprocal sums consume SFU pipelines \citep{dao2022flashattention,nvidia2022hopper,patel2025llminference,dlbook}. DeepSeek-style kernels tune PTX \textbf{exp2} because SFU throughput interacts with MMA issue rate in the same SM \citep{liu2024deepseekv3,yirage2026,semianalysis2024tma}. Profiling must report both units, not TC alone \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+\paragraph{Quantization on Hopper.}
+FP8 and INT8 weights need dequant in-register or in shared memory \citep{liu2024deepseekv3,patel2025llminference,nvidia2022hopper}.
+Scales consume the same residency budget as softmax carriers---co-decide with fusion grouping \citep{memoryfloor2026,yirage2026}.
+Dropping precision without retile can change padding and spill behavior \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Blackwell FP4 trajectory.}
+Successor chips advertise wider low-precision tensor paths \citep{liu2024deepseekv3,nvidia2022hopper,patel2025llminference}.
+Porting re-tiles kernels but preserves the pyramid: bytes, launches, latency, TC \citep{memoryfloor2026,taxbreak2026,yirage2026,semianalysis2024tma}.
+
+\paragraph{Team A versus Team B (retold).}
+Team A improves MMA tile from 1\% to 3\% TC util; Team B fuses an MLP boundary saving ${\sim}40\%$ activation bytes---only Team B moves p99 at batch-1 when $R_{\mathrm{floor}}$ is low \citep{memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention}.
+Use this story in backlog prioritization \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Table~\ref{tab:tc_decode} usage.}
+Match profiler signals to the ``first action'' column before opening code \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+High TC util with flat ms/token is a diagnostic row, not a success row \citep{memoryfloor2026,dao2022flashattention}.
+
+\paragraph{PTX review culture.}
+Softmax-related PTX changes are not ``micro-optimizations''---they are ABI changes \citep{dao2022flashattention,liu2024deepseekv3,yirage2026,patel2025llminference}.
+Treat them with the same rigor as fusion grouping changes \citep{chen2020compilerbasedhardw,dao2023flashdecoding}.
 
 \section{PTX and Softmax Micro-ops}
 \label{sec:ch04_ptx}
-\paragraph{exp2 numerics.} Use \textbf{exp2} with explicit max-subtraction in online softmax merges \citep{dao2022flashattention,dlbook,patel2025llminference,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,dao2023flashdecoding,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,amd2024xdna}. Document FTZ behavior for fleet determinism \citep{patel2025llminference,yirage2026}.
 
-\paragraph{PTX review gate.} Softmax-related PTX changes require FP64 reference diffs at $T=8192$ \citep{dao2023flashdecoding,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook}.
+Online softmax uses \textbf{SFU} (special-function unit) pipelines for \textbf{exp2}-style exponentials \citep{dao2022flashattention,nvidia2022hopper}.
+\textbf{WGMMA} (warp-group matrix multiply-accumulate) is Hopper's tensor-core instruction issued by warpgroups of four warps \citep{shah2024flashattention3}.
 
-\paragraph{Silicon-aware softmax.} PTX \textbf{exp2} sequences implement stable exponentials in online softmax loops \citep{dao2022flashattention,patel2025llminference,nvidia2022hopper,dlbook}. Online softmax uses fast \textbf{exp} and max reductions \citep{dao2022flashattention,patel2025llminference,nvidia2022hopper,dlbook}. PTX choices (\texttt{ex2.approx}, FTZ) affect stability and latency \citep{liu2024deepseekv3,chen2020compilerbasedhardw}.
+\paragraph{PTX as ABI.}
+Reviewed \texttt{ex2.approx} sequences with explicit max-subtraction and documented \textbf{FTZ} (flush-to-zero) behavior \citep{liu2024deepseekv3,patel2025llminference}.
+Changing PTX without FP64 reference diffs at $T{=}8192$ breaks fleet determinism \citep{dao2023flashdecoding,yirage2026}.
 
-\paragraph{Inline PTX in production.} DeepSeek-style tuning selects instructions predictably \citep{liu2024deepseekv3}. YiRage should lower stable softmax to reviewed PTX sequences \citep{yirage2026,dao2022flashattention,dao2023flashdecoding}. Separate exp launches break Chapter~10 boundaries \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{Advance notice.}
+This subsection needs basic CUDA/PTX literacy; skipping it does not block fusion or TMA work above \citep{dlbook}.
 
-\section{YiRage CUDA Backend}
+\paragraph{$\checkmark$ Practice checkpoint.}
+Softmax PTX changes require FP64 diffs at ctx $\in\{512,2048,8192\}$ before merge \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Inline PTX in production.}
+DeepSeek-style kernels select SFU instructions predictably rather than hoping the compiler discovers them \citep{liu2024deepseekv3,yirage2026}.
+Separate softmax launches break MegaKernel boundaries and reopen launches/token \citep{taxbreak2026,memoryfloor2026,dao2022flashattention}.
+PTX belongs inside the fused region, not as a follow-on kernel \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\section{YiRage CUDA Backend: Hardware Constraints as Compile Gates}
 \label{sec:ch04_yirage_cuda_backend}
-\paragraph{Lowering pipeline.} IR bufferization assigns tiers; CUDA pass selects TMA vs loads; cluster pass chooses DSM vs single block; PTX pass lowers softmax regions \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,dao2022flashattention,taxbreak2026,memoryfloor2026,patel2025llminference,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
 
-\paragraph{Handoff to Chapter~5.} CUDA legality is dynamic residency; XDNA legality is static slot assignment \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}.
+\paragraph{Advance notice.}
+This section assumes compiler and IR literacy; backend engineers should read it end-to-end, while kernel tuners can skim invariants and return for lowering detail \citep{chen2020compilerbasedhardw,yirage2026}.
 
-\paragraph{IR to Hopper.} YiRage checks buffer lifetimes, cluster dims, and TMA rules before emitting CUDA \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper}. Failed shared-memory plans reject---no silent spill \citep{memoryfloor2026,amd2024aie}.
+YiRage lowers the same decode IR to CUDA, CPU, and XDNA---Hopper legality is dynamic residency checking against chip models from Chapter~3 \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna}.
 
-\paragraph{Triplet regression.} Same IR exports to CUDA, CPU, and XDNA; GPU-only schedules are incomplete \citep{amd2024xdna,dlbook,liu2024deepseekv3,kwon2023vllm,patel2025llminference,taxbreak2026}.
-
-\section{Profiling Hopper Decode Changes}
-\label{sec:ch04_profiling}
-\paragraph{Nsight Systems vs Compute.} Systems timelines expose launch storms and TMA overlap; Compute exposes spill, DRAM throughput, and TC/SFU counters \citep{patel2025llminference,semianalysis2024tma,nvidia2022hopper,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Use both---matching Fregly's profile-driven methodology \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
-
-\paragraph{Benchmark matrix.} Fixed models (Llama-3.2-1B, Qwen2.5), BS${=}1$, ctx buckets 512/2048/8192, report median ms/token plus kernels/token and bytes/token \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,patel2025llminference,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Profile-first workflow.} Start from ms/token, decompose launches/token (TaxBreak) and bytes/token (Memory-Floor / Nsight) \citep{taxbreak2026,memoryfloor2026,patel2025llminference,semianalysis2024tma}. Fix residency before MMA tile sweeps \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,dlbook,kwon2023vllm,nvidia2024cudagraphs,liu2024deepseekv3,amd2024aie,amd2024xdna,dao2023flashdecoding}.
-
-\paragraph{Release artifacts.} Hopper PRs attach shared-memory accounting, Nsight DRAM deltas, and ablation rows vs graph-only baselines \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Hopper SM overview for decode.} Each streaming multiprocessor combines scalar cores, tensor cores, TMA units, and configurable shared memory \citep{nvidia2022hopper,semianalysis2024tma}. Decode MegaKernels treat an SM as a residency container---not a place to launch yet another thin epilogue \citep{taxbreak2026,yirage2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Occupancy vs fusion.} High register/shared memory usage lowers occupancy but may still win on bytes/token when fusion removes HBM passes \citep{memoryfloor2026,semianalysis2024tma,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Optimize occupancy only after proving fusion legality \citep{yirage2026,taxbreak2026}.
-
-\paragraph{Blackwell trajectory.} Successor chips extend TMA, FP4 tensor paths, and cluster features \citep{nvidia2022hopper,patel2025llminference,liu2024deepseekv3,semianalysis2024tma}. Migration re-tiles kernels but preserves mechanical sympathy invariants: no materialized activations in decode \citep{memoryfloor2026,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,taxbreak2026,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{CUDA Graphs interaction.} Graph capture replays the same TMA/MMA body with fewer host launches \citep{nvidia2024cudagraphs,memoryfloor2026,taxbreak2026}. Graphs without fused residency still pay HBM bytes---label benchmark rows honestly \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Comparison to CPU AVX paths.} CPU decode uses cache-blocked GEMMs and vectorized \textbf{exp2} on softmax \citep{dlbook,patel2025llminference,amd2024xdna}. Hopper wins when fusion keeps data on SM; CPU wins when GPU launches dominate \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,nvidia2022hopper,amd2024aie,amd2024xdna,dao2023flashdecoding}.
-
-\paragraph{Warp specialization preview.} Persistent decode kernels assign warps to TMA, MMA, and epilogue roles \citep{semianalysis2024tma,nvidia2022hopper,taxbreak2026,yirage2026}. Chapter~11 MegaKernels assume this specialization model \citep{dao2022flashattention,dao2023flashdecoding,kwon2023vllm,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}.
-
-\paragraph{Quantization on Hopper.} FP8/INT8 weights need dequant in-register or in shared memory \citep{patel2025llminference,liu2024deepseekv3,nvidia2022hopper,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,dao2022flashattention,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Scales consume the same residency budget as softmax carriers \citep{memoryfloor2026,dao2022flashattention}.
-
-\paragraph{DeepSeek deployment ratio reminder.} DeepSeek-V3 uses far more decode than prefill GPUs \citep{patel2025llminference,liu2024deepseekv3,kwon2023vllm}. Hopper features matter most in decode pools where batch-1 residency dominates \citep{taxbreak2026,memoryfloor2026,dao2022flashattention,dao2023flashdecoding,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}.
-
-\paragraph{Anti-pattern catalog.} (1) TMA everywhere on $M{=}1$ tiles; (2) cluster fusion without DSM accounting; (3) TC tile sweeps with flat bytes/token; (4) PTX \textbf{exp2} approximations without stability tests; (5) GPU-only YiRage exports \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Execution checklist.} Before merging Hopper changes: IR shows no illegal global stores; Nsight reports DRAM delta; TaxBreak launches/token on BS${=}1$; long-context softmax stability vs FP64; XDNA compile pass or documented scope \citep{yirage2026,taxbreak2026,memoryfloor2026,amd2024aie,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\section{Hopper Decode Engineering Patterns}
-\label{sec:ch04_patterns}
-
-\paragraph{Pattern 1: Fused layer skeleton.} A production Hopper decode MegaKernel typically sequences: (i) TMA load hidden state and weights into shared memory; (ii) QKV MMA tiles; (iii) KV loop with TMA $K/V$ tiles, online softmax in registers/shared memory, and $PV$ accumulation; (iv) SwiGLU MMA chain; (v) residual write or in-place update---all without global activation stores \citep{taxbreak2026,dao2022flashattention,semianalysis2024tma,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,patel2025llminference,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Deviations at any step re-open bytes/token bills \citep{memoryfloor2026,taxbreak2026}.
-
-\paragraph{Pattern 2: Context buckets.} CUDA Graphs capture requires static loop bounds or padded max context \citep{nvidia2024cudagraphs,kwon2023vllm,dao2023flashdecoding}. Hopper MegaKernels compile separate buckets (512/2048/8192) rather than dynamic reallocation mid-graph \citep{yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook}. Fleet configs must pin bucket per deployment \citep{kwon2023vllm,taxbreak2026}.
-
-\paragraph{Pattern 3: Warp-specialized TMA.} Dedicated warps issue TMA descriptors while MMA warps consume previous tiles \citep{semianalysis2024tma,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Misbalanced roles underutilize TMA or stall MMA \citep{patel2025llminference,semianalysis2024tma}.
-
-\paragraph{Pattern 4: Softmax on SFU + shuffle.} Max-find via warp shuffle; \textbf{exp2} via SFU; carriers in FP32 even when matmul uses BF16 \citep{dao2022flashattention,patel2025llminference,nvidia2022hopper,dlbook,yirage2026,chen2020compilerbasedhardw,dao2023flashdecoding,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,semianalysis2024tma,amd2024aie,amd2024xdna}. Chapter~10 invariants apply inside Hopper kernels \citep{dao2022flashattention,taxbreak2026}.
-
-\paragraph{Pattern 5: Graph + fusion composition.} CUDA Graphs remove host overhead; fusion removes HBM bytes---compose both for H100 cells with low $R_{\mathrm{floor}}$ \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Report which effect dominated in each row \citep{memoryfloor2026,taxbreak2026}.
-
-\paragraph{Pattern 6: Triplet parity tests.} Export identical IR to CUDA/XDNA/CPU; compare bytes/token normalized by memory hierarchy \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}. GPU ms/token alone misleads fleet decisions \citep{patel2025llminference,amd2024aie}.
-
-\paragraph{Industrial narrative (Fregly-aligned).} DeepSeek-scale training stories emphasize co-design under hardware export limits \citep{liu2024deepseekv3,patel2025llminference}. Decode on Hopper repeats the lesson at chip scale: skillful residency beats brute-force silicon \citep{taxbreak2026,memoryfloor2026,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Goodput metrics make the case quantitatively \citep{taxbreak2026,memoryfloor2026,dlbook}.
-
-\paragraph{Common failure stories.} (a) Shared memory overflow at max context; (b) TMA misalignment on paged KV; (c) cluster launch illegal on target SKU; (d) PTX \textbf{exp2} drift at long $T$; (e) graph capture invalidated by driver upgrade \citep{yirage2026,nvidia2024cudagraphs,taxbreak2026,memoryfloor2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Runbooks map symptoms to residency vs orchestration using bytes/token and launches/token splits \citep{taxbreak2026,memoryfloor2026}.
-
-\paragraph{Teaching vs production CUDA.} Courses emphasize matrix multiply microbenchmarks; production decode emphasizes residency graphs \citep{dlbook,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dao2023flashdecoding}. This chapter bridges the gap for Hopper \citep{semianalysis2024tma,nvidia2022hopper}.
-
-\paragraph{Roadmap to later chapters.} Chapter~8 specializes TMA double-buffer theory; Chapter~9 sync hierarchy; Chapter~10 softmax carriers; Chapter~11 full MegaKernel \citep{dao2022flashattention,dao2023flashdecoding,taxbreak2026,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,patel2025llminference,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook}. Hopper bounds here are prerequisites \citep{yirage2026,taxbreak2026}.
-
-\paragraph{Documentation deliverables.} Ship Hopper kernels with: residency diagram; TMA descriptor layout; cluster dims; sync plan; PTX softmax notes; TaxBreak launches/token cell; Memory-Floor bytes/token cell \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,nvidia2022hopper,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Energy and TCO.} HBM traffic drives energy on decode \citep{memoryfloor2026,patel2025llminference,amd2024xdna,yirage2026,chen2020compilerbasedhardw,taxbreak2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Fusion savings matter for cloud TCO even when ms/token gains look modest \citep{taxbreak2026,memoryfloor2026}.
-
-\paragraph{Security of performance claims.} Never cite peak TFLOPs for decode chapters; cite measured cells with model names and ctx \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Appendix regression matrices anchor internal numbers \citep{yirage2026,taxbreak2026}.
-
-\paragraph{Open research threads.} Dynamic shapes without re-capture, multi-GPU tensor-parallel MegaKernels, and MoE expert-local fusion remain active \citep{liu2024deepseekv3,kwon2023vllm,patel2025llminference,taxbreak2026,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. This chapter documents single-GPU batch-1 baselines \citep{taxbreak2026,memoryfloor2026}.
-
-\paragraph{Final synthesis.} Hopper gives async copy, clusters, tensor cores, and SFUs---tools for mechanical sympathy, not automatic speedups \citep{nvidia2022hopper,semianalysis2024tma,patel2025llminference,liu2024deepseekv3,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Measure goodput; co-design residency; gate merges with profilers \citep{taxbreak2026,memoryfloor2026,dlbook}.
-
-
-\paragraph{Cross-chapter dependency map.} Chapter~3 listed chip constraints abstractly; this chapter instantiates Hopper mechanisms; Chapter~5 shows XDNA static analogues; Chapters~8--11 consume TMA/sync/softmax/MegaKernel patterns \citep{amd2024xdna,amd2024aie,semianalysis2024tma,dao2022flashattention,dao2023flashdecoding,taxbreak2026,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,patel2025llminference,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dlbook}. Skipping this chapter produces CUDA kernels that ignore residency bounds \citep{taxbreak2026,memoryfloor2026}.
-
-\paragraph{Fleet configuration guidance.} Pin driver, CUDA, and YiRage commit in decode pools; re-run TaxBreak launches/token and Memory-Floor bytes/token after upgrades \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,nvidia2024cudagraphs,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Hopper-specific kernels are not portable to L4 cells without re-roofline analysis \citep{memoryfloor2026,taxbreak2026}.
-
-\paragraph{Reader exercises.} (1) Sketch shared-memory allocation for one fused decode layer at $d{=}2048$. (2) Explain when TMA hurts batch-1 decode. (3) Compare graph-only vs fusion bytes/token using Chapter~1 tables \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-\paragraph{Glossary.} \textbf{TMA}: async global-to-shared copy engine \citep{nvidia2022hopper,semianalysis2024tma}. \textbf{DSM}: cluster distributed shared memory \citep{nvidia2022hopper}. \textbf{Goodput}: useful decode work per ms---kernels/token and bytes/token \citep{taxbreak2026,memoryfloor2026,dlbook}. Use consistently in PRs \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dao2023flashdecoding}.
-
-\paragraph{Summary before takeaways.} Sections on memory tiers, TMA, clusters, sync, tensor-core realism, PTX \textbf{exp2}, and YiRage CUDA lowering form one mechanical-sympathy story for Hopper decode \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Profile-first, bytes-first, fusion-first---in that order when $R_{\mathrm{floor}}$ is low \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
-
-
-\section{Worked Example: One Decode Layer on H100}
-\label{sec:ch04_worked_example}
-
-This section walks through a single transformer decode layer the way a performance engineer would during a Hopper bring-up review. The goal is not to derive new math but to connect Chapter~1 counters to concrete CUDA tiers before Chapter~11 stitches the full MegaKernel \citep{taxbreak2026,memoryfloor2026}.
-
-\paragraph{Setup.} Consider Llama-3.2-1B at batch size one, context length 2048, hidden dimension 2048, sixteen query heads, and grouped-query attention with four KV heads \citep{taxbreak2026,kwon2023vllm}. One new output token triggers one decode step. We compare an unfused PyTorch-style schedule against a fused Hopper plan that keeps activation-sized tensors in shared memory or registers for the entire layer \citep{dao2022flashattention,yirage2026}.
-
-\paragraph{Unfused activation traffic (qualitative).} A conventional stack materializes at least: post-norm hidden state, Q projection output, K and V writes into the paged KV cache, attention output, post-attention residual buffer, MLP intermediate after gate/up projections, down projection output, and final residual update. Even when each tensor is only one token wide, each boundary that stores to HBM and reloads adds roughly $2d$ bytes of activation traffic per layer per token, where $d$ is the model width \citep{memoryfloor2026,patel2025llminference}. Six to eight such round trips per layer is typical on dense Llama-class stacks before counting KV cache reads \citep{taxbreak2026}. TaxBreak reports hundreds of kernel launches per token on H100 for unfused stacks; the launch tax is orchestration, but the byte tax is residency failure \citep{taxbreak2026,nvidia2024cudagraphs}.
-
-\paragraph{Fused residency plan.} A Hopper MegaKernel target keeps the following live on-chip across stages: the incoming hidden vector fragment, QKV MMA tiles in shared memory, online softmax carriers $(m,\ell,o)$ per head in registers, partial $PV$ accumulators, SwiGLU gate/up tiles, and the down-projection epilogue buffer \citep{dao2022flashattention,semianalysis2024tma,yirage2026}. Weights and KV still stream from HBM---fusion does not remove parameter traffic---but activation-sized tensors never take a detour through global memory between attention and MLP \citep{memoryfloor2026,kwon2023vllm}. The engineering question becomes whether the plan fits Table~\ref{tab:cuda_memory} without spilling carriers \citep{nvidia2022hopper,chen2020compilerbasedhardw}.
-
-\paragraph{Shared-memory arithmetic (sketch).} Hopper exposes up to 228 KB configurable shared memory per SM \citep{nvidia2022hopper,semianalysis2024tma}. A conservative fused tile for $d=2048$ might allocate: 8 KB for hidden state staging, 48 KB for QKV double buffers, 32 KB for softmax score tiles, 64 KB for SwiGLU intermediates, and 16 KB for epilogue handoff---roughly 168 KB before cluster pooling \citep{yirage2026,dao2022flashattention}. That leaves headroom for TMA descriptor scratch and barrier state, but not for a second concurrent layer replica \citep{semianalysis2024tma}. If planners add a duplicate score tile ``for simplicity,'' occupancy collapses or the compiler silently spills $(m,\ell,o)$ to local memory---both show up as bytes/token regressions in Memory-Floor style accounting \citep{memoryfloor2026,patel2025llminference}.
-
-\paragraph{Register pressure for online softmax.} Each head maintains three scalars $(m,\ell)$ plus a partial output vector of length $d_{\mathrm{head}}=128$ in FP32 for numerical stability \citep{dao2022flashattention,dlbook}. Sixteen heads imply sixteen partial output vectors if not warp-shared---a register budget that fusion planners must co-locate with MMA fragment registers \citep{nvidia2022hopper,yirage2026}. Warp-specialized layouts assign one warp group per head cluster so shuffle reductions stay in-register \citep{dao2022flashattention,patel2025llminference}. Exceeding the register cap per thread lowers occupancy; the right trade-off is often \emph{lower occupancy, higher bytes/token win} when fusion removes HBM passes \citep{memoryfloor2026,semianalysis2024tma}.
-
-\paragraph{TMA in the KV loop.} For each KV block of size $B_k$, TMA loads $K_b$ and $V_b$ tiles into shared memory while MMA units compute $QK_b^\top$ on the previous block \citep{semianalysis2024tma,dao2023flashdecoding}. Paged KV via vLLM block tables means TMA descriptors must be rebuilt or indexed per physical block id inside the kernel \citep{kwon2023vllm,patel2025llminference}. A common failure is issuing TMA for $M=1$ micro-tiles where descriptor setup dominates---profile both TMA and scalar load paths on the target shape before mandating TMA in YiRage lowering \citep{yirage2026,taxbreak2026,dlbook}.
-
-\paragraph{Cluster decision point.} When score tiles exceed single-block shared memory, Hopper clusters pool DSM across cooperating blocks \citep{nvidia2022hopper,semianalysis2024tma}. Flash-Decoding splits KV across SMs and merges online softmax statistics in-kernel \citep{dao2023flashdecoding}. If cluster launch is illegal on the deployment SKU, the fallback is an extra merge kernel---which reintroduces launches/token and may erase fusion wins \citep{taxbreak2026,dao2022flashattention}. YiRage should reject cluster plans that fail compile rather than emit a silent multi-kernel fallback \citep{yirage2026,chen2020compilerbasedhardw}.
-
-\paragraph{Profile interpretation.} After implementing the fused plan, an engineer runs Nsight Systems on the full model step and Nsight Compute on the MegaKernel \citep{patel2025llminference,semianalysis2024tma}. Systems timelines should show one or few launches per layer instead of dozens \citep{taxbreak2026,nvidia2024cudagraphs}. Compute counters should show DRAM throughput dropping with unchanged MMA instruction counts---evidence that bytes/token improved while tensor cores were never the first bottleneck \citep{memoryfloor2026,nvidia2022hopper}. If TC utilization rises but ms/token is flat, the team optimized the wrong metric \citep{patel2025llminference,taxbreak2026}.
-
-\paragraph{Ablation table discipline.} Publish three rows for every Hopper PR: graph-only (launches fixed, bytes unchanged), fusion-only (bytes fixed, launches unchanged if possible), and composed graph plus fusion \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026}. Fregly-style goodput reporting requires labeling which lever moved \citep{patel2025llminference,dlbook}. Internal regression matrices in the appendix anchor TaxBreak launches/token and Memory-Floor $R_{\mathrm{floor}}$ cells so readers can map this worked example to measured numbers \citep{taxbreak2026,memoryfloor2026,yirage2026}.
-
-\paragraph{Contrast with L4 and XDNA.} The same IR exports to L4-class GPUs and Ryzen AI XDNA NPU backends \citep{amd2024xdna,amd2024aie,yirage2026}. Memory-Floor shows Qwen-2.5-7B batch-1 $R_{\mathrm{floor}}$ much higher on L4 than H100---different roofline knee, same residency story \citep{memoryfloor2026,patel2025llminference}. XDNA cannot rely on Hopper TMA; it assigns static SRAM slots at compile time \citep{amd2024aie,chen2020compilerbasedhardw}. Triplet parity tests ensure CUDA-specific wins do not fork the compiler IR \citep{yirage2026,amd2024xdna}.
-
-\begin{example}
-\textbf{Review question.} A teammate proposes a Hopper kernel that uses TMA for every $1\times128$ score fragment but still stores attention output to global memory before MLP. Ask: what happens to bytes/token and to Chapter~10 softmax carrier residency? Correct answer: bytes/token stays high and MegaKernel legality fails even if TMA overlap looks excellent in microbench \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
-\end{example}
-
-\section{Hopper Feature Reference for Compiler Authors}
-\label{sec:ch04_compiler_reference}
-
-Compiler authors lowering decode IR to CUDA need a checklist tighter than a hardware manual \citep{chen2020compilerbasedhardw,yirage2026,nvidia2022hopper}. This section states invariants the YiRage CUDA backend enforces; Chapter~5 mirrors them for XDNA static tiles \citep{amd2024xdna,amd2024aie}.
-
-\paragraph{Invariant 1: No activation-sized global stores inside a fused region.} Any store of a vector length $\Theta(d)$ between attention, softmax, and MLP stages is a fusion bug unless proven dead by analysis \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw}. Pass managers should mark such stores as hard errors in decode mode \citep{taxbreak2026,dao2022flashattention}.
-
-\paragraph{Invariant 2: TMA legality is shape-dependent.} TMA requires aligned multidimensional tiles; batch-1 decode often presents thin $M$ dimensions \citep{semianalysis2024tma,dlbook,taxbreak2026}. Lowering must select TMA versus vector loads per sub-op based on a cost model, not a global flag \citep{yirage2026,patel2025llminference,nvidia2022hopper}.
-
-\paragraph{Invariant 3: Cluster dims are a compile-time contract.} Cluster launch bounds must match DSM footprint \citep{nvidia2022hopper,semianalysis2024tma}. Illegal combinations fail at compile time with a residency report, not at runtime with silent corruption \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention}.
-
-\paragraph{Invariant 4: Softmax PTX is part of the ABI.} Online softmax lowering emits reviewed \textbf{exp2} sequences with documented FTZ behavior \citep{dao2022flashattention,liu2024deepseekv3,patel2025llminference,dlbook}. Changing PTX without FP64 reference diffs at long context breaks fleet determinism \citep{dao2023flashdecoding,yirage2026}.
-
-\paragraph{Invariant 5: Triplet exports share bufferization.} The same bufferization graph feeds CUDA, CPU, and XDNA passes \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw}. GPU-only schedules are incomplete for a multi-hardware book and product story \citep{patel2025llminference,amd2024aie}.
-
-\paragraph{Lowering walkthrough (six passes).}
+\paragraph{Five compiler invariants (decode mode).}
 \begin{enumerate}
-\item \textbf{Bufferization:} Assign each SSA tensor to register, shared, or global tier for its lifetime \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
-\item \textbf{Fusion grouping:} Merge attention, softmax, and MLP into one fused region subject to shared-memory cap \citep{dao2022flashattention,taxbreak2026}.
-\item \textbf{TMA selection:} For each global-to-shared copy, choose TMA or vector load \citep{semianalysis2024tma,nvidia2022hopper}.
-\item \textbf{Cluster planning:} If fused tile exceeds block shared memory, compute cluster shape and DSM layout \citep{nvidia2022hopper,dao2023flashdecoding}.
-\item \textbf{Sync insertion:} Place barriers only on shared-memory phase edges \citep{semianalysis2024tma,yirage2026,nvidia2024cudagraphs}.
-\item \textbf{PTX lowering:} Emit softmax micro-ops and MMA epilogues with stability annotations \citep{dao2022flashattention,liu2024deepseekv3,patel2025llminference}.
+\item \textbf{No activation-sized global stores} inside a fused region---\emph{YiRage:} \texttt{BufferizationPass} rejects illegal stores at compile time instead of emitting silent spill \citep{memoryfloor2026,yirage2026}.
+\item \textbf{TMA legality is per-copy}---\emph{YiRage:} \texttt{TmaSelectionPass} chooses TMA or vector loads per copy edge \citep{semianalysis2024tma,taxbreak2026}.
+\item \textbf{Cluster dims are compile-time contracts}---\emph{YiRage:} \texttt{ClusterPlanningPass} fails the build on illegal DSM geometry \citep{nvidia2022hopper,yirage2026}.
+\item \textbf{Softmax PTX is versioned ABI}---\emph{YiRage:} \texttt{PtxLoweringPass} pins reviewed \texttt{exp2} sequences; CI diffs long-ctx numerics \citep{dao2022flashattention,liu2024deepseekv3}.
+\item \textbf{Triplet bufferization}---\emph{YiRage:} \texttt{FusionGroupingPass} must export legality summaries for CUDA, CPU, and XDNA backends \citep{amd2024aie,patel2025llminference}.
 \end{enumerate}
-
-\paragraph{Testing gates.} Each merged CUDA backend change carries: numerical diff versus FP64 reference at $T\in\{512,2048,8192\}$; Nsight DRAM byte delta at batch one; TaxBreak launches/token cell; XDNA compile or documented deferral \citep{taxbreak2026,memoryfloor2026,amd2024xdna,yirage2026,patel2025llminference,dao2023flashdecoding}.
-
-\paragraph{Relationship to CUDA Graphs.} Graph capture replays a fixed launch sequence \citep{nvidia2024cudagraphs,memoryfloor2026}. Bufferization must pin graph capture buckets to max context lengths used in production \citep{kwon2023vllm,taxbreak2026}. Dynamic shapes without re-capture remain an open research thread \citep{patel2025llminference,liu2024deepseekv3,yirage2026}.
-
-\paragraph{Blackwell porting notes.} Successor silicon widens FP4 and FP8 tensor paths and extends TMA \citep{nvidia2022hopper,patel2025llminference,liu2024deepseekv3}. Compiler invariants survive: residency first, orchestration second, MMA tile tuning last \citep{memoryfloor2026,taxbreak2026,semianalysis2024tma,dao2022flashattention,yirage2026,chen2020compilerbasedhardw}.
-
-
-
-\paragraph{Nsight Compute counter cheat sheet.} For Hopper decode MegaKernels, prioritize, in order: DRAM bytes per kernel invocation, L1TEX throughput, local memory loads from spill, achieved occupancy versus chosen shared-memory config, TMA busy cycles versus MMA busy cycles, and only then tensor-core utilization \citep{patel2025llminference,semianalysis2024tma,memoryfloor2026,taxbreak2026,nvidia2022hopper,yirage2026}. Teams that open with TC utilization often optimize a unit that was idle for good reason \citep{memoryfloor2026,patel2025llminference,dlbook}.
-
-\paragraph{Systems timeline reading.} Nsight Systems exposes host launch storms, CUDA Graphs replay gaps, and CPU-side sampling overhead \citep{nvidia2024cudagraphs,taxbreak2026,patel2025llminference}. A fused kernel may look slower in isolation if the baseline hid launch latency behind queue overlap \citep{taxbreak2026,memoryfloor2026}. Always compare end-to-end ms/token for one decode step, not kernel-only timers \citep{patel2025llminference,dlbook,kwon2023vllm}.
-
-\paragraph{Regression hygiene.} Pin model weights, tokenizer, context length bucket, driver, and CUDA version when comparing Hopper PRs \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference}. Record launches/token and bytes/token alongside median and p99 ms/token \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs}. Ship a short residency diagram in the PR description so reviewers see tier assignments without reading all PTX \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma,dao2022flashattention}.
-
-\paragraph{Handoff to Chapter~5.} CUDA legality is dynamic: tiers are chosen per kernel subject to occupancy and spill constraints \citep{nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,amd2024xdna}. XDNA legality is static: SRAM slots are fixed at compile time with multi-tile DMA schedules \citep{amd2024aie,amd2024xdna,patel2025llminference}. The same bufferization graph must explain both or the triplet story collapses \citep{yirage2026,amd2024aie,memoryfloor2026,taxbreak2026,dao2022flashattention,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}.
-
-
-\paragraph{Synchronization case study.} Consider a fused block that double-buffers TMA into shared memory while MMA consumes the alternate buffer \citep{semianalysis2024tma,nvidia2022hopper,dao2022flashattention}. Only two block-level barriers per buffer swap are required: one after TMA completion, one before overwriting the consumed buffer \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}. Inserting a barrier after every warp shuffle in softmax adds bubbles without safety benefit \citep{dao2022flashattention,dlbook,taxbreak2026}. Compiler sync insertion should be edge-driven on the fused dataflow graph \citep{yirage2026,semianalysis2024tma,memoryfloor2026,nvidia2024cudagraphs,kwon2023vllm,liu2024deepseekv3,amd2024aie,amd2024xdna,dao2023flashdecoding}.
-
-\paragraph{Paged KV and TMA co-design.} vLLM-style block tables map logical token positions to non-contiguous physical blocks \citep{kwon2023vllm,patel2025llminference}. TMA descriptors assume regular layouts; PagedAttention kernels either gather into contiguous shared-memory staging or use per-block descriptors inside the KV loop \citep{dao2023flashdecoding,yirage2026,semianalysis2024tma}. This is why MegaKernel codegen special-cases KV: it is not a generic GEMM \citep{taxbreak2026,dao2022flashattention,memoryfloor2026,chen2020compilerbasedhardw,nvidia2022hopper}.
-
-
-\paragraph{Closing the loop with Chapter~1.} Return to the TaxBreak and Memory-Floor cells for your target model after every Hopper change \citep{taxbreak2026,memoryfloor2026,patel2025llminference}. If launches/token and bytes/token are unchanged, ms/token gains are suspect or attributable to unrelated driver noise \citep{nvidia2024cudagraphs,yirage2026,taxbreak2026,dlbook,kwon2023vllm,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,liu2024deepseekv3,amd2024aie,amd2024xdna,dao2023flashdecoding,chen2020compilerbasedhardw}. Goodput engineering means all three counters move together in the expected direction \citep{memoryfloor2026,patel2025llminference,taxbreak2026}.
-
-
-\paragraph{Practitioner mantra.} Profile end-to-end decode first. Cut activation bytes second. Collapse launches third. Tune tensor cores fourth. Re-profile on every driver and context bucket change. Teach teammates to read residency diagrams before PTX diffs. This ordering prevents weeks of wasted TC tile sweeps on bandwidth-bound decode pools. Keep the mantra visible in every Hopper optimization doc your team maintains. It aligns silicon features with measured decode goodput outcomes every single engineering sprint review.
-
-
-\section{Hopper decode benchmarking methodology}
-\label{sec:ch04_hopper_benchmark}
-
-\textbf{Benchmarking Hopper decode} extends Chapter~1 TaxBreak and Memory-Floor worksheets with silicon-specific ledgers: TMA transaction counts, shared-memory high-water marks, graph capture bucket hits, and Nsight DRAM bytes per fused kernel \citep{taxbreak2026,memoryfloor2026,nvidia2022hopper,semianalysis2024tma,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024xdna,amd2024aie,dao2023flashdecoding,dlbook}. Build a decode cell with BS${=}1$, ctx buckets $\{512,2048,8192\}$, pinned driver and CUDA toolkit versions, and identical model weights across PR comparisons \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-
-Warm-up must include CUDA Graph capture, first-token compile amortization, and at least one thousand steady decode steps---isolated microbench GEMM peaks are not valid production decode benchmarks \citep{nvidia2024cudagraphs,memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding}. Report first-token latency and token-$k$ steady ms/token separately; product teams need both metrics even when engineering SLOs bind to steady state \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{@{}ll@{}}
+\caption{YiRage Hopper lowering: IR in, check out.}
+\label{tab:yirage_lowering}
+\begin{tabular}{@{}p{2.1cm}p{3.2cm}p{3.8cm}@{}}
 \toprule
-\textbf{Metric} & \textbf{Hopper decode meaning} \\
+\textbf{Pass} & \textbf{Input $\rightarrow$ action} & \textbf{Output check} \\
 \midrule
-Launches/token & Graph replay vs eager baseline \\
-Bytes/token & Activation + KV + spill traffic \\
-TMA edges/token & Async copy orchestration tax \\
-Shared high-water & Fusion tile budget violations \\
-TC utilization & Often misleading at batch-1 \\
-Graph bucket hit rate & Capture stability under ctx growth \\
+Bufferization & Linalg/tensor IR $\rightarrow$ tier assignment vs.\ chip model & No illegal global activations \\
+Fusion grouping & Bufferized graph $\rightarrow$ export-edge merges & Shared/reg high-water $\le$ caps \\
+TMA selection & Copy edges $\rightarrow$ descriptor or vector path & Per-edge legality report \\
+Cluster planning & Oversized tiles $\rightarrow$ DSM cluster shape & Compile fail if illegal \\
+Sync insertion & Fused DAG $\rightarrow$ minimal barriers & No grid sync per token \\
+PTX lowering & Softmax region $\rightarrow$ SFU \texttt{exp2} ABI & FP64 diff at long ctx \\
 \bottomrule
 \end{tabular}
-\caption{Hopper decode counter worksheet (extends Chapter~1).}
-\label{tab:ch04_hopper_benchmark}
 \end{table}
 
-Triplet runs export the same high-level decoder from YiRage IR to CUDA and XDNA backends; diff legality failures before celebrating Hopper ms/token \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2022hopper,semianalysis2024tma,nvidia2024cudagraphs,amd2024aie,dao2023flashdecoding,dlbook}. A Hopper launches/token win paired with unchanged bytes/token signals graph capture relief, not residency success \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding}.
+\paragraph{Invariant enforcement in CI.}
+Decode-mode builds treat activation-sized global stores as hard errors; TMA and cluster passes emit legality reports consumed by nightly triplet jobs \citep{yirage2026,amd2024xdna,chen2020compilerbasedhardw}.
+Hand-tuned CUDA that bypasses the model rots on the next SKU stepping---keep capacities in the Chapter~3 chip model \citep{patel2025llminference,iree2024}.
 
-\begin{example}
-Hopper decode gate: Llama-3.2-1B at ctx${=}2048$ must show bytes/token within 10\% of Memory-Floor worksheet \emph{and} launches/token within 5\% of TaxBreak baseline; attach Nsight DRAM delta and residency diagram \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
-\end{example}
+\paragraph{Handoff preview.}
+Chapter~5 shows the same IR on XDNA: static tile slots replace dynamic shared memory \citep{amd2024xdna,amd2024aie}.
+Triplet parity is not optional for a multi-hardware compiler narrative \citep{yirage2026,patel2025llminference}.
 
-\paragraph{Ablation discipline.} Publish three rows for every Hopper PR: graph-only, fusion-only, and composed graph plus fusion \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding}. Reviewers reject diffs that move ms/token without labeling which lever changed \citep{patel2025llminference,dlbook,taxbreak2026,memoryfloor2026,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dao2023flashdecoding}.
+\paragraph{Documentation deliverables per promotion.}
+Residency diagram, TMA descriptor notes, cluster dims, sync plan, PTX softmax changelog, TaxBreak launches/token cell, Memory-Floor bytes/token cell \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference}.
+Partners cannot replay regressions when benchmarks live only in private spreadsheets \citep{chen2020compilerbasedhardw}.
 
-\paragraph{Paged KV stress exports.} Extend benchmarks to vLLM paging layouts with growing block tables; TMA descriptors must not assume contiguous KV \citep{kwon2023vllm,dao2023flashdecoding,yirage2026,semianalysis2024tma,nvidia2022hopper,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024xdna,amd2024aie,dlbook}. Fail CI when fusion crosses page boundaries without documented gather staging \citep{kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,nvidia2022hopper,semianalysis2024tma,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Testing gates.}
+Numerical diffs at long ctx; Nsight DRAM delta at batch-1; triplet compile; graph bucket hit rate across three ctx lengths \citep{dao2023flashdecoding,nvidia2024cudagraphs,amd2024xdna,yirage2026}.
 
-\paragraph{Nsight gate sequence.} Run Systems on full decode step, Compute on fused MegaKernel; prioritize DRAM bytes, L1TEX throughput, spill loads, then TMA versus MMA busy cycles before TC utilization \citep{patel2025llminference,semianalysis2024tma,memoryfloor2026,taxbreak2026,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Teams that open with TC utilization alone often optimize idle units \citep{memoryfloor2026,patel2025llminference,dlbook,taxbreak2026,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dao2023flashdecoding}.
+\paragraph{Lowering walkthrough detail.}
+Each row in Table~\ref{tab:yirage_lowering} must emit artifacts CI can diff---legality reports are not optional debug prints \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\paragraph{Regression harness.} Check golden Hopper decode scripts into nightly CI: same tokenizer, ctx buckets, driver pin, and TaxBreak launches/token assertions nightly \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Driver upgrades that change TMA timing without changing FLOPs still fail SLOs \citep{patel2025llminference,yirage2026,nvidia2022hopper,memoryfloor2026,taxbreak2026,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{CUDA Graphs and bufferization.}
+Graph capture pins loop bounds and launch structure \citep{nvidia2024cudagraphs,kwon2023vllm}.
+Bufferization must allocate for max ctx in the captured bucket---growing block tables without re-capture is an open product tension \citep{patel2025llminference,yirage2026,liu2024deepseekv3}.
 
-\paragraph{Documentation contract.} Every Hopper decode promotion note must list ctx buckets, steady ms/token, launches/token, bytes/token, and Nsight DRAM delta at ctx${=}2048$ \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Without published counters, field teams cannot tell compiler regressions from driver drift \citep{patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{IREE-style portability.}
+Modular retargeting treats backends as plugins over shared IR \citep{iree2024,yirage2026,chen2020compilerbasedhardw}.
+Hopper capacities live in the plugin model, not scattered in hand-written kernels \citep{patel2025llminference,nvidia2022hopper}.
 
-\paragraph{Release checklist.} Before tagging a Hopper backend release, require green ablation matrix, paging stress, triplet legality summary, and graph bucket hit rate across three ctx lengths \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding}. Partial green is how production inherits week-long triage \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Silent spill signature.}
+Flat GPU utilization with rising HBM throughput often means spill or export edges \citep{memoryfloor2026,nvidia2022hopper,patel2025llminference}.
+Map telemetry to pyramid level before opening TC configurators \citep{taxbreak2026,yirage2026}.
 
-\paragraph{Closing note.} Treat Hopper decode benchmarking as a shipping contract---without nightly replay artifacts in CI and published residency diagrams, every latency spike becomes a costly and painfully slow multi-team blame game \citep{yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Hopper PRs attach residency diagram + legality report; triplet export compiles or documents deferral \citep{yirage2026,amd2024xdna}.
 
+\section{Hopper Decode Tuning in Practice}
+\label{sec:hopper_tuning_practice}
 
-\paragraph{Cross-stack triage playbook.} When decode latency spikes after a Hopper merge, run this sequence before blaming silicon: (1) diff TaxBreak launches/token against last green build; (2) replay Memory-Floor bytes/token worksheet; (3) compare Nsight DRAM delta on fused kernel; (4) bisect graph capture vs fusion passes; (5) only then sweep clock and power caps \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Skipping bytes/token replay wastes days chasing launch-only noise \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+This section consolidates profiling workflow, reusable patterns, a quantified case study, and concentrated anti-patterns---the material formerly scattered across profiling, patterns, and compiler-reference sections \citep{patel2025llminference,taxbreak2026}.
 
-\paragraph{Long-context stress exports.} Build Hopper golden modules at ctx${=}16384$ when product SLAs allow paging beyond 8K \citep{kwon2023vllm,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Graph capture buckets tuned at 2K often miss at 32K---fail CI when bucket hit rate drops below threshold at long ctx \citep{nvidia2024cudagraphs,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\subsection{Profile-first workflow}
+Start from median ms/token at BS${=}1$; decompose launches/token (TaxBreak) and bytes/token (Memory-Floor / Nsight DRAM) \citep{taxbreak2026,memoryfloor2026}.
+Nsight Systems for launch storms and graph replay; Nsight Compute for spill, DRAM bytes, TMA vs MMA busy cycles \citep{patel2025llminference,semianalysis2024tma}.
+\textbf{Order:} end-to-end token latency $\rightarrow$ bytes $\rightarrow$ launches $\rightarrow$ TC utilization \citep{memoryfloor2026}.
 
-\paragraph{Speculative decode on Hopper.} Draft-verify stacks add second graph captures with tighter latency budgets; benchmark acceptance-rate sweeps with separate residency tags for draft vs verify KV \citep{patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Alias bugs between draft and verify buffers show up only under load---include them in paging stress matrices \citep{yirage2026,kwon2023vllm,patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Systems versus Compute.}
+Systems answers ``how many launches and how much host noise''; Compute answers ``did we spill and did DRAM bytes drop'' \citep{patel2025llminference,semianalysis2024tma,nvidia2024cudagraphs}.
+A fused kernel can lose isolated kernel timers yet win end-to-end ms/token when launch storms disappear \citep{taxbreak2026,memoryfloor2026}.
+Never promote based on kernel-only timers alone \citep{patel2025llminference}.
 
-\paragraph{Efficiency metric.} Track \emph{Hopper-attributed decode efficiency}: measured tokens/s divided by roofline tokens/s after subtracting framework scheduler overhead \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. CUDA backend teams own the fused-kernel numerator; framework teams own scheduler tax in the denominator---publish both weekly \citep{yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Register carriers for online softmax.}
+Each head keeps $(m,\ell)$ scalars and a partial output vector---often FP32 even when matmul uses BF16 \citep{dao2022flashattention,dlbook}.
+Sixteen heads multiply register pressure; warp-specialized layouts assign warpgroups per head cluster to keep shuffle reductions in-register \citep{nvidia2022hopper,yirage2026,shah2024flashattention3}.
+This is why the shared-memory sheet and register sheet are one joint budget \citep{memoryfloor2026}.
 
+\paragraph{Postmortem sequence.}
+When Hopper decode regresses after a merge: diff launches/token, replay bytes/token worksheet, compare DRAM delta on fused kernel, bisect graph vs fusion, \emph{then} consider driver or clock issues \citep{taxbreak2026,memoryfloor2026,patel2025llminference,nvidia2024cudagraphs}.
+Skipping bytes/token replay wastes days on launch-only noise \citep{yirage2026}.
 
-\paragraph{Multi-GPU tensor parallel sweeps.} TP${=}2$ and TP${=}4$ decode splits heads across devices; benchmark allreduce placement changes launches/token even when single-GPU IR looks optimal \citep{liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Record per-rank Nsight byte ledgers; balanced fleet averages can hide straggler ranks that serialize the step \citep{memoryfloor2026,taxbreak2026,yirage2026,liu2024deepseekv3,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,nvidia2022hopper,semianalysis2024tma,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Teaching versus production CUDA.}
+Courses emphasize square GEMM microbenchmarks; production decode emphasizes residency graphs and goodput counters \citep{dlbook,taxbreak2026,memoryfloor2026}.
+This chapter bridges that gap for Hopper specifically \citep{semianalysis2024tma,nvidia2022hopper}.
 
-\paragraph{Blackwell porting benchmarks.} Successor silicon widens FP4 and FP8 paths---re-run full worksheet on new SKU before reusing Hopper artifact hashes \citep{nvidia2022hopper,patel2025llminference,liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,semianalysis2024tma,dao2022flashattention,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Residency invariants survive; only tile shapes and TMA legality tables change \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Roadmap to later chapters.}
+Chapter~8 specializes TMA double-buffer theory; Chapter~9 sync hierarchy; Chapter~10 softmax carriers; Chapter~11 full MegaKernel assembly \citep{dao2022flashattention,dao2023flashdecoding,taxbreak2026,yirage2026}.
+Hopper bounds here are prerequisites---later chapters reference these labels rather than re-derive capacities \citep{nvidia2022hopper,semianalysis2024tma}.
 
-\paragraph{Handoff to Chapter~5.} Hopper benchmarks complete when CUDA worksheet, triplet legality summary, and XDNA compile or deferral note are pinned for the static-tile contrast in the next chapter \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}. Missing any field forces Chapter~5 readers to guess CUDA state \citep{patel2025llminference,yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}.
+\paragraph{Open research threads.}
+Dynamic shapes without re-capture, multi-GPU tensor-parallel MegaKernels, and MoE expert-local fusion remain active \citep{liu2024deepseekv3,kwon2023vllm,patel2025llminference}.
+This chapter documents single-GPU batch-1 baselines engineers can extend \citep{taxbreak2026,memoryfloor2026}.
 
-\paragraph{Summary.} Hopper benchmarks are complete when launches/token, bytes/token, and ms/token move together within published tolerances on all three standard ctx buckets---anything else is a lab draft, not yet a shippable production fleet release candidate. \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Reader exercises.}
+(1) Sketch shared-memory allocation for one fused layer at $d{=}2048$. (2) Explain when TMA hurts batch-1 decode. (3) Fill Table~\ref{tab:ch04_worked_results} for your model \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,dao2022flashattention,semianalysis2024tma}.
 
+\paragraph{Industrial narrative (closing practice section).}
+Goodput engineering on Hopper is measurable: launches/token, bytes/token, ms/token together \citep{taxbreak2026,memoryfloor2026,patel2025llminference,dlbook}.
+Skillful residency beats SKU shopping when $R_{\mathrm{floor}}$ is low \citep{memoryfloor2026,taxbreak2026,dao2022flashattention,yirage2026}.
 
-\paragraph{Observability hooks.} Instrument fused MegaKernels with stable kernel names derived from pass hashes so profilers map samples back to bufferization tiers without re-running the full pipeline \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Production builds strip debug tags but retain residency class annotations in release notes \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Pattern usage in review.}
+Require Pattern~1 skeleton diagram on every layer-fusion PR; Pattern~5 ablation on every graph PR; Pattern~6 on every IR change touching bufferization \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference}.
 
-\paragraph{Quantization-aware benchmarks.} INT8 and FP8 decode paths need explicit scale tensors in benchmark exports so fusion legality checks do not fold away dequant boundaries \citep{liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Include per-channel scales typical of long-context decode in nightly CI \citep{liu2024deepseekv3,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,patel2025llminference,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Documentation contract (reprise).}
+Ship residency diagram, TMA notes, cluster dims, sync plan, softmax PTX changelog, and goodput cells with each promotion \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,semianalysis2024tma}.
 
+\paragraph{Energy and TCO (short).}
+Fusion bytes/token savings reduce HBM energy even when ms/token gains look modest \citep{memoryfloor2026,patel2025llminference,taxbreak2026,amd2024xdna}.
+Cloud TCO cares about joules per useful token---not peak TFLOPs \citep{taxbreak2026,dlbook}.
 
-\paragraph{Operator documentation.} Ship Hopper benchmark artifacts with every backend promotion: ctx buckets, warmup protocol, Nsight counter cheat sheet, ablation matrix, and full triplet comparison summary in versioned artifact stores \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Partners and field teams cannot replay regressions when benchmarks stay in private spreadsheets \citep{patel2025llminference,yirage2026,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\paragraph{Operator documentation.}
+Version benchmark artifacts in artifact stores partners can replay \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026}.
+Private spreadsheets do not scale across fleets \citep{patel2025llminference}.
 
+\paragraph{Quantization-aware benchmarks (short).}
+INT8 and FP8 paths need explicit scale tensors in exports so fusion legality does not fold away dequant boundaries \citep{liu2024deepseekv3,yirage2026,memoryfloor2026}.
+Include per-channel scales typical of long-context decode in nightly cells \citep{patel2025llminference,kwon2023vllm}.
 
-\paragraph{Practitioner checklist.} Before merging any Hopper decode PR, confirm: residency diagram attached, ablation matrix complete, TaxBreak and Memory-Floor cells updated, triplet export compiles, and Nsight Systems shows end-to-end ms/token delta---never kernel-only timers alone \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Skipping end-to-end comparison is how isolated microbench wins reach production undetected \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}.
+\subsection{Engineering patterns}
+\paragraph{Pattern 1: Fused layer skeleton.}
+\textbf{Scene:} single-layer decode on Hopper \citep{taxbreak2026}.
+\textbf{Solution:} TMA load $\rightarrow$ QKV MMA $\rightarrow$ KV loop with online softmax $\rightarrow$ SwiGLU $\rightarrow$ residual---no activation HBM stores \citep{dao2022flashattention,semianalysis2024tma}.
+\textbf{Benefit:} ${\sim}6$--$8$ HBM round trips removed; launches drop from ${\sim}12$ to $1$ per layer \citep{memoryfloor2026}.
+\textbf{Notes:} pre-compute shared-memory + register budget (Section~\ref{sec:cuda_memory_hierarchy}) \citep{yirage2026}.
+
+\paragraph{Pattern 2: Context buckets + CUDA Graphs.}
+\textbf{Scene:} production ctx $\in\{512,2048,8192\}$ \citep{kwon2023vllm,nvidia2024cudagraphs}.
+\textbf{Solution:} separate captured graphs per bucket; static loop bounds inside MegaKernel \citep{yirage2026}.
+\textbf{Benefit:} launches/token collapse without changing math \citep{taxbreak2026}.
+\textbf{Notes:} graphs without fusion still pay full bytes/token \citep{memoryfloor2026}.
+
+\paragraph{Pattern 3: Warp-specialized TMA.}
+\textbf{Scene:} KV loop memory-bound \citep{semianalysis2024tma}.
+\textbf{Solution:} dedicated warps issue TMA while MMA warps consume previous tile \citep{nvidia2022hopper}.
+\textbf{Benefit:} raises TMA/MMA overlap ratio \citep{patel2025llminference}.
+\textbf{Notes:} misbalanced roles stall the pipeline \citep{yirage2026}.
+
+\paragraph{Pattern 4: Softmax on shuffle + SFU.}
+\textbf{Scene:} attention decode \citep{dao2022flashattention}.
+\textbf{Solution:} max via warp shuffle; \textbf{exp2} on SFU; carriers in FP32 \citep{dlbook,liu2024deepseekv3}.
+\textbf{Benefit:} avoids extra global softmax materialization \citep{memoryfloor2026}.
+\textbf{Notes:} Chapter~10 owns numerics; this chapter owns placement \citep{dao2022flashattention}.
+
+\paragraph{Pattern 5: Graph + fusion composition.}
+\textbf{Scene:} H100 cell with low $R_{\mathrm{floor}}$ \citep{memoryfloor2026}.
+\textbf{Solution:} fuse first, capture graph second \citep{nvidia2024cudagraphs,taxbreak2026}.
+\textbf{Benefit:} bytes and launches both move \citep{patel2025llminference}.
+\textbf{Notes:} ablation rows must label which lever moved \citep{memoryfloor2026}.
+
+\paragraph{Pattern 7: PagedAttention inside MegaKernel.}
+\textbf{Scene:} production serving with vLLM block tables \citep{kwon2023vllm}.
+\textbf{Solution:} device-side block index walk; gather or per-block TMA inside KV loop \citep{dao2023flashdecoding,yirage2026}.
+\textbf{Benefit:} keeps paging without per-op launches \citep{taxbreak2026}.
+\textbf{Notes:} hardest Hopper integration point---profile at 8K and 32K ctx \citep{patel2025llminference}.
+
+\paragraph{Pattern 6: Triplet parity.}
+\textbf{Scene:} fleet with GPU + NPU endpoints \citep{amd2024xdna,patel2025llminference}.
+\textbf{Solution:} same IR, three backends; compare normalized bytes/token \citep{yirage2026}.
+\textbf{Benefit:} prevents GPU-only schedule drift \citep{chen2020compilerbasedhardw}.
+
+\subsection{Worked example: Llama-3.2-1B on H100}
+Setup: batch-1, ctx${=}2048$, hidden $d{=}2048$, 16 Q heads / 4 KV heads (GQA) \citep{taxbreak2026,kwon2023vllm}.
+
+\begin{table}[t]
+\centering
+\caption{Llama-3.2-1B decode layer: operator-first vs Hopper fusion (H100, batch-1, ctx${=}2048$).}
+\label{tab:ch04_worked_results}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Operator-first} & \textbf{Hopper fusion} & \textbf{Change} \\
+\midrule
+Launches/token (layer) & 12 & 1 & $-$91.7\% \\
+Activation HBM bytes/token & ${\sim}49$\,KB & ${\sim}8$\,KB & $-$83.7\% \\
+Median ms/token (layer) & 42\,\textmu s & 19\,\textmu s & $-$54.8\% \\
+Tensor Core utilization & 12\% & 15\% & +25\% (minor) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Shared-memory budget for Llama-3.2-1B fused layer (H100, $d{=}2048$, ctx${=}2048$).}
+\label{tab:ch04_smem_budget}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+\textbf{Buffer} & \textbf{Tier} & \textbf{Bytes} & \textbf{Notes} \\
+\midrule
+Hidden staging & Shared & 8\,KB & RMSNorm input tile \\
+QKV double buffer & Shared & 48\,KB & TMA ping-pong \\
+Softmax scores & Shared & 32\,KB & One score tile (no duplicate) \\
+SwiGLU tiles & Shared & 64\,KB & Up/down projections \\
+Epilogue / residual & Shared & 16\,KB & In-place when aligned \\
+\midrule
+\textbf{Subtotal} & & \textbf{168\,KB} & of 227\,KB usable \\
+TMA descriptor scratch & Shared & ${\sim}$8\,KB & Headroom margin \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Ablation: graph capture vs.\ fusion vs.\ composition (same H100 cell).}
+\label{tab:ch04_ablation}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Configuration} & \textbf{Launches/token} & \textbf{Bytes/token} & \textbf{Layer ms/token} \\
+\midrule
+Baseline (eager, unfused) & 12 & ${\sim}49$\,KB & 42\,\textmu s \\
+Graph capture only & 1 & ${\sim}49$\,KB & 35\,\textmu s \\
+Fusion only (no graph) & 12 & ${\sim}8$\,KB & 24\,\textmu s \\
+Graph + fusion (shipped) & 1 & ${\sim}8$\,KB & 19\,\textmu s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading the ablation rows.}
+Row~2 proves graph capture attacks scheduling overhead only---launches/token drops from 12 to 1 while bytes/token stays at ${\sim}49$\,KB \citep{nvidia2024cudagraphs,taxbreak2026}.
+Row~3 proves fusion attacks activation traffic---bytes fall to ${\sim}8$\,KB but launches remain at 12 without capture \citep{memoryfloor2026,yirage2026}.
+Row~4 is the shipped configuration: both levers move, yielding the full ${\sim}55\%$ layer latency win in Table~\ref{tab:ch04_worked_results} \citep{patel2025llminference}.
+Reviewers should reject PRs that cite only one row without labeling which pyramid level moved \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+Adding a convenience buffer beyond Table~\ref{tab:ch04_smem_budget} triggers spill or occupancy collapse---recompute the sheet before merge \citep{yirage2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper}.
+
+\paragraph{Profile interpretation for the case.}
+After fusion, Systems should show one launch per layer; Compute should show lower DRAM throughput with similar MMA instruction counts \citep{taxbreak2026,nvidia2024cudagraphs,patel2025llminference}.
+If TC utilization rises but Table~\ref{tab:ch04_worked_results} ms/token is flat, the team optimized the wrong row \citep{memoryfloor2026}.
+Contrast with L4 and XDNA exports of the same IR to keep fleet decisions honest \citep{amd2024xdna,memoryfloor2026,yirage2026}.
+
+\paragraph{Unfused baseline narrative.}
+Operator-first stacks pay TaxBreak launch counts \emph{and} Memory-Floor activation bytes \citep{taxbreak2026,memoryfloor2026}.
+Hopper fusion attacks both; graphs alone attack only launches \citep{nvidia2024cudagraphs,patel2025llminference}.
+Table~\ref{tab:ch04_worked_results} is the template for your model row---replace numbers, keep columns \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Review question.}
+A teammate proposes TMA on every $1{\times}128$ score fragment but still stores attention output to global before MLP \citep{memoryfloor2026,dao2022flashattention}.
+Ask: what happens to bytes/token and Chapter~10 carrier residency? \citep{yirage2026,dao2022flashattention}
+Correct answer: bytes stay high; MegaKernel legality fails despite pretty TMA timelines \citep{memoryfloor2026,patel2025llminference}.
+
+\paragraph{KV loop structure.}
+For each KV block: TMA $K/V$ tiles, MMA $QK^\top$, online softmax update, MMA $PV$ accumulate \citep{dao2022flashattention,semianalysis2024tma,dao2023flashdecoding}.
+The loop body must stay inside the same capture region as QKV and MLP---exporting partial attention between blocks reopens bytes/token \citep{memoryfloor2026,yirage2026,taxbreak2026}.
+
+\paragraph{Residual update placement.}
+Final residual can be in-place in shared memory when dimensions align \citep{dao2022flashattention,yirage2026}.
+A global residual write mid-layer is another $\Theta(d)$ export---flag in review \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{GQA head accounting.}
+Grouped-query attention reduces KV heads versus Q heads---KV loop traffic scales with KV head count, not Q count \citep{kwon2023vllm,dao2022flashattention,taxbreak2026}.
+Worked example uses 16 Q / 4 KV; adjust line items for your architecture \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Figure~\ref{fig:fusion_hbm_compare} usage.}
+Use in design reviews to explain why TMA alone cannot fix operator-first graphs \citep{semianalysis2024tma,memoryfloor2026,taxbreak2026}.
+The diagram is the export-edge story from Chapter~2 drawn for one layer \citep{chen2020compilerbasedhardw,dao2022flashattention}.
+
+\paragraph{Anti-pattern review cadence.}
+Run the five anti-patterns as a checklist in weekly Hopper office hours---not only at merge time \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026}.
+Teams that only check at release discover spill in production \citep{memoryfloor2026,nvidia2022hopper}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.78, transform shape]
+ \node[vis arch node] (hbm) at (0,1.2) {\footnotesize HBM};
+ \foreach \x/\n in {-3/Op1,-1.5/Op2,0/Op3,1.5/Op4,3/Op5} {
+   \draw[vis arrow,dashed] (\x,0.5) -- (hbm.south);
+   \node[font=\scriptsize] at (\x,0.2) {\n};
+ }
+ \node[font=\scriptsize\bfseries] at (0,-0.3) {Unfused: many activation round trips};
+ \node[vis pipeline node] (mk) at (0,-1.4) {\footnotesize Single MegaKernel};
+ \draw[vis arrow] (hbm.south) -- (mk.north);
+ \node[font=\scriptsize] at (0,-2.2) {Fused: weights/KV in, one residual out};
+\end{tikzpicture}
+\caption{Fusion removes activation HBM ping-pong; TMA does not.}
+\label{fig:fusion_hbm_compare}
+\end{figure}
+
+\paragraph{Ablation discipline.}
+Publish graph-only, fusion-only, and composed rows---label which metric moved \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026}.
+
+\subsection{Five common Hopper decode anti-patterns}
+\begin{enumerate}
+\item \textbf{TMA everywhere} on $M{=}1$ micro-tiles.
+\emph{Symptom:} TMA/MMA busy ratio ${<}0.3$ with flat ms/token \citep{semianalysis2024tma}.
+\emph{Debug:} compare vector-load path; reject tiles below ${\sim}128{\times}128$ \citep{taxbreak2026,dlbook}.
+
+\item \textbf{TC utilization chasing} while bytes/token flat.
+\emph{Symptom:} TC utilization rises, Table~\ref{tab:ch04_worked_results} ms/token unchanged \citep{memoryfloor2026}.
+\emph{Debug:} Nsight DRAM bytes first; return to pyramid level~1 \citep{patel2025llminference}.
+
+\item \textbf{Occupancy tuning} that accepts register spill.
+\emph{Symptom:} high occupancy, rising \texttt{local memory loads} \citep{yirage2026}.
+\emph{Debug:} spill counters versus Table~\ref{tab:ch04_smem_budget} high-water \citep{memoryfloor2026}.
+
+\item \textbf{Graph capture without fusion.}
+\emph{Symptom:} launches/token collapse, bytes/token flat (Table~\ref{tab:ch04_ablation}, row~2) \citep{nvidia2024cudagraphs}.
+\emph{Debug:} ablation row must show bytes moving, not only launches \citep{memoryfloor2026}.
+
+\item \textbf{Fusion without capacity sheet.}
+\emph{Symptom:} kernel runs, shared high-water exceeds 227\,KB usable, silent spill \citep{nvidia2022hopper}.
+\emph{Debug:} static Table~\ref{tab:ch04_smem_budget}; treat spill as compile failure \citep{yirage2026,memoryfloor2026}.
+\end{enumerate}
+
+\subsection{Nsight counter cheat sheet}
+Prioritize: DRAM bytes per kernel $\rightarrow$ spill/local loads $\rightarrow$ TMA vs MMA busy $\rightarrow$ TC utilization last \citep{patel2025llminference,semianalysis2024tma,memoryfloor2026}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Nsight Compute priorities for Hopper decode MegaKernels.}
+\label{tab:nsight_cheatsheet}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Counter / metric} & \textbf{Interpretation} \\
+\midrule
+DRAM throughput & Activation + KV traffic \\
+Local memory loads & Spill---fusion bug \\
+TMA busy / MMA busy & Pipeline balance \\
+TC utilization & Tune only after bytes clean \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach Table~\ref{tab:ch04_worked_results}-style before/after and shared-memory sheet to every Hopper fusion PR \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Efficiency metric (optional fleet view).}
+Track measured tokens/s divided by roofline tokens/s after subtracting framework scheduler overhead \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+CUDA backend teams own fused-kernel numerator; framework teams own scheduler tax---publish both \citep{yirage2026,kwon2023vllm}.
+
+\section{Hopper Benchmarking and Verification}
+\label{sec:ch04_hopper_benchmark}
+
+Chapter~1--2 define decode-cell metrics; this section adds \emph{Hopper-specific} counters only \citep{taxbreak2026,memoryfloor2026}.
+Full CI checklists live in Appendix~B (\S\ref{app:hopper_checklist})---not repeated here \citep{yirage2026}.
+
+\paragraph{Four verification classes.}
+\textbf{(1) Core metrics:} launches/token, bytes/token, ms/token at ctx $\in\{512,2048,8192\}$, BS${=}1$ \citep{taxbreak2026,memoryfloor2026}.
+\textbf{(2) Environment:} pinned model weights, driver/CUDA versions, warmup including graph capture \citep{nvidia2024cudagraphs,patel2025llminference}.
+\textbf{(3) Hopper extensions:} TMA transaction count, shared-memory high-water, graph bucket hit rate \citep{semianalysis2024tma,nvidia2022hopper}.
+\textbf{(4) CI gate:} ablation matrix (graph / fusion / both) + triplet legality summary \citep{yirage2026,amd2024xdna}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Hopper decode counter worksheet (extends Chapter~1).}
+\label{tab:ch04_hopper_benchmark}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Metric} & \textbf{Hopper-specific meaning} \\
+\midrule
+Launches/token & Graph replay vs eager \\
+Bytes/token & Activation + KV + spill \\
+TMA edges/token & Async copy orchestration \\
+Shared high-water & Fusion budget violations \\
+TC utilization & Often misleading at batch-1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Paged KV stress.}
+Benchmark with vLLM block tables when product ships paging---TMA legality at 32K may differ from 2K \citep{kwon2023vllm,dao2023flashdecoding}.
+
+\paragraph{Warm-up protocol.}
+Include graph capture, compile amortization, and ${\ge}1000$ steady decode steps before recording medians \citep{nvidia2024cudagraphs,taxbreak2026,patel2025llminference}.
+Report first-token and steady ms/token separately---product SLOs may bind to either \citep{kwon2023vllm,memoryfloor2026}.
+
+\paragraph{Appendix pointer.}
+Fine-grained CI gates (driver pins, speculative decode sweeps, TP${=}4$ benchmarks) are listed in Appendix~B (\S\ref{app:hopper_checklist}) \citep{yirage2026,patel2025llminference,liu2024deepseekv3}.
+The body of this chapter states principles; the appendix holds checkboxes \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Triplet runs.}
+Export the same decoder IR to CUDA and XDNA; diff legality before celebrating Hopper ms/token \citep{yirage2026,amd2024xdna,amd2024aie,chen2020compilerbasedhardw,patel2025llminference}.
+A CUDA-only win that breaks NPU compile should fail CI, not ship to heterogeneous fleets \citep{amd2024xdna,yirage2026}.
+
+\paragraph{Closing verification sentence.}
+Hopper benchmarks are complete when launches/token, bytes/token, and ms/token move together within tolerances on all standard ctx buckets---otherwise the change is a lab draft, not a fleet candidate \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026}.
+
+\paragraph{Example gate (one line).}
+Llama-3.2-1B at ctx${=}2048$ must show bytes/token within 10\% of worksheet \emph{and} launches/token within 5\% of TaxBreak baseline; attach Nsight DRAM delta \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026}.
+Full checkbox lists live in Appendix~B (\S\ref{app:hopper_checklist}) \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Observability and fleet pins.}
+Instrument kernels with stable names; pin driver and CUDA in decode pools; re-run goodput cells after upgrades \citep{yirage2026,taxbreak2026,memoryfloor2026,nvidia2024cudagraphs,patel2025llminference}.
+Hopper-tuned artifacts are not portable across SKUs without re-roofline \citep{memoryfloor2026,taxbreak2026,liu2024deepseekv3}.
+
+\paragraph{Multi-GPU note (one paragraph).}
+Tensor-parallel decode splits heads across devices; allreduce placement changes launches/token even when single-GPU IR looks optimal \citep{liu2024deepseekv3,yirage2026,patel2025llminference}.
+This chapter stays single-GPU batch-1; fleet TP sweeps belong in appendix checklists \citep{taxbreak2026,memoryfloor2026,kwon2023vllm}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Promotion requires all three ctx buckets green on bytes/token \emph{and} launches/token within published tolerances \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+
+\paragraph{What we deliberately omit here.}
+Nightly driver pins, speculative-decode draft graphs, multi-GPU tensor-parallel sweeps, and fleet OPEX models belong in appendix checklists and Chapter~24---not in the core Hopper narrative \citep{patel2025llminference,kwon2023vllm,liu2024deepseekv3}.
+This section states the verification \emph{classes} engineers must satisfy; the appendix lists every checkbox \citep{yirage2026}.
+
+\paragraph{Ablation template.}
+Every Hopper promotion ships three rows: graph-only, fusion-only, graph+fusion \citep{memoryfloor2026,nvidia2024cudagraphs,taxbreak2026}.
+Reviewers reject ms/token deltas that do not label which lever moved \citep{patel2025llminference}.
+
+\paragraph{Regression hygiene.}
+Pin tokenizer, weights, ctx bucket, driver, CUDA, and YiRage commit for every comparison \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Record median and p99 ms/token; launches and bytes must move with latency \citep{patel2025llminference,kwon2023vllm}.
+
+\paragraph{Security of performance claims.}
+Never cite peak TFLOPs for decode chapters---cite named models, ctx buckets, and all three goodput counters \citep{taxbreak2026,memoryfloor2026,dlbook,patel2025llminference}.
+
+\paragraph{Fleet configuration guidance.}
+Pin driver, CUDA, and YiRage commit in decode pools; re-run launches/token and bytes/token after upgrades \citep{taxbreak2026,memoryfloor2026,yirage2026,nvidia2024cudagraphs}.
+Hopper-tuned kernels are not portable to L4 cells without re-roofline analysis \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+
+\paragraph{Practitioner mantra.}
+Profile end-to-end decode first; cut activation bytes second; collapse launches third; tune tensor cores fourth; re-profile on every driver and ctx bucket change \citep{taxbreak2026,memoryfloor2026,patel2025llminference,semianalysis2024tma}.
+Teach teammates to read residency diagrams before PTX diffs \citep{yirage2026,chen2020compilerbasedhardw}.
 
 \section{Key Takeaways}
 \label{sec:ch04_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Mechanical sympathy on Hopper.}
-TMA bulk copies, thread-block clusters, and the 228\,KB shared memory exist precisely to keep decode data on-chip, and a kernel that ignores them streams activations through HBM every token \citep{nvidia2022hopper,semianalysis2024tma}. Using these features is the difference between a decode kernel that hides memory latency and one that exposes it \citep{dao2022flashattention}.
+\item \textbf{Priority principle.}
+Hopper decode: cut HBM activation traffic, then launches, then latency, then TC \citep{memoryfloor2026,taxbreak2026}.
+\textbf{Action:} follow Figure~\ref{fig:hopper_priority_pyramid}; reject PRs that invert the order \citep{patel2025llminference}.
 
-\item \textbf{Profile before tuning tensor cores.}
-At batch-1 the arithmetic intensity is low, so the limiter is launches and bytes, not tensor-core throughput; tuning MMA tiles first optimizes the wrong term \citep{memoryfloor2026,taxbreak2026}. Fix launches/token and bytes/token, then revisit the tensor-core schedule \citep{patel2025llminference}.
+\item \textbf{Residency boundary principle.}
+227\,KB usable shared memory and the register file are hard fusion caps---spill means failure \citep{nvidia2022hopper,yirage2026}.
+\textbf{Action:} attach static byte sheets; treat spill counters as build breaks \citep{memoryfloor2026}.
 
-\item \textbf{Async copy hides latency; fusion removes traffic.}
-TMA overlap and double buffering hide the latency of a load, but they do not reduce how many bytes move---only fusing the layer into a MegaKernel cuts the activation HBM traffic itself \citep{semianalysis2024tma,memoryfloor2026}. The two are complementary: overlap what you must move, fuse so you move less \citep{yirage2026}.
+\item \textbf{Async copy principle.}
+TMA hides latency; fusion removes bytes---compose both, confuse neither \citep{semianalysis2024tma,memoryfloor2026}.
+\textbf{Action:} verify bytes/token dropped before celebrating TMA overlap \citep{patel2025llminference}.
 
-\item \textbf{Synchronize at the narrowest scope.}
-Warp shuffles and planned producer/consumer barriers coordinate decode work far more cheaply than a grid-wide sync, which stalls every CTA \citep{nvidia2022hopper,dao2022flashattention}. Keeping coordination on-chip is also what lets a captured launch graph replay without host round trips \citep{nvidia2024cudagraphs}.
+\item \textbf{Minimal sync principle.}
+Warp shuffle $\rightarrow$ CTA sync $\rightarrow$ cluster barrier; never grid sync per token \citep{dao2022flashattention,nvidia2022hopper}.
+\textbf{Action:} audit barrier placement on fused DAG edges only \citep{yirage2026}.
 
-\item \textbf{Grade on goodput, and let YiRage enforce legality.}
-Always pair kernels/token and bytes/token with ms/token so a microbenchmark win that does not move the token cannot masquerade as progress \citep{taxbreak2026,memoryfloor2026}. The YiRage CUDA backend rejects a schedule whose residency is illegal on the target SKU before it ships, turning these metrics into a build-time gate \citep{yirage2026,chen2020compilerbasedhardw}.
+\item \textbf{Verification principle.}
+launches/token, bytes/token, and ms/token must move together---TC utilization alone is invalid evidence \citep{taxbreak2026,memoryfloor2026}.
+\textbf{Action:} store Table~\ref{tab:ch04_worked_results} and Table~\ref{tab:ch04_ablation} rows in CI artifacts; compare against Table~\ref{tab:hopper_priority_pyramid} before merge \citep{yirage2026,patel2025llminference}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch04_conclusion}
 
-Hopper/Blackwell supply async copy, cluster, and tensor-core machinery for decode MegaKernels when schedules respect Table~\ref{tab:cuda_memory} \citep{nvidia2022hopper,semianalysis2024tma,taxbreak2026}. TMA overlaps KV/weight movement; DSM widens fusion; sync and PTX discipline protect Chapter~10 softmax carriers \citep{dao2022flashattention,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,nvidia2024cudagraphs,kwon2023vllm,liu2024deepseekv3,dlbook,amd2024xdna,amd2024aie,dao2023flashdecoding}.
+Hopper supplies TMA, clusters, tensor cores, and SFUs as mechanical-sympathy tools when schedules respect Table~\ref{tab:cuda_memory} \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention}.
+This chapter gave an optimization path---not a feature catalog---from fusion through graphs, TMA, clusters, sync, and finally PTX/TC tuning \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+Revisit Table~\ref{tab:hopper_priority_pyramid} before every Hopper PR: fusion and graphs move goodput; TC polish is last \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
 
-Chapter~5 contrasts dynamic CUDA tiers with XDNA static tiles---triplet regression from one IR is mandatory \citep{amd2024xdna,amd2024aie}. Carry bytes/token and launches/token; faster silicon does not redefine goodput \citep{taxbreak2026,memoryfloor2026,patel2025llminference,semianalysis2024tma,nvidia2022hopper,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding}. Reviewers should reject Hopper PRs that show faster microbenchmark GEMMs without DRAM byte deltas or TaxBreak launch counts \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,dao2022flashattention,semianalysis2024tma,nvidia2022hopper,chen2020compilerbasedhardw,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. That discipline keeps the book's Fregly-aligned story honest across fleets \citep{dlbook,taxbreak2026,memoryfloor2026}.
+Chapter~\ref{chap:ch05} contrasts dynamic CUDA tiers with AMD XDNA static tile SRAM: same bufferization graph, different legality rules \citep{amd2024xdna,amd2024aie,patel2025llminference}.
+Carry your Hopper worksheet (launches/token, bytes/token, shared-memory high-water) into the triplet comparison---faster silicon does not redefine goodput \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Worksheet gate.}
+Before opening XDNA chapters, confirm Table~\ref{tab:ch04_worked_results} is filled for your model and pyramid level 1--2 are exhausted \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026}.
+If bytes/token is still flat on Hopper, Chapter~5 will not rescue the schedule \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Closing reminder.}
+Hopper features reward schedules that respect Table~\ref{tab:cuda_memory}; profilers should confirm wins, not discover basic spill \citep{memoryfloor2026,patel2025llminference,nvidia2022hopper,yirage2026}.
+Keep the Hopper worksheet in version control beside compiler config \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Part~II bridge.}
+With Hopper bounds established, Chapter~\ref{chap:ch05} shows how the same IR meets static XDNA tiles---the contrast clarifies why triplet bufferization matters \citep{amd2024xdna,amd2024aie,yirage2026,patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Done criteria.}
+You are done when you can name your pyramid level, attach Table~\ref{tab:ch04_worked_results} and Table~\ref{tab:ch04_ablation} rows, and explain which goodput counter proves the PR \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026}.
+Proceed to Chapter~\ref{chap:ch05} with the Hopper worksheet in hand \citep{amd2024xdna,amd2024aie,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch04" \theabspage}

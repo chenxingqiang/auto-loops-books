@@ -1,0 +1,51 @@
+\appendix
+\chapter{Reproducible Benchmark Harness}
+\label{app:benchmark_harness}
+
+Chapter~1 and Chapter~2 reference this appendix for the triplet decode-cell harness, TaxBreak/Memory-Floor worksheets, and regression matrices.
+Full harness scripts and spreadsheet templates are maintained with the book build artifacts; pin model, ctx bucket, and driver versions per cell before comparing chapters.
+
+\chapter{Hopper Decode Verification Checklist}
+\label{app:hopper_checklist}
+
+This appendix holds execution checklists referenced from Chapter~\ref{chap:ch04}.
+The chapter body states principles; this section is the checkbox layer for CI and release gates.
+
+\section{Environment pins}
+\begin{itemize}
+\item Model weights, tokenizer, and hidden size pinned per benchmark cell.
+\item Driver, CUDA toolkit, and YiRage commit recorded in the artifact manifest.
+\item Context buckets $\{512, 2048, 8192\}$, batch size $=1$, decode step only.
+\item Warmup includes graph capture and ${\ge}1000$ steady decode steps before medians.
+\end{itemize}
+
+\section{Core goodput gates}
+\begin{itemize}
+\item Launches/token, bytes/token, and ms/token reported together---not TC utilization alone.
+\item Ablation matrix: graph-only, fusion-only, graph+fusion (Table~\ref{tab:ch04_ablation} template).
+\item No regression on any ctx bucket beyond published tolerance.
+\item Triplet legality summary: CUDA, CPU, and XDNA exports compile or document deferral.
+\end{itemize}
+
+\section{Hopper-specific counters}
+\begin{itemize}
+\item Shared-memory high-water versus 227\,KB usable block cap.
+\item TMA transaction count and TMA/MMA busy ratio on KV loop bodies.
+\item Graph bucket hit rate across ctx buckets.
+\item Spill check: \texttt{local memory loads} must not rise after fusion merges.
+\end{itemize}
+
+\section{Paged KV and long-context stress}
+\begin{itemize}
+\item vLLM block-table path exercised when product ships paging.
+\item 32K ctx smoke when fleet SLO requires it (may differ from 2K TMA legality).
+\item Numerical diffs at long ctx after any softmax PTX change.
+\end{itemize}
+
+\section{Release train extras}
+\begin{itemize}
+\item Driver upgrade re-run of launches/token and bytes/token cells.
+\item Speculative-decode draft graph capture (when enabled in product).
+\item Tensor-parallel TP$=4$ sweep for fleet configs (not single-GPU chapter default).
+\item Artifact store: residency diagram, byte sheet, Nsight screenshot set, ablation rows.
+\end{itemize}

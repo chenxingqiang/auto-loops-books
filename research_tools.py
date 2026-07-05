@@ -2,10 +2,10 @@
 """
 Per-chapter literature research for autobooks.
 
-Keywords are derived automatically from:
-  - book_prepare.OUTLINE (title, section labels, coverage patterns)
-  - Chinese outline markdown (chapter bullets)
-  - Existing chapter .tex (section titles, index/newterm, body terms)
+Keyword/query strategy (layered):
+  1. books/research/keyword_specs.json — per-chapter curated Scholar queries + seeds
+  2. book_prepare.OUTLINE + book_content.md + chapter .tex — auto-locked terms
+  3. Prior chapters — high-score papers from citation_catalog / search_data reused
 
 Results are saved under books/research/<chapter_id>/ with no hard cap on paper count.
 
@@ -16,6 +16,7 @@ Usage:
     uv run research_tools.py --all
     uv run research_tools.py --chapter ch01 --dry-run
     uv run research_tools.py --verify-references --all
+    python3 research_keyword_specs.py --generate   # refresh keyword_specs.json
     uv run book-loop verify-references --all
 """
 
@@ -35,13 +36,16 @@ import requests
 from bs4 import BeautifulSoup
 
 from book_prepare import OUTLINE, ChapterSpec, read_chapter_text
+from research_keyword_specs import SPECS_PATH, chapter_spec_entry
 
 ROOT = Path(__file__).resolve().parent
 BOOKS = ROOT / "books"
 RESEARCH_ROOT = BOOKS / "research"
 BIB_PATH = BOOKS / "book.bib"
 OUTLINE_MD = ROOT / "book_content.md"
+KEYWORD_SPECS_PATH = SPECS_PATH
 DEFAULT_MIN_CITATION_SCORE = 8
+OUTLINE_ORDER: tuple[str, ...] = tuple(s.chapter_id for s in OUTLINE)
 
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 CROSSREF_EMAIL = os.environ.get("CROSSREF_EMAIL", "research@autobooks.local")
@@ -116,9 +120,11 @@ def search_google_scholar_page(
     num_results: int = SCHOLAR_PAGE_SIZE,
     start: int = 0,
     year_hi: int | None = None,
+    year_lo: int | None = None,
 ) -> list[dict]:
     api_key = _require_serpapi_key()
     year_hi = year_hi or datetime.now().year
+    year_lo = year_lo if year_lo is not None else SCHOLAR_YEAR_LO
 
     params = {
         "engine": "google_scholar",
@@ -126,7 +132,7 @@ def search_google_scholar_page(
         "api_key": api_key,
         "num": num_results,
         "start": start,
-        "as_ylo": SCHOLAR_YEAR_LO,
+        "as_ylo": year_lo,
         "as_yhi": year_hi,
         "hl": "en",
     }
@@ -158,6 +164,7 @@ def search_google_scholar(
     page_size: int = SCHOLAR_PAGE_SIZE,
     max_pages: int | None = None,
     query_delay_s: float = 2.0,
+    year_lo: int | None = None,
 ) -> list[dict]:
     print(f"\nSearching: {query}")
     all_results: list[dict] = []
@@ -168,7 +175,9 @@ def search_google_scholar(
         if max_pages is not None and page >= max_pages:
             break
 
-        batch = search_google_scholar_page(query, num_results=page_size, start=start)
+        batch = search_google_scholar_page(
+            query, num_results=page_size, start=start, year_lo=year_lo
+        )
         if not batch:
             break
 
@@ -790,6 +799,72 @@ def extract_english_terms_from_text(text: str) -> list[str]:
     return terms
 
 
+def prior_chapter_ids(chapter_id: str) -> list[str]:
+    """Chapter ids before chapter_id in OUTLINE order (for literature reuse)."""
+    if chapter_id not in OUTLINE_ORDER:
+        return []
+    idx = OUTLINE_ORDER.index(chapter_id)
+    return list(OUTLINE_ORDER[:idx])
+
+
+def load_inherited_papers(
+    spec: ChapterSpec,
+    keywords: list[tuple[str, int]],
+    *,
+    reuse_min_score: int = 12,
+    max_inherited: int = 25,
+) -> list[dict]:
+    """Reuse high-relevance papers already found for prior chapters."""
+    cfg = chapter_spec_entry(spec.chapter_id)
+    if not cfg.get("inherit_prior_chapters", True):
+        return []
+
+    reuse_min_score = int(cfg.get("reuse_min_score", reuse_min_score))
+    max_inherited = int(cfg.get("max_inherited_papers", max_inherited))
+    collected: list[dict] = []
+
+    for prior_id in prior_chapter_ids(spec.chapter_id):
+        prior_dir = RESEARCH_ROOT / prior_id
+        for source_name in ("citation_catalog.json", "search_data.json"):
+            path = prior_dir / source_name
+            if not path.exists():
+                continue
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            for paper in payload.get("papers", []):
+                title = paper.get("title", "")
+                if not title:
+                    continue
+                abstract = paper.get("abstract") or paper.get("snippet") or ""
+                score, matched = analyze_relevance(
+                    {"title": title, "abstract": abstract, "snippet": abstract},
+                    keywords,
+                )
+                prior_score = paper.get("relevance_score", 0)
+                effective_score = max(score, prior_score // 3 if prior_score else 0)
+                if effective_score < reuse_min_score:
+                    continue
+                raw = paper.get("raw") or paper
+                collected.append(
+                    {
+                        "title": title,
+                        "link": paper.get("link") or raw.get("link", ""),
+                        "abstract": abstract,
+                        "snippet": abstract,
+                        "inherited_from": prior_id,
+                        "inherited_source": source_name,
+                        "prior_relevance_score": prior_score,
+                        "relevance_score": effective_score,
+                        "matched_keywords": matched,
+                        "reference": paper.get("reference") or format_reference(raw),
+                        "bib_key": paper.get("bib_key"),
+                        "raw": raw,
+                    }
+                )
+
+    collected.sort(key=lambda p: p.get("relevance_score", 0), reverse=True)
+    return dedupe_papers(collected)[:max_inherited]
+
+
 def extract_chapter_keywords(spec: ChapterSpec) -> list[tuple[str, int]]:
     weighted: dict[str, int] = {}
 
@@ -799,6 +874,11 @@ def extract_chapter_keywords(spec: ChapterSpec) -> list[tuple[str, int]]:
             return
         key = term.lower()
         weighted[key] = max(weighted.get(key, 0), weight)
+
+    cfg = chapter_spec_entry(spec.chapter_id)
+    for item in cfg.get("keywords", []):
+        if isinstance(item, dict) and item.get("term"):
+            add(str(item["term"]), int(item.get("weight", 15)))
 
     add(spec.title, 18)
 
@@ -851,8 +931,10 @@ def generate_chapter_queries(
     spec: ChapterSpec,
     keywords: list[tuple[str, int]],
 ) -> list[str]:
+    cfg = chapter_spec_entry(spec.chapter_id)
+    queries: list[str] = [str(q).strip() for q in cfg.get("queries", []) if str(q).strip()]
     top_terms = [k for k, _ in keywords[:16]]
-    queries: list[str] = [f'"{spec.title}"']
+    queries.append(f'"{spec.title}"')
 
     for section in spec.sections:
         patterns = [humanize_pattern(p) for p in section.patterns if humanize_pattern(p)]
@@ -989,24 +1071,45 @@ def run_chapter_research(
     min_relevance: int = 1,
     max_pages_per_query: int | None = None,
     query_delay_s: float = 2.0,
+    inherit_prior: bool = True,
 ) -> dict:
     formatted_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     run_ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     out_dir = RESEARCH_ROOT / spec.chapter_id
     run_dir = out_dir / "runs" / run_ts
+    cfg = chapter_spec_entry(spec.chapter_id)
+
+    if max_pages_per_query is None and cfg.get("max_pages_per_query") is not None:
+        max_pages_per_query = cfg.get("max_pages_per_query")
+    query_delay_s = float(cfg.get("query_delay_s", query_delay_s))
+    min_relevance = int(cfg.get("min_relevance", min_relevance))
 
     print(f"\n{'=' * 60}")
     print(f"Chapter: {spec.chapter_id} — {spec.title}")
     print(f"Output:  {out_dir}")
+    print(f"Specs:   {KEYWORD_SPECS_PATH.relative_to(ROOT)}")
 
     keywords = extract_chapter_keywords(spec)
     queries = generate_chapter_queries(spec, keywords)
+    year_lo = int(cfg.get("year_lo", SCHOLAR_YEAR_LO))
 
-    print(f"\nLocked {len(keywords)} keywords, {len(queries)} queries")
+    print(f"\nLocked {len(keywords)} keywords, {len(queries)} queries (year>={year_lo})")
     for kw, w in keywords[:12]:
         print(f"  [{w:2d}] {kw}")
     if len(keywords) > 12:
         print(f"  ... and {len(keywords) - 12} more")
+    print("Queries (custom + auto):")
+    for q in queries[:8]:
+        print(f"  - {q}")
+    if len(queries) > 8:
+        print(f"  ... and {len(queries) - 8} more")
+
+    inherited: list[dict] = []
+    if inherit_prior and cfg.get("inherit_prior_chapters", True):
+        inherited = load_inherited_papers(spec, keywords)
+        if inherited:
+            print(f"\nReusing {len(inherited)} papers from prior chapters: "
+                  f"{', '.join(sorted({p['inherited_from'] for p in inherited}))}")
 
     if dry_run:
         print("\n[dry-run] Skipping API calls.")
@@ -1014,7 +1117,8 @@ def run_chapter_research(
             "chapter": spec.chapter_id,
             "keywords": keywords,
             "queries": queries,
-            "paper_count": 0,
+            "inherited_count": len(inherited),
+            "paper_count": len(inherited),
             "dry_run": True,
         }
 
@@ -1025,28 +1129,54 @@ def run_chapter_research(
                 query,
                 max_pages=max_pages_per_query,
                 query_delay_s=query_delay_s,
+                year_lo=year_lo,
             )
         )
         time.sleep(query_delay_s)
 
     unique_papers = dedupe_papers(raw_papers)
     analyzed: list[tuple[dict, int, list[str]]] = []
+    seen_titles: set[str] = set()
+
+    for paper in inherited:
+        title_key = re.sub(r"\s+", " ", paper.get("title", "").lower())
+        if title_key:
+            seen_titles.add(title_key)
+        analyzed.append(
+            (
+                paper,
+                int(paper.get("relevance_score", 0)),
+                paper.get("matched_keywords") or [],
+            )
+        )
 
     for paper in unique_papers:
+        title_key = re.sub(r"\s+", " ", paper.get("title", "").lower())
+        if title_key in seen_titles:
+            continue
         score, matched = analyze_relevance(paper, keywords)
         if score >= min_relevance:
             analyzed.append((paper, score, matched))
+            if title_key:
+                seen_titles.add(title_key)
 
     analyzed.sort(key=lambda item: item[1], reverse=True)
 
-    print(f"\n=== {spec.chapter_id}: {len(analyzed)} relevant papers (no upper limit) ===")
+    new_count = len(unique_papers)
+    print(
+        f"\n=== {spec.chapter_id}: {len(analyzed)} relevant papers "
+        f"({len(inherited)} inherited + {new_count} raw searched) ==="
+    )
 
     payload = {
         "timestamp": formatted_ts,
         "chapter_id": spec.chapter_id,
         "chapter_title": spec.title,
+        "keyword_specs": str(KEYWORD_SPECS_PATH.relative_to(ROOT)),
+        "year_lo": year_lo,
         "keywords": [{"term": k, "weight": w} for k, w in keywords],
         "search_queries": queries,
+        "inherited_count": len(inherited),
         "paper_count": len(analyzed),
         "papers": [
             {
@@ -1054,9 +1184,11 @@ def run_chapter_research(
                 "link": p.get("link"),
                 "relevance_score": score,
                 "matched_keywords": matched,
-                "reference": format_reference(p),
+                "reference": p.get("reference") or format_reference(p),
                 "abstract": p.get("abstract", p.get("snippet", "")),
-                "raw": p,
+                "inherited_from": p.get("inherited_from"),
+                "bib_key": p.get("bib_key"),
+                "raw": p.get("raw", p),
             }
             for p, score, matched in analyzed
         ],
@@ -1134,7 +1266,23 @@ def main() -> int:
         default=DEFAULT_MIN_CITATION_SCORE,
         help="Min relevance score for a bib cite to pass reference verify",
     )
+    parser.add_argument(
+        "--no-inherit",
+        action="store_true",
+        help="Do not reuse high-score papers from prior chapters",
+    )
+    parser.add_argument(
+        "--specs-path",
+        type=Path,
+        default=KEYWORD_SPECS_PATH,
+        help="Path to keyword_specs.json (default: books/research/keyword_specs.json)",
+    )
     args = parser.parse_args()
+
+    if args.specs_path != KEYWORD_SPECS_PATH:
+        import research_keyword_specs as rks
+
+        rks.SPECS_PATH = args.specs_path
 
     if not args.chapter and not args.all:
         parser.error("Specify --chapter <id> or --all")
@@ -1174,6 +1322,7 @@ def main() -> int:
             min_relevance=args.min_relevance,
             max_pages_per_query=args.max_pages_per_query,
             query_delay_s=args.query_delay,
+            inherit_prior=not args.no_inherit,
         )
         results.append(result)
 

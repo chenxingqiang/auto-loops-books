@@ -1,0 +1,2350 @@
+{
+  "version": 1,
+  "description": "Per-chapter Scholar keywords/queries. Edit queries for latest literature; prior-chapter papers are reused when inherit_prior_chapters is true.",
+  "defaults": {
+    "year_lo": 2019,
+    "year_hi": null,
+    "inherit_prior_chapters": true,
+    "reuse_min_score": 12,
+    "max_inherited_papers": 25,
+    "max_pages_per_query": null,
+    "query_delay_s": 2.0
+  },
+  "chapters": {
+    "ch01": {
+      "title": "LLM Inference Performance Bottlenecks: From Symptoms to Root Causes",
+      "keywords": [
+        {
+          "term": "llm inference performance bottlenecks: from symptoms to root causes",
+          "weight": 18
+        },
+        {
+          "term": "memory-floor r_floor bandwidth",
+          "weight": 17
+        },
+        {
+          "term": "taxbreak hdbi kernel launch",
+          "weight": 17
+        },
+        {
+          "term": "prefill decode disaggregation",
+          "weight": 16
+        },
+        {
+          "term": "flash-decoding attention kernel",
+          "weight": 15
+        },
+        {
+          "term": "pagedattention vllm",
+          "weight": 15
+        },
+        {
+          "term": "benchmark gap",
+          "weight": 14
+        },
+        {
+          "term": "decode pain",
+          "weight": 14
+        },
+        {
+          "term": "framework issues",
+          "weight": 14
+        },
+        {
+          "term": "megakernel whole-decoder fusion",
+          "weight": 14
+        },
+        {
+          "term": "memory not compute",
+          "weight": 14
+        },
+        {
+          "term": "multi hardware",
+          "weight": 14
+        },
+        {
+          "term": "overhead quant",
+          "weight": 14
+        },
+        {
+          "term": "prefill decode",
+          "weight": 14
+        },
+        {
+          "term": "yirage preview",
+          "weight": 14
+        },
+        {
+          "term": "benchmark baseline flash",
+          "weight": 12
+        },
+        {
+          "term": "compute arithmetic",
+          "weight": 12
+        },
+        {
+          "term": "decode",
+          "weight": 12
+        },
+        {
+          "term": "differ hardware",
+          "weight": 12
+        },
+        {
+          "term": "fusion megakernel",
+          "weight": 12
+        },
+        {
+          "term": "gpu cpu npu",
+          "weight": 12
+        },
+        {
+          "term": "latency",
+          "weight": 12
+        },
+        {
+          "term": "launch overhead kernel",
+          "weight": 12
+        },
+        {
+          "term": "memory bandwidth",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "TaxBreak kernel launch overhead LLM decode 2024 2025",
+        "Memory-Floor LLM inference bandwidth batch-1",
+        "vLLM PagedAttention continuous batching decode latency",
+        "Flash-Decoding long context batch-1 attention",
+        "LLM prefill decode disaggregated serving",
+        "kernel fusion megakernel decoder LLM",
+        "CUDA graphs LLM inference decode",
+        "MoE decode kernel launch storm",
+        "\"LLM Inference Performance Bottlenecks: From Symptoms to Root Causes\""
+      ],
+      "year_lo": 2019,
+      "inherit_prior_chapters": false,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch02": {
+      "title": "Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven",
+      "keywords": [
+        {
+          "term": "two kernel design mindsets: operator-driven vs dataflow-driven",
+          "weight": 18
+        },
+        {
+          "term": "dataflow-driven optimization",
+          "weight": 17
+        },
+        {
+          "term": "data residency on-chip",
+          "weight": 16
+        },
+        {
+          "term": "operator-driven kernel design",
+          "weight": 15
+        },
+        {
+          "term": "automation path",
+          "weight": 14
+        },
+        {
+          "term": "cross hardware",
+          "weight": 14
+        },
+        {
+          "term": "data residency",
+          "weight": 14
+        },
+        {
+          "term": "dataflow philosophy",
+          "weight": 14
+        },
+        {
+          "term": "iron rules",
+          "weight": 14
+        },
+        {
+          "term": "megakernel preview",
+          "weight": 14
+        },
+        {
+          "term": "operator first",
+          "weight": 14
+        },
+        {
+          "term": "static pipeline dataflow",
+          "weight": 14
+        },
+        {
+          "term": "compute",
+          "weight": 12
+        },
+        {
+          "term": "data residen residency on chip",
+          "weight": 12
+        },
+        {
+          "term": "dataflow static pipeline",
+          "weight": 12
+        },
+        {
+          "term": "megakernel fusion",
+          "weight": 12
+        },
+        {
+          "term": "operator",
+          "weight": 12
+        },
+        {
+          "term": "register shared global",
+          "weight": 12
+        },
+        {
+          "term": "xdna cuda cpu cache",
+          "weight": 12
+        },
+        {
+          "term": "yirage automat compiler",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "dataflow-driven kernel optimization deep learning",
+        "operator fusion vs data residency on-chip",
+        "static dataflow accelerator inference",
+        "megakernel fused decoder transformer",
+        "compiler automated kernel fusion LLM",
+        "XDNA AIE dataflow graph inference",
+        "\"Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven\""
+      ],
+      "year_lo": 2019,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch03": {
+      "title": "AI Hardware Architecture and Compiler Constraints",
+      "keywords": [
+        {
+          "term": "ai hardware architecture and compiler constraints",
+          "weight": 18
+        },
+        {
+          "term": "hardware constraint matrix",
+          "weight": 16
+        },
+        {
+          "term": "memory hierarchy roofline",
+          "weight": 15
+        },
+        {
+          "term": "benchmark method",
+          "weight": 14
+        },
+        {
+          "term": "constraint matrix",
+          "weight": 14
+        },
+        {
+          "term": "cpu constraints",
+          "weight": 14
+        },
+        {
+          "term": "gpu constraints",
+          "weight": 14
+        },
+        {
+          "term": "hardware aware compile",
+          "weight": 14
+        },
+        {
+          "term": "hardware landscape",
+          "weight": 14
+        },
+        {
+          "term": "npu constraints",
+          "weight": 14
+        },
+        {
+          "term": "warp simd numa static npu",
+          "weight": 14
+        },
+        {
+          "term": "yirage modeling",
+          "weight": 14
+        },
+        {
+          "term": "bandwidth memory hierarchy parallel",
+          "weight": 12
+        },
+        {
+          "term": "benchmark metric methodology",
+          "weight": 12
+        },
+        {
+          "term": "cache simd numa",
+          "weight": 12
+        },
+        {
+          "term": "nvidia amd x86 arm npu",
+          "weight": 12
+        },
+        {
+          "term": "static npu edge",
+          "weight": 12
+        },
+        {
+          "term": "tiling layout pass",
+          "weight": 12
+        },
+        {
+          "term": "warp shared memory tensor core",
+          "weight": 12
+        },
+        {
+          "term": "yirage chip arch model",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "AI accelerator memory hierarchy roofline 2024",
+        "GPU CPU NPU inference compiler constraints",
+        "hardware-aware tiling layout parallel scheduling",
+        "edge NPU static scheduling inference",
+        "cross-platform ML compiler benchmark methodology",
+        "\"AI Hardware Architecture and Compiler Constraints\""
+      ],
+      "year_lo": 2019,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch04": {
+      "title": "CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds",
+      "keywords": [
+        {
+          "term": "cuda hopper/blackwell: hardware properties and optimization bounds",
+          "weight": 18
+        },
+        {
+          "term": "hopper tma tensor memory",
+          "weight": 17
+        },
+        {
+          "term": "tensor core batch-1 decode",
+          "weight": 15
+        },
+        {
+          "term": "thread block cluster dsm",
+          "weight": 15
+        },
+        {
+          "term": "cluster dsm",
+          "weight": 14
+        },
+        {
+          "term": "cuda memory hierarchy",
+          "weight": 14
+        },
+        {
+          "term": "ptx",
+          "weight": 14
+        },
+        {
+          "term": "sync mechanisms",
+          "weight": 14
+        },
+        {
+          "term": "tensor core bounds",
+          "weight": 14
+        },
+        {
+          "term": "tma",
+          "weight": 14
+        },
+        {
+          "term": "yirage cuda backend",
+          "weight": 14
+        },
+        {
+          "term": "block sync",
+          "weight": 12
+        },
+        {
+          "term": "cluster",
+          "weight": 12
+        },
+        {
+          "term": "cuda",
+          "weight": 12
+        },
+        {
+          "term": "decode",
+          "weight": 12
+        },
+        {
+          "term": "dsm",
+          "weight": 12
+        },
+        {
+          "term": "exp2",
+          "weight": 12
+        },
+        {
+          "term": "register",
+          "weight": 12
+        },
+        {
+          "term": "shared memory",
+          "weight": 12
+        },
+        {
+          "term": "tensor core",
+          "weight": 12
+        },
+        {
+          "term": "tensor memory",
+          "weight": 12
+        },
+        {
+          "term": "warp",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "Hopper TMA tensor memory accelerator decode",
+        "Blackwell GPU memory hierarchy inference",
+        "thread block cluster distributed shared memory",
+        "tensor core utilization batch-1 decode",
+        "PTX softmax exp2 inference kernel",
+        "\"CUDA Hopper/Blackwell: Hardware Properties and Optimization Bounds\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch05": {
+      "title": "AMD XDNA/AIE Dataflow Architecture",
+      "keywords": [
+        {
+          "term": "amd xdna/aie dataflow architecture",
+          "weight": 18
+        },
+        {
+          "term": "xdna aie dataflow",
+          "weight": 17
+        },
+        {
+          "term": "adf static graph dma",
+          "weight": 15
+        },
+        {
+          "term": "architecture tradeoffs",
+          "weight": 14
+        },
+        {
+          "term": "cuda xdna mapping",
+          "weight": 14
+        },
+        {
+          "term": "dataflow conclusion",
+          "weight": 14
+        },
+        {
+          "term": "online softmax hw",
+          "weight": 14
+        },
+        {
+          "term": "ryzen ai edge inference",
+          "weight": 14
+        },
+        {
+          "term": "static dataflow rules",
+          "weight": 14
+        },
+        {
+          "term": "xdna tiles",
+          "weight": 14
+        },
+        {
+          "term": "yirage xdna backend",
+          "weight": 14
+        },
+        {
+          "term": "aie",
+          "weight": 12
+        },
+        {
+          "term": "buffer descriptor",
+          "weight": 12
+        },
+        {
+          "term": "carrier",
+          "weight": 12
+        },
+        {
+          "term": "cuda",
+          "weight": 12
+        },
+        {
+          "term": "dataflow",
+          "weight": 12
+        },
+        {
+          "term": "inference",
+          "weight": 12
+        },
+        {
+          "term": "softmax",
+          "weight": 12
+        },
+        {
+          "term": "static",
+          "weight": 12
+        },
+        {
+          "term": "tma",
+          "weight": 12
+        },
+        {
+          "term": "xdna",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "AMD XDNA Ryzen AI inference dataflow",
+        "AIE tile DMA pipeline static graph",
+        "edge NPU LLM decode optimization",
+        "CUDA XDNA primitive mapping compiler",
+        "\"AMD XDNA/AIE Dataflow Architecture\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch06": {
+      "title": "Data Residency and On-Chip Memory Design",
+      "keywords": [
+        {
+          "term": "data residency and on-chip memory design",
+          "weight": 18
+        },
+        {
+          "term": "cpu residency",
+          "weight": 14
+        },
+        {
+          "term": "gpu residency",
+          "weight": 14
+        },
+        {
+          "term": "lifetime planning",
+          "weight": 14
+        },
+        {
+          "term": "npu residency",
+          "weight": 14
+        },
+        {
+          "term": "yirage memory pass",
+          "weight": 14
+        },
+        {
+          "term": "cache",
+          "weight": 12
+        },
+        {
+          "term": "lifetime",
+          "weight": 12
+        },
+        {
+          "term": "memory",
+          "weight": 12
+        },
+        {
+          "term": "npu",
+          "weight": 12
+        },
+        {
+          "term": "numa",
+          "weight": 12
+        },
+        {
+          "term": "register",
+          "weight": 12
+        },
+        {
+          "term": "residen",
+          "weight": 12
+        },
+        {
+          "term": "shared",
+          "weight": 12
+        },
+        {
+          "term": "sram",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "on-chip memory residency fused kernel",
+        "shared memory budgeting transformer decode",
+        "NUMA cache-aware LLM inference layout",
+        "bufferization memory reuse compiler pass",
+        "\"Data Residency and On-Chip Memory Design\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch07": {
+      "title": "Static Role Assignment and Schedule-Free Kernels",
+      "keywords": [
+        {
+          "term": "static role assignment and schedule-free kernels",
+          "weight": 18
+        },
+        {
+          "term": "no runtime sched",
+          "weight": 14
+        },
+        {
+          "term": "static roles",
+          "weight": 14
+        },
+        {
+          "term": "thread mapping",
+          "weight": 14
+        },
+        {
+          "term": "yirage tiling",
+          "weight": 14
+        },
+        {
+          "term": "dispatch",
+          "weight": 12
+        },
+        {
+          "term": "role",
+          "weight": 12
+        },
+        {
+          "term": "runtime",
+          "weight": 12
+        },
+        {
+          "term": "static",
+          "weight": 12
+        },
+        {
+          "term": "thread",
+          "weight": 12
+        },
+        {
+          "term": "tiling",
+          "weight": 12
+        },
+        {
+          "term": "warp",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "static warp assignment GPU kernel",
+        "schedule-free persistent kernel inference",
+        "heterogeneous core tiling compiler",
+        "\"Static Role Assignment and Schedule-Free Kernels\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch08": {
+      "title": "TMA Double-Buffer Pipelines and Async Movement",
+      "keywords": [
+        {
+          "term": "tma double-buffer pipelines and async movement",
+          "weight": 18
+        },
+        {
+          "term": "cpu dma",
+          "weight": 14
+        },
+        {
+          "term": "gpu tma",
+          "weight": 14
+        },
+        {
+          "term": "npu pipeline",
+          "weight": 14
+        },
+        {
+          "term": "pipeline theory",
+          "weight": 14
+        },
+        {
+          "term": "yirage pipeline gen",
+          "weight": 14
+        },
+        {
+          "term": "cpu",
+          "weight": 12
+        },
+        {
+          "term": "dma",
+          "weight": 12
+        },
+        {
+          "term": "double-buffer",
+          "weight": 12
+        },
+        {
+          "term": "hopper",
+          "weight": 12
+        },
+        {
+          "term": "npu",
+          "weight": 12
+        },
+        {
+          "term": "pipeline",
+          "weight": 12
+        },
+        {
+          "term": "tma",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "TMA double buffering MMA overlap Hopper",
+        "async copy pipeline GPU inference",
+        "compiler pipeline stage hazard check",
+        "\"TMA Double-Buffer Pipelines and Async Movement\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch09": {
+      "title": "Hierarchical Synchronization and Communication",
+      "keywords": [
+        {
+          "term": "hierarchical synchronization and communication",
+          "weight": 18
+        },
+        {
+          "term": "deadlock detection",
+          "weight": 14
+        },
+        {
+          "term": "hardware sync pick",
+          "weight": 14
+        },
+        {
+          "term": "sync hierarchy",
+          "weight": 14
+        },
+        {
+          "term": "yirage sync pass",
+          "weight": 14
+        },
+        {
+          "term": "barrier",
+          "weight": 12
+        },
+        {
+          "term": "cpu",
+          "weight": 12
+        },
+        {
+          "term": "deadlock",
+          "weight": 12
+        },
+        {
+          "term": "gpu",
+          "weight": 12
+        },
+        {
+          "term": "sync",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "warp shuffle vs block sync softmax",
+        "GPU synchronization cost model inference",
+        "cross-hardware barrier optimization",
+        "\"Hierarchical Synchronization and Communication\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch10": {
+      "title": "Attention Online Softmax Optimization",
+      "keywords": [
+        {
+          "term": "attention online softmax optimization",
+          "weight": 18
+        },
+        {
+          "term": "cross hardware",
+          "weight": 14
+        },
+        {
+          "term": "fusion boundary",
+          "weight": 14
+        },
+        {
+          "term": "numerical stability",
+          "weight": 14
+        },
+        {
+          "term": "online softmax",
+          "weight": 14
+        },
+        {
+          "term": "exp",
+          "weight": 12
+        },
+        {
+          "term": "fuse",
+          "weight": 12
+        },
+        {
+          "term": "gpu",
+          "weight": 12
+        },
+        {
+          "term": "megakernel",
+          "weight": 12
+        },
+        {
+          "term": "online",
+          "weight": 12
+        },
+        {
+          "term": "softmax",
+          "weight": 12
+        },
+        {
+          "term": "stable",
+          "weight": 12
+        },
+        {
+          "term": "xdna",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "online softmax numerics attention decode",
+        "FlashAttention IO-aware attention 2024",
+        "paged KV cache softmax residency",
+        "\"Attention Online Softmax Optimization\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch11": {
+      "title": "Full Decoder MegaKernel Implementation",
+      "keywords": [
+        {
+          "term": "full decoder megakernel implementation",
+          "weight": 18
+        },
+        {
+          "term": "benchmark results",
+          "weight": 14
+        },
+        {
+          "term": "megakernel structure",
+          "weight": 14
+        },
+        {
+          "term": "qkv attn mlp",
+          "weight": 14
+        },
+        {
+          "term": "source walkthrough",
+          "weight": 14
+        },
+        {
+          "term": "attention",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "decoder",
+          "weight": 12
+        },
+        {
+          "term": "implement",
+          "weight": 12
+        },
+        {
+          "term": "megakernel",
+          "weight": 12
+        },
+        {
+          "term": "qkv",
+          "weight": 12
+        },
+        {
+          "term": "source",
+          "weight": 12
+        },
+        {
+          "term": "speedup",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "fused decoder megakernel transformer",
+        "QKV attention MLP single kernel",
+        "PagedAttention gather fused kernel",
+        "\"Full Decoder MegaKernel Implementation\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch12": {
+      "title": "Three Kernel Execution Modes",
+      "keywords": [
+        {
+          "term": "three kernel execution modes",
+          "weight": 18
+        },
+        {
+          "term": "eager mode",
+          "weight": 14
+        },
+        {
+          "term": "graph mode",
+          "weight": 14
+        },
+        {
+          "term": "megakernel mode",
+          "weight": 14
+        },
+        {
+          "term": "mode selection",
+          "weight": 14
+        },
+        {
+          "term": "cuda graph",
+          "weight": 12
+        },
+        {
+          "term": "eager",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "megakernel",
+          "weight": 12
+        },
+        {
+          "term": "pytorch",
+          "weight": 12
+        },
+        {
+          "term": "trade",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "CUDA graphs LLM decode capture",
+        "persistent kernel vs eager launch inference",
+        "graph bucket memory pool context length",
+        "\"Three Kernel Execution Modes\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch13": {
+      "title": "Core Theory: AI Compiler Optimization Principles",
+      "keywords": [
+        {
+          "term": "core theory: ai compiler optimization principles",
+          "weight": 18
+        },
+        {
+          "term": "fusion theory",
+          "weight": 14
+        },
+        {
+          "term": "gpu cpu npu split",
+          "weight": 14
+        },
+        {
+          "term": "layout theory",
+          "weight": 14
+        },
+        {
+          "term": "parallel scheduling",
+          "weight": 14
+        },
+        {
+          "term": "tiling theory",
+          "weight": 14
+        },
+        {
+          "term": "cpu",
+          "weight": 12
+        },
+        {
+          "term": "fusion",
+          "weight": 12
+        },
+        {
+          "term": "gpu",
+          "weight": 12
+        },
+        {
+          "term": "layout",
+          "weight": 12
+        },
+        {
+          "term": "parallel",
+          "weight": 12
+        },
+        {
+          "term": "tiling",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "AI compiler tiling fusion layout theory",
+        "roofline-guided compiler pass ordering",
+        "decode fusion granularity GPU CPU NPU",
+        "\"Core Theory: AI Compiler Optimization Principles\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch14": {
+      "title": "MLIR: Modern Compiler Infrastructure",
+      "keywords": [
+        {
+          "term": "mlir: modern compiler infrastructure",
+          "weight": 18
+        },
+        {
+          "term": "mlir arch passes",
+          "weight": 14
+        },
+        {
+          "term": "mlir case study",
+          "weight": 14
+        },
+        {
+          "term": "mlir codegen",
+          "weight": 14
+        },
+        {
+          "term": "mlir hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "mlir tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "MLIR bufferization dialect lowering inference",
+        "MLIR GPU CPU codegen optimization 2024",
+        "multi-level IR deep learning compiler",
+        "\"MLIR: Modern Compiler Infrastructure\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch15": {
+      "title": "XLA: Production-Grade AI Compiler",
+      "keywords": [
+        {
+          "term": "xla: production-grade ai compiler",
+          "weight": 18
+        },
+        {
+          "term": "xla arch passes",
+          "weight": 14
+        },
+        {
+          "term": "xla case study",
+          "weight": 14
+        },
+        {
+          "term": "xla codegen",
+          "weight": 14
+        },
+        {
+          "term": "xla hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "xla tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "XLA GPU fusion limits inference",
+        "XLA cross-hardware graph compiler benchmark",
+        "\"XLA: Production-Grade AI Compiler\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch16": {
+      "title": "TVM and Apache TVM Stack",
+      "keywords": [
+        {
+          "term": "tvm and apache tvm stack",
+          "weight": 18
+        },
+        {
+          "term": "tvm arch passes",
+          "weight": 14
+        },
+        {
+          "term": "tvm case study",
+          "weight": 14
+        },
+        {
+          "term": "tvm codegen",
+          "weight": 14
+        },
+        {
+          "term": "tvm hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "tvm tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "TVM AutoTVM Ansor schedule search",
+        "TVM hardware-aware autotuning inference",
+        "\"TVM and Apache TVM Stack\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch17": {
+      "title": "OpenAI Triton: Pythonic GPU Kernel Compiler",
+      "keywords": [
+        {
+          "term": "openai triton: pythonic gpu kernel compiler",
+          "weight": 18
+        },
+        {
+          "term": "triton arch passes",
+          "weight": 14
+        },
+        {
+          "term": "triton case study",
+          "weight": 14
+        },
+        {
+          "term": "triton codegen",
+          "weight": 14
+        },
+        {
+          "term": "triton hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "triton tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "OpenAI Triton autotune register pressure",
+        "Triton HIP AMD inference kernel",
+        "\"OpenAI Triton: Pythonic GPU Kernel Compiler\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch18": {
+      "title": "IREE: MLIR-Native Runtime and Compilation",
+      "keywords": [
+        {
+          "term": "iree: mlir-native runtime and compilation",
+          "weight": 18
+        },
+        {
+          "term": "iree arch passes",
+          "weight": 14
+        },
+        {
+          "term": "iree case study",
+          "weight": 14
+        },
+        {
+          "term": "iree codegen",
+          "weight": 14
+        },
+        {
+          "term": "iree hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "iree tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "IREE MLIR runtime deployment inference",
+        "IREE GPU CPU edge codegen",
+        "\"IREE: MLIR-Native Runtime and Compilation\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch19": {
+      "title": "Glow: Lightweight AI Compiler",
+      "keywords": [
+        {
+          "term": "glow: lightweight ai compiler",
+          "weight": 18
+        },
+        {
+          "term": "glow arch passes",
+          "weight": 14
+        },
+        {
+          "term": "glow case study",
+          "weight": 14
+        },
+        {
+          "term": "glow codegen",
+          "weight": 14
+        },
+        {
+          "term": "glow hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "glow tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "Glow compiler graph optimization inference",
+        "Glow backend quantization fusion",
+        "\"Glow: Lightweight AI Compiler\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch20": {
+      "title": "Mirage and Emerging AI Compilers",
+      "keywords": [
+        {
+          "term": "mirage and emerging ai compilers",
+          "weight": 18
+        },
+        {
+          "term": "mirage arch passes",
+          "weight": 14
+        },
+        {
+          "term": "mirage case study",
+          "weight": 14
+        },
+        {
+          "term": "mirage codegen",
+          "weight": 14
+        },
+        {
+          "term": "mirage hw matrix",
+          "weight": 14
+        },
+        {
+          "term": "mirage tuning",
+          "weight": 14
+        },
+        {
+          "term": "backend",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "codegen",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "lower",
+          "weight": 12
+        },
+        {
+          "term": "pass",
+          "weight": 12
+        },
+        {
+          "term": "profile",
+          "weight": 12
+        },
+        {
+          "term": "target",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "Mirage LLM compiler fusion",
+        "Mirage multi-GPU inference kernel",
+        "\"Mirage and Emerging AI Compilers\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch21": {
+      "title": "Unified AI Compiler Analysis and Cross-Hardware Benchmark",
+      "keywords": [
+        {
+          "term": "unified ai compiler analysis and cross-hardware benchmark",
+          "weight": 18
+        },
+        {
+          "term": "compile overhead",
+          "weight": 14
+        },
+        {
+          "term": "compiler ratings",
+          "weight": 14
+        },
+        {
+          "term": "hw binding",
+          "weight": 14
+        },
+        {
+          "term": "search space",
+          "weight": 14
+        },
+        {
+          "term": "yirage benchmark",
+          "weight": 14
+        },
+        {
+          "term": "autotun",
+          "weight": 12
+        },
+        {
+          "term": "benchmark",
+          "weight": 12
+        },
+        {
+          "term": "binding",
+          "weight": 12
+        },
+        {
+          "term": "compile",
+          "weight": 12
+        },
+        {
+          "term": "compiler",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "overhead",
+          "weight": 12
+        },
+        {
+          "term": "rating",
+          "weight": 12
+        },
+        {
+          "term": "search",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "multi-backend compiler benchmark same model",
+        "cross-hardware LLM inference triplet benchmark",
+        "\"Unified AI Compiler Analysis and Cross-Hardware Benchmark\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch22": {
+      "title": "Compiler-Driven End-to-End Performance Tuning",
+      "keywords": [
+        {
+          "term": "compiler-driven end-to-end performance tuning",
+          "weight": 18
+        },
+        {
+          "term": "bottleneck locating",
+          "weight": 14
+        },
+        {
+          "term": "hw aware profiling",
+          "weight": 14
+        },
+        {
+          "term": "regression gates",
+          "weight": 14
+        },
+        {
+          "term": "tuning workflow",
+          "weight": 14
+        },
+        {
+          "term": "bandwidth",
+          "weight": 12
+        },
+        {
+          "term": "bottleneck",
+          "weight": 12
+        },
+        {
+          "term": "gate",
+          "weight": 12
+        },
+        {
+          "term": "profil",
+          "weight": 12
+        },
+        {
+          "term": "regression",
+          "weight": 12
+        },
+        {
+          "term": "tun",
+          "weight": 12
+        },
+        {
+          "term": "workflow",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "LLM inference profiling Nsight decode",
+        "framework queue vs kernel bottleneck inference",
+        "\"Compiler-Driven End-to-End Performance Tuning\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch23": {
+      "title": "LLM and MoE Specialized Compilation",
+      "keywords": [
+        {
+          "term": "llm and moe specialized compilation",
+          "weight": 18
+        },
+        {
+          "term": "hetero moe",
+          "weight": 14
+        },
+        {
+          "term": "kv hardware",
+          "weight": 14
+        },
+        {
+          "term": "llm decode compile",
+          "weight": 14
+        },
+        {
+          "term": "moe scheduling",
+          "weight": 14
+        },
+        {
+          "term": "cache",
+          "weight": 12
+        },
+        {
+          "term": "decode",
+          "weight": 12
+        },
+        {
+          "term": "expert",
+          "weight": 12
+        },
+        {
+          "term": "hetero",
+          "weight": 12
+        },
+        {
+          "term": "llm",
+          "weight": 12
+        },
+        {
+          "term": "load",
+          "weight": 12
+        },
+        {
+          "term": "moe",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "MoE inference routing scheduling GPU",
+        "mixture of experts decode latency",
+        "heterogeneous MoE deployment",
+        "\"LLM and MoE Specialized Compilation\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch24": {
+      "title": "Heterogeneous Compilation and Multi-Hardware Deployment",
+      "keywords": [
+        {
+          "term": "heterogeneous compilation and multi-hardware deployment",
+          "weight": 18
+        },
+        {
+          "term": "hetero cluster",
+          "weight": 14
+        },
+        {
+          "term": "industrial cases",
+          "weight": 14
+        },
+        {
+          "term": "runtime adapt",
+          "weight": 14
+        },
+        {
+          "term": "unified stack",
+          "weight": 14
+        },
+        {
+          "term": "version regression",
+          "weight": 14
+        },
+        {
+          "term": "yirage cluster",
+          "weight": 14
+        },
+        {
+          "term": "case",
+          "weight": 12
+        },
+        {
+          "term": "cluster",
+          "weight": 12
+        },
+        {
+          "term": "detect",
+          "weight": 12
+        },
+        {
+          "term": "hetero",
+          "weight": 12
+        },
+        {
+          "term": "mlir",
+          "weight": 12
+        },
+        {
+          "term": "production",
+          "weight": 12
+        },
+        {
+          "term": "regression",
+          "weight": 12
+        },
+        {
+          "term": "runtime",
+          "weight": 12
+        },
+        {
+          "term": "unified",
+          "weight": 12
+        },
+        {
+          "term": "version",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "disaggregated prefill decode serving",
+        "KV cache transfer network inference",
+        "DeepEP expert parallel communication",
+        "\"Heterogeneous Compilation and Multi-Hardware Deployment\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch25": {
+      "title": "Auto-Optimization and AI-Assisted Compilation",
+      "keywords": [
+        {
+          "term": "auto-optimization and ai-assisted compilation",
+          "weight": 18
+        },
+        {
+          "term": "hw reward",
+          "weight": 14
+        },
+        {
+          "term": "rl autotune",
+          "weight": 14
+        },
+        {
+          "term": "yirage auto",
+          "weight": 14
+        },
+        {
+          "term": "auto",
+          "weight": 12
+        },
+        {
+          "term": "autotun",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "reward",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "reinforcement learning compiler autotuning",
+        "hardware-aware search space LLM kernel",
+        "\"Auto-Optimization and AI-Assisted Compilation\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch26": {
+      "title": "Production Deployment and Engineering Best Practices",
+      "keywords": [
+        {
+          "term": "production deployment and engineering best practices",
+          "weight": 18
+        },
+        {
+          "term": "env packaging",
+          "weight": 14
+        },
+        {
+          "term": "multi hw ops",
+          "weight": 14
+        },
+        {
+          "term": "pitfalls",
+          "weight": 14
+        },
+        {
+          "term": "scheduling",
+          "weight": 14
+        },
+        {
+          "term": "deploy",
+          "weight": 12
+        },
+        {
+          "term": "fleet",
+          "weight": 12
+        },
+        {
+          "term": "lesson",
+          "weight": 12
+        },
+        {
+          "term": "operation",
+          "weight": 12
+        },
+        {
+          "term": "packag",
+          "weight": 12
+        },
+        {
+          "term": "pitfall",
+          "weight": 12
+        },
+        {
+          "term": "production",
+          "weight": 12
+        },
+        {
+          "term": "schedul",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "LLM inference packaging deployment ops",
+        "production inference scheduling pitfalls",
+        "\"Production Deployment and Engineering Best Practices\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch27": {
+      "title": "Future Trends in AI Compilers",
+      "keywords": [
+        {
+          "term": "future trends in ai compilers",
+          "weight": 18
+        },
+        {
+          "term": "autonomous kernels",
+          "weight": 14
+        },
+        {
+          "term": "codesign",
+          "weight": 14
+        },
+        {
+          "term": "edge cloud",
+          "weight": 14
+        },
+        {
+          "term": "new architectures",
+          "weight": 14
+        },
+        {
+          "term": "architecture",
+          "weight": 12
+        },
+        {
+          "term": "autonomous",
+          "weight": 12
+        },
+        {
+          "term": "cloud",
+          "weight": 12
+        },
+        {
+          "term": "co-design",
+          "weight": 12
+        },
+        {
+          "term": "edge",
+          "weight": 12
+        },
+        {
+          "term": "hardware",
+          "weight": 12
+        },
+        {
+          "term": "kernel",
+          "weight": 12
+        },
+        {
+          "term": "trend",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "edge cloud LLM inference co-design",
+        "autonomous compiler optimization inference",
+        "\"Future Trends in AI Compilers\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch28": {
+      "title": "LLM Inference Frameworks and Serving Runtimes",
+      "keywords": [
+        {
+          "term": "llm inference frameworks and serving runtimes",
+          "weight": 18
+        },
+        {
+          "term": "continuous batching scheduler",
+          "weight": 17
+        },
+        {
+          "term": "pagedattention serving framework",
+          "weight": 16
+        },
+        {
+          "term": "compiler integration hooks",
+          "weight": 14
+        },
+        {
+          "term": "continuous batching",
+          "weight": 14
+        },
+        {
+          "term": "framework bottlenecks",
+          "weight": 14
+        },
+        {
+          "term": "framework landscape",
+          "weight": 14
+        },
+        {
+          "term": "inference framework plugin",
+          "weight": 14
+        },
+        {
+          "term": "kv paging serv",
+          "weight": 14
+        },
+        {
+          "term": "batch",
+          "weight": 12
+        },
+        {
+          "term": "bytes",
+          "weight": 12
+        },
+        {
+          "term": "continuous",
+          "weight": 12
+        },
+        {
+          "term": "export",
+          "weight": 12
+        },
+        {
+          "term": "framework",
+          "weight": 12
+        },
+        {
+          "term": "launch",
+          "weight": 12
+        },
+        {
+          "term": "paged",
+          "weight": 12
+        },
+        {
+          "term": "plugin",
+          "weight": 12
+        },
+        {
+          "term": "vllm",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "vLLM continuous batching scheduler 2024 2025",
+        "inference framework paging plugin architecture",
+        "LLM serving framework decode throughput",
+        "\"LLM Inference Frameworks and Serving Runtimes\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch29": {
+      "title": "YiRage Runtime Layer and Persistent Kernel Execution",
+      "keywords": [
+        {
+          "term": "yirage runtime layer and persistent kernel execution",
+          "weight": 18
+        },
+        {
+          "term": "yirage compiler runtime",
+          "weight": 17
+        },
+        {
+          "term": "persistent kernel capture",
+          "weight": 15
+        },
+        {
+          "term": "deps build native",
+          "weight": 14
+        },
+        {
+          "term": "hw registry runtime",
+          "weight": 14
+        },
+        {
+          "term": "persistent kernel decode",
+          "weight": 14
+        },
+        {
+          "term": "superoptimize handoff",
+          "weight": 14
+        },
+        {
+          "term": "yirage stack layers",
+          "weight": 14
+        },
+        {
+          "term": "decode",
+          "weight": 12
+        },
+        {
+          "term": "detect",
+          "weight": 12
+        },
+        {
+          "term": "graph",
+          "weight": 12
+        },
+        {
+          "term": "hardwareregistry",
+          "weight": 12
+        },
+        {
+          "term": "layer",
+          "weight": 12
+        },
+        {
+          "term": "native",
+          "weight": 12
+        },
+        {
+          "term": "persistent",
+          "weight": 12
+        },
+        {
+          "term": "persistentkernel",
+          "weight": 12
+        },
+        {
+          "term": "submodule",
+          "weight": 12
+        },
+        {
+          "term": "superoptimize",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "YiRage LLM compiler runtime",
+        "persistent kernel runtime inference compiler",
+        "\"YiRage Runtime Layer and Persistent Kernel Execution\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    },
+    "ch30": {
+      "title": "Framework, Compiler, and Runtime Co-Design for Decode Goodput",
+      "keywords": [
+        {
+          "term": "framework, compiler, and runtime co-design for decode goodput",
+          "weight": 18
+        },
+        {
+          "term": "framework compiler co-design",
+          "weight": 17
+        },
+        {
+          "term": "runtime compiler boundary inference",
+          "weight": 15
+        },
+        {
+          "term": "decode pipeline handoff",
+          "weight": 14
+        },
+        {
+          "term": "mode selection fleet",
+          "weight": 14
+        },
+        {
+          "term": "production regression",
+          "weight": 14
+        },
+        {
+          "term": "responsibility split",
+          "weight": 14
+        },
+        {
+          "term": "vllm yirage stack",
+          "weight": 14
+        },
+        {
+          "term": "compiler",
+          "weight": 12
+        },
+        {
+          "term": "decode",
+          "weight": 12
+        },
+        {
+          "term": "eager",
+          "weight": 12
+        },
+        {
+          "term": "framework",
+          "weight": 12
+        },
+        {
+          "term": "graph",
+          "weight": 12
+        },
+        {
+          "term": "prefill",
+          "weight": 12
+        },
+        {
+          "term": "regression",
+          "weight": 12
+        },
+        {
+          "term": "triplet",
+          "weight": 12
+        },
+        {
+          "term": "vllm",
+          "weight": 12
+        },
+        {
+          "term": "yirage",
+          "weight": 12
+        }
+      ],
+      "queries": [
+        "framework compiler runtime co-design inference",
+        "end-to-end LLM serving stack optimization",
+        "\"Framework, Compiler, and Runtime Co-Design for Decode Goodput\""
+      ],
+      "year_lo": 2020,
+      "inherit_prior_chapters": true,
+      "reuse_min_score": 12,
+      "max_inherited_papers": 25
+    }
+  }
+}

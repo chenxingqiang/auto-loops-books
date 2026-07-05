@@ -59,7 +59,8 @@ The loop runs **per-chapter** compile via `book-loop step` → `book_prepare.com
 | `research/<chapter_id>/citation_bindings.jsonl` | Sentence ↔ `bib_key` bindings |
 | `research/<chapter_id>/citation_strict_report.json` | Strict gate (papers, bindings, unbound ratio) |
 | `visuals/<chapter_id>/plan.json` | `book_visuals.py --plan` |
-| `visuals/<chapter_id>/generated/*.tex` | `book_visuals.py --render` |
+| `visuals/<chapter_id>/generated/*.tex` | `book_visuals.py --render`（数据图） |
+| `visuals/<chapter_id>/opentikz/*.tex` | **`using-opentikz` Skill**（架构/流水线，见 [`OPENTIKZ.md`](OPENTIKZ.md)） |
 
 ### Per-chapter citation loop
 

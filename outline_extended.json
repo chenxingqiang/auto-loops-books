@@ -136,6 +136,15 @@
       "min_citations": 8,
       "sections": [
         [
+          "industrial_hook",
+          [
+            "hopper",
+            "production",
+            "hook",
+            "priority"
+          ]
+        ],
+        [
           "cuda_memory_hierarchy",
           [
             "register",
@@ -185,6 +194,23 @@
             "yirage",
             "cuda"
           ]
+        ],
+        [
+          "hopper_tuning",
+          [
+            "pattern",
+            "worked",
+            "anti",
+            "profil"
+          ]
+        ],
+        [
+          "hopper_benchmark",
+          [
+            "benchmark",
+            "hopper",
+            "launches/token"
+          ]
         ]
       ]
     },
@@ -196,6 +222,13 @@
       "max_words": 9000,
       "min_citations": 8,
       "sections": [
+        [
+          "industrial_hook",
+          [
+            "hook|slower gpu|compile fail",
+            "xdna|spatial"
+          ]
+        ],
         [
           "xdna_tiles",
           [
@@ -245,6 +278,19 @@
             "yirage",
             "xdna"
           ]
+        ],
+        [
+          "review_gates",
+          [
+            "review gate|merge blocker|sram budget"
+          ]
+        ],
+        [
+          "ryzen_benchmark",
+          [
+            "benchmark|ddr bytes",
+            "dma edges"
+          ]
         ]
       ]
     },
@@ -256,6 +302,13 @@
       "max_words": 8000,
       "min_citations": 6,
       "sections": [
+        [
+          "industrial_hook",
+          [
+            "residen|on-chip|decode optim",
+            "lifetime"
+          ]
+        ],
         [
           "lifetime_planning",
           [
@@ -289,6 +342,34 @@
           [
             "yirage",
             "memory"
+          ]
+        ],
+        [
+          "cross_hw_worked",
+          [
+            "worked|llama|tri.?hardware",
+            "gpu.*cpu.*npu"
+          ]
+        ],
+        [
+          "residency_pitfalls",
+          [
+            "anti.?pattern|checklist|pitfall",
+            "over.?fusion|numa"
+          ]
+        ],
+        [
+          "residency_patterns",
+          [
+            "pattern",
+            "scene"
+          ]
+        ],
+        [
+          "residency_review",
+          [
+            "review workflow",
+            "step r"
           ]
         ]
       ]
@@ -327,6 +408,57 @@
           [
             "yirage",
             "tiling"
+          ]
+        ],
+        [
+          "role_decision",
+          [
+            "producer",
+            "consumer",
+            "ratio"
+          ]
+        ],
+        [
+          "tri_hw_role_mapping",
+          [
+            "tri.?hardware",
+            "gpu.*cpu.*npu"
+          ]
+        ],
+        [
+          "static_levels",
+          [
+            "staticization",
+            "cuda graph",
+            "persistent"
+          ]
+        ],
+        [
+          "role_pitfalls",
+          [
+            "anti.?pattern|checklist|pitfall",
+            "barrier"
+          ]
+        ],
+        [
+          "role_patterns",
+          [
+            "pattern",
+            "scene"
+          ]
+        ],
+        [
+          "role_review",
+          [
+            "review workflow",
+            "step r"
+          ]
+        ],
+        [
+          "joint_residency",
+          [
+            "joint",
+            "residency"
           ]
         ]
       ]
@@ -373,6 +505,41 @@
             "yirage",
             "pipeline"
           ]
+        ],
+        [
+          "joint_budget",
+          [
+            "residency",
+            "pipeline"
+          ]
+        ],
+        [
+          "pipeline_pitfalls",
+          [
+            "pitfall",
+            "checklist"
+          ]
+        ],
+        [
+          "pipeline_patterns",
+          [
+            "pattern",
+            "workflow"
+          ]
+        ],
+        [
+          "pipeline_review",
+          [
+            "review",
+            "gate"
+          ]
+        ],
+        [
+          "pipeline_benchmarking",
+          [
+            "benchmark",
+            "decode"
+          ]
         ]
       ]
     },
@@ -410,6 +577,53 @@
           [
             "yirage",
             "sync"
+          ]
+        ],
+        [
+          "joint_budget",
+          [
+            "memory",
+            "budget",
+            "barrier"
+          ]
+        ],
+        [
+          "sync_pitfalls",
+          [
+            "pitfall",
+            "checklist",
+            "anti-pattern"
+          ]
+        ],
+        [
+          "sync_patterns",
+          [
+            "pattern",
+            "engineering"
+          ]
+        ],
+        [
+          "sync_review",
+          [
+            "review",
+            "gate",
+            "pr"
+          ]
+        ],
+        [
+          "sync_benchmarking",
+          [
+            "benchmark",
+            "nsight",
+            "decode"
+          ]
+        ],
+        [
+          "megakernel_composition",
+          [
+            "megakernel",
+            "pass",
+            "certificate"
           ]
         ]
       ]

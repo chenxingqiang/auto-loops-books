@@ -3,42 +3,30 @@
   "chapter_title": "Two Kernel Design Mindsets: Operator-Driven vs Dataflow-Driven",
   "visuals": [
     {
-      "id": "fig_operator_graph",
+      "id": "fig_mindset_contrast",
       "kind": "architecture_figure",
-      "section": "operator_first",
-      "label": "fig:operator_graph",
-      "caption": "Operator-driven schedule: each op reads/writes global memory.",
+      "section": "two_mindsets",
+      "label": "fig:mindset_contrast",
+      "caption": "Mindset contrast: operator-first vs dataflow-first on one decoder layer.",
       "status": "done",
       "placement": "t",
       "blocks": [
-        "LayerNorm",
-        "QKV",
-        "Attn",
-        "MLP",
-        "HBM"
+        "Operator-first",
+        "Dataflow-first"
       ]
     },
     {
-      "id": "fig_dataflow_residency",
-      "kind": "pipeline_figure",
-      "section": "dataflow_philosophy",
-      "label": "fig:dataflow_residency",
-      "caption": "Dataflow-driven schedule: activations stay on-chip across fused stages.",
+      "id": "fig_memory_pyramid",
+      "kind": "architecture_figure",
+      "section": "data_residency",
+      "label": "fig:memory_pyramid",
+      "caption": "Memory residency pyramid and iron rules.",
       "status": "done",
       "placement": "t",
-      "stages": [
-        {
-          "name": "On-chip tile",
-          "detail": "Register / shared"
-        },
-        {
-          "name": "Fused QKV+Attn",
-          "detail": "No HBM export"
-        },
-        {
-          "name": "Fused MLP",
-          "detail": "Pipeline"
-        }
+      "blocks": [
+        "Registers",
+        "Shared",
+        "HBM"
       ]
     },
     {
@@ -66,6 +54,19 @@
           "CPU",
           "Cache hierarchy + explicit blocking"
         ]
+      ]
+    },
+    {
+      "id": "fig_export_edges",
+      "kind": "architecture_figure",
+      "section": "megakernel_automation",
+      "label": "fig:export_edges",
+      "caption": "Export-edge audit before and after staged fusion.",
+      "status": "done",
+      "placement": "t",
+      "blocks": [
+        "Before",
+        "After"
       ]
     }
   ]

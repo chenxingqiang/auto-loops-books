@@ -159,26 +159,31 @@ SECTION_VISUAL_RECIPES: dict[str, dict[str, list[dict[str, Any]]]] = {
         ],
     },
     "ch02": {
-        "operator_first": [
+        "two_mindsets": [
             {
-                "id": "fig_operator_graph",
+                "id": "fig_mindset_contrast",
                 "kind": "architecture_figure",
-                "caption": "Operator-driven schedule: each op reads/writes global memory.",
-                "label": "fig:operator_graph",
-                "blocks": ["LayerNorm", "QKV", "Attn", "MLP", "HBM"],
+                "caption": "Mindset contrast: operator-first vs dataflow-first on one decoder layer.",
+                "label": "fig:mindset_contrast",
+                "blocks": ["Operator-first", "Dataflow-first"],
             },
         ],
-        "dataflow_philosophy": [
+        "data_residency": [
             {
-                "id": "fig_dataflow_residency",
-                "kind": "pipeline_figure",
-                "caption": "Dataflow-driven schedule: activations stay on-chip across fused stages.",
-                "label": "fig:dataflow_residency",
-                "stages": [
-                    {"name": "On-chip tile", "detail": "Register / shared"},
-                    {"name": "Fused QKV+Attn", "detail": "No HBM export"},
-                    {"name": "Fused MLP", "detail": "Pipeline"},
-                ],
+                "id": "fig_memory_pyramid",
+                "kind": "architecture_figure",
+                "caption": "Memory residency pyramid and iron rules.",
+                "label": "fig:memory_pyramid",
+                "blocks": ["Registers", "Shared", "HBM"],
+            },
+        ],
+        "megakernel_automation": [
+            {
+                "id": "fig_export_edges",
+                "kind": "architecture_figure",
+                "caption": "Export-edge audit before and after staged fusion.",
+                "label": "fig:export_edges",
+                "blocks": ["Before", "After"],
             },
         ],
         "cross_hardware": [
@@ -225,6 +230,25 @@ SECTION_VISUAL_RECIPES: dict[str, dict[str, list[dict[str, Any]]]] = {
                     ["Dynamic shapes", "Flexible", "Flexible", "Restricted"],
                 ],
             },
+            {
+                "id": "tab_tri_hw_decode_compare",
+                "kind": "comparison_table",
+                "caption": "Decode optimization comparison across hardware classes.",
+                "label": "tab:tri_hw_decode_compare",
+                "columns": ["Dimension", "GPU", "CPU", "NPU"],
+                "rows": [
+                    ["Core bottleneck", "Launch + HBM", "Cache + NUMA", "SRAM + layout"],
+                    ["Optimization focus", "Fusion + graphs", "Blocking + affinity", "Static DMA"],
+                    ["Typical failure", "Spill", "LLC eviction", "Compile fail"],
+                ],
+            },
+            {
+                "id": "fig_tri_hw_memory",
+                "kind": "architecture_figure",
+                "caption": "Tri-hardware memory hierarchy sketch.",
+                "label": "fig:tri_hw_memory",
+                "blocks": ["GPU tiers", "CPU tiers", "NPU tiers"],
+            },
         ],
         "benchmark_method": [
             {
@@ -247,9 +271,44 @@ SECTION_VISUAL_RECIPES: dict[str, dict[str, list[dict[str, Any]]]] = {
                 "label": "fig:gpu_memory_hierarchy",
                 "blocks": ["Register file", "Shared memory", "L2 cache", "HBM"],
             },
+            {
+                "id": "fig_gpu_sm_resources",
+                "kind": "architecture_figure",
+                "caption": "H100 SM resource sketch.",
+                "label": "fig:gpu_sm_resources",
+                "blocks": ["Register file", "Shared memory", "Tensor cores", "Warp scheduler"],
+            },
+        ],
+        "hardware_aware_compile": [
+            {
+                "id": "fig_hw_aware_compile_flow",
+                "kind": "pipeline_figure",
+                "caption": "Hardware-aware compile flow.",
+                "label": "fig:hw_aware_compile_flow",
+                "stages": [
+                    {"name": "Hardware model", "detail": "Capacities + costs"},
+                    {"name": "Tiling / fusion", "detail": "Residency budget"},
+                    {"name": "Layout", "detail": "Vectorize / DMA"},
+                    {"name": "Legality", "detail": "Codegen gate"},
+                ],
+            },
         ],
     },
     "ch04": {
+        "industrial_hook": [
+            {
+                "id": "fig_hopper_priority_pyramid",
+                "kind": "pipeline_figure",
+                "caption": "Hopper decode optimization priority pyramid.",
+                "label": "fig:hopper_priority_pyramid",
+                "stages": [
+                    {"name": "Fusion", "detail": "bytes/token"},
+                    {"name": "Graphs", "detail": "launches/token"},
+                    {"name": "TMA", "detail": "latency"},
+                    {"name": "TC last", "detail": "FLOPs"},
+                ],
+            },
+        ],
         "cuda_memory_hierarchy": [
             {
                 "id": "tab_cuda_memory",
@@ -275,6 +334,34 @@ SECTION_VISUAL_RECIPES: dict[str, dict[str, list[dict[str, Any]]]] = {
                     {"name": "MMA compute", "detail": "Previous tile"},
                     {"name": "Epilogue", "detail": "Fused in shared"},
                     {"name": "TMA prefetch", "detail": "Next tile"},
+                ],
+            },
+        ],
+        "hopper_tuning": [
+            {
+                "id": "fig_fusion_hbm_compare",
+                "kind": "architecture_figure",
+                "caption": "Fusion removes activation HBM ping-pong.",
+                "label": "fig:fusion_hbm_compare",
+                "blocks": ["Unfused ops", "HBM", "Fused MegaKernel"],
+            },
+            {
+                "id": "fig_hopper_sm_resources",
+                "kind": "architecture_figure",
+                "caption": "Hopper SM resource sketch.",
+                "label": "fig:hopper_sm_resources",
+                "blocks": ["Registers", "Shared mem", "TMA", "Tensor cores"],
+            },
+            {
+                "id": "tab_ch04_worked_results",
+                "kind": "comparison_table",
+                "caption": "Llama-3.2-1B layer fusion results.",
+                "label": "tab:ch04_worked_results",
+                "columns": ["Metric", "Before", "After"],
+                "rows": [
+                    ["Launches", "12", "1"],
+                    ["Bytes/token", "~49KB", "~8KB"],
+                    ["ms/token", "42µs", "19µs"],
                 ],
             },
         ],

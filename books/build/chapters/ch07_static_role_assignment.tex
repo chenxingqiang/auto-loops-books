@@ -2,148 +2,975 @@
 \label{chap:ch07}
 \typeout{START_CHAPTER "ch07" \theabspage}
 
-Chapter~6 made on-chip residency a budgeted, checkable property; this chapter spends that budget on a specific structural choice---assigning each execution unit a fixed role at compile time so the kernel needs no runtime scheduler at all \citep{shah2024flashattention3,mpk2025}. The motivation is again the launch storm: dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, and most of that orchestration exists only because the work-to-hardware mapping is decided dynamically, per operator, by the host \citep{taxbreak2026}. If instead the mapping is fixed once, at compile time, the host stops dispatching and the kernel becomes ``schedule-free''---a single resident program that already knows what every block and warp should do \citep{memoryfloor2026,nvidia2024cudagraphs}.
-The mistake to avoid is assuming static assignment sacrifices flexibility for speed. On the contrary, fixing roles is what lets the compiler reason about residency and overlap precisely, because it knows in advance which unit produces what and when \citep{dao2022flashattention,wu2024mirage}. This chapter develops static role assignment on GPUs and dataflow NPUs, shows how it eliminates runtime dispatch, and ends with the YiRage tiling pass that assigns roles per target.
+\section{The Ultimate Fix for Dispatch Overhead: Static Role Assignment}
+\label{sec:industrial_hook}
+
+A serving team measured 847.5 GPU kernel launches per output token on dense Llama-3.2-1B---and realized most launches existed only to \emph{decide who does what} this step \citep{taxbreak2026,patel2025llminference}.
+Chapter~\ref{chap:ch06} budgeted \emph{where} bytes live; this chapter fixes \emph{which unit} loads them and which unit computes---at compile time, not per token \citep{yirage2026,shah2024flashattention3}.
+
+\textbf{847.5 launches per token is a scheduling tax.} Each launch reassigns work from host to device; static role assignment moves that decision to compile time so one resident kernel already knows every warp's job \citep{taxbreak2026,mpk2025,nvidia2024cudagraphs}.
+\textbf{This chapter is the MegaKernel structural pillar}---from residency budget to schedule-free execution \citep{wu2024mirage,memoryfloor2026}.
+
+\paragraph{Bridge from Chapter~6.}
+Residency worksheets tell you peak footprint; role assignment tells you \emph{who} holds each buffer while it is live \citep{yirage2026,chen2020compilerbasedhardw}.
+Register skew from producer/consumer splits \emph{changes} the residency distribution---joint optimization is mandatory \citep{shah2024flashattention3,dao2022flashattention}.
+General lifetime method: Chapter~\ref{chap:ch06}; here we specialize to decode staticization \citep{patel2025llminference}.
+
+\paragraph{Bridge to hardware chapters.}
+Hopper thread hierarchy, TMA, WGMMA: Chapter~\ref{chap:ch04} \citep{nvidia2022hopper,semianalysis2024tma}.
+XDNA tile pipelines: Chapter~\ref{chap:ch05} \citep{amd2024xdna,amd2024aie}.
+We cite only constraints that bind role splits---not silicon catalogs \citep{yirage2026}.
+
+\paragraph{What you will be able to do.}
+(1)~Choose a staticization level (L1--L3), (2)~compute producer/consumer ratio for decode, (3)~fill tri-hardware role map, (4)~interpret YiRage tiling-pass output, (5)~review with the role checklist \citep{yirage2026,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Organization map.}
+Core principles (\S\ref{sec:ch07_static_roles}), quantitative decision (\S\ref{sec:ch07_role_decision}), tri-hardware mapping (\S\ref{sec:ch07_tri_hw_role_mapping}), staticization ladder (\S\ref{sec:ch07_static_levels}), YiRage tiling pass (\S\ref{sec:ch07_yirage_tiling}), pitfalls (\S\ref{sec:ch07_role_pitfalls}), patterns (\S\ref{sec:ch07_role_patterns}), review workflow (\S\ref{sec:ch07_role_review}), takeaways and bridge to Chapter~\ref{chap:ch08} \citep{semianalysis2024tma,dao2022flashattention}.
+
+\paragraph{Case study sketch (dense 1B decode cell).}
+Baseline: per-operator stack, 847.5 launches/token, ms/token dominated by dispatch \citep{taxbreak2026,patel2025llminference}.
+L1 CUDA Graph: launches drop to 1; ms/token improves if host was the bottleneck \citep{nvidia2024cudagraphs,memoryfloor2026}.
+L2 persistent + warp roles: launches stay at 1; producer/consumer overlap cuts consumer wait \citep{shah2024flashattention3,yirage2026}.
+L3 megakernel: same launch count; depth-scaling dispatch removed across layers \citep{mpk2025,taxbreak2026,wu2024mirage}.
+Document each step with launches/token and bytes/token \citep{dao2022flashattention,memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{Decode-first thesis.}
+Prefill has batch parallelism to amortize schedulers; batch-1 decode does not \citep{kwon2023vllm,memoryfloor2026}.
+Static roles pay off when overhead dominates useful work---the decode regime this book targets \citep{patel2025llminference,taxbreak2026}.
+Do not copy prefill FA3 ratios blindly; Section~\ref{sec:ch07_role_decision} gives decode-specific rules \citep{shah2024flashattention3}.
+
+\paragraph{Why this follows Chapter~6.}
+Residency answers ``can these bytes fit?''; roles answer ``which warp holds them while computing?'' \citep{yirage2026,dao2022flashattention}.
+A legal footprint with a bad role split still leaves consumers starving or producers wasting SM slots \citep{shah2024flashattention3,memoryfloor2026}.
+MegaKernel chapters assume both worksheets are green \citep{mpk2025,wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Industrial narrative.}
+TaxBreak attributed 847.5 launches/token on Llama-3.2-1B largely to per-operator dispatch \citep{taxbreak2026}.
+CUDA Graphs remove \emph{host} launch overhead but not per-operator \emph{role} chaos inside graphs unless you fuse and specialize \citep{nvidia2024cudagraphs,shah2024flashattention3}.
+Static roles are how fusion becomes a single coherent program instead of a scripted sequence \citep{mpk2025,yirage2026}.
+
+\paragraph{Reader paths.}
+\textbf{Kernel engineers:} staticization ladder + worked ratio table + pitfalls \citep{shah2024flashattention3,taxbreak2026}.
+\textbf{Compiler authors:} tiling pass I/O + Mirage loop \citep{yirage2026,wu2024mirage,mpk2025}.
+\textbf{Serving leads:} L1--L3 trade table + launches/token evidence \citep{patel2025llminference,nvidia2024cudagraphs}.
+All paths end at the checklist before Chapter~\ref{chap:ch08} \citep{semianalysis2024tma,dao2022flashattention}.
+
+\paragraph{Anti-pattern preview.}
+Section~\ref{sec:ch07_role_pitfalls} lists five role failures---review before merging warp-specialization \citep{yirage2026,shah2024flashattention3}.
+Culture: no ``we enabled FA3 split'' without decode ratio worksheet \citep{taxbreak2026,patel2025llminference}.
+Celebrating launch drops without role stall replay is L1 thinking on an L2 problem \citep{nvidia2024cudagraphs,shah2024flashattention3,memoryfloor2026}.
+
+\paragraph{Who should read this chapter.}
+Kernel engineers implementing warp specialization, compiler authors wiring tiling pass, serving leads choosing L1--L3 staticization \citep{shah2024flashattention3,yirage2026,mpk2025,patel2025llminference}.
+If you completed Ch.~6 worksheets, you are ready for role assignment \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+If not, finish Ch.~6 first---roles without residency budgets are guesswork \citep{memoryfloor2026,yirage2026,taxbreak2026}.
+
+\paragraph{What this chapter is not.}
+Not a Hopper programming manual (Ch.~4), not an XDNA catalog (Ch.~5), not a residency tutorial (Ch.~6) \citep{nvidia2022hopper,amd2024xdna,chen2020compilerbasedhardw}.
+We teach staticization \emph{decisions} given those inputs \citep{yirage2026,dlbook}.
+
+\paragraph{Budget--structure coupling.}
+Chapter~\ref{chap:ch06} asked whether tensors fit; this chapter asks whether \emph{units} can execute the fit plan without renegotiating every token \citep{yirage2026,shah2024flashattention3,dao2022flashattention}.
+Register skew from consumer warpgroups changes which tensors fit in registers versus shared memory---update the Ch.~6 worksheet when roles change \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+Megakernel assembly (Chapters~8--11) assumes both budgets are closed \citep{mpk2025,wu2024mirage,semianalysis2024tma}.
+
+\paragraph{847.5 as operational anchor.}
+Keep launches/token next to ms/token in every decode dashboard \citep{taxbreak2026,patel2025llminference}.
+Static roles attack the launch numerator; residency attacks the bytes denominator---both charts must move for a real win \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
+OLMoE-scale 9{,}305 launches/token is the regime where L3 megakernels repay compile investment \citep{taxbreak2026,mpk2025}.
+
+\paragraph{Terminology alignment.}
+\textbf{Static role} = fixed unit function for kernel lifetime \citep{shah2024flashattention3,mpk2025}.
+\textbf{Schedule-free} = no runtime reassignment of units across operators \citep{taxbreak2026,patel2025llminference}.
+\textbf{Persistent kernel} = fixed grid of resident CTAs looping work \citep{shah2024flashattention3,nvidia2024cudagraphs}.
+\textbf{Megakernel} = persistent + whole-model fusion + SM task graph \citep{mpk2025,wu2024mirage,yirage2026}.
+Use these terms consistently in worksheets and CI logs \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
 \index{Static role assignment}
 \index{Warp specialization}
 \index{Persistent kernel}
+\index{Schedule-free kernel}
 
-\section{Static roles}
+\section{Static Role Assignment: Principles and Decode Payoff}
 \label{sec:ch07_static_roles}
 
-% AUTO_VISUAL:fig_static_roles_pipeline
+\textbf{Static role assignment} fixes each execution unit's job for the kernel lifetime---producer units move data, consumer units compute---instead of a runtime scheduler reassigning per operator \citep{shah2024flashattention3,mpk2025}.
+On Hopper the canonical pattern is warp specialization: producer warps issue async loads; consumer warpgroups issue collective matmul \citep{shah2024flashattention3,semianalysis2024tma}.
+The compiler emits role-pure instruction streams---no interleaved load/matmul branches---improving overlap scheduling \citep{shah2024flashattention3,wu2024mirage}.
 
+% AUTO_VISUAL:fig_static_roles_pipeline
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
  \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Compile time\\assign roles};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Producer\\TMA loads};
- \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Consumer\\WGMMA compute};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Producer\\loads};
+ \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Consumer\\compute};
  \node[vis arch node] (s3) at (5.03,0) {\footnotesize Resident\\no re-dispatch};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Static role assignment fixes each unit's job at compile time---producer warps move data, consumer warps compute---so no runtime scheduler is needed.}
+\caption{Static roles: compile-time assignment $\rightarrow$ producer/consumer overlap $\rightarrow$ schedule-free resident kernel.}
 \label{fig:static_roles_pipeline}
 \end{figure}
 
-\textbf{Static} \textbf{role} assignment means deciding, at compile time, what each execution unit does for the entire life of the kernel, rather than letting a runtime scheduler reassign work dynamically \citep{shah2024flashattention3}. On a GPU the canonical instance is warp specialization: the warps of a thread block are partitioned into producer warps that only ever issue data movement and consumer warps that only ever issue computation \citep{shah2024flashattention3}. FlashAttention-3 makes this concrete on Hopper---producer warps drive the Tensor Memory Accelerator (TMA) to move tiles from global to shared memory, while consumer warps drive Warpgroup Matrix-Multiply-Accumulate (WGMMA) on those tiles---and the paper notes that this separation ``improves the compiler's ability to generate optimal instruction schedules'' \citep{shah2024flashattention3}.
+\paragraph{What ``schedule-free'' means.}
+The \emph{assignment} of work to units is not recomputed at runtime---no host picks the next operator kernel \citep{taxbreak2026,mpk2025}.
+Internal tile \emph{ordering} may remain; cross-operator dispatch does not \citep{shah2024flashattention3}.
+That distinction is where decode latency is won \citep{memoryfloor2026,patel2025llminference}.
 
-Static role assignment is, in compiler terms, a form of specialization: the kernel is compiled knowing the role of each unit, so branches that would otherwise select behavior at runtime are resolved away, and each unit's instruction stream contains only the instructions for its role \citep{shah2024flashattention3}. This is why the FA3 authors observe that the separation improves the compiler's ability to schedule instructions---a producer warp's stream is all loads and barrier signals, a consumer warp's stream is all matmuls and barrier waits, and neither contains the other's instructions to get in the way \citep{shah2024flashattention3}. A unified, non-specialized warp would interleave both and force the instruction scheduler to reason about dependencies that the static split makes structural.
+\paragraph{Mechanical sympathy with asynchrony.}
+Async load and compute paths signal through barriers \citep{semianalysis2024tma,nvidia2022hopper}.
+A unified warp stalls on its own loads; split roles let producers run ahead while consumers drain buffers---Chapter~\ref{chap:ch06} double-buffering expressed as labor division \citep{dao2022flashattention,yirage2026}.
 
-The reason a fixed \textbf{role} helps is mechanical sympathy with asynchrony. Modern GPU data movement and compute are asynchronous: TMA copies and WGMMA matmuls run on separate hardware paths and signal completion through barriers \citep{semianalysis2024tma,nvidia2022hopper}. If a single warp had to both load and compute, it would stall waiting on its own loads; by giving each warp one \textbf{static} \textbf{role}, the producer can run ahead filling buffers while the consumer drains them, and the two overlap naturally. This is the same double-buffering idea from Chapter~6, but expressed as a division of labor among units rather than among buffers.
+\paragraph{Megakernel limit case.}
+Mirage Persistent Kernel assigns each SM a compile-time task sequence---entire forward pass in one launch \citep{mpk2025,wu2024mirage}.
+Full static roles are the structural prerequisite Chapter~20's search assumes \citep{mpk2025,yirage2026}.
+TaxBreak-scale launch counts collapse to one per token when roles and fusion are co-designed \citep{taxbreak2026,memoryfloor2026}.
 
-Static \textbf{role} assignment is not GPU-specific; it is the native model of a dataflow NPU. On the AMD XDNA fabric each compute tile has a fixed \textbf{role} in a spatial pipeline, with its DMA engine and vector unit assigned a specific stage of the computation at compile time, and data flowing between neighboring tiles through configured streams \citep{amd2024xdna,amd2024aie}. There is no runtime that decides which tile does what---the array is configured before execution and holds that configuration. The GPU and NPU therefore arrive at the same place from opposite directions: the GPU adds static specialization on top of a dynamically scheduled machine, while the NPU is statically scheduled by construction. This convergence is a useful design signal: when two very different architectures both reward fixing roles at compile time, it suggests the benefit is fundamental to memory-bound, low-parallelism workloads rather than an artifact of one machine's quirks \citep{amd2024aie,shah2024flashattention3}. The book's recurring thesis---that decode is bound by movement and orchestration, not arithmetic---predicts exactly this, because static assignment attacks orchestration directly while leaving the arithmetic untouched \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{Two scheduling costs.}
+\textbf{Assignment scheduling} decides which unit runs which op---host launches, block schedulers \citep{taxbreak2026,mpk2025}.
+\textbf{Ordering scheduling} decides tile sequence inside a unit---cheap if assignment is fixed \citep{shah2024flashattention3,patel2025llminference}.
+Static roles eliminate assignment cost; persistent tile loops retain minimal ordering cost \citep{nvidia2024cudagraphs,shah2024flashattention3}.
+Confusing the two leads teams to CUDA Graph L1 and wonder why bytes/token is flat \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
 
-It is worth being precise about what ``schedule-free'' does and does not mean. It does not mean the kernel performs no scheduling---there is still an order in which a consumer warp processes its tiles. It means the \emph{assignment} of work to units is not recomputed at runtime: no host scheduler decides which kernel runs next, and no hardware block scheduler streams fresh CTAs through the machine per operator \citep{shah2024flashattention3,mpk2025}. The distinction matters because the two kinds of scheduling have very different costs. Ordering within a resident unit is nearly free; reassigning work across units, especially when it requires a host round trip, is the expensive part, and it is the part static assignment removes \citep{taxbreak2026}.
-
-A second clarification is why this is specifically a decode technique. During prefill there is abundant parallelism---many prompt tokens processed at once---so a dynamic scheduler has plenty of independent work to keep units busy and its overhead amortizes across a large batch \citep{kwon2023vllm}. At batch-1 decode there is exactly one token of work per step, so any scheduling overhead is paid against a tiny amount of useful computation, and the ratio of overhead to work is at its worst \citep{memoryfloor2026,patel2025llminference}. Static role assignment is therefore not a universal speedup; it is the right structure precisely when parallelism is scarce and overhead dominates, which is the decode regime this book targets.
-
-Taken to its limit, static \textbf{role} assignment produces a megakernel. Mirage Persistent Kernel assigns every streaming multiprocessor a \textbf{role} in an SM-level task graph and runs the entire model forward pass as one kernel, with the SMs cooperating through in-kernel scheduling rather than returning to the host between operators \citep{mpk2025,wu2024mirage}. The \textbf{static} structure is what makes this possible: because each SM's sequence of tasks is known at compile time, there is no need to re-launch or re-dispatch, and the megakernel reduces per-token launches from thousands to one \citep{taxbreak2026,memoryfloor2026}. The lesson that carries forward is that flexibility at runtime is precisely the thing decode cannot afford---every dynamic decision is overhead paid per token.
-
-\section{Thread mapping}
-\label{sec:ch07_thread_mapping}
-
-% AUTO_VISUAL:fig_thread_mapping_architecture
+\paragraph{Serving stack interaction.}
+Frameworks queue tokens; static kernels reduce per-step device orchestration \citep{kwon2023vllm,patel2025llminference}.
+PagedAttention solves KV DRAM placement; static roles solve per-step operator dispatch inside the step \citep{kwon2023vllm,taxbreak2026}.
+Both layers stack---neither replaces the other \citep{dao2023flashdecoding,yirage2026}.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.84, transform shape]
- \node[vis arch node] (s0) at (-5.5,0) {\footnotesize Thread\\$\le$256 regs};
- \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Warp\\32 threads};
- \node[vis arch node] (s2) at (1.8,0) {\footnotesize Warpgroup\\4 warps / WGMMA};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize CTA / cluster\\SM / GPC};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
- \draw[vis arrow] (s2.east) -- (s3.west);
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+ \draw[vis arrow] (0,0) -- (8,0) node[right, font=\scriptsize] {time};
+ \foreach \x/\lab in {0.5/$n$,2.5/$n{+}1$,4.5/$n{+}2$} {
+  \node[font=\scriptsize, visText] at (\x,-0.35) {tile \lab};
+ }
+ \draw[thick, blue!70] (0.3,1.0) -- (2.2,1.0) node[midway, above, font=\scriptsize] {producer load};
+ \draw[thick, orange!80] (1.5,0.4) -- (3.4,0.4) node[midway, above, font=\scriptsize] {consumer GEMV};
+ \draw[thick, blue!70] (2.3,1.0) -- (4.2,1.0);
+ \draw[thick, orange!80] (3.5,0.4) -- (5.4,0.4);
 \end{tikzpicture}
-\caption{The Hopper thread hierarchy; static role assignment maps work to this structure at the warp and warpgroup granularity.}
-\label{fig:thread_mapping_architecture}
+\caption{Producer--consumer pipeline: load tile $n{+}1$ overlaps compute on tile $n$ (decode batch-1).}
+\label{fig:ch07_producer_consumer_timeline}
 \end{figure}
 
-Assigning roles requires knowing the \textbf{thread} hierarchy precisely, because roles are assigned at its granularities. On Hopper the hierarchy runs from threads, to \textbf{warp}s of 32 threads, to warpgroups of 4 contiguous \textbf{warp}s, to thread blocks (CTAs), to thread-block clusters, to the grid \citep{shah2024flashattention3}. Each \textbf{thread} has at most 256 registers private to it; shared memory is addressable by all threads in a CTA; and CTAs in a cluster are co-scheduled on the same GPC with fast access to each other's shared memory \citep{shah2024flashattention3,nvidia2022hopper}. These groupings are not bookkeeping---they are the units to which roles are bound.
+\paragraph{Decode parallelism reality.}
+Batch-1 decode has thin matmuls---WGMMA utilization is naturally low \citep{patel2025llminference,shah2024flashattention3}.
+Static roles target \emph{feeding} scarce compute slots, not maximizing TFLOPs counters \citep{memoryfloor2026,taxbreak2026}.
+Work per step is regular and small---ideal for extreme staticization \citep{kwon2023vllm,yirage2026}.
 
-The warpgroup is the key granularity for decode kernels because WGMMA, the high-throughput Hopper matmul, is issued collectively by a warpgroup of four \textbf{warp}s \citep{shah2024flashattention3}. Warp specialization therefore typically assigns one warpgroup the consumer \textbf{role} (issuing WGMMA) and dedicates other \textbf{warp}s to the producer \textbf{role} (issuing TMA). A subtlety that matters for residency is register reallocation: because producers issuing TMA need few registers while consumers running WGMMA need many, Hopper allows warpgroup-wide register reallocation to give the consumer warpgroup a larger share of the register file \citep{shah2024flashattention3}. This is static role assignment paying off directly in the residency budget of Chapter~6---the fixed roles let the compiler skew registers toward the units that need them.
+\paragraph{NPU convergence.}
+XDNA tiles are statically configured stages---no runtime tile reassignment \citep{amd2024xdna,amd2024aie}.
+GPU adds static specialization atop a dynamic machine; NPU is static by construction \citep{patel2025llminference,chen2020compilerbasedhardw}.
+Both reward fixing roles when movement and orchestration dominate \citep{taxbreak2026,memoryfloor2026}.
 
-\textbf{Thread} mapping also determines how overlap is achieved within and across warpgroups. FlashAttention-3 overlaps the softmax computation of one warpgroup with the GEMM of another using pingpong scheduling driven by synchronization barriers, reporting an improvement from roughly 580 to 640 TFLOPS in BF16 from that inter-warpgroup overlap alone \citep{shah2024flashattention3}. The reason overlap is necessary is a throughput mismatch: in the FA3 analysis the special-function exponentials of softmax take about half the cycles of the tensor-core matmul, so leaving them un-overlapped idles the tensor cores for a substantial fraction of the time \citep{shah2024flashattention3}. Static role assignment is what makes the overlap schedulable, because the compiler knows which warpgroup is doing softmax and which is doing GEMM and can place the barriers accordingly.
+\paragraph{Specialization as compiler transform.}
+Static roles are specialization: runtime role branches fold away \citep{shah2024flashattention3,wu2024mirage}.
+Producer streams contain loads and barrier arrivals; consumer streams contain matmuls and waits---no cross-traffic \citep{semianalysis2024tma,nvidia2022hopper}.
+That separation is what makes barrier placement a compile-time problem \citep{yirage2026,chen2020compilerbasedhardw}.
 
-The cluster level adds a mapping option that did not exist before Hopper and that static assignment can exploit. Thread-block clusters group several CTAs that are co-scheduled on the same GPC and can read each other's shared memory directly through distributed shared memory, and TMA loads can be multicast to all CTAs in a cluster in one operation \citep{nvidia2022hopper,shah2024flashattention3}. For a decode kernel that means a producer role can load a weight tile once and multicast it to the consumers in several CTAs of a cluster, rather than each CTA loading its own copy---a residency win that is only schedulable because the cluster membership and the producer/consumer split are both fixed in advance. Mapping work to the cluster granularity is thus another static decision the compiler makes, trading a larger co-scheduled group for cheaper data sharing.
+\paragraph{Decode vs prefill (again, operationally).}
+Prefill: many tokens $\rightarrow$ schedulers hide latency; consumer-heavy splits can maximize tensor-core occupancy \citep{kwon2023vllm,shah2024flashattention3}.
+Decode: one token $\rightarrow$ every warp stall is visible; producer-heavy splits keep thin GEMVs fed \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+Benchmark both regimes separately---do not tune decode with prefill dashboards \citep{yirage2026,taxbreak2026}.
 
-There is an interplay between role mapping and the occupancy budget of Chapter~6 that the compiler must resolve jointly. Dedicating warps to a producer role consumes warp slots that could otherwise run consumers, so the split is not free: too many producers and the consumers starve for compute slots, too few and the consumers stall waiting on data \citep{shah2024flashattention3,nvidia2022hopper}. The right ratio depends on the throughput mismatch between data movement and compute for the specific kernel, which is exactly the kind of target- and shape-specific decision that argues for a compiler pass over a hand-tuned constant. At batch-1 decode, where the matmul is a thin matrix-vector product, the balance often tilts toward fewer compute warps and more attention to keeping them fed, the opposite of a throughput-shaped prefill kernel \citep{kwon2023vllm,taxbreak2026}.
+\paragraph{FA3 lessons without FA3 copy-paste.}
+FlashAttention-3 demonstrates warp specialization benefits on Hopper \citep{shah2024flashattention3}.
+\textbf{Take the pattern, not the constants:} producer/consumer split, register skew, barrier-driven overlap \citep{semianalysis2024tma,nvidia2022hopper}.
+\textbf{Do not take:} prefill tile sizes, warpgroup counts, or TFLOPs targets \citep{patel2025llminference,memoryfloor2026,kwon2023vllm}.
+Decode worksheets (Table~\ref{tab:ch07_role_worked_example}) replace FA3 tables for batch-1 \citep{yirage2026,taxbreak2026}.
 
-On a CPU or NPU the mapping granularities differ but the principle holds. A CPU maps roles to \textbf{thread}s and SIMD lanes, pinning a decode \textbf{thread} to a core and a NUMA node as Chapter~6 described; an NPU maps roles to tiles in its array, with each tile a fixed stage \citep{dlbook,amd2024aie}. In every case the mapping is chosen so that the units that must communicate are close in the hierarchy---warps in a CTA sharing shared memory, tiles adjacent in the array sharing a stream---so that the data a role produces reaches the role that consumes it without leaving fast memory \citep{semianalysis2024tma,amd2024xdna}.
+\paragraph{Schedule-free vs persistent.}
+Schedule-free emphasizes fixed assignment; persistent kernels may retain lightweight tile ordering \citep{shah2024flashattention3,mpk2025,nvidia2024cudagraphs}.
+L2 is often ``schedule-free roles + persistent grid''---the production compromise \citep{patel2025llminference,yirage2026,taxbreak2026}.
 
-\section{No runtime scheduling}
-\label{sec:ch07_no_runtime_sched}
+\paragraph{MoE and depth scaling.}
+Mixture-of-experts multiplies per-layer dispatch decisions in per-op stacks \citep{taxbreak2026,liu2024deepseekv3}.
+Static roles at L3 amortize routing overhead across experts when graphs are bucketed \citep{mpk2025,wu2024mirage,patel2025llminference}.
+Even L2 per-layer persistent kernels help before full MPK \citep{shah2024flashattention3,nvidia2024cudagraphs,yirage2026}.
 
-The payoff of static roles is that the kernel needs no \textbf{runtime} scheduler, which is where the decode latency is won. In a conventional stack the host decides, per operator, which kernel to launch and on what data, paying a \textbf{dispatch} cost for every one of the thousands of launches a token requires \citep{taxbreak2026}. A schedule-free kernel moves that decision to compile time: the work-to-unit mapping is baked in, so the only \textbf{runtime} activity is the computation itself \citep{mpk2025,shah2024flashattention3}.
+\paragraph{Compiler specialization benefit.}
+Role-pure warp code enables better instruction scheduling and fewer predicate registers \citep{shah2024flashattention3,wu2024mirage}.
+Unified warps interleave async copies and matmuls---harder for compilers to overlap \citep{semianalysis2024tma,nvidia2022hopper}.
+This is why static roles pair with YiRage lowering rather than hand-written mega-CUDA only \citep{yirage2026,chen2020compilerbasedhardw,mpk2025}.
 
-The persistent kernel is the GPU mechanism that eliminates \textbf{runtime} \textbf{dispatch} for the multi-tile case. Instead of launching one CTA per work tile and relying on the hardware's block scheduler to stream them, a persistent kernel launches a fixed number of CTAs equal to the SM count---132 CTAs on an H100 SXM5, one per SM---and each CTA loops over a fraction of the work tiles, assigned by an in-kernel tile scheduler \citep{shah2024flashattention3}. This decouples physical CTAs from logical work, so the kernel can overlap the epilogue of the current tile with the prologue loads of the next, and avoids re-incurring launch and prologue cost for every tile \citep{shah2024flashattention3}. The tile scheduler is a small piece of in-kernel logic, not a host round trip, so the \textbf{dispatch} decision never leaves the GPU.
+\paragraph{Launch storm anatomy.}
+Per-operator stacks launch attention, norms, MLP, residuals separately---each launch re-enters driver and scheduler \citep{taxbreak2026,patel2025llminference}.
+Even fast kernels pay fixed launch latency at batch-1 \citep{memoryfloor2026,kwon2023vllm}.
+Static roles inside fused kernels convert thousands of assignment decisions into zero per token \citep{mpk2025,shah2024flashattention3,yirage2026}.
+Measure before/after on the \emph{same} model checkpoint---not different quantizations \citep{taxbreak2026,dao2022flashattention}.
+
+\paragraph{Relationship to CUDA Graphs.}
+Graphs batch host launches; they do not by themselves fuse ops or assign warp roles \citep{nvidia2024cudagraphs,shah2024flashattention3}.
+L1 removes host replay cost; L2 adds in-kernel specialization---complementary steps \citep{patel2025llminference,yirage2026,taxbreak2026}.
+Teams stuck at L1 should ask whether launches are gone but bytes/token is still high---that is Ch.~6 work \citep{dao2022flashattention,memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Document producer/consumer split rationale before merging any warp-specialization PR \citep{shah2024flashattention3,yirage2026}.
+
+\section{Joint Optimization with Chapter~6 Residency}
+\label{sec:ch07_joint_residency}
+
+Roles and residency are not sequential handoffs---they co-evolve \citep{yirage2026,dao2022flashattention,shah2024flashattention3,chen2020compilerbasedhardw}.
+
+\paragraph{Register file as shared budget.}
+Consumer warpgroups demand high per-thread register counts; producers stay low \citep{shah2024flashattention3,nvidia2022hopper}.
+Skew shifts bytes between register and shared tiers---update Ch.~6 peak after every skew proposal \citep{memoryfloor2026,yirage2026}.
+Spill to local memory means joint optimization failed---split fusion before tuning ratios \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Shared memory for ping-pong.}
+Producer/consumer pipelines need A/B buffers in shared memory \citep{semianalysis2024tma,dao2022flashattention}.
+Chapter~\ref{chap:ch06} counted $2\times$ tile bytes; roles decide which warps touch each buffer \citep{yirage2026,shah2024flashattention3}.
+Illegal role plan can fit on paper but fail when both buffers are live---rerun peak walk with role timeline \citep{wu2024mirage,memoryfloor2026}.
+
+\paragraph{Fixed-point iteration.}
+Practical lowering loop: (1)~memory pass max tile; (2)~tiling pass roles+skew; (3)~rerun memory pass; (4)~repeat or split \citep{yirage2026,wu2024mirage,mpk2025,chen2020compilerbasedhardw}.
+Teams that run passes once often ship spill bugs \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+
+\paragraph{Worked joint example.}
+Table~\ref{tab:ch07_role_worked_example} producer count assumes Ch.~6 peak ${\sim}168$\,KB shared on GPU \citep{yirage2026,dao2022flashattention,taxbreak2026}.
+Increasing producers without shrinking tiles overflows shared memory---co-search or split \citep{memoryfloor2026,nvidia2022hopper,shah2024flashattention3}.
+
+\paragraph{Carrier tensors and roles.}
+Softmax carriers $(m,\ell,o)$ usually live in consumer registers or fixed NPU slots \citep{dao2022flashattention,amd2024aie,shah2024flashattention3}.
+Role assignment must reserve carrier home before sizing producer teams---Chapter~10 expands carrier placement \citep{dao2022flashattention,patel2025llminference,yirage2026}.
+Demoting carriers to shared memory is a structured fallback when register skew exhausts the file \citep{memoryfloor2026,nvidia2022hopper}.
+
+\paragraph{KV stream roles.}
+KV slices are producer-loaded, consumer-read streams across steps \citep{kwon2023vllm,dao2023flashdecoding,semianalysis2024tma}.
+Decode staticization assigns dedicated producer bandwidth to KV---ratio worksheet should include KV tile load cycles \citep{patel2025llminference,yirage2026,shah2024flashattention3}.
+Chapter~\ref{chap:ch08} implements the movement; roles decide how many warps participate \citep{semianalysis2024tma,dao2022flashattention}.
+
+\paragraph{Checklist coupling.}
+Ch.~6 checklist item ``ping-pong counted'' must be green before Ch.~7 ratio worksheet sign-off \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention}.
+Ch.~7 checklist adds barrier and ratio rows---both checklists ship together \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach both Ch.~6 peak worksheet and Ch.~7 ratio worksheet on staticization PRs \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention}.
+
+\section{Quantitative Role Decision Framework}
+\label{sec:ch07_role_decision}
+
+Conceptual warp splits are insufficient for production---use a \textbf{three-axis decision framework} tied to decode throughput mismatch \citep{shah2024flashattention3,patel2025llminference,yirage2026}.
+
+\paragraph{Axis 1: Producer/consumer ratio.}
+Estimate bytes moved per step versus useful FLOPs per step \citep{memoryfloor2026,dao2022flashattention}.
+Decode GEMV is memory-heavy---tilt toward more producer capacity than prefill-shaped kernels \citep{kwon2023vllm,taxbreak2026}.
+Rule of thumb: if load latency exceeds consumer cycle time on a tile, add producer warps until the consumer rarely waits---subject to register/SM caps from Chapter~\ref{chap:ch06} \citep{yirage2026,nvidia2022hopper}.
+
+\paragraph{Quantitative procedure (decode).}
+Step A: profile or model bytes per attention micro-tile and cycles per consumer matmul \citep{shah2024flashattention3,patel2025llminference}.
+Step B: compute mismatch $M = t_{\mathrm{load}} / t_{\mathrm{compute}}$ \citep{memoryfloor2026}.
+Step C: allocate producer warps until simulated consumer idle $\lt 5\%$ \citep{yirage2026,shah2024flashattention3}.
+Step D: verify Ch.~6 peak and register file; iterate \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+Document $M$ and final split in the PR \citep{taxbreak2026,patel2025llminference}.
+
+\paragraph{Axis 2: Register skew bounds.}
+Hopper allows warpgroup register reallocation---consumers need more registers than TMA producers \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{Skew policy:} allocate minimum registers to producers; give remainder to consumer warpgroup until spill threshold \citep{memoryfloor2026,dao2022flashattention}.
+Re-run Chapter~\ref{chap:ch06} peak worksheet after skew---roles change residency \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Skew procedure.}
+(1) Measure producer instruction footprint---usually small for TMA-only warps \citep{semianalysis2024tma,shah2024flashattention3}.
+(2) Allocate consumer registers to hold accumulators and softmax state without spill \citep{dao2022flashattention,nvidia2022hopper}.
+(3) If total exceeds SM file, shrink tile or split fusion---do not spill to local memory \citep{memoryfloor2026,yirage2026}.
+(4) Document final per-role register counts in tiling IR metadata \citep{chen2020compilerbasedhardw,wu2024mirage}.
+
+\paragraph{Axis 3: Barrier placement.}
+Barriers synchronize producer completion with consumer start---misplacement causes bubbles or races \citep{shah2024flashattention3,semianalysis2024tma}.
+\textbf{Placement rule:} one barrier pair per ping-pong stage; consumers wait only on the buffer they consume; producers signal only after async copy completes \citep{nvidia2022hopper,yirage2026}.
+Count barrier slots in residency budget---synchronization metadata consumes planning headroom \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Barrier walkthrough.}
+For buffer A/B ping-pong: producer issues TMA$\rightarrow$A, signals \texttt{mbarrier}; consumer waits, reads A, computes; producer loads B while consumer works on A \citep{semianalysis2024tma,shah2024flashattention3}.
+Swap roles on buffers next iteration---barrier indices must alternate consistently \citep{nvidia2022hopper,yirage2026}.
+Chapter~\ref{chap:ch08} details TMA descriptor setup; this chapter fixes \emph{who} issues them \citep{semianalysis2024tma,dao2022flashattention,patel2025llminference}.
+
+\paragraph{Three-axis summary.}
+Ratio fixes starvation; skew fixes spill; barriers fix races and bubbles \citep{shah2024flashattention3,memoryfloor2026,yirage2026}.
+YiRage tiling pass searches all three jointly under Ch.~6 caps \citep{wu2024mirage,chen2020compilerbasedhardw,mpk2025}.
+
+\paragraph{Axis interaction example.}
+If Axis~1 demands more producers but Axis~2 cannot skew further, shrink tile (Axis implicit) or split fusion \citep{yirage2026,dao2022flashattention,shah2024flashattention3}.
+If Axis~3 adds barriers that lengthen producer critical path, revisit Axis~1---barriers can negate producer gains \citep{semianalysis2024tma,nvidia2022hopper,patel2025llminference}.
+Document trade-offs in tiling IR comments for future bisect \citep{chen2020compilerbasedhardw,wu2024mirage,mpk2025}.
+
+\paragraph{Worked decode example (Llama-3.2-1B attention, batch-1).}
+Hidden $d{=}2048$, one head slice, QKV GEMV-dominated step \citep{taxbreak2026,kwon2023vllm}.
 
 \begin{table}[t]
 \centering
-\caption{Where work-to-unit \textbf{dispatch} happens, and the per-token cost it implies for batch-1 decode \citep{taxbreak2026,shah2024flashattention3}.}
-\label{tab:ch07_dispatch}
-\begin{tabular}{lll}
+\small
+\caption{Decode role split worksheet (Llama-3.2-1B attention tile, illustrative).}
+\label{tab:ch07_role_worked_example}
+\begin{tabular}{@{}ll@{}}
 \toprule
-Model & Dispatch decided & Per-token launch cost \\
+\textbf{Decision} & \textbf{Value / rationale} \\
 \midrule
-Per-operator kernels & Host, at runtime & Thousands of launches \\
-Persistent + tile scheduler & In-kernel, at runtime & Fixed CTA count \\
-Static megakernel (MPK) & Compile time & One launch \\
+Tile bytes (QKV fragment) & ${\sim}32$\,KB \\
+Load cycles (TMA, est.) & ${\sim}400$ \\
+Consumer cycles (thin GEMV) & ${\sim}250$ \\
+Throughput mismatch & Load-bound $\rightarrow$ more producer share \\
+Producer warps & 4 (TMA issue) \\
+Consumer warpgroups & 1 (WGMMA collective) \\
+Register skew & Producers ${\le}32$/thread; consumers ${\sim}96$/thread \\
+Ping-pong buffers & 2 (included in Ch.~6 peak) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Mirage Persistent Kernel takes the elimination of \textbf{runtime} \textbf{dispatch} to the whole model. Its SM-level task graph is built at compile time, and an in-kernel parallel \textbf{runtime} executes the tasks with decentralized scheduling across SMs, so the entire forward pass runs as one launch with no host involvement between operators \citep{mpk2025}. The reported $1.2$--$6.7\times$ end-to-end latency reduction over kernel-per-operator serving is, in large part, the cost of \textbf{runtime} \textbf{dispatch} that the static structure removed \citep{mpk2025,memoryfloor2026}. The same principle is the NPU's default: because the array is configured before execution, there is no \textbf{runtime} that decides tile assignment, and the per-token cost is whatever the static schedule fixed \citep{amd2024xdna,amd2024aie}.
+\paragraph{Reading the worksheet.}
+Mismatch ratio ${\approx}400/250 \approx 1.6$ suggests producer-side capacity until consumer wait $\lt 5\%$ in simulation \citep{shah2024flashattention3,patel2025llminference}.
+Prefill FA3 configs with more consumer warpgroups would starve decode consumers on data \citep{shah2024flashattention3,taxbreak2026}.
+Validate with Nsight memory vs compute warp stalls---not FLOPs alone \citep{memoryfloor2026,yirage2026}.
 
-The tile scheduler deserves a closer look because it is where the small amount of necessary dynamism lives. In a persistent kernel the scheduler is in-kernel logic that hands the next work tile to whichever resident CTA is free, which both balances load and lets the kernel decouple the number of physical CTAs from the number of logical tiles \citep{shah2024flashattention3}. CUTLASS generalizes this with schemes like Stream-K, where the scheduler can split a tile's reduction across CTAs and fall back to simpler data-parallel or Split-K modes by heuristic, and on Hopper it constructs the schedule in units of clusters rather than single tiles \citep{shah2024flashattention3}. The important property for decode is that all of this stays on the GPU: the scheduler is a few instructions of in-kernel arithmetic, not a host callback, so it removes launch overhead without reintroducing dispatch latency.
+\paragraph{Register skew worked example.}
+Suppose 256 threads split: 128 producer threads at 24 registers, 128 consumer threads at 112 registers \citep{shah2024flashattention3,nvidia2022hopper}.
+Total ${\approx}128\cdot24 + 128\cdot112 = 17{,}408$ register slots---under typical SM file when occupancy target is one block \citep{nvidia2022hopper,memoryfloor2026}.
+Push consumer to 200 registers without dropping producers $\rightarrow$ spill risk; rerun Ch.~6 peak \citep{yirage2026,dao2022flashattention}.
 
-Contrast this with the NPU, where even the in-kernel scheduler disappears. Because the XDNA array is configured before execution and each tile holds a fixed stage, there is no per-token assignment decision at all---the ``schedule'' is the physical configuration of the fabric, and running a token is just clocking data through it \citep{amd2024xdna,amd2024aie}. This is the most extreme point on the static-to-dynamic axis: the GPU per-operator stack recomputes assignment thousands of times per token, the persistent kernel computes it in-kernel a fixed number of times, the megakernel computes it once at compile time, and the static NPU never computes it at runtime at all \citep{taxbreak2026,mpk2025}. Each step down that axis trades flexibility for fewer per-token decisions, and decode rewards moving as far down it as the workload's regularity allows.
+\paragraph{Barrier budget.}
+Each ping-pong stage needs arrive/wait pairs on mbarrier objects \citep{semianalysis2024tma,nvidia2022hopper}.
+Decode layers with two streamed operands (QKV + KV) may need two barrier chains---count them in the schedule sketch \citep{shah2024flashattention3,yirage2026}.
+Mis-ordered barriers manifest as rare correctness bugs or steady 5--10\% bubble overhead \citep{patel2025llminference,taxbreak2026}.
 
-There is an honest limit to schedule-free kernels. A fully static assignment can load-balance poorly when work is irregular---the persistent tile scheduler exists precisely to redistribute uneven work, such as the variable row counts under causal masking, while staying in-kernel \citep{shah2024flashattention3}. The design judgment is how much dynamism to keep: enough to balance genuinely irregular work, but not so much that the host re-enters the loop. For batch-1 decode, where the per-token work is regular and small, the answer is to keep almost nothing dynamic, which is why decode is the workload where schedule-free kernels pay off most \citep{kwon2023vllm,patel2025llminference}.
+\paragraph{Inter-warpgroup overlap (decode scope).}
+FA3 overlaps softmax in one warpgroup with GEMM in another---valuable when both stages exist in the fused region \citep{shah2024flashattention3}.
+Thin decode GEMV may not justify extra warpgroups---overlap adds role complexity \citep{patel2025llminference,memoryfloor2026}.
+Apply overlap only when cycle-accounting shows idle tensor cores \citep{shah2024flashattention3,yirage2026}.
 
-A practical consequence for serving teams is that the win compounds with model depth. Each transformer layer that a per-operator stack executes adds its own quota of launches and dispatch decisions, so a deep model pays the orchestration tax once per layer per token; a static megakernel pays it once per token regardless of depth \citep{taxbreak2026,mpk2025}. This is why the reported megakernel speedups are largest for the deepest, most launch-dense models---the very OLMoE-style mixture-of-experts configurations that issue 9{,}305 launches per token in the TaxBreak measurement \citep{taxbreak2026}. The static structure converts a cost that scaled with the number of operators into a constant, which is the kind of asymptotic improvement that a faster inner loop can never deliver \citep{memoryfloor2026}.
+\paragraph{Simulation before silicon.}
+Use stall simulation or Nsight warp-state metrics to validate ratio proposals before locking tiling IR \citep{patel2025llminference,shah2024flashattention3,yirage2026}.
+Worksheets are hypotheses---measurement confirms \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+Reject ratios that improve TFLOPs but not tokens/sec at batch-1 \citep{kwon2023vllm,patel2025llminference}.
 
-\section{YiRage tiling}
+\paragraph{Thread mapping granularity.}
+Roles bind at warp/warpgroup on GPU, thread/SIMD on CPU, tile on NPU \citep{shah2024flashattention3,amd2024aie,dlbook}.
+% AUTO_VISUAL:fig_thread_mapping_architecture
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Role map\\};
+    \node[vis arch node] (s2) at (1.67,0) {\footnotesize Producer\\consumer};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize Resident\\kernel};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{Thread mapping: compile-time role map drives producer/consumer resident kernel (Hopper detail in Ch.~4).}
+\label{fig:thread_mapping_architecture}
+\end{figure}
+
+Co-locate communicating roles within CTA/cluster so data stays on chip---cluster multicast is a static mapping decision \citep{nvidia2022hopper,shah2024flashattention3}.
+Joint constraint: producer warps consume SM slots---too many producers starve consumers; too few stall compute \citep{patel2025llminference,yirage2026}.
+
+\paragraph{Worked ratio narrative (attention slice).}
+For Table~\ref{tab:ch07_role_worked_example}: load-bound mismatch drives four producer warps feeding one consumer warpgroup \citep{shah2024flashattention3,patel2025llminference}.
+If profiling shows consumer wait $>$10\%, add a producer warp before enlarging tiles \citep{yirage2026,memoryfloor2026}.
+If producers idle while consumers compute, remove a producer warp---ratio is not ``more producers always'' \citep{shah2024flashattention3,taxbreak2026}.
+
+\paragraph{MLP decode note.}
+MLP GEMVs exhibit similar load/compute mismatch---reuse the same worksheet template with MLP tile bytes \citep{taxbreak2026,kwon2023vllm,dao2022flashattention}.
+Fused attention+MLP megakernels need \emph{two} ratio checks or a combined worst-case interval \citep{mpk2025,yirage2026,wu2024mirage}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach completed Table~\ref{tab:ch07_role_worked_example} (or your model's version) to fusion PRs \citep{yirage2026,taxbreak2026}.
+
+\section{Tri-Hardware Role Mapping}
+\label{sec:ch07_tri_hw_role_mapping}
+
+Static roles are universal; \emph{granularity and staticization depth} differ per class \citep{patel2025llminference,chen2020compilerbasedhardw,yirage2026}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[font=\scriptsize\bfseries] at (-3.6,2.1) {GPU};
+ \node[font=\scriptsize\bfseries] at (0,2.1) {CPU};
+ \node[font=\scriptsize\bfseries] at (3.6,2.1) {NPU};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,1.0) {\footnotesize Warp / WG};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,0.0) {\footnotesize Semi-static};
+ \node[vis arch node, minimum width=2.0cm] at (0,1.0) {\footnotesize Thread / SIMD};
+ \node[vis arch node, minimum width=2.0cm] at (0,0.0) {\footnotesize Weak static};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,1.0) {\footnotesize Compute tile};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,0.0) {\footnotesize Fully static};
+\end{tikzpicture}
+\caption{Tri-hardware role mapping granularity (detail in Ch.~4--5).}
+\label{fig:ch07_tri_hw_roles}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Tri-hardware static role mapping comparison (decode).}
+\label{tab:ch07_tri_hw_roles}
+\begin{tabular}{@{}p{2.0cm}p{2.2cm}p{1.6cm}p{2.4cm}p{2.6cm}@{}}
+\toprule
+\textbf{Class} & \textbf{Role granularity} & \textbf{Static depth} & \textbf{Core win} & \textbf{Core constraint} \\
+\midrule
+GPU (Hopper) & Warp / warpgroup & Semi-static & Kill host launches; overlap load/compute & Shared mem, registers, WGMMA groups (Ch.~4) \\
+CPU & Thread / SIMD lane & Weak static & Pin threads; cache affinity & NUMA, cache levels (Ch.~3) \\
+NPU (XDNA) & Compute tile & Fully static & Zero runtime dispatch; fixed latency & Tile SRAM, DMA BW (Ch.~5) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{GPU role mapping}
+\label{sec:ch07_thread_mapping}
+
+Producer warps + consumer warpgroups; register skew toward consumers \citep{shah2024flashattention3,nvidia2022hopper}.
+Persistent CTAs (one per SM) with in-kernel tile handoff---dispatch stays on device \citep{shah2024flashattention3,mpk2025}.
+\textbf{Avoid:} repeating Hopper hierarchy lessons---see Chapter~\ref{chap:ch04} \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{GPU decode checklist.}
+Assign producers to async copy path; consumers to warpgroup matmul \citep{semianalysis2024tma,shah2024flashattention3}.
+Verify WGMMA is warpgroup-collective---roles bind at warpgroup granularity for consumers \citep{nvidia2022hopper,patel2025llminference}.
+Use cluster multicast when multiple CTAs consume the same weight tile---static cluster membership required \citep{nvidia2022hopper,shah2024flashattention3,yirage2026}.
+After skew, confirm Ch.~6 shared-memory peak still legal \citep{dao2022flashattention,memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{Persistent kernel mechanics.}
+Grid size = SM count; each CTA loops logical tiles \citep{shah2024flashattention3,mpk2025}.
+Epilogue of tile $n$ overlaps prologue of tile $n{+}1$ when roles are pipelined \citep{shah2024flashattention3,semianalysis2024tma}.
+This is L2 sweet spot: one host launch, structured in-kernel progress \citep{nvidia2024cudagraphs,patel2025llminference,taxbreak2026}.
+
+\subsection{CPU role mapping}
+
+Pin decode threads to cores owning weight pages; split prefetch vs compute threads weakly \citep{dlbook,patel2025llminference}.
+Staticization is \emph{affinity policy}, not warp specialization \citep{kwon2023vllm,memoryfloor2026}.
+NUMA mistakes look like role imbalance---half bandwidth with idle cores \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{CPU decode checklist.}
+Partition reader threads (prefetch weight/KV blocks) and compute threads (GEMV/attention micro-kernels) \citep{dlbook,kwon2023vllm}.
+Pin each partition to the socket that owns the pages it reads \citep{patel2025llminference,memoryfloor2026}.
+Measure remote NUMA accesses---not just cache misses \citep{taxbreak2026,chen2020compilerbasedhardw}.
+CPU ``static roles'' are stable thread-function mappings across tokens \citep{yirage2026,patel2025llminference}.
+
+\subsection{NPU role mapping}
+
+Each tile is a pipeline stage---DMA in, MAC, DMA out---fixed at compile \citep{amd2024xdna,amd2024aie}.
+\textbf{Avoid:} restating XDNA tile catalogs---see Chapter~\ref{chap:ch05} \citep{amd2024xdna,yirage2026}.
+Role plan equals DMA graph plus spatial placement \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{NPU decode checklist.}
+Map attention sweep as spatial pipeline across tile row/column \citep{amd2024aie,dao2022flashattention}.
+Double-buffer descriptors alternate per streamed operand---roles include DMA engine vs MAC array \citep{amd2024xdna,patel2025llminference}.
+Illegal role+tile plan fails compile---no silent fallback \citep{yirage2026,memoryfloor2026,taxbreak2026}.
+Compare DDR bytes/token before blaming ``slow NPU'' \citep{memoryfloor2026,amd2024aie}.
+
+\paragraph{Tri-hardware deployment narrative.}
+A fleet might serve GPU in cloud and NPU on edge---same YiRage IR, different role maps \citep{yirage2026,patel2025llminference,amd2024xdna,nvidia2022hopper}.
+GPU path: semi-static warp roles inside persistent CTAs \citep{shah2024flashattention3,mpk2025}.
+NPU path: fully static tile stages with DMA descriptors \citep{amd2024aie,amd2024xdna,chen2020compilerbasedhardw}.
+CPU path: pinned reader/compute threads per socket \citep{dlbook,kwon2023vllm,memoryfloor2026}.
+Triplet CI compiles all three or documents intentional single-backend deferral \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Cross-class lesson.}
+Same fused IR needs three role maps---triplet CI should reject GPU-only schedules \citep{yirage2026,amd2024aie,nvidia2022hopper,taxbreak2026}.
+
+\paragraph{GPU persistent kernel note.}
+Launch CTAs = SM count (e.g.\ 132 on H100 SXM5); in-kernel tile loop assigns work without host \citep{shah2024flashattention3,mpk2025}.
+Role assignment still matters inside each CTA---persistent $\neq$ unified warps \citep{patel2025llminference,yirage2026}.
+Persistent + warp specialization is the usual L2 sweet spot \citep{nvidia2024cudagraphs,shah2024flashattention3}.
+
+\paragraph{CPU staticization limits.}
+OS schedulers migrate threads---``static role'' means pinning and partition, not permanent warp identity \citep{dlbook,patel2025llminference}.
+Use thread pools with fixed reader/compute roles per socket \citep{kwon2023vllm,memoryfloor2026}.
+Gains come from NUMA affinity and fewer handoffs---not from eliminating the OS entirely \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{NPU spatial roles.}
+Tiles along a column form a pipeline---stage $k$ always performs the same op \citep{amd2024xdna,amd2024aie}.
+Reconfiguration mid-inference is a different graph---staticization assumes fixed topology per bucket \citep{yirage2026,patel2025llminference}.
+Role map equals placement + DMA descriptors---Chapter~\ref{chap:ch05} backend lowering emits it \citep{amd2024xdna,chen2020compilerbasedhardw}.
+
+\section{Staticization Ladder for Decode}
+\label{sec:ch07_static_levels}
+
+Not every deployment needs a full megakernel---pick a \textbf{staticization level} by flexibility vs latency trade \citep{nvidia2024cudagraphs,mpk2025,patel2025llminference}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node, minimum width=2.2cm] (l1) at (0,0) {\footnotesize L1\\CUDA Graph};
+ \node[vis arch node, minimum width=2.2cm] (l2) at (3.2,0) {\footnotesize L2\\Persistent};
+ \node[vis pipeline node, minimum width=2.2cm] (l3) at (6.4,0) {\footnotesize L3\\Megakernel};
+ \draw[vis arrow] (l1) -- (l2) -- (l3);
+ \node[font=\scriptsize, visText] at (3.2,-0.9) {$\leftarrow$ more static, less flexible};
+\end{tikzpicture}
+\caption{Decode staticization ladder: host launches $\rightarrow$ in-kernel dispatch $\rightarrow$ compile-time roles.}
+\label{fig:ch07_static_levels}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Decode staticization levels (relative to per-operator baseline).}
+\label{tab:ch07_static_levels}
+\begin{tabular}{@{}llccp{3.2cm}@{}}
+\toprule
+\textbf{Level} & \textbf{Scheme} & \textbf{Host launches/token} & \textbf{Typical latency win} & \textbf{Best for} \\
+\midrule
+L1 & CUDA Graph + separate ops & 1 & 30--40\% & Rapid port; changing graphs \\
+L2 & Persistent kernel + in-kernel tiles & 1 & 40--60\% & Production balance \\
+L3 & Full megakernel + fixed roles & 1 & 60--80\% & Fixed model; extreme latency \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Where dispatch lives.}
+\label{sec:ch07_no_runtime_sched}
+
+\begin{table}[t]
+\centering
+\caption{Dispatch locus and per-token cost (batch-1 decode).}
+\label{tab:ch07_dispatch}
+\begin{tabular}{lll}
+\toprule
+\textbf{Model} & \textbf{Assignment decided} & \textbf{Per-token launch pattern} \\
+\midrule
+Per-operator & Host, each op & Thousands \\
+Persistent + tile scheduler & In-kernel & Fixed CTA count \\
+Static megakernel (MPK) & Compile time & One \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Choosing a level.}
+L1 when model ops change weekly; L3 when model and shapes are frozen and TaxBreak-scale launch counts hurt \citep{taxbreak2026,mpk2025}.
+Higher levels raise compile cost and reduce runtime flexibility---not ``always L3'' \citep{patel2025llminference,yirage2026}.
+OLMoE-style 9{,}305 launches/token magnifies megakernel wins---orchestration tax scales with depth \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Economics table (qualitative).}
+\begin{table}[t]
+\centering
+\small
+\caption{Staticization economics for decode teams (qualitative).}
+\label{tab:ch07_static_economics}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & \textbf{L1} & \textbf{L2} & \textbf{L3} \\
+\midrule
+Compile churn & Low & Medium & High \\
+Runtime flex & High & Medium & Low \\
+Launch reduction & Moderate & Strong & Strongest \\
+Role specialization & Minimal & Warp-level & SM-graph \\
+Best team skill & Framework eng & CUDA fusion & Compiler+CUDA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading the economics table.}
+Start L1 if you are still changing graphs weekly \citep{nvidia2024cudagraphs,patel2025llminference}.
+Move L2 when fusion boundaries stabilize and warp roles are testable \citep{shah2024flashattention3,yirage2026}.
+Attempt L3 only with frozen models, green Ch.~6 worksheets, and MPK/Mirage toolchain \citep{mpk2025,wu2024mirage,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Honest limit.}
+Irregular work (causal ragged rows) may need in-kernel tile schedulers---small dynamic core inside persistent kernels \citep{shah2024flashattention3}.
+Batch-1 dense decode is usually regular enough for near-L3 staticization \citep{kwon2023vllm,patel2025llminference}.
+
+\paragraph{L1 deep dive (CUDA Graph).}
+Capture a launch sequence once; replay with one host launch per token \citep{nvidia2024cudagraphs,taxbreak2026}.
+Ops remain separate kernels inside the graph---roles are per-kernel, not fused \citep{patel2025llminference}.
+Good when you need quick wins without rewriting fusion \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{L2 deep dive (persistent + roles).}
+One grid of resident CTAs; warp specialization inside each CTA \citep{shah2024flashattention3,mpk2025}.
+In-kernel tile scheduler handles unequal tile counts without host \citep{shah2024flashattention3}.
+Balances flexibility and launch reduction---recommended default for production decode \citep{patel2025llminference,nvidia2024cudagraphs}.
+
+\paragraph{L3 deep dive (megakernel).}
+SM-level task graph; decentralized in-kernel scheduling across operators \citep{mpk2025,wu2024mirage}.
+Reports $1.2$--$6.7\times$ end-to-end latency wins over per-op serving when launch storm dominates \citep{mpk2025,memoryfloor2026,taxbreak2026}.
+Requires frozen fusion boundaries and proven residency+role worksheets \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Migration path.}
+Most teams: L1 $\rightarrow$ L2 (add fusion + warp roles) $\rightarrow$ L3 only if launches still hurt after fusion \citep{taxbreak2026,patel2025llminference,mpk2025}.
+Skipping L2 worksheets and jumping to L3 yields fragile megakernels that spill silently \citep{memoryfloor2026,yirage2026}.
+
+\paragraph{Depth compounding.}
+Per-operator stacks pay orchestration tax once per layer per token \citep{taxbreak2026,mpk2025}.
+Static megakernels pay once per token regardless of depth---asymptotic win no inner-loop tweak matches \citep{memoryfloor2026,patel2025llminference}.
+Document layer count when arguing for L3---deep models amplify launch storms \citep{taxbreak2026,wu2024mirage}.
+
+\paragraph{CUTLASS / Stream-K note.}
+Library tile schedulers stay in-kernel---compatible with L2 when roles are fixed inside each persistent CTA \citep{shah2024flashattention3,patel2025llminference}.
+Do not confuse library scheduling with host per-op dispatch \citep{taxbreak2026,yirage2026}.
+
+\paragraph{When not to staticize.}
+Highly irregular shapes, dynamic expert counts per token without bucketing, or rapid A/B graph changes \citep{liu2024deepseekv3,patel2025llminference,mpk2025}.
+Stay L1--L2 until shapes and graphs stabilize \citep{nvidia2024cudagraphs,yirage2026,taxbreak2026}.
+Staticization is a business decision as much as a kernel decision \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Record chosen staticization level and launch-count evidence in benchmark TSV \citep{taxbreak2026,nvidia2024cudagraphs}.
+
+\section{YiRage Tiling Pass: Roles as Compiler Output}
 \label{sec:ch07_yirage_tiling}
 
-The book's reference compiler turns static role assignment into a per-target pass. \textbf{YiRage} carries a \textbf{tiling} pass that, given a fused region and a target, chooses tile shapes and assigns each execution unit its static role---which warps are producers and consumers on a GPU, which tiles are which stage on an NPU---and emits the corresponding schedule-free kernel \citep{yirage2026}. Because the residency budget of Chapter~6 and the role assignment of this chapter are decided together, the \textbf{tiling} pass can guarantee that the chosen tiles fit the on-chip memory of the target while the role assignment keeps producers and consumers overlapped \citep{wu2024mirage,shah2024flashattention3}.
+\textbf{YiRage} lowers static roles through a \textbf{tiling pass} after the Chapter~\ref{chap:ch06} memory pass, before codegen \citep{yirage2026,wu2024mirage}.
+Hand-tuned warp splits do not scale across models or backends \citep{patel2025llminference,chen2020compilerbasedhardw}.
 
-The \textbf{tiling} decision is genuinely different per target, which is why it must be a pass and not a fixed template. On a GPU the pass picks a tile size that fits the 228\,KB shared-memory budget, assigns a consumer warpgroup for WGMMA and producer warps for TMA, and reallocates registers toward the consumer \citep{nvidia2022hopper,shah2024flashattention3}. On an XDNA NPU the same logical computation is tiled to fit the 64\,KB tile SRAM, with double-buffered DMA and a fixed tile-to-stage assignment \citep{amd2024aie,amd2024xdna}. The math is identical; the \textbf{tiling} and role assignment are not, and a plan transferred blindly from one to the other is either illegal or wasteful \citep{semianalysis2024tma}.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node] (mem) at (-3.6,0) {\footnotesize Memory\\pass};
+ \node[vis arch node] (til) at (0,0) {\footnotesize Tiling\\pass};
+ \node[vis pipeline node] (opt) at (3.6,0) {\footnotesize Megakernel\\search};
+ \draw[vis arrow] (mem) -- (til) -- (opt);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Roles + tiles + barriers};
+\end{tikzpicture}
+\caption{YiRage tiling pass between residency legality and megakernel search (Ch.~20).}
+\label{fig:ch07_yirage_tiling_pass}
+\end{figure}
 
-The pass must also decide how far to fuse before assigning roles, because the fusion boundary and the role split are coupled. Fuse too little and the kernel is back to per-operator launches with their dispatch tax; fuse too much and the combined working set blows the residency budget or the register file, forcing a spill that negates the win \citep{nvidia2022hopper,memoryfloor2026}. The \textbf{tiling} pass resolves this by growing the fused region while continuously checking the residency metadata, stopping at the largest region whose static role assignment still fits the target's fast memory \citep{yirage2026,shah2024flashattention3}. This is the same stopping rule Chapter~6 stated for fusion in general, now applied with the role assignment in hand: the boundary sits where one more fused operator would force either a spill or a producer/consumer imbalance that starves the tensor cores. Because the check is per target, the boundary lands in a different place on an H100 than on an XDNA tile, which is exactly why a single hand-tuned kernel cannot be the answer across a heterogeneous fleet \citep{amd2024aie,patel2025llminference}.
+\begin{table}[t]
+\centering
+\small
+\caption{YiRage tiling pass: I/O and search dimensions.}
+\label{tab:ch07_tiling_pass_io}
+\begin{tabular}{@{}p{2.4cm}p{4.8cm}p{3.8cm}@{}}
+\toprule
+\textbf{Item} & \textbf{Content} & \textbf{Notes} \\
+\midrule
+Input & Fused subgraph + residency metadata & From Ch.~6 memory pass \\
+Output & Role-annotated schedule IR & Tile sizes, barriers, warp split \\
+Search dims & Tile shape, prod/cons ratio, registers, barriers & Joint search \\
+Stop rules & No residency overflow; no compute starvation; pipeline full & See Ch.~6 caps \\
+On failure & Split fusion + reason string & Feed back to Mirage search \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The pass treats tile-shape selection as a constrained search rather than a lookup. For a GPU consumer the tile must be large enough to amortize the WGMMA setup and keep the tensor cores busy, small enough that the producer can keep its double buffers filled within the shared-memory budget, and shaped so the access pattern is bank-conflict-free---three constraints that interact, so the pass explores shapes rather than applying a fixed one \citep{shah2024flashattention3,nvidia2022hopper}. For an NPU tile the dominant constraint is simply fitting the double-buffered operands in the 64\,KB local SRAM, after which the pass picks the largest tile that maximizes reuse \citep{amd2024aie,amd2024xdna}. The output of the search is not just a number but a complete static plan: tile shape, producer/consumer warp split, register allocation, and the barrier placement that realizes the overlap.
+\paragraph{Closed loop.}
+Mirage proposes fusion $\rightarrow$ memory pass certifies footprint $\rightarrow$ tiling pass assigns roles $\rightarrow$ illegal plans reject with split hint \citep{wu2024mirage,yirage2026,mpk2025}.
+Chapter~20 superoptimizer consumes legal role IR---static assignment is its structural substrate \citep{mpk2025,chen2020compilerbasedhardw}.
 
-This is also where the \textbf{tiling} pass interacts with quantization and precision. A lower-precision tile---FP8 or int8---moves fewer bytes and fits more elements per buffer, which loosens the residency constraint and can change the optimal tile shape and even the producer/consumer ratio \citep{shah2024flashattention3,dlbook}. The pass therefore cannot choose tiles independently of the numeric format; it must co-decide them, because the format determines how much of the working set is resident and therefore how the roles should be balanced. For a memory-bound decode kernel this coupling is the whole game: the format choice and the \textbf{tiling} together set bytes/token, and the role assignment sets whether the movement of those bytes overlaps the compute \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{Pass pseudocode narrative.}
+\textbf{Input:} fused subgraph $G$ with residency metadata $R$ from Ch.~6 \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Loop:} propose tile shape $T$; propose split $(p,c)$ producer/consumer counts; allocate registers; place barriers \citep{shah2024flashattention3,wu2024mirage}.
+\textbf{Check:} simulate stalls; verify $R$ still valid under skew \citep{memoryfloor2026,dao2022flashattention}.
+\textbf{Accept:} emit schedule IR; \textbf{reject:} split $G$ or shrink $T$ with reason \citep{yirage2026,patel2025llminference,mpk2025}.
+This is constrained search---not a single template table \citep{wu2024mirage,chen2020compilerbasedhardw}.
 
-What makes the \textbf{YiRage} \textbf{tiling} pass composable with the rest of the book's machinery is that it consumes the same residency metadata the memory pass produces and feeds the megakernel search of Chapter~20. The superoptimizer proposes a fusion; the memory pass certifies its footprint fits; the \textbf{tiling} pass assigns static roles and tiles that realize the fusion as a schedule-free kernel on the target \citep{yirage2026,wu2024mirage,mpk2025}. The result is that ``static role assignment'' stops being a hand-coding technique a CUDA expert applies and becomes a compiler decision that is made, checked, and re-made per target automatically.
+\paragraph{Per-target divergence.}
+GPU search explores warp splits under shared-memory caps; NPU search explores tile stages under SRAM caps \citep{amd2024aie,nvidia2022hopper,yirage2026}.
+Precision changes tile bytes---co-decide format with tile shape \citep{shah2024flashattention3,dlbook,memoryfloor2026}.
+
+\paragraph{Error contract.}
+Failures cite: overflow tensor, role split attempted, recommended fusion edge, backend cap row \citep{yirage2026,patel2025llminference}.
+Opaque errors recreate GPU-porting pain on NPU \citep{amd2024xdna,chen2020compilerbasedhardw}.
+
+\paragraph{Search algorithm sketch.}
+Start from memory-pass max legal tile; propose producer/consumer split; place barriers; simulate stall counters \citep{wu2024mirage,yirage2026,shah2024flashattention3}.
+If starvation or overflow, shrink tile or split fusion; if still failing, emit structured error \citep{mpk2025,chen2020compilerbasedhardw}.
+Megakernel search (Ch.~20) receives only feasible schedules---search does not fix illegal roles \citep{wu2024mirage,mpk2025}.
+
+\paragraph{Regression tests.}
+Golden tests: stored role ratio + barrier count for canonical layers \citep{yirage2026,wu2024mirage}.
+CI fails when tiling pass output drifts without worksheet update \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Operator fusion interaction.}
+Tiling pass grows fusion until memory pass or role search fails \citep{wu2024mirage,yirage2026,shah2024flashattention3}.
+Each added op changes load/compute mismatch---ratio must be re-evaluated \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+This is why megakernel search and tiling pass iterate rather than run once \citep{mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{Backend lowering handoff.}
+GPU lowering emits warp-specialized PTX/CUDA with barrier indices from schedule IR \citep{shah2024flashattention3,nvidia2022hopper,yirage2026}.
+NPU lowering emits DMA graphs with tile stage IDs \citep{amd2024xdna,amd2024aie,patel2025llminference}.
+CPU lowering emits threaded task structs with affinity tags \citep{dlbook,chen2020compilerbasedhardw,kwon2023vllm}.
+Same schedule IR surface---three backends \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Composition with Chapter~6 memory pass.}
+Memory pass fixes \emph{what} fits; tiling pass fixes \emph{who} executes while it fits \citep{yirage2026,dao2022flashattention}.
+Register skew from tiling can invalidate memory pass---run passes in a loop until fixed point or split \citep{chen2020compilerbasedhardw,memoryfloor2026,shah2024flashattention3}.
+
+\paragraph{Fusion boundary coupling.}
+Tiling pass must co-decide how far to fuse: too little fusion $\rightarrow$ dispatch tax returns; too much $\rightarrow$ residency or role imbalance \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+Stopping rule: largest fused region where memory pass \emph{and} tiling pass both succeed \citep{wu2024mirage,shah2024flashattention3,chen2020compilerbasedhardw}.
+This is Chapter~\ref{chap:ch06} export-edge logic with roles in the loop \citep{dao2022flashattention,patel2025llminference}.
+
+\paragraph{Precision and tile co-search.}
+FP8/int8 tiles move fewer bytes---may allow smaller producer teams or larger consumer tiles \citep{shah2024flashattention3,dlbook}.
+Tiling pass must search format and shape jointly for decode cells \citep{memoryfloor2026,yirage2026}.
+Bytes/token and role balance move together---do not tune them in isolation \citep{taxbreak2026,patel2025llminference}.
+
+\paragraph{Documentation bundle.}
+Ship with every staticization merge: staticization level, ratio worksheet, tri-hardware role row, tiling IR excerpt, checklist \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3,taxbreak2026,patel2025llminference}.
+Private warp splits do not survive team turnover \citep{mpk2025,wu2024mirage}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Archive tiling-pass schedule IR snippet on every staticization PR \citep{yirage2026,wu2024mirage}.
+
+\section{Role Assignment Pitfalls and Checklist}
+\label{sec:ch07_role_pitfalls}
+
+\subsection{Five common anti-patterns}
+\begin{enumerate}
+\item \textbf{Ratio imbalance.}
+\emph{Symptom:} consumer warps stall on \texttt{mbarrier}; producers idle \citep{shah2024flashattention3,patel2025llminference}.
+\emph{Root cause:} prefill-biased producer/consumer split on decode GEMV \citep{taxbreak2026,memoryfloor2026}.
+\emph{Fix:} re-run Axis~1 worksheet; add producer warps \citep{yirage2026}.
+\emph{Prevention:} Pattern~2 mandatory on decode PRs \citep{shah2024flashattention3,chen2020compilerbasedhardw}.
+
+\item \textbf{Barrier misplacement.}
+\emph{Symptom:} pipeline bubbles, rare data races \citep{semianalysis2024tma,nvidia2022hopper}.
+\emph{Root cause:} consumer starts before TMA completion signal \citep{shah2024flashattention3}.
+\emph{Fix:} one barrier pair per ping-pong stage; verify with race check \citep{yirage2026}.
+\emph{Prevention:} barrier walkthrough in Section~\ref{sec:ch07_role_decision} \citep{semianalysis2024tma,patel2025llminference}.
+
+\item \textbf{Over-staticization.}
+\emph{Symptom:} some SMs idle on irregular batches \citep{shah2024flashattention3,mpk2025}.
+\emph{Root cause:} L3 megakernel on workloads needing tile scheduler \citep{patel2025llminference}.
+\emph{Fix:} step down to L2 persistent; keep host graph flexibility \citep{nvidia2024cudagraphs}.
+\emph{Prevention:} Table~\ref{tab:ch07_static_economics} review before L3 commitment \citep{mpk2025,yirage2026}.
+
+\item \textbf{Resource omission.}
+\emph{Symptom:} spill after enabling ping-pong roles \citep{memoryfloor2026,yirage2026}.
+\emph{Root cause:} role plan ignored Ch.~6 double-buffer bytes or register skew \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\emph{Fix:} joint residency+role worksheet; Section~\ref{sec:ch07_joint_residency} \citep{yirage2026,shah2024flashattention3}.
+\emph{Prevention:} Pattern~3 on every skew change \citep{wu2024mirage,mpk2025}.
+
+\item \textbf{Prefill copy-paste.}
+\emph{Symptom:} high TFLOPs, poor tokens/sec at batch-1 \citep{shah2024flashattention3,taxbreak2026}.
+\emph{Root cause:} consumer-heavy split on memory-bound decode \citep{memoryfloor2026,patel2025llminference}.
+\emph{Fix:} decode worksheet (Table~\ref{tab:ch07_role_worked_example}) \citep{yirage2026}.
+\emph{Prevention:} separate decode and prefill benchmark tabs \citep{kwon2023vllm,shah2024flashattention3}.
+\end{enumerate}
+
+\paragraph{Anti-pattern culture.}
+Treat ``we copied FA3 config'' as a red flag in review \citep{shah2024flashattention3,patel2025llminference,taxbreak2026}.
+Require decode ratio worksheet even when prefill kernel exists \citep{yirage2026,kwon2023vllm,memoryfloor2026}.
+Static roles without measurement are folklore---stall counters or simulation required \citep{patel2025llminference,chen2020compilerbasedhardw,shah2024flashattention3}.
+
+\paragraph{Debug playbook (expanded).}
+\textbf{Stalls rising:} check producer count first, barrier order second, tile size third \citep{shah2024flashattention3,yirage2026,semianalysis2024tma}.
+\textbf{Spill appearing:} rerun Ch.~6 peak with skew; reduce consumer registers or split fusion \citep{memoryfloor2026,dao2022flashattention,chen2020compilerbasedhardw}.
+\textbf{Launches flat:} you optimized inner loop but not staticization level---revisit Table~\ref{tab:ch07_static_levels} \citep{taxbreak2026,nvidia2024cudagraphs,mpk2025}.
+\textbf{NPU fail:} compare role map row to GPU row---do not port warp counts literally \citep{amd2024xdna,patel2025llminference,yirage2026}.
+
+\subsection{Static role self-check (review checklist)}
+\begin{itemize}
+\item[$\square$] Producer/consumer ratio computed from load/compute mismatch
+\item[$\square$] Register skew within hardware limits; no spill
+\item[$\square$] Ping-pong bytes in Ch.~6 peak budget
+\item[$\square$] Barrier placements verified; no pipeline bubbles
+\item[$\square$] Decode workload regularity matches chosen staticization level
+\item[$\square$] Residency + role legality reports archived for target hardware
+\end{itemize}
+
+\paragraph{Postmortem sequence.}
+Replay role worksheet $\rightarrow$ compare warp stall counters $\rightarrow$ bisect barrier $\rightarrow$ re-run tiling pass \citep{shah2024flashattention3,yirage2026,taxbreak2026,memoryfloor2026}.
+Do not tune tile MMA shapes before dispatch and stall replay \citep{patel2025llminference,nvidia2022hopper}.
+
+\paragraph{Engineering patterns (quick reference).}
+See Section~\ref{sec:ch07_role_patterns} for full Scene/Solution/Benefit/Notes patterns \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+
+\section{Static Role Engineering Patterns}
+\label{sec:ch07_role_patterns}
+
+\paragraph{Pattern 1: Launch-storm diagnosis.}
+\textbf{Scene:} TaxBreak-scale launches/token on dense 1B model \citep{taxbreak2026}.
+\textbf{Solution:} measure launches; pick L1 graph as stopgap; plan L2 persistent + roles \citep{nvidia2024cudagraphs,shah2024flashattention3}.
+\textbf{Benefit:} separates host overhead from missing fusion \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Notes:} graph capture does not fix bytes/token \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Pattern 2: Decode ratio worksheet.}
+\textbf{Scene:} FA3 prefill config ported to batch-1 decode \citep{shah2024flashattention3,taxbreak2026}.
+\textbf{Solution:} Table~\ref{tab:ch07_role_worked_example} with load/compute cycle estimate \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Benefit:} prevents consumer-heavy starvation \citep{yirage2026,shah2024flashattention3}.
+\textbf{Notes:} validate stalls, not TFLOPs \citep{memoryfloor2026}.
+
+\paragraph{Pattern 3: Joint residency rerun.}
+\textbf{Scene:} register skew after warp split \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{Solution:} rerun Ch.~6 peak; adjust skew or tile \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+\textbf{Benefit:} catches spill before production \citep{memoryfloor2026}.
+\textbf{Notes:} roles and residency are coupled \citep{wu2024mirage}.
+
+\paragraph{Pattern 4: Triplet role map.}
+\textbf{Scene:} CUDA schedule works; XDNA compile fails \citep{amd2024xdna,taxbreak2026}.
+\textbf{Solution:} Table~\ref{tab:ch07_tri_hw_roles} for all backends \citep{yirage2026,patel2025llminference,chen2020compilerbasedhardw}.
+\textbf{Benefit:} fleet-safe IR \citep{amd2024aie,nvidia2022hopper}.
+\textbf{Notes:} IR parity $\neq$ role parity \citep{yirage2026}.
+
+\paragraph{Pattern 5: Ladder documentation.}
+\textbf{Scene:} team debates megakernel vs graphs \citep{mpk2025,nvidia2024cudagraphs}.
+\textbf{Solution:} Table~\ref{tab:ch07_static_levels} + launches/token in TSV \citep{taxbreak2026,patel2025llminference}.
+\textbf{Benefit:} principled staticization choice \citep{yirage2026}.
+\textbf{Notes:} L3 needs frozen fusion \citep{wu2024mirage,mpk2025}.
+
+\paragraph{Pattern 6: Tiling pass artifact.}
+\textbf{Scene:} hand-tuned warp split lost on model update \citep{shah2024flashattention3,yirage2026}.
+\textbf{Solution:} CI golden schedule IR from tiling pass \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\textbf{Benefit:} reproducible roles across versions \citep{patel2025llminference,mpk2025}.
+\textbf{Notes:} pair with Ch.~6 memory-pass goldens \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Pattern usage.}
+Require Pattern~2 on decode PRs; Pattern~4 on IR changes; Pattern~6 on staticization merges \citep{yirage2026,taxbreak2026,shah2024flashattention3,patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Anti-pattern cross-reference.}
+Map pitfalls to patterns: ratio imbalance $\rightarrow$ Pattern~2; resource omission $\rightarrow$ Pattern~3; prefill copy $\rightarrow$ Pattern~2; triplet fail $\rightarrow$ Pattern~4 \citep{yirage2026,shah2024flashattention3,amd2024xdna,patel2025llminference}.
+Use patterns in design review agendas so discussion stays evidence-based \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+
+\section{Role Assignment Review Workflow}
+\label{sec:ch07_role_review}
+
+\paragraph{Step R1: Staticization level.}
+Pick L1/L2/L3 with launches/token evidence \citep{taxbreak2026,nvidia2024cudagraphs,mpk2025}.
+
+\paragraph{Step R2: Ratio worksheet.}
+Complete Table~\ref{tab:ch07_role_worked_example} or model-specific variant \citep{shah2024flashattention3,patel2025llminference}.
+
+\paragraph{Step R3: Joint residency check.}
+Rerun Chapter~\ref{chap:ch06} peak with register skew and ping-pong \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Step R4: Tiling pass.}
+Archive schedule IR; verify barrier count \citep{yirage2026,wu2024mirage,semianalysis2024tma}.
+
+\paragraph{Step R5: Checklist.}
+Section~\ref{sec:ch07_role_pitfalls} sign-off before Chapter~\ref{chap:ch08} pipeline work \citep{dao2022flashattention,patel2025llminference}.
+
+\paragraph{Step R6: Cross-chapter packet.}
+Bundle Ch.~6 peak worksheet + Ch.~7 ratio worksheet + tiling IR + staticization level in one review folder \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention,shah2024flashattention3}.
+Reviewers should not approve role changes without residency re-certification \citep{memoryfloor2026,mpk2025,yirage2026}.
+
+\paragraph{Review gates.}
+\textbf{Gate A---Consumer starvation:} memory warp stalls $\gg$ compute stalls \citep{shah2024flashattention3,yirage2026}.
+\textbf{Gate B---Spill after roles:} local memory loads post skew \citep{memoryfloor2026,nvidia2022hopper}.
+\textbf{Gate C---Launch regression:} ms/token flat, launches/token unchanged \citep{taxbreak2026,patel2025llminference}.
+\textbf{Gate D---Triplet drift:} GPU schedule fails NPU compile \citep{amd2024xdna,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Artifact bundle.}
+Role review packet: staticization level, Table~\ref{tab:ch07_role_worked_example}, Table~\ref{tab:ch07_tri_hw_roles} row, tiling IR excerpt, checklist, launches/token screenshot \citep{yirage2026,taxbreak2026,shah2024flashattention3,patel2025llminference,chen2020compilerbasedhardw}.
+Store beside Ch.~6 residency packets for correlated bisect \citep{dao2022flashattention,memoryfloor2026,mpk2025}.
+
+\paragraph{Facilitation.}
+Kernel owners defend ratio math; compiler owners defend pass output; serving owners accept launches/token SLO \citep{patel2025llminference,yirage2026,taxbreak2026}.
+Disputes resolve with stall counters, not seniority \citep{shah2024flashattention3,chen2020compilerbasedhardw}.
+Escalate to split fusion when joint Ch.~6--7 iteration fails after two pass loops \citep{wu2024mirage,yirage2026,mpk2025,memoryfloor2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Merge blocked until checklist complete or staticization level deferral documented \citep{yirage2026,chen2020compilerbasedhardw}.
 
 \section{Key Takeaways}
 \label{sec:ch07_key_takeaways}
 
+Static role assignment closes the loop opened in Chapter~\ref{chap:ch06}: residency budgets become actor assignments that eliminate per-token dispatch \citep{yirage2026,shah2024flashattention3,mpk2025,patel2025llminference}.
+The principles below pair design rules with actions your team can adopt this sprint \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+
 \begin{itemize}
-\item \textbf{Fix roles at compile time to remove runtime scheduling.}
-Assigning each unit a static role---producer or consumer on a GPU, a fixed stage on an NPU---lets the kernel run without a host scheduler, removing the per-token dispatch that dominates batch-1 \citep{shah2024flashattention3,taxbreak2026}. Flexibility at runtime is overhead paid per token \citep{memoryfloor2026}.
+\item \textbf{Static-first principle.}
+Decode pays scheduling per token---fix roles at compile time when workload is regular \citep{taxbreak2026,mpk2025,patel2025llminference}.
+Launch storms (847.5/token on 1B dense) are assignment problems as much as fusion problems \citep{taxbreak2026}.
+\textbf{Action:} pick L1--L3 level explicitly; measure launches/token before and after \citep{nvidia2024cudagraphs,yirage2026}.
 
-\item \textbf{Warp specialization overlaps data movement and compute.}
-Producer warps issuing TMA and consumer warpgroups issuing WGMMA overlap naturally, and pingpong scheduling overlapped softmax with GEMM for ~580$\to$640 TFLOPS in FlashAttention-3 \citep{shah2024flashattention3}. Static roles are what make the overlap schedulable \citep{semianalysis2024tma}.
+\item \textbf{Ratio-adaptation principle.}
+Producer/consumer split follows memory/compute mismatch---decode tilts producer-heavy vs prefill \citep{shah2024flashattention3,memoryfloor2026,kwon2023vllm}.
+Copying FA3 prefill splits to batch-1 decode is anti-pattern~5 \citep{patel2025llminference,taxbreak2026}.
+\textbf{Action:} complete Table~\ref{tab:ch07_role_worked_example} for your layer; attach stall counters \citep{yirage2026}.
 
-\item \textbf{Map roles to the right hierarchy granularity.}
-Roles bind to warps and warpgroups on a GPU (WGMMA is warpgroup-collective), threads and SIMD lanes on a CPU, and tiles on an NPU; co-locate communicating roles so produced data reaches its consumer on chip \citep{shah2024flashattention3,amd2024aie}. Register reallocation skews the file toward consumers \citep{nvidia2022hopper}.
+\item \textbf{Resource-linkage principle.}
+Role assignment changes register residency---joint optimize with Chapter~\ref{chap:ch06} \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw}.
+Skew without peak rerun is how spill sneaks into production \citep{memoryfloor2026,nvidia2022hopper}.
+\textbf{Action:} rerun peak worksheet after every warp skew change \citep{yirage2026,dao2022flashattention}.
 
-\item \textbf{Persistent kernels keep dispatch in-kernel.}
-Launching CTAs equal to the SM count (132 on H100 SXM5) with an in-kernel tile scheduler eliminates per-tile launch overhead and overlaps epilogue with prologue \citep{shah2024flashattention3}. MPK extends this to one launch for the whole model, reporting 1.2--6.7$\times$ end-to-end latency reduction over kernel-per-operator serving \citep{mpk2025}.
+\item \textbf{Graded-landing principle.}
+Higher staticization is not always better---match level to model churn and shape stability \citep{mpk2025,patel2025llminference,nvidia2024cudagraphs}.
+L3 megakernels trade flexibility for launch elimination---document the trade \citep{taxbreak2026,wu2024mirage}.
+\textbf{Action:} record level in benchmark metadata and README \citep{taxbreak2026,yirage2026}.
 
-\item \textbf{Make role assignment a per-target compiler pass.}
-The YiRage tiling pass chooses tiles and assigns static roles per target, composing with the residency memory pass and megakernel search \citep{yirage2026,wu2024mirage}. The same math gets a different, checked schedule on each class, and the fusion boundary lands wherever the target's residency budget allows \citep{amd2024xdna}.
+\item \textbf{Compiler-internalization principle.}
+Roles belong in YiRage tiling pass output---not tribal CUDA knowledge \citep{yirage2026,wu2024mirage,mpk2025}.
+Chapter~20 search consumes role IR---hand splits do not compose across model versions \citep{wu2024mirage,chen2020compilerbasedhardw,patel2025llminference}.
+\textbf{Action:} attach schedule IR + checklist to CI artifacts; block drift without worksheet updates \citep{yirage2026,shah2024flashattention3,taxbreak2026}.
 \end{itemize}
+
+\paragraph{How this chapter connects.}
+Chapter~\ref{chap:ch06} planned bytes; this chapter assigned units; Chapter~\ref{chap:ch08} pipelines movement between them \citep{semianalysis2024tma,dao2022flashattention,shah2024flashattention3}.
+Chapter~4--5 hardware async features are \emph{used} by roles, not re-taught here \citep{nvidia2022hopper,amd2024xdna,patel2025llminference}.
+Chapter~20 megakernel search requires role-annotated IR produced here \citep{wu2024mirage,mpk2025,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Megakernel stack preview.}
+Roles (Ch.~7) $\rightarrow$ async pipelines (Ch.~8) $\rightarrow$ sync discipline (Ch.~9) $\rightarrow$ softmax carriers (Ch.~10) $\rightarrow$ assembly (Ch.~11) \citep{dao2022flashattention,semianalysis2024tma,shah2024flashattention3,mpk2025,patel2025llminference}.
+Skipping any layer produces kernels that benchmark well in isolation and fail in fusion \citep{taxbreak2026,memoryfloor2026,yirage2026}.
 
 \section{Conclusion}
 \label{sec:ch07_conclusion}
 
-Static role assignment is the structural move that turns Chapter~6's residency budget into a schedule-free kernel: fix what each warp, warpgroup, or tile does at compile time, and the runtime scheduler---and its per-token dispatch cost---disappears \citep{shah2024flashattention3,mpk2025}. Warp specialization and persistent kernels show the GPU path, the XDNA array shows the natively static NPU path, and MPK shows the limit case of one launch per token; in every case the win is that dynamism removed at compile time is overhead not paid at runtime \citep{taxbreak2026,memoryfloor2026}. The YiRage tiling pass makes the assignment a per-target compiler decision rather than a hand-coding feat, choosing tile shapes and role splits that fit each target's residency budget automatically \citep{yirage2026}. Static roles, however, only pay off if the data each role needs arrives on time, which is the subject of Chapter~\ref{chap:ch08}: TMA double-buffer pipelines and the asynchronous movement that keeps producer and consumer roles fed, so the statically assigned consumers never stall waiting on data \citep{semianalysis2024tma,dao2022flashattention}.
+Static role assignment spends Chapter~\ref{chap:ch06}'s residency budget on a schedule-free structure: every warp, warpgroup, or tile knows its job before the first token \citep{shah2024flashattention3,mpk2025,yirage2026}.
+The quantitative framework, tri-hardware map, staticization ladder, and tiling pass turn principle into repeatable engineering \citep{patel2025llminference,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Closing metaphor.}
+If Chapter~\ref{chap:ch06} is the warehouse layout, this chapter is the org chart---who unloads trucks (producers) and who assembles orders (consumers) \citep{dao2022flashattention,yirage2026,shah2024flashattention3}.
+A perfect layout with no job titles still has people standing in the loading bay asking ``what next?'' each token \citep{taxbreak2026,mpk2025}.
+Static roles eliminate that question; Chapter~\ref{chap:ch08} keeps the trucks arriving on time \citep{semianalysis2024tma,dao2022flashattention}.
+
+Chapter~\ref{chap:ch08} addresses the next failure mode: \textbf{keeping producers fed}---TMA double-buffer pipelines and async movement so statically assigned consumers never stall waiting for data \citep{semianalysis2024tma,dao2022flashattention}.
+Carry role worksheets and staticization level into every async-pipeline change \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Part~IV bridge.}
+Roles (this chapter) + movement (Ch.~8) + sync (Ch.~9) + carriers (Ch.~10) assemble the megakernel stack \citep{dao2022flashattention,shah2024flashattention3,mpk2025}.
+Chapter~20's search assumes both residency legality and role-annotated IR---skipping here breaks the compiler story \citep{wu2024mirage,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Budget--structure recap.}
+Chapter~\ref{chap:ch06}: where bytes live and for how long \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw}.
+Chapter~\ref{chap:ch07}: which units touch those bytes during each fused stage \citep{shah2024flashattention3,mpk2025,patel2025llminference}.
+Together they define a deployable decode cell---not just a fast microbenchmark \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Recap for practitioners.}
+(1) Pick staticization level. (2) Compute decode producer/consumer ratio. (3) Fill tri-hardware role table. (4) Run tiling pass. (5) Complete checklist \citep{taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025,amd2024xdna,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,memoryfloor2026,wu2024mirage,nvidia2024cudagraphs,kwon2023vllm,dlbook,chen2020compilerbasedhardw}.
+Residency without roles is bytes planned but work still dispatched every operator \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Teaching vs production.}
+Whiteboard producer/consumer timelines (Figure~\ref{fig:ch07_producer_consumer_timeline}) for onboarding \citep{shah2024flashattention3,dlbook}.
+Automate Patterns A--E in CI for fleet scale \citep{yirage2026,patel2025llminference,mpk2025}.
+The book shows both: concepts in \S\ref{sec:ch07_static_roles}--\ref{sec:ch07_tri_hw_role_mapping}, gates in \S\ref{sec:ch07_role_pitfalls}--\ref{sec:ch07_role_review} \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Summary sentence.}
+Chapter~\ref{chap:ch06} budgeted bytes; Chapter~\ref{chap:ch07} assigned actors; Chapter~\ref{chap:ch08} will synchronize their movement \citep{dao2022flashattention,semianalysis2024tma,yirage2026,shah2024flashattention3}.
+That sequence is the MegaKernel spine \citep{mpk2025,wu2024mirage,memoryfloor2026,patel2025llminference,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Done criteria.}
+You are done when launches/token, role ratio worksheet, and tiling-pass artifact agree for your decode cell \citep{yirage2026,taxbreak2026,patel2025llminference}.
+Proceed to Chapter~\ref{chap:ch08} with barriers and buffer indices documented \citep{semianalysis2024tma,dao2022flashattention}.
+Bring staticization level, joint Ch.~6--7 worksheets, and Table~\ref{tab:ch07_tri_hw_roles}---Chapter~8 assumes roles are fixed and legal \citep{dao2022flashattention,yirage2026,shah2024flashattention3,mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{Hands-on exercises.}
+(1) Measure launches/token on your baseline. (2) Fill ratio worksheet. (3) Pick L1/L2/L3. (4) Run tiling pass. (5) Complete checklist \citep{taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025,amd2024xdna,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,memoryfloor2026,wu2024mirage,nvidia2024cudagraphs,kwon2023vllm,dlbook,chen2020compilerbasedhardw,amd2024aie,rotem2018glow}.
+Compare decode vs prefill stall profiles on the same kernel if you maintain both paths \citep{kwon2023vllm,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Fleet note.}
+Triplet deployments need three role maps from one IR---GPU semi-static, CPU weak-static, NPU fully static \citep{patel2025llminference,yirage2026,amd2024aie,nvidia2022hopper,chen2020compilerbasedhardw}.
+Do not ship CUDA-only role metadata to Ryzen AI endpoints \citep{amd2024xdna,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Long-context note.}
+Static roles do not replace KV paging---they optimize per-step operator dispatch \citep{kwon2023vllm,dao2023flashdecoding}.
+Longer contexts increase KV stream load work---ratio worksheets may need more producer share at high ctx \citep{patel2025llminference,semianalysis2024tma,shah2024flashattention3}.
+Re-validate roles per context bucket if you compile bucketed graphs \citep{yirage2026,amd2024xdna,mpk2025}.
+
+\paragraph{Reader exercises (extended).}
+(6) Compare L1 vs L2 launches/token on the same model. (7) Explain one anti-pattern from your last merge. (8) Sketch producer/consumer timeline for MLP slice \citep{dao2022flashattention,taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025,kwon2023vllm,memoryfloor2026,wu2024mirage,chen2020compilerbasedhardw}.
+(9) Trace how tiling pass output feeds Chapter~20 search \citep{wu2024mirage,mpk2025,yirage2026}.
+
+\paragraph{Part II/IV handoff.}
+Part~II established hardware and budgets; Part~IV implements movement and sync atop roles \citep{nvidia2022hopper,amd2024xdna,chen2020compilerbasedhardw,semianalysis2024tma,dao2022flashattention,shah2024flashattention3,mpk2025,patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,wu2024mirage}.
+Skip role worksheets and later chapters optimize the wrong bottleneck \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Final sentence.}
+Static roles turn Chapter~\ref{chap:ch06}'s residency plan into a cast of actors; Chapter~\ref{chap:ch08} teaches them to move in sync \citep{dao2022flashattention,semianalysis2024tma,shah2024flashattention3,yirage2026,mpk2025,patel2025llminference,taxbreak2026,memoryfloor2026,wu2024mirage,chen2020compilerbasedhardw,nvidia2022hopper,amd2024xdna,kwon2023vllm,dlbook,nvidia2024cudagraphs,amd2024aie,rotem2018glow,liu2024deepseekv3,dao2023flashdecoding}.
+Ship the budget--structure packet before you tune async pipelines---otherwise Chapter~8 optimizes movement for the wrong cast \citep{semianalysis2024tma,yirage2026,shah2024flashattention3,patel2025llminference,taxbreak2026}.
+Part~IV begins with movement only after roles are cast and budgets are closed \citep{dao2022flashattention,mpk2025,memoryfloor2026,chen2020compilerbasedhardw}.
+Archive Ch.~6--7 review packets beside benchmark TSV for every staticization milestone \citep{yirage2026,taxbreak2026,patel2025llminference,shah2024flashattention3,wu2024mirage}.
+Re-read Section~\ref{sec:industrial_hook} before the next fusion review---847.5 launches/token is the problem statement this chapter solves with roles \citep{taxbreak2026,mpk2025,memoryfloor2026,nvidia2024cudagraphs}.
+Enter Chapter~\ref{chap:ch08} with producer/consumer roles fixed and barrier indices written down \citep{semianalysis2024tma,dao2022flashattention,shah2024flashattention3,yirage2026}.
+The budget--structure loop is complete; the movement loop begins in Chapter~\ref{chap:ch08} with TMA double-buffer pipelines \citep{semianalysis2024tma,dao2022flashattention,mpk2025,patel2025llminference,chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,yirage2026}.
+
+\paragraph{Hands-on recap (one line).}
+Budget (Ch.~6) + cast (Ch.~7) + movement (Ch.~8) = deployable decode megakernel path \citep{dao2022flashattention,shah2024flashattention3,semianalysis2024tma,yirage2026,mpk2025,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,wu2024mirage}.
+Do not open Chapter~\ref{chap:ch08} until Table~\ref{tab:ch07_role_worked_example} and the staticization level are signed off in the review packet \citep{yirage2026,shah2024flashattention3,patel2025llminference,nvidia2024cudagraphs,mpk2025,chen2020compilerbasedhardw,taxbreak2026}.
+That sign-off is the Part~IV entry checkpoint for this book's megakernel implementation track \citep{mpk2025,wu2024mirage,dao2022flashattention,semianalysis2024tma,memoryfloor2026,patel2025llminference,yirage2026}.
+Carry the signed packet into every subsequent kernel chapter through Chapter~11 megakernel assembly \citep{shah2024flashattention3,taxbreak2026,chen2020compilerbasedhardw,mpk2025,dao2022flashattention,patel2025llminference,yirage2026,wu2024mirage}.
+Static roles are the structural contract those chapters execute \citep{mpk2025,semianalysis2024tma,memoryfloor2026,taxbreak2026,patel2025llminference}.
+If your review packet is incomplete, stop here and finish the worksheets now before opening Chapter~\ref{chap:ch08} async pipeline movement \citep{semianalysis2024tma,dao2022flashattention}.
+Roles without movement planning still stall at runtime today \citep{shah2024flashattention3,patel2025llminference,yirage2026}.
 
 \typeout{END_CHAPTER "ch07" \theabspage}

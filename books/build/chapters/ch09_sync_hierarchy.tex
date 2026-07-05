@@ -2,152 +2,1011 @@
 \label{chap:ch09}
 \typeout{START_CHAPTER "ch09" \theabspage}
 
-The double-buffer pipelines of Chapter~8 only work if the producer and consumer agree on when a buffer is ready, and a megakernel that fuses a whole layer must coordinate hundreds of units without ever returning to the host. Synchronization is therefore not a detail at the bottom of the stack---it is the mechanism that makes static roles and overlapped movement safe, and getting it wrong is how a fused kernel either corrupts data or deadlocks \citep{shah2024flashattention3,nvidia2022hopper}. The decode stakes are unchanged: dense Llama-3.2-1B issues 847.5 launches per token on H100 and OLMoE-1B/7B issues 9{,}305, and the whole point of collapsing those launches is to keep coordination on chip rather than paying a host round trip per operator \citep{taxbreak2026,memoryfloor2026}.
-The mistake to avoid is using a coarser synchronization scope than the dependency requires. A barrier that synchronizes a whole thread block when only two warps need to agree wastes cycles serializing units that could have run free; conversely, omitting a needed barrier is a correctness bug that surfaces as nondeterministic output \citep{dao2022flashattention,nvidia2024cudagraphs}. This chapter develops the synchronization hierarchy, shows how to pick the right primitive per hardware class, treats deadlock as a first-class hazard, and ends with the YiRage pass that inserts and checks synchronization per target.
+\section{The Lifeline of Fused Kernels: Sync Correctness}
+\label{sec:industrial_hook}
+
+A team shipped a fused decode kernel with perfect bytes/token---then production hung on a barrier-count mismatch \citep{shah2024flashattention3,taxbreak2026,yirage2026}.
+Chapters~\ref{chap:ch06}--\ref{chap:ch08} optimized residency, roles, and pipelines; \textbf{this chapter makes those optimizations correct and deadlock-free} \citep{nvidia2022hopper,dao2022flashattention,mpk2025}.
+
+\textbf{The more aggressive the overlap, the more dangerous a sync bug.} At batch-1 decode, a coarse block barrier on the critical path can cost more than the matmul it guards---yet omitting a needed barrier corrupts output silently \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+\textbf{This chapter is the MegaKernel correctness pillar}---minimal-scope synchronization with compile-time proof \citep{yirage2026,wu2024mirage,shah2024flashattention3}.
+
+\paragraph{Bridge from Chapters~6--8.}
+Transaction barriers from Ch.~8 are point-to-point handoffs---this chapter generalizes scope selection and proves they cannot deadlock \citep{semianalysis2024tma,shah2024flashattention3}.
+Static roles from Ch.~7 fix who coordinates---sync can be minimal only because roles are known at compile time \citep{yirage2026,mpk2025}.
+Barrier objects consume Ch.~6 fast-memory budget---count mbarrier slots in peak worksheets \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+Decode metrics: Chapter~\ref{chap:ch03}; hardware primitives: Chapters~\ref{chap:ch04}--\ref{chap:ch05} \citep{patel2025llminference,nvidia2022hopper,amd2024xdna}.
+
+\paragraph{What you will be able to do.}
+(1)~Pick minimal sync scope per dependency, (2)~fill tri-hardware sync table, (3)~run static deadlock checks, (4)~interpret YiRage sync-pass errors, (5)~complete sync checklist \citep{yirage2026,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Organization map.}
+Hierarchy principles (\S\ref{sec:ch09_sync_hierarchy}), tri-hardware primitives (\S\ref{sec:ch09_hardware_sync_pick}), deadlock detection (\S\ref{sec:ch09_deadlock_detection}), YiRage pass (\S\ref{sec:ch09_yirage_sync_pass}), joint budget (\S\ref{sec:ch09_joint_budget}), pitfalls (\S\ref{sec:ch09_sync_pitfalls}), patterns (\S\ref{sec:ch09_sync_patterns}), review workflow, takeaways, bridge to Chapter~\ref{chap:ch10} \citep{dao2022flashattention,semianalysis2024tma}.
+
+\paragraph{Decode-first thesis.}
+Prefill amortizes coarse sync across many tokens; decode does not \citep{kwon2023vllm,shah2024flashattention3,patel2025llminference}.
+\textbf{Fine sync, fine roles, fine pipelines}---or pay ms/token on barriers with nothing to hide behind \citep{taxbreak2026,memoryfloor2026}.
+Never use block sync where a transaction barrier suffices \citep{semianalysis2024tma,yirage2026}.
+
+\paragraph{Case study sketch.}
+Fused attention: replacing one errant \texttt{\_\_syncthreads} with mbarrier pair recovered ${\sim}8\%$ ms/token; a divergent barrier path hung 1 in $10^4$ requests \citep{shah2024flashattention3,patel2025llminference,taxbreak2026}.
+Static proof caught the divergent path before merge \citep{yirage2026,wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Anti-pattern preview.}
+Section~\ref{sec:ch09_sync_pitfalls} lists five sync failures---review before any barrier edit \citep{yirage2026,shah2024flashattention3}.
+Culture: no hand barrier without sync-pass legality report \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Budget--structure--execution--correctness stack.}
+Ch.~6 bytes $\rightarrow$ Ch.~7 actors $\rightarrow$ Ch.~8 timing $\rightarrow$ \textbf{Ch.~9 proof} \citep{dao2022flashattention,shah2024flashattention3,semianalysis2024tma,yirage2026}.
+Residency without sync races; roles without sync deadlock; pipelines without sync read stale buffers \citep{memoryfloor2026,amd2024aie,mpk2025,wu2024mirage}.
+
+\paragraph{Industrial narrative.}
+847.5 launches/token collapse to one kernel---then one wrong barrier hangs the whole forward pass \citep{taxbreak2026,mpk2025,patel2025llminference}.
+CUTLASS pipeline classes exist because humans mis-count arrives---sync belongs in the compiler \citep{shah2024flashattention3,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Reader paths.}
+\textbf{Kernel engineers:} scope ladder + mbarrier rules + pitfalls \citep{shah2024flashattention3,semianalysis2024tma}.
+\textbf{Compiler authors:} sync pass I/O + deadlock checks + golden IR \citep{yirage2026,wu2024mirage,mpk2025}.
+\textbf{Serving leads:} hang postmortem bundle + quadruple legality \citep{taxbreak2026,patel2025llminference}.
+All paths end at checklist before Chapter~\ref{chap:ch10} \citep{dao2022flashattention,memoryfloor2026}.
+
+\paragraph{Who should read this chapter.}
+Anyone editing barriers after Ch.~8 pipeline merge; compiler authors on sync pass; on-call for fused-kernel hangs \citep{yirage2026,shah2024flashattention3,mpk2025}.
+Finish Ch.~6--8 worksheets first---sync without pipeline IR is guesswork \citep{semianalysis2024tma,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{What this chapter is not.}
+Not Hopper ISA manual (Ch.~4), not mbarrier tutorial (Ch.~8), not softmax math (Ch.~10) \citep{nvidia2022hopper,dao2022flashattention,semianalysis2024tma}.
+We teach sync \emph{design and proof} given fused IR \citep{yirage2026,mpk2025}.
+
+\paragraph{Terminology alignment.}
+\textbf{Scope} = set of units that must agree before proceeding \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{Transaction barrier} = producer-consumer scoped mbarrier \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Proof certificate} = compile-time deadlock-freedom artifact from sync pass \citep{yirage2026,wu2024mirage}.
+Use consistently in PRs and CI \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Bridge to Chapter~10.}
+Online softmax keeps $(m,\ell,o)$ carriers synchronized across tiles---Ch.~10 specializes the shuffle/atomic patterns introduced here \citep{dao2022flashattention,shah2024flashattention3,patel2025llminference,memoryfloor2026}.
+
+\paragraph{What changes in Ch.~10 vs Ch.~9.}
+Ch.~9 proves \emph{where} sync may occur and that wait-for graph is acyclic \citep{yirage2026,wu2024mirage,shah2024flashattention3}.
+Ch.~10 proves \emph{what numeric state} must be consistent across those sync points---running max $m$, running sum $\ell$, output accumulator $o$ \citep{dao2022flashattention,memoryfloor2026}.
+A softmax carrier bug can pass sync proof yet fail numerics---both certificates are required for attention fusion release \citep{taxbreak2026,patel2025llminference,chen2020compilerbasedhardw}.
+Carry forward: mbarrier index table, scope worksheets, and quadruple legality bundle when opening Ch.~10 worksheets \citep{yirage2026,semianalysis2024tma}.
+
 \index{Synchronization}
 \index{Barrier}
 \index{Deadlock}
+\index{mbarrier}
 
-\section{Sync hierarchy}
+\section{Sync Hierarchy: Minimal Scope Principles}
 \label{sec:ch09_sync_hierarchy}
 
-% AUTO_VISUAL:fig_sync_hierarchy_pipeline
+Coordinate at the \textbf{narrowest scope} a dependency spans---cost rises steeply with participant count and physical distance \citep{shah2024flashattention3,patel2025llminference,nvidia2022hopper}.
 
+% AUTO_VISUAL:fig_sync_hierarchy_pipeline
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.84, transform shape]
- \node[vis pipeline node] (s0) at (-5.5,0) {\footnotesize Warp\\\_\_syncwarp};
- \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Block\\bar.sync};
- \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Cluster\\barrier};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize Grid / multi-GPU\\collective};
+ \node[vis pipeline node] (s0) at (-5.5,0) {\footnotesize Warp\\shuffle};
+ \node[vis arch node] (s1) at (-1.9,0) {\footnotesize mbarrier\\pair};
+ \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Block\\bar.sync};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Grid /\\collective};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{The synchronization hierarchy: cost rises with scope, from a warp barrier to a multi-GPU collective. Synchronize at the narrowest scope a dependency requires.}
+\caption{Sync hierarchy (decode: live in left two boxes; avoid right unless unavoidable).}
 \label{fig:sync_hierarchy_pipeline}
 \end{figure}
 
-Synchronization on a GPU is hierarchical, mirroring the thread hierarchy of Chapter~7, and the central design rule is to \textbf{sync} at the narrowest scope that the dependency actually spans \citep{shah2024flashattention3}. The reason a hierarchy exists at all is that coordination has a physical cost proportional to how far apart the units being coordinated are and how many of them there are, so a single universal synchronization primitive would be either too weak (unable to coordinate distant units) or too expensive (paying chip-crossing cost for a local handoff) \citep{nvidia2022hopper,patel2025llminference}. By exposing a ladder of scopes, the hardware lets software pay only for the coordination it needs.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+ \draw[->] (0,0) -- (0,3.2) node[above, font=\scriptsize] {relative cost};
+ \draw[->] (0,0) -- (6.5,0) node[right, font=\scriptsize] {scope};
+ \node[font=\scriptsize] at (0.8,0.3) {warp};
+ \node[font=\scriptsize] at (2.2,1.0) {mbarrier};
+ \node[font=\scriptsize] at (3.6,1.8) {block};
+ \node[font=\scriptsize] at (5.0,2.6) {grid};
+ \draw[thick, blue!70] (0.5,0.2) -- (5.5,2.8);
+\end{tikzpicture}
+\caption{Sync cost ladder: scope widening raises latency (H100 illustrative cycles in Table~\ref{tab:ch09_sync_cost_ladder}).}
+\label{fig:ch09_sync_cost_ladder}
+\end{figure}
 
- The finest scope is the warp: \texttt{\_\_syncwarp} coordinates the 32 threads of a warp and is nearly free because they already execute in lockstep. The next is the thread block: \texttt{bar.sync} (exposed as \texttt{\_\_syncthreads}) is a \textbf{barrier} that all threads of a CTA must reach before any proceeds, and it is the workhorse of shared-memory kernels \citep{nvidia2022hopper}. Between these sits the transaction \textbf{barrier} (mbarrier) of Chapter~8, which producer and consumer warps use to hand off a buffer without a full block \textbf{barrier} \citep{shah2024flashattention3}.
-
-The transaction \textbf{barrier} deserves emphasis as the scope that decode kernels live in. Unlike a block \texttt{bar.sync}, which forces every warp to a common point, a transaction \textbf{barrier} lets a producer warp signal ``buffer $k$ is full'' to exactly the consumer that waits on it, so the two coordinate one tile apart while the rest of the kernel runs free \citep{shah2024flashattention3}. This is the synchronization that makes the double-buffer pipeline of Chapter~8 possible: without it, overlapping a load with a compute would require a block \textbf{barrier} between them that defeats the overlap. The transaction \textbf{barrier} is thus the connective tissue of the whole MegaKernel design---it is how static roles hand work to each other without a coarse stall \citep{nvidia2022hopper,dao2022flashattention}.
-
-Above the block, Hopper adds cluster-scope synchronization. Thread-block clusters are co-scheduled on the same GPC and can synchronize through hardware-accelerated cluster \textbf{barrier} instructions, which is what lets the distributed-shared-memory sharing of Chapter~6 be coordinated safely \citep{nvidia2022hopper,shah2024flashattention3}. Coarser still is grid-scope synchronization across all CTAs of a kernel, available through cooperative-groups grid \textbf{sync} but expensive because it requires all CTAs to be resident, and coarsest is multi-GPU communication through collectives such as all-reduce and all-gather, which cross the device boundary and the interconnect \citep{patel2025llminference,dlbook}.
-
+\paragraph{Quantitative cost ladder (H100 illustrative).}
 \begin{table}[t]
 \centering
-\caption{The GPU synchronization hierarchy; cost rises steeply with scope, so a decode kernel coordinates at the narrowest scope a dependency spans \citep{shah2024flashattention3,patel2025llminference}.}
-\label{tab:ch09_sync_scopes}
-\begin{tabular}{lll}
+\small
+\caption{GPU synchronization cost ladder (decode planning).}
+\label{tab:ch09_sync_cost_ladder}
+\begin{tabular}{@{}lll@{}}
 \toprule
-Scope & Primitive & Relative cost \\
+\textbf{Scope} & \textbf{Primitive} & \textbf{Typ.\ cost} \\
 \midrule
-Warp & \texttt{\_\_syncwarp} & Near-free (lockstep) \\
-Producer/consumer & Transaction barrier & Two units, one tile apart \\
-Block (CTA) & \texttt{bar.sync} & Stall to slowest warp \\
-Cluster & Cluster barrier & Several co-scheduled CTAs \\
-Grid / multi-GPU & Grid sync / collective & Chip- or network-crossing \\
+Warp & \texttt{\_\_syncwarp}, shuffle & ${\sim}$0 cycles (lockstep) \\
+Producer/consumer & Transaction mbarrier & ${\sim}$10--20 cycles \\
+Block (CTA) & \texttt{\_\_syncthreads} & ${\sim}$50--100 cycles \\
+Cluster & Cluster barrier & ${\sim}$200--500 cycles \\
+Grid / multi-GPU & Grid sync, collective & $\mu$s (2--3 orders up) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The cost gradient across these scopes is the whole reason the hierarchy matters. A warp \textbf{barrier} is a few cycles; a block \textbf{barrier} stalls until the slowest warp arrives; a cluster \textbf{barrier} spans several CTAs; a grid \textbf{sync} or a collective crosses the chip or the network and can cost orders of magnitude more \citep{shah2024flashattention3,patel2025llminference}. For decode this gradient is acute because the per-token work is tiny, so a coarse \textbf{sync} on the critical path is overhead with nothing to amortize it against. The pingpong scheduling of Chapter~7---overlapping one warpgroup's softmax with another's GEMM---is exactly a use of narrow-scope barriers to coordinate two units without a block-wide stall, and it is why that technique recovered tens of TFLOPS \citep{shah2024flashattention3}.
+\paragraph{Design iron rule.}
+\textbf{Fine when possible, coarse only when necessary.} Two warps handing off one buffer $\Rightarrow$ mbarrier, not block sync \citep{shah2024flashattention3,semianalysis2024tma}.
+Whole CTA phase change $\Rightarrow$ block barrier \citep{nvidia2022hopper}.
+Shard sum across GPUs $\Rightarrow$ collective---overlap with next layer compute \citep{patel2025llminference,dlbook}.
 
-A useful way to see why scope dominates cost is to think about how many units a \textbf{barrier} must wait for and how far apart they are physically. A warp \textbf{barrier} waits for 32 threads that already advance together, so it is essentially a no-op that the hardware can satisfy immediately \citep{nvidia2022hopper}. A block \textbf{barrier} waits for every warp in the CTA, so it stalls until the straggler arrives---and at batch-1 decode, where warps may have unequal work, that straggler sets the pace. A cluster \textbf{barrier} additionally crosses CTA boundaries within a GPC, and a grid \textbf{sync} requires every CTA in the kernel to be co-resident and to reach the same point, which is why it is only usable in a persistent kernel and is still expensive. A multi-GPU collective leaves the chip entirely, traversing NVLink or a network fabric, so its latency is measured in microseconds against the nanoseconds of an on-chip \textbf{barrier} \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Decode-specific rules.}
+(1)~Reductions (softmax stats, partial sums): prefer warp shuffle + atomics over block sync \citep{dao2022flashattention,shah2024flashattention3}.
+(2)~Pipeline handoffs: only point-to-point mbarrier---never block sync as a pipeline substitute \citep{semianalysis2024tma,yirage2026}.
+(3)~Coarse sync on critical path: treat as bug unless proven necessary \citep{taxbreak2026,patel2025llminference,memoryfloor2026}.
 
-This gradient also explains why disaggregated decode deployments care so much about where synchronization lands. When a model is split across devices for tensor parallelism, every layer may require an all-reduce to sum partial results, and that collective is on the per-token critical path \citep{patel2025llminference}. The design response is the same producer-consumer overlap one scope coarser: overlap the collective with the next layer's compute so the network latency hides behind useful work, exactly as a transaction \textbf{barrier} overlaps a TMA load with a WGMMA \citep{shah2024flashattention3,dlbook}. The synchronization hierarchy is thus self-similar---the same overlap principle applies at every scope, only the latency to hide grows.
+\paragraph{Sync economics vs pipeline depth.}
+Every extra pipeline stage from Ch.~8 adds at least one mbarrier edge---sync cost scales with depth even when memory budget allows deeper buffering \citep{semianalysis2024tma,yirage2026}.
+Table~\ref{tab:ch09_sync_economics} pairs scope choice with decode impact: the goal is not zero sync but \emph{minimal necessary} sync on the critical path \citep{shah2024flashattention3,patel2025llminference}.
 
-\section{Hardware sync pick}
+\begin{table}[t]
+\centering
+\small
+\caption{Sync scope economics for decode (H100 illustrative).}
+\label{tab:ch09_sync_economics}
+\begin{tabular}{@{}p{2.0cm}p{2.4cm}p{2.4cm}p{2.4cm}@{}}
+\toprule
+\textbf{Scope choice} & \textbf{Typ.\ cycles} & \textbf{Decode impact} & \textbf{When justified} \\
+\midrule
+Warp shuffle & ${\sim}$0 & Negligible vs matmul & Row stats, partial sums \\
+mbarrier pair & 10--20 & Small if off critical path & Pipeline handoff \\
+Block barrier & 50--100 & Can dominate batch-1 step & Whole-CTA phase change \\
+Cluster / grid & 200+ / $\mu$s & Almost always fatal at decode & Shard collectives only \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Worked decode sync audit (Llama-3.2-1B, batch-1).}
+Consider a fused attention tile with Ch.~8 depth $D{=}2$ and Ch.~7 roles: four producer warps load KV, one consumer warpgroup computes softmax+GEMM \citep{shah2024flashattention3,kwon2023vllm}.
+\textbf{Sync sites to prove:} (a)~TMA$\rightarrow$smem handoff per buffer slot---mbarrier with byte count; (b)~softmax row max across warpgroup---warp shuffle then at most one atomic per row group, not \texttt{\_\_syncthreads}; (c)~optional KV index update---single atomic per page slot \citep{dao2022flashattention,patel2025llminference}.
+\textbf{Reject:} block sync between load and compute---destroys the overlap Ch.~8 built; block sync between softmax and GEMM warpgroups when FA3-style narrow pairing suffices \citep{shah2024flashattention3,semianalysis2024tma}.
+\textbf{Certificate output:} two mbarrier rings (weight stream, KV stream), zero block barriers on pipeline path, shuffle path for stats---archive hash with quadruple legality \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Scope decision worksheet (template).}
+For each dependency edge, record: (1)~producer unit id (from Ch.~7 role map); (2)~consumer unit id; (3)~buffer id and byte range; (4)~narrowest legal primitive; (5)~CFG paths where both units participate \citep{yirage2026,mpk2025}.
+If step~(4) lands on block or wider scope, write one-sentence proof why narrower scopes fail---blank proof fields fail review Gate~B \citep{chen2020compilerbasedhardw,taxbreak2026}.
+Decode kernels should show ${\geq}80\%$ of sync sites at warp or mbarrier scope on the critical path \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Transaction barrier as Ch.~8 foundation.}
+Ch.~8 ping-pong \emph{is} mbarrier discipline---producer arrive with byte count, consumer wait, then read \citep{shah2024flashattention3,semianalysis2024tma,nvidia2022hopper}.
+Coarse block sync between load and compute would serialize the overlap Ch.~8 built \citep{dao2022flashattention,yirage2026}.
+
+\paragraph{Static roles enable minimal sync.}
+Ch.~7 fixed producer/consumer IDs---sync pass knows exactly which units pair \citep{yirage2026,shah2024flashattention3,mpk2025}.
+Dynamic roles would force wider barriers ``just in case'' \citep{taxbreak2026,patel2025llminference}.
+
+\paragraph{mbarrier in residency budget.}
+Each mbarrier object has metadata cost in Ch.~6 peak---deep pipelines multiply barriers \citep{memoryfloor2026,chen2020compilerbasedhardw,yirage2026}.
+Deeper pipeline (Ch.~8) $\Rightarrow$ more barrier indices to prove consistent \citep{wu2024mirage,shah2024flashattention3}.
+
+\paragraph{Cluster and grid scope.}
+Use cluster barriers only when DSM sharing (Ch.~6) genuinely requires cross-CTA visibility \citep{nvidia2022hopper,shah2024flashattention3}.
+Grid sync only in persistent kernels with proven co-residency---expensive at batch-1 \citep{mpk2025,patel2025llminference,nvidia2024cudagraphs}.
+
+\paragraph{Why hierarchy mirrors thread hierarchy.}
+Warp $\subset$ block $\subset$ cluster $\subset$ grid mirrors Ch.~7 unit nesting---sync scope should match the smallest containing set for each dependency \citep{shah2024flashattention3,nvidia2022hopper,yirage2026}.
+Mismatching scope wastes work: block sync forces fast warps to wait for slow ones on unrelated data \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+
+\paragraph{Prefill vs decode sync economics.}
+Prefill: many warps busy---block sync cost amortized across parallel work \citep{kwon2023vllm,shah2024flashattention3}.
+Decode: few active warps---one \texttt{\_\_syncthreads} can dominate step time \citep{patel2025llminference,taxbreak2026,memoryfloor2026}.
+Maintain separate sync audit tabs for decode and prefill kernels \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Quantifying sync tax on decode critical path.}
+Let $T_{\mathrm{step}}$ be batch-1 decode step time and $T_{\mathrm{sync}}$ the sum of stall cycles from barriers on the critical path \citep{patel2025llminference,shah2024flashattention3}.
+When $T_{\mathrm{sync}} / T_{\mathrm{step}} > 0.05$, treat as P1 optimization---often fixable by replacing one block sync with mbarrier or shuffle \citep{semianalysis2024tma,taxbreak2026}.
+Nsight exports $T_{\mathrm{sync}}$ via barrier stall counters; compare against Table~\ref{tab:ch09_sync_economics} expectations before accepting new sync sites \citep{nvidia2022hopper,yirage2026}.
+Prefill kernels may tolerate $T_{\mathrm{sync}} / T_{\mathrm{step}}$ up to ${\sim}0.15$ when parallelism hides stalls---do not copy prefill sync plans into decode \citep{kwon2023vllm,memoryfloor2026,patel2025llminference}.
+
+\paragraph{Multi-stream weight/KV independence.}
+Chapter~\ref{chap:ch08} split weight and KV pipelines---sync must mirror that split \citep{semianalysis2024tma,kwon2023vllm,dao2023flashdecoding}.
+Cross-stream barriers are forbidden unless a true data dependency exists (e.g., attention needs both weight and KV ready for the same tile index) \citep{shah2024flashattention3,dao2022flashattention}.
+When dependency is per-tile, use a join mbarrier whose arrive count reflects both streams---not two block syncs in sequence \citep{yirage2026,semianalysis2024tma,chen2020compilerbasedhardw}.
+Mis-ordered weight/KV sync is anti-pattern trigger~\#1 in Section~\ref{sec:ch09_deadlock_detection} \citep{taxbreak2026,patel2025llminference}.
+
+\paragraph{Collectives as coarsest sync.}
+Tensor-parallel all-reduce is synchronization across devices---treat as graph edge with same acyclic rules \citep{patel2025llminference,dlbook,mpk2025}.
+Overlap collective with next-layer compute when dependency graph allows---mirror Ch.~8 latency hiding one scope up \citep{shah2024flashattention3,yirage2026}.
+
+\paragraph{Worked scope decision (attention handoff).}
+Dependency: producer warp fills smem tile; consumer warpgroup reads it \citep{shah2024flashattention3,semianalysis2024tma}.
+\textbf{Wrong:} \texttt{\_\_syncthreads}---stalls entire CTA \citep{nvidia2022hopper,patel2025llminference}.
+\textbf{Right:} mbarrier pair scoped to producer+consumer role IDs from Ch.~7 \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+For each sync site, document dependency span (which units, which buffer) before choosing primitive \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3}.
+
+\section{Tri-Hardware Sync Primitives and Adaptation}
 \label{sec:ch09_hardware_sync_pick}
 
-% AUTO_VISUAL:fig_hardware_sync_pick_architecture
+Each backend exposes different coordination mechanisms---same producer--consumer dependency graph, different lowering \citep{yirage2026,patel2025llminference,chen2020compilerbasedhardw}.
+Chapter~\ref{chap:ch08}'s tri-hardware table answered \emph{how data moves}; this section answers \emph{how collaborators synchronize}---symmetric cross-hardware framing for the MegaKernel stack \citep{semianalysis2024tma,amd2024xdna,shah2024flashattention3}.
 
+\paragraph{Tri-hardware sync overview.}
+The sync stacks differ in the same axis as residency and pipelines: a trade between \textbf{dynamic flexibility} and \textbf{static determinism} \citep{yirage2026,amd2024aie,nvidia2022hopper}.
+Table~\ref{tab:ch09_tri_hw_sync} summarizes primitives, scheduling model, cost, decode rules, and deadlock detectability---read it before any platform subsection so GPU habits are not pasted onto CPU or NPU \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Tri-hardware synchronization comparison (decode): primitives, cost, and proof strength.}
+\label{tab:ch09_tri_hw_sync}
+\begin{tabular}{@{}p{1.35cm}p{1.55cm}p{1.45cm}p{1.45cm}p{2.05cm}p{1.35cm}@{}}
+\toprule
+\textbf{Platform} & \textbf{Core primitives} & \textbf{Scheduling} & \textbf{Cost profile} & \textbf{Decode rules} & \textbf{Deadlock proof} \\
+\midrule
+\textbf{GPU (Hopper)} &
+Transaction mbarrier, \texttt{\_\_syncthreads}, atomics, warp shuffle\textsuperscript{\ref{sec:ch08_gpu_tma}} &
+Explicit programmer + dynamic warp scheduler; scope configurable &
+Scope grows steeply: warp ${\sim}$0; mbarrier ${\sim}$10--20 cyc.; block ${\sim}$50--100 cyc.; grid $\mu$s &
+(1)~Pipeline handoff: point-to-point mbarrier only---no block sync fallback\newline
+(2)~Reductions: shuffle/atomics before block sync\newline
+(3)~Minimize scope---coarse sync dominates batch-1 steps &
+Partial static proof; dynamic warp paths need runtime watchdog \\
+\midrule
+\textbf{CPU} &
+acquire/release fences, atomics, coherence protocol &
+HW maintains coherence; fences/atomics constrain ordering explicitly &
+Hidden cost: local fast; remote NUMA atomics 2--3$\times$; false sharing inflates traffic &
+(1)~Partition data---minimize cross-core sharing\newline
+(2)~Lightest acquire/release; avoid \texttt{seq\__cst} on hot path\newline
+(3)~Pad to cache line---no false sharing &
+Hard to prove fully static; runtime tools; high debug cost \\
+\midrule
+\textbf{NPU (XDNA/AIE)} &
+Completion tokens, stream sync, tile locks\textsuperscript{\ref{sec:ch05_static_dataflow_rules}} &
+100\% compile-time static; all token pairs fixed at build time &
+Deterministic pipeline slot; mis-planning stalls array permanently---no scheduler recovery &
+(1)~Strict token pairing---every wait has a producer\newline
+(2)~Account tile-chain latency; balance spatial pipeline\newline
+(3)~No runtime dynamic sync---compile-time covers all paths &
+Full static proof: dependency cycle + token coverage checks \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Cross-hardware law (staticity gradient).}
+Reading Table~\ref{tab:ch09_tri_hw_sync} left to right: \textbf{staticity rises, compiler responsibility rises, runtime forgiveness falls} \citep{yirage2026,amd2024xdna,nvidia2022hopper}.
+GPU keeps flexible explicit barriers---powerful overlap, but scope mistakes tax decode and deadlocks hide in divergent CFG \citep{shah2024flashattention3,patel2025llminference,taxbreak2026}.
+CPU sits in the middle: coherence makes many syncs ``invisible,'' yet false sharing and NUMA remote atomics punish decode helpers silently \citep{dlbook,memoryfloor2026,chen2020compilerbasedhardw}.
+NPU freezes every sync at compile time---zero runtime scheduling tax, but a missing token halts the array with no recovery path \citep{amd2024xdna,amd2024aie,yirage2026}.
+
+\paragraph{Decode landing rules (three directions).}
+\textbf{GPU:} minimize sync \emph{scope}---fine primitives on a thin per-token critical path \citep{semianalysis2024tma,shah2024flashattention3}.
+\textbf{CPU:} minimize cross-core sync \emph{frequency}---partition and pad before adding fences \citep{patel2025llminference,dlbook}.
+\textbf{NPU:} maximize compile-time sync \emph{correctness}---token graph must be complete before silicon \citep{amd2024aie,wu2024mirage}.
+These directions are not interchangeable; YiRage Sync Pass (Section~\ref{sec:ch09_yirage_sync_pass}) lowers one dependency graph three ways with matching proof strength per row \citep{yirage2026,chen2020compilerbasedhardw,mpk2025}.
+
+% AUTO_VISUAL:fig_hardware_sync_pick_architecture
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.84, transform shape]
- \node[vis arch node] (s0) at (-5.5,0) {\footnotesize GPU\\barriers / mbarrier};
+ \node[vis arch node] (s0) at (-5.5,0) {\footnotesize GPU\\mbarrier / atomics};
  \node[vis arch node] (s1) at (-1.9,0) {\footnotesize CPU\\fences / atomics};
- \node[vis arch node] (s2) at (1.8,0) {\footnotesize NPU\\locks / tokens};
+ \node[vis arch node] (s2) at (1.8,0) {\footnotesize NPU\\tokens / streams};
  \node[vis arch node] (s3) at (5.4,0) {\footnotesize Multi-device\\collectives};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Each hardware class provides different synchronization primitives; the compiler picks the one matching the dependency and the target.}
+\caption{Tri-hardware sync lowering (hardware detail in Ch.~4--5, pipeline handoff in Ch.~8).}
 \label{fig:hardware_sync_pick_architecture}
 \end{figure}
 
-Picking the right synchronization primitive is target-specific, and the three classes differ as much in synchronization as they did in memory and movement. On a \textbf{gpu} the primitives are the barrier family above plus atomics for fine-grained updates; the design choice is which scope to use and whether to use a transaction barrier for asynchronous handoff or a full block barrier for a bulk-synchronous phase \citep{shah2024flashattention3,nvidia2022hopper}. CUTLASS wraps the producer/consumer barrier discipline in reusable asynchronous pipeline classes precisely because hand-managing a circular list of barriers across many asynchronous operations is too error-prone for a human, which is a strong hint that synchronization belongs in a compiler pass rather than in hand-written kernels \citep{shah2024flashattention3}.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[font=\scriptsize\bfseries] at (-3.6,2.1) {GPU};
+ \node[font=\scriptsize\bfseries] at (0,2.1) {CPU};
+ \node[font=\scriptsize\bfseries] at (3.6,2.1) {NPU};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,1.0) {\footnotesize Explicit\\barriers};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,0.0) {\footnotesize Dynamic\\schedule};
+ \node[vis arch node, minimum width=2.0cm] at (0,1.0) {\footnotesize Coherence\\protocol};
+ \node[vis arch node, minimum width=2.0cm] at (0,0.0) {\footnotesize Hidden\\sync cost};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,1.0) {\footnotesize Static\\tokens};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,0.0) {\footnotesize Fully\\analyzable};
+\end{tikzpicture}
+\caption{Sync management style per hardware class (visual companion to Table~\ref{tab:ch09_tri_hw_sync}).}
+\label{fig:ch09_tri_hw_sync}
+\end{figure}
 
-A subtlety specific to the \textbf{gpu} is the difference between a barrier and an atomic, and when each is the right tool. A \textbf{barrier} enforces that all participating units reach a point before any proceeds---a phase boundary---whereas an atomic enforces that a single memory update happens indivisibly, allowing units to coordinate without all stopping \citep{nvidia2022hopper}. For a reduction where many warps contribute to one sum, an atomic add lets them proceed independently and merge results, avoiding a full \textbf{barrier}; for a phase change where the next stage cannot start until the previous fully completes, a \textbf{barrier} is required. Choosing atomics where possible keeps units running and is often the better fit for the irregular, low-parallelism reductions of batch-1 decode, while barriers remain necessary at genuine phase boundaries \citep{shah2024flashattention3,memoryfloor2026}. The transaction \textbf{barrier} is a hybrid---it is a \textbf{barrier} scoped to a producer-consumer pair, giving phase-boundary semantics without a block-wide stall.
+\subsection{GPU synchronization rules}
+Hopper mbarrier mechanics for pipeline handoff: Section~\ref{sec:ch08_gpu_tma} and Chapter~\ref{chap:ch04} \citep{semianalysis2024tma,nvidia2022hopper,shah2024flashattention3}.
+Table~\ref{tab:ch09_tri_hw_sync} row~1 is the contract---subsections below are implementation detail, not a second taxonomy \citep{yirage2026,patel2025llminference}.
 
-On a \textbf{cpu} synchronization is built from memory fences, atomic operations, and the cache-coherence protocol rather than explicit barriers into a scratchpad \citep{dlbook}. Threads coordinate through atomic flags and acquire/release fences that order memory operations, and the hardware's coherence protocol makes a write by one core visible to another---at the cost of coherence traffic that, like NUMA, can dominate a memory-bound decode loop if threads share data across sockets. The \textbf{cpu} design choice is to minimize cross-core sharing on the hot path, partitioning work so that each thread's data is mostly private and synchronization is rare, the opposite of a GPU kernel that synchronizes warps every pipeline stage.
+\paragraph{mbarrier arrive/wait pairing.}
+Producer: TMA complete $\rightarrow$ \texttt{mbarrier.arrive} with expected bytes \citep{semianalysis2024tma,shah2024flashattention3}.
+Consumer: \texttt{mbarrier.wait} $\rightarrow$ read buffer $\rightarrow$ compute \citep{nvidia2022hopper,yirage2026}.
+Ping-pong: alternate barrier indices $b_0, b_1, \ldots, b_{D-1}$ in ring---off-by-one causes corruption or hang \citep{dao2022flashattention,chen2020compilerbasedhardw}.
 
-On an \textbf{npu} synchronization is explicit and local: AIE-ML tiles use locks and task-completion-tokens, where the DMA signals a token when a buffer is ready and the vector unit waits on it before consuming, and neighboring tiles coordinate through configured streams and cascade connections \citep{amd2024aie,amd2024xdna}. Because the array is statically configured, the synchronization pattern is fixed at compile time---there is no dynamic contention for a shared lock as there might be on a CPU---which makes the \textbf{npu} the most deterministic of the three but also the least forgiving: a mis-sequenced token is a compile-time bug that stalls the pipeline rather than a rare race. Across collectives, multi-device decode must also pick a communication pattern---all-reduce for tensor-parallel sums, all-gather for sharded weights---and overlap it with compute, which is the same producer-consumer overlap one scope coarser \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Atomic vs barrier boundary.}
+\textbf{Barrier:} phase boundary---no participant proceeds until all arrive \citep{nvidia2022hopper,shah2024flashattention3}.
+\textbf{Atomic:} single-location update---units need not all stop \citep{dao2022flashattention,memoryfloor2026}.
+Partial reductions, KV index updates: atomics or warp shuffle \citep{kwon2023vllm,patel2025llminference}.
+Stage handoff after async copy: mbarrier only \citep{semianalysis2024tma,yirage2026}.
 
-The deeper contrast is between explicit and implicit synchronization, and it tracks the same axis as residency and movement. The \textbf{gpu} sits in the middle: barriers are explicit, but the hardware still schedules warps dynamically, so synchronization coordinates a partly dynamic machine. The \textbf{cpu} is the most implicit: the coherence protocol synchronizes caches automatically, and the programmer mostly reasons about ordering through fences rather than issuing explicit barriers, which is convenient but makes the synchronization cost hard to see and easy to incur accidentally through false sharing \citep{dlbook}. The \textbf{npu} is the most explicit: every lock and token is placed by the compiler, nothing is automatic, and the cost is fully visible at compile time \citep{amd2024aie,amd2024xdna}. A residency-first engineer reads this as the same lesson once more---the more explicit the control, the more the compiler can reason about and minimize the coordination, which is why the statically scheduled \textbf{npu} is the most predictable and the coherence-driven \textbf{cpu} the most prone to hidden synchronization cost.
+\paragraph{Decode GPU tricks.}
+Softmax row stats: warp shuffle reduce before any block sync \citep{dao2022flashattention,shah2024flashattention3}.
+FA3-style warpgroup overlap uses narrow barriers between softmax and GEMM warpgroups---not block-wide stalls \citep{shah2024flashattention3,patel2025llminference}.
 
-A concrete \textbf{cpu} hazard worth calling out is false sharing: two threads writing different variables that happen to share a cache line force the coherence protocol to ping the line between cores on every write, synchronizing data that did not logically need synchronizing \citep{dlbook}. For a memory-bound decode loop this can quietly dominate, and the fix is a layout decision---pad per-thread state to separate cache lines---not a synchronization primitive. It is the \textbf{cpu} analogue of the GPU's bank conflicts: an accidental sharing that the compiler must lay out around.
+\paragraph{mbarrier ring walkthrough (depth $D{=}2$).}
+Buffer slots $B_0, B_1$ alternate; barrier indices $b_0, b_1$ form a ring \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Initialization:} both buffers empty; producer owns both; consumer waits on $b_0$ before first read \citep{shah2024flashattention3,yirage2026}.
+\textbf{Steady state:} producer fills $B_0$, arrives $b_0$ with byte count $N$; consumer waits $b_0$, reads $B_0$, computes, releases $B_0$ to producer via arrive on consumer-side phase barrier; producer fills $B_1$ while consumer works on $B_0$ output---overlap is valid only if arrives precede waits in consistent order \citep{nvidia2022hopper,semianalysis2024tma}.
+\textbf{Failure modes:} producer arrives $b_1$ while consumer still reads $B_1$ (depth mis-config); consumer waits $b_0$ twice without intervening producer arrive (pairing bug); byte count $N$ does not match actual TMA bytes after dtype change (silent corruption) \citep{taxbreak2026,chen2020compilerbasedhardw}.
+YiRage generates this ring from Ch.~8 pipeline IR---hand-editing indices is the top source of anti-pattern~2 \citep{wu2024mirage,yirage2026}.
 
-\section{Deadlock detection}
+\paragraph{KV cache index updates.}
+Paged attention updates slot metadata once per token---use atomics on the page table entry, not a block barrier across the CTA \citep{kwon2023vllm,dao2023flashdecoding}.
+If multiple warps update disjoint pages, no sync between them; if two warps can touch the same page, serialize with atomics on that page only \citep{patel2025llminference,yirage2026}.
+This pattern foreshadows Ch.~10 carrier updates---running softmax stats obey the same ``shuffle first, atomic only if cross-warp'' rule \citep{dao2022flashattention,shah2024flashattention3}.
+
+\paragraph{mbarrier timeout and debug.}
+Production kernels should log barrier index on watchdog timeout \citep{taxbreak2026,shah2024flashattention3,yirage2026}.
+Development builds may enable arrive-count assertions before wait \citep{nvidia2022hopper,chen2020compilerbasedhardw,semianalysis2024tma}.
+
+\paragraph{Atomic contention on decode.}
+Hot global atomics serialize warps---prefer warp-local shuffle then single atomic per warp \citep{dao2022flashattention,memoryfloor2026,patel2025llminference}.
+KV length updates: atomics on paged structures---minimize frequency \citep{kwon2023vllm,dao2023flashdecoding,yirage2026}.
+
+\subsection{CPU synchronization rules}
+No scratchpad barriers---memory ordering and coherence do the work (Ch.~6 blocking); see Table~\ref{tab:ch09_tri_hw_sync} row~2 \citep{dlbook,chen2020compilerbasedhardw}.
+
+\paragraph{Fence level selection.}
+Producer publishes with \texttt{release}; consumer loads with \texttt{acquire} \citep{dlbook,patel2025llminference}.
+Use \texttt{seq\__cst} only when global total order required---decode hot loops rarely need it \citep{yirage2026,taxbreak2026}.
+
+\paragraph{False sharing quantified.}
+Two threads on one cache line (${\sim}64$\,B): coherence ping-pong can cut effective bandwidth 30--50\% \citep{dlbook,memoryfloor2026}.
+\textbf{Fix:} pad per-thread accumulators to cache-line boundaries \citep{chen2020compilerbasedhardw,patel2025llminference}.
+
+\paragraph{NUMA cross-node sync.}
+Remote atomics/fences often 2--3$\times$ local latency \citep{patel2025llminference,taxbreak2026}.
+Partition weights/KV per socket; avoid hot atomics on cross-node lines \citep{kwon2023vllm,yirage2026}.
+
+\paragraph{CPU decode pipeline analogy.}
+CPU ``pipeline'' is cache + prefetch (Ch.~8)---sync is fence placement ordering loads to consumers \citep{dlbook,yirage2026,patel2025llminference}.
+Mis-ordered fence $\Rightarrow$ stale read without hang---harder than GPU deadlock \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Worked CPU layout fix.}
+Per-thread partial sum array: pad struct to 64\,B alignment \citep{dlbook,chen2020compilerbasedhardw}.
+Before: 8 threads false-share on one line; after: LLC miss rate drops, ms/token improves \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+
+\paragraph{CPU decode helper threading model.}
+Many deployments run token sampling, logits post-processing, or small expert routers on CPU while GPU runs the megakernel \citep{patel2025llminference,kwon2023vllm}.
+Handoff uses a single-producer single-consumer queue: producer publishes slot index with \texttt{release}, consumer loads with \texttt{acquire} \citep{dlbook,yirage2026}.
+Do not use \texttt{seq\__cst} on every token---batch-1 decode issues one fence per step at most on the hot path \citep{taxbreak2026,chen2020compilerbasedhardw}.
+If multiple CPU threads reduce partial statistics for speculative decoding, give each thread a cache-line-aligned accumulator---mirrors GPU shuffle-before-atomic discipline at core granularity \citep{memoryfloor2026,patel2025llminference}.
+
+\paragraph{When CPU sync matters for fused stacks.}
+Even GPU-only megakernels interact with CPU through graph capture buckets and dynamic shape guards \citep{nvidia2024cudagraphs,yirage2026}.
+Bucket boundaries must not change barrier participant sets without re-proof---CPU-side bucket selection is a sync-affecting control-flow edge \citep{shah2024flashattention3,patel2025llminference}.
+Document which buckets share the same sync certificate; splitting buckets multiplies proof artifacts but prevents context-length hangs \citep{kwon2023vllm,taxbreak2026}.
+
+\subsection{NPU synchronization rules}
+XDNA completion tokens and static dataflow: Section~\ref{sec:ch05_static_dataflow_rules} and Chapter~\ref{chap:ch05}; Table~\ref{tab:ch09_tri_hw_sync} row~3 mandates full static proof \citep{amd2024xdna,amd2024aie,yirage2026}.
+
+\paragraph{Token pairing.}
+One completion token per DMA$\rightarrow$MAC handoff; wait instruction references exact token id \citep{amd2024aie,amd2024xdna}.
+Multi-stream (weight vs KV): disjoint token index spaces---no cross-stream alias \citep{yirage2026,shah2024flashattention3,kwon2023vllm}.
+
+\paragraph{Cross-tile stream sync.}
+Neighbor tile links have finite bandwidth---long chains accumulate latency \citep{amd2024xdna,patel2025llminference,memoryfloor2026}.
+Balance spatial pipeline (Ch.~8) with sync depth---do not serialize array on one token chain \citep{amd2024aie,chen2020compilerbasedhardw}.
+
+\paragraph{Static validation mandate.}
+Every wait must have a proven producer on all paths---NPU has no runtime recovery \citep{amd2024xdna,yirage2026,wu2024mirage}.
+Compile-time token graph is fully simulatable \citep{amd2024aie,taxbreak2026}.
+
+\paragraph{NPU multi-stream decode layout.}
+Weight DMA stream and KV DMA stream use disjoint token namespaces---token~7 on weight stream must never satisfy a wait on KV stream \citep{amd2024xdna,amd2024aie,yirage2026}.
+Spatial pipeline across tiles assigns forward tokens along the chain; backward dependency (e.g., partial sum return) needs reverse token path or explicit stream sync at subgraph boundary \citep{patel2025llminference,memoryfloor2026}.
+Long chains accumulate latency: if each tile adds 50 cycles of sync tax, a 16-tile chain adds 800 cycles before MAC sees last tile's data---balance Ch.~8 spatial depth with sync chain length \citep{amd2024aie,chen2020compilerbasedhardw,shah2024flashattention3}.
+Validation exports a token DAG; simulation runs topological order with timeout---any wait without producer is release-blocking \citep{yirage2026,wu2024mirage}.
+
+\paragraph{Lowering GPU mbarrier plans to NPU tokens.}
+Do not transliterate mbarrier arrive/wait as ``token per buffer slot'' without checking MAC schedule---NPU tokens bind to DMA completion events, not arbitrary warp phases \citep{amd2024xdna,yirage2026,patel2025llminference}.
+YiRage backend pass maps each pipeline handoff edge to (DMA\_id, token\_id) pairs; cross-hardware fleet builds share dependency graph, not textual CUDA barrier code \citep{chen2020compilerbasedhardw,mpk2025}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Fill Table~\ref{tab:ch09_tri_hw_sync} row per backend before fleet merge \citep{yirage2026,patel2025llminference,chen2020compilerbasedhardw}.
+
+\section{Deadlock Detection and Prevention}
 \label{sec:ch09_deadlock_detection}
 
-Static role assignment and asynchronous pipelines introduce a hazard that synchronous, per-operator kernels largely avoid: \textbf{deadlock}. When producer and consumer units coordinate through barriers, a mismatch in their arrive/wait counts, or a circular dependency where each unit waits for the other, hangs the kernel permanently \citep{shah2024flashattention3,nvidia2022hopper}. On a GPU a \textbf{deadlock} typically manifests as a kernel that never returns; on an NPU it manifests as a pipeline stage waiting forever on a token that will never be signaled \citep{amd2024aie}. The insidious property is that these failures are often nondeterministic or configuration-dependent: a barrier-count assumption that holds at one block size or warp count breaks at another, so a kernel that passes tests on one shape hangs on a production shape \citep{shah2024flashattention3,nvidia2022hopper}. This is the worst kind of bug to discover in a serving system, because it surfaces as a hung request under specific load rather than as a clean failure in testing, which is the strongest argument for proving deadlock-freedom statically rather than relying on test coverage.
+Async pipelines trade bulk-synchronous safety for overlap---and introduce coordination hangs \citep{shah2024flashattention3,nvidia2022hopper,yirage2026}.
 
- Because these are coordination bugs, not arithmetic bugs, they do not show up in a numerical test---the kernel simply never finishes.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node] (d) at (-4.5,0) {\footnotesize Build\\dep graph};
+ \node[vis arch node] (c) at (-1.5,0) {\footnotesize Cycle\\detect};
+ \node[vis pipeline node] (a) at (1.5,0) {\footnotesize Arrival\\count check};
+ \node[vis arch node] (o) at (4.5,0) {\footnotesize Pass /\\error IR};
+ \draw[vis arrow] (d) -- (c) -- (a) -- (o);
+\end{tikzpicture}
+\caption{Static deadlock detection pipeline (compile-time gate).}
+\label{fig:ch09_deadlock_flow}
+\end{figure}
 
-The classic \textbf{deadlock} patterns are worth naming because a compiler can check for them. The first is a barrier-count mismatch: if a barrier expects $n$ arrivals but only $n{-}1$ units reach it (because one took a divergent path), the barrier never releases \citep{shah2024flashattention3}. The second is a circular wait: producer waits for the consumer to free a buffer while the consumer waits for the producer to fill it, a cycle that only a correct initial condition (the producer starting with empty buffers) avoids. The third is an ordering bug in a multi-stage pipeline where the barriers are not arranged as a consistent circular list, so two stages wait on each other out of order \citep{shah2024flashattention3}.
+\paragraph{Three classic deadlock patterns.}
+\textbf{(1) Arrival mismatch:} barrier expects $n$ arrivals; divergent path delivers $n{-}1$ \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{(2) Circular wait:} producer waits on free buffer while consumer waits on full---broken initial condition or reversed order \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{(3) Barrier ring disorder:} multi-buffer pipeline with inconsistent cyclic order \citep{shah2024flashattention3,yirage2026}.
 
-There is a reason these patterns proliferate exactly when performance improves. Each optimization in this Part trades a bulk-synchronous structure---compute everything, synchronize, move on---for a finer-grained asynchronous one where units run ahead and coordinate point-to-point \citep{shah2024flashattention3,dao2022flashattention}. Bulk-synchronous code is hard to deadlock because there is one barrier everyone hits; asynchronous, warp-specialized code has many barriers with specific arrive/wait counts, and every one is an opportunity for a mismatch. In other words, \textbf{deadlock} risk is the price of the overlap that makes decode fast, which is why a serious decode kernel cannot treat synchronization casually---the very structure that wins latency is the structure that can hang.
+\paragraph{Static detection methods.}
+\textbf{Arrival counts:} for each barrier, enumerate CFG paths; count reaching units; compare to expected \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3}.
+\textbf{Cycle detection:} build wait-for graph on handoff edges; reject if cycle exists \citep{wu2024mirage,mpk2025}.
+\textbf{Ring consistency:} verify producer/consumer pointers advance monotonically on buffer ring \citep{semianalysis2024tma,dao2022flashattention}.
 
-The role of control-flow divergence in \textbf{deadlock} deserves emphasis because it is the subtlest case. A \textbf{barrier} placed inside a conditional that only some warps take will wait forever for the warps that branched around it \citep{nvidia2022hopper,shah2024flashattention3}. This is why barriers must be placed at points all participating units are guaranteed to reach, and why a compiler that understands the control flow is better positioned to verify this than a human reading a complex kernel. On a statically scheduled \textbf{npu} the analogous bug is a token that one tile expects but no tile ever produces because a stage was conditionally skipped, and again the static schedule makes it checkable at compile time \citep{amd2024aie,amd2024xdna}.
+\begin{table}[t]
+\centering
+\small
+\caption{Static deadlock checks (YiRage sync pass).}
+\label{tab:ch09_deadlock_checks}
+\begin{tabular}{@{}p{2.4cm}p{4.2cm}p{2.0cm}@{}}
+\toprule
+\textbf{Check} & \textbf{Method} & \textbf{Catches} \\
+\midrule
+Arrival parity & CFG unit count vs barrier $n$ & Divergent barrier \\
+Wait-for cycle & Graph cycle detection & Circular deadlock \\
+Ring order & Buffer index monotonicity & Pipeline reorder bug \\
+Token coverage & Each wait has producer & NPU hang \\
+Collective match & Rank-symmetric edges & Multi-GPU hang \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The defense is to make synchronization structural rather than ad hoc. CUTLASS's pipeline classes exist so that the arrive/wait counts and the circular barrier list are generated from a single specification, guaranteeing they match \citep{shah2024flashattention3}. A compiler that owns synchronization can go further: it can verify statically that every barrier's expected arrival count equals the number of units that reach it on all paths, that the producer-consumer cycle has a correct initial condition, and that the barrier ordering forms a consistent list---turning \textbf{deadlock} from a runtime hang discovered in production into a compile-time rejection \citep{yirage2026,wu2024mirage}. On a statically scheduled NPU this check is especially natural because the entire synchronization pattern is known at compile time \citep{amd2024xdna}. The same staticness that makes an NPU unforgiving---no cache to hide a late load, no dynamic scheduler to reorder around a stall---is what makes its synchronization fully analyzable: with every lock, token, and stream assignment fixed before execution, the compiler can simulate the coordination and prove progress, something far harder on a dynamically scheduled GPU where warp progress depends on runtime occupancy \citep{amd2024aie,nvidia2022hopper}. This is a recurring trade in the book: explicit, static control is harder to write by hand but easier for a compiler to verify, which is exactly why these facets belong in a pass.
+\paragraph{Decode high-frequency triggers.}
+\textbf{Weight vs KV stream cross-wait:} mismatched ordering between independent mbarrier chains \citep{kwon2023vllm,dao2023flashdecoding,shah2024flashattention3}.
+\textbf{Context bucket branches:} some warps skip barrier in one bucket template \citep{nvidia2024cudagraphs,yirage2026,patel2025llminference}.
+\textbf{Wrong pipeline depth:} producer overwrites buffer consumer still reads---often race before hang \citep{semianalysis2024tma,memoryfloor2026,taxbreak2026}.
 
-\section{YiRage sync pass}
+\paragraph{Static analysis algorithm (conceptual).}
+\textbf{Step 1---Build wait-for graph:} nodes are role units (Ch.~7); directed edge $A \rightarrow B$ means $A$ waits on a barrier/token that $B$ must signal \citep{yirage2026,wu2024mirage}.
+\textbf{Step 2---Cycle detection:} run DFS or Tarjan on the wait-for graph; any cycle is a compile failure with listed nodes \citep{chen2020compilerbasedhardw,mpk2025}.
+\textbf{Step 3---CFG arrival parity:} for each barrier $b$ expecting $n$ arrivals, intersect participating units with each CFG path; if any path contributes $k \neq n$, emit barrier id and path id \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{Step 4---Ring monotonicity:} for buffer index sequence $(i_t)$, verify $i_{t+1} = (i_t + 1) \bmod D$ on both producer and consumer sides \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Step 5---Token coverage (NPU):} every wait instruction id appears as a completion token on some DMA or MAC edge in the static schedule \citep{amd2024xdna,amd2024aie}.
+This five-step pipeline is what the YiRage sync pass implements; manual review mirrors the same checks using exported IR \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Simulation and soak strategy.}
+Compile-time proof catches structural deadlock; simulation catches timing assumptions---e.g., consumer wait before producer arrive on first tile because initialization lowering was wrong \citep{shah2024flashattention3,patel2025llminference}.
+Run cycle-accurate or instruction-level simulation with timeout on every wait primitive; log barrier id and cycle count at timeout \citep{nvidia2022hopper,semianalysis2024tma}.
+Production soak: replay decode traces across context-length buckets; hangs at 1 in $10^4$ still fail release gates when serving SLA is millions of tokens per day \citep{taxbreak2026,mpk2025,kwon2023vllm}.
+
+\paragraph{Tiered defense.}
+\textbf{Compile-time:} sync pass rejects unprovable regions (${\sim}$90\%+ bug class) \citep{yirage2026,wu2024mirage,chen2020compilerbasedhardw}.
+\textbf{Simulation:} cycle-accurate wait timeout in validation \citep{shah2024flashattention3,patel2025llminference}.
+\textbf{Runtime:} watchdog + barrier index dump for residual cases \citep{taxbreak2026,mpk2025}.
+
+\paragraph{Initial conditions for producer-consumer cycles.}
+Ping-pong starts with defined buffer ownership---usually empty buffers owned by producer, first consumer wait on buffer 0 \citep{semianalysis2024tma,dao2022flashattention,shah2024flashattention3}.
+Sync pass must emit and verify initial state---hand kernels often get this wrong on first tile \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{CUTLASS structural lesson.}
+Circular barrier list generated from single pipeline spec---humans should not hand-maintain ring indices \citep{shah2024flashattention3,wu2024mirage}.
+YiRage sync pass is the compiler analogue for whole fused subgraphs \citep{yirage2026,mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{NPU determinism advantage.}
+Fully static token graph enables exhaustive compile-time simulation---strongest proof story of three backends \citep{amd2024xdna,amd2024aie,yirage2026}.
+GPU proof harder due to dynamic warp scheduling---rely on CFG + role staticness from Ch.~7 \citep{shah2024flashattention3,nvidia2022hopper,patel2025llminference}.
+
+\paragraph{Control-flow divergence rule.}
+Barriers only at points \emph{all} participating units reach unconditionally \citep{nvidia2022hopper,shah2024flashattention3}.
+Conditional barriers are anti-pattern~3 (Section~\ref{sec:ch09_sync_pitfalls}) \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach sync-pass legality report---not just ``kernel compiles'' \citep{yirage2026,wu2024mirage,shah2024flashattention3}.
+
+\section{Joint Budget with Chapters~6--8}
+\label{sec:ch09_joint_budget}
+
+Sync is not free in memory or proof complexity \citep{yirage2026,dao2022flashattention,shah2024flashattention3,chen2020compilerbasedhardw}.
+
+\paragraph{Barrier objects in Ch.~6 peak.}
+mbarrier state, token slots, collective scratch---account in fast-memory worksheet \citep{memoryfloor2026,nvidia2022hopper,amd2024xdna}.
+Deep pipeline (Ch.~8) $\Rightarrow$ more live barriers simultaneously \citep{semianalysis2024tma,yirage2026}.
+
+\paragraph{Role-fixed dependency graph.}
+Sync pass consumes Ch.~7 role IDs and Ch.~8 buffer map---changing either without re-running sync pass invalidates proof \citep{shah2024flashattention3,yirage2026,wu2024mirage,mpk2025}.
+
+\paragraph{Quadruple legality bundle.}
+Ship Ch.~6 memory + Ch.~7 role + Ch.~8 pipeline + Ch.~9 sync reports together \citep{chen2020compilerbasedhardw,taxbreak2026,patel2025llminference}.
+CI fails on any drift without coordinated regen \citep{yirage2026,mpk2025}.
+
+\paragraph{Fixed-point loop.}
+Memory $\rightarrow$ tiling $\rightarrow$ pipeline $\rightarrow$ \textbf{sync} $\rightarrow$ re-validate barrier count vs footprint \citep{yirage2026,wu2024mirage,dao2022flashattention,shah2024flashattention3}.
+
+\paragraph{Worked quadruple example.}
+Attention fusion: Ch.~6 peak includes $2$ mbarrier objects + ping-pong smem \citep{yirage2026,dao2022flashattention,semianalysis2024tma}.
+Ch.~7: 4 producer warps, 1 consumer warpgroup \citep{shah2024flashattention3,mpk2025}.
+Ch.~8: depth $D{=}2$, weight/KV stream maps \citep{kwon2023vllm,semianalysis2024tma}.
+Ch.~9: 2 mbarrier rings proven acyclic---certificate hash archived in CI \citep{yirage2026,wu2024mirage,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Spill vs sync confusion.}
+Spill after sync merge usually means barrier metadata exceeded Ch.~6---not a sync bug but budget violation \citep{memoryfloor2026,yirage2026,dao2022flashattention}.
+Rollback barrier count or split fusion before weakening proof \citep{wu2024mirage,chen2020compilerbasedhardw,mpk2025}.
+
+\paragraph{MoE and sync.}
+Expert routing adds control-flow edges---each bucket needs sync re-proof \citep{taxbreak2026,liu2024deepseekv3,mpk2025,patel2025llminference}.
+Static expert buckets mirror CUDA graph bucketing \citep{nvidia2024cudagraphs,yirage2026,shah2024flashattention3}.
+
+\paragraph{Tensor-parallel and pipeline-parallel edges.}
+Tensor parallel inserts all-reduce or reduce-scatter as collective sync edges---every rank must enter the same collective in the same order relative to local mbarrier phases \citep{patel2025llminference,dlbook,mpk2025}.
+Pipeline parallel inserts send/recv between stages---model as directed sync edge from sender rank to receiver rank; cycle detection includes cross-rank wait-for graph \citep{yirage2026,shah2024flashattention3}.
+Decode batch-1 often runs TP inside the megakernel; PP may be absent---but when PP exists, a hang on rank~2 blocks the whole replica set \citep{taxbreak2026,patel2025llminference}.
+Quadruple legality extends to \emph{quintuple} when TP collectives are in scope: add collective symmetry report to the bundle \citep{chen2020compilerbasedhardw,wu2024mirage}.
+
+\paragraph{Budget rollback triggers.}
+If sync pass inserts more mbarrier objects than Ch.~6 peak allows, do not weaken proof---reduce pipeline depth, split fusion, or spill cold tensors first \citep{memoryfloor2026,yirage2026,dao2022flashattention}.
+Teams sometimes add block sync to ``fix'' races after budget failure---that trades proof debt for ms/token tax; reject in review \citep{taxbreak2026,shah2024flashattention3,patel2025llminference}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Quadruple worksheet bundle on every sync-affecting PR \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{YiRage Sync Pass: Insertion and Proof}
 \label{sec:ch09_yirage_sync_pass}
 
-The book's reference compiler turns synchronization into a generated, checked pass. \textbf{YiRage} carries a \textbf{sync} pass that, given a fused region with its static roles and pipeline, inserts the synchronization at the narrowest correct scope per target---warp and transaction barriers on a GPU, fences and atomics on a CPU, locks and tokens on an NPU---and verifies the result is deadlock-free before codegen \citep{yirage2026,shah2024flashattention3}. Because the pass consumes the role assignment of Chapter~7 and the pipeline of Chapter~8, it knows exactly which units must coordinate and when, so it can choose warp-scope over block-scope wherever the dependency permits and avoid the coarse-\textbf{sync} overhead that decode cannot afford \citep{nvidia2022hopper,memoryfloor2026}.
+\textbf{YiRage} inserts minimal sync and proves deadlock-freedom after pipeline pass, before codegen \citep{yirage2026,shah2024flashattention3,wu2024mirage,mpk2025}.
+The pass implements Table~\ref{tab:ch09_tri_hw_sync}: GPU rows get scope-minimized mbarrier lowering with partial static proof plus watchdog hints; CPU rows get fence/atomic placement with false-sharing warnings; NPU rows get token graphs with full cycle and coverage checks \citep{amd2024xdna,chen2020compilerbasedhardw,patel2025llminference}.
 
-Choosing the scope is itself an optimization the pass performs, not just a correctness step. Given the dependency graph of a fused region, the pass determines, for each handoff, the smallest set of units that actually share data and synchronizes only them---two warps through a transaction \textbf{barrier} rather than the whole block, or a cluster \textbf{barrier} only where distributed shared memory is genuinely used \citep{shah2024flashattention3,nvidia2022hopper}. This matters because a human writing a kernel tends to reach for the familiar block \texttt{bar.sync} even when a narrower primitive would do, leaving performance on the table; the pass has no such habit and picks the minimal scope mechanically. For batch-1 decode, where every coarse \textbf{sync} on the critical path is unamortized overhead, this minimization is a direct latency win \citep{taxbreak2026,memoryfloor2026}.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node] (pip) at (-3.6,0) {\footnotesize Pipeline\\pass};
+ \node[vis arch node] (syn) at (0,0) {\footnotesize Sync\\pass};
+ \node[vis pipeline node] (cg) at (3.6,0) {\footnotesize Codegen};
+ \draw[vis arrow] (pip) -- (syn) -- (cg);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Minimal scope + static proof};
+\end{tikzpicture}
+\caption{YiRage sync pass: last compile-time correctness gate before codegen.}
+\label{fig:ch09_yirage_sync_pass}
+\end{figure}
 
-The pass also adapts the synchronization to the precision and the pipeline depth, because those change what must be coordinated. A deeper pipeline has more buffers and therefore more transaction barriers in flight, and the pass must generate a consistent circular list of exactly the right length \citep{shah2024flashattention3}. A lower-precision format that packs more elements per buffer can change which units produce and consume a given tile, shifting where the barriers belong. Because the \textbf{sync} pass runs after the tiling and pipeline passes have fixed these decisions, it has the information to place the barriers correctly, which is the argument for synchronization being a late, dependent pass rather than something hand-written up front \citep{yirage2026,wu2024mirage}.
+\begin{table}[t]
+\centering
+\small
+\caption{YiRage sync pass: I/O and verification dimensions.}
+\label{tab:ch09_sync_pass_io}
+\begin{tabular}{@{}p{2.2cm}p{4.8cm}p{2.4cm}@{}}
+\toprule
+\textbf{Item} & \textbf{Content} & \textbf{On failure} \\
+\midrule
+Input & Roles + pipeline IR + dep graph & --- \\
+Output & Sync IR + proof certificate & Error with site/path \\
+Scope min & Narrowest primitive per edge & Widen only if required \\
+Arrival parity & CFG path counts & Barrier id + path \\
+Acyclic wait & Wait-for DAG & Cycle nodes listed \\
+Memory order & Acquire/release match & Edge + ordering bug \\
+Multi-device & Collective symmetry & Rank mismatch hint \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The pass's verification is the part that matters most for a megakernel. A whole-model megakernel coordinates hundreds of units, and a single mismatched barrier hangs the entire forward pass, so shipping one without a static deadlock check is reckless \citep{mpk2025,wu2024mirage}. The \textbf{YiRage} \textbf{sync} pass checks barrier arrival counts against the units on every control-flow path, validates the producer-consumer initial conditions, and confirms the barrier ordering forms a consistent list, rejecting any region that cannot be proven deadlock-free \citep{yirage2026}. This composes with the residency, role, and pipeline checks of the previous chapters: the superoptimizer proposes a fusion, the memory pass certifies its footprint, the tiling pass assigns roles, the pipeline pass overlaps movement, and the \textbf{sync} pass guarantees the coordination is correct and minimal---all per target, all before a kernel is emitted \citep{wu2024mirage,mpk2025}.
+\paragraph{Verification dimensions.}
+(1)~\textbf{Scope minimization}---two-unit deps never get block barriers \citep{shah2024flashattention3,yirage2026,nvidia2022hopper}.
+(2)~\textbf{Arrival consistency}---all CFG paths \citep{chen2020compilerbasedhardw,wu2024mirage}.
+(3)~\textbf{No wait cycles}---handoff DAG acyclic \citep{mpk2025,semianalysis2024tma}.
+(4)~\textbf{Memory order}---reads not visible before matching sync \citep{dao2022flashattention,dlbook,patel2025llminference}.
 
-The verification also has to reason about the multi-device boundary when a model is sharded. A tensor-parallel layer's all-reduce is a synchronization point across devices, and a mismatch there---one rank expecting a collective that another never issues---hangs the whole job exactly like a barrier-count mismatch within a kernel, but now across the network \citep{patel2025llminference,dlbook}. The \textbf{sync} pass treats the collective as another synchronization edge in the dependency graph, checking that every participating rank issues a matching collective and that the overlap with compute does not create a cycle where a rank waits to send while a peer waits to receive. This unifies on-chip and cross-device coordination under one analysis, which matters because production decode increasingly spans many devices and a cross-device \textbf{deadlock} is even harder to debug by hand than an on-chip one \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Error reporting.}
+On failure: emit barrier id, divergent CFG path, or wait-cycle node list---not generic ``sync error'' \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+Enables bisect without reproducing hang on silicon \citep{shah2024flashattention3,patel2025llminference}.
 
-A final benefit of owning synchronization in the compiler is reproducibility across targets. A hand-written kernel's synchronization is tuned for one GPU and silently wrong or suboptimal on another---a barrier count assuming a specific warp count, say, or an atomic pattern that contends differently under another memory model \citep{nvidia2022hopper,amd2024xdna}. Because the \textbf{YiRage} \textbf{sync} pass regenerates the synchronization from the dependency graph per target, the same logical kernel gets a correct plan on each, with the scope and primitive chosen for that machine \citep{yirage2026}. For a fleet that mixes GPU generations, CPUs, and NPUs, this is the difference between maintaining one verified specification and maintaining a matrix of hand-tuned, separately-debugged kernels.
+\paragraph{Multi-device extension.}
+Tensor-parallel all-reduce modeled as sync edge---every rank must issue matching collective \citep{patel2025llminference,dlbook,mpk2025}.
+Overlap with compute allowed only if acyclic in combined graph \citep{shah2024flashattention3,yirage2026}.
 
-The result is that synchronization, the most error-prone part of a hand-written fused kernel, becomes a property the compiler generates and proves rather than one a CUDA expert debugs by staring at hangs. For a serving team deploying megakernels across a heterogeneous fleet, that guarantee is what makes end-to-end fusion safe: the same logical kernel gets a different, minimal, deadlock-free synchronization plan on an H100, a CPU, and an XDNA tile, each checked before it runs \citep{yirage2026,patel2025llminference}.
+\paragraph{Mirage / Ch.~20 composition.}
+Superoptimizer proposes fusion; memory/tiling/pipeline passes certify structure; sync pass certifies coordination \citep{wu2024mirage,mpk2025,yirage2026}.
+Megakernel candidates without proof are pruned \citep{chen2020compilerbasedhardw,taxbreak2026}.
 
-It is worth situating this within the book's recurring argument. Chapters~6 through~9 have each taken one facet of a fused decode kernel---residency, role assignment, asynchronous movement, and now synchronization---and shown that the facet is best handled as a checked, per-target compiler pass rather than as hand-written CUDA, because each is a place where prefill intuitions mislead and where a single hand-tuned artifact fails to port \citep{taxbreak2026,memoryfloor2026}. Synchronization completes the set: it is the facet that turns the other three from independent optimizations into a single correct kernel, because residency without coordination races, roles without coordination deadlock, and pipelines without coordination read stale buffers \citep{shah2024flashattention3,amd2024aie}. Treating all four as composable passes over a shared representation is what lets a superoptimizer propose an aggressive fusion and have the compiler certify it is resident, role-assigned, overlapped, and deadlock-free before a single token is decoded \citep{wu2024mirage,yirage2026}.
+\paragraph{Golden IR regression.}
+CI diffs sync IR per canonical layer---barrier index drift blocks merge \citep{yirage2026,wu2024mirage,shah2024flashattention3}.
+
+\paragraph{Sync pass pseudocode (engineering view).}
+\begin{enumerate}
+\item Ingest pipeline IR: buffer map, depth $D$, stream ids, role participant sets \citep{yirage2026,semianalysis2024tma}.
+\item For each handoff edge, attempt lowering: warp $\rightarrow$ mbarrier $\rightarrow$ block $\rightarrow$ cluster; stop at first scope that satisfies visibility \citep{shah2024flashattention3,nvidia2022hopper}.
+\item Insert acquire/release or mbarrier arrive/wait with byte counts derived from memory pass layout \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\item Run deadlock checks (Table~\ref{tab:ch09_deadlock_checks}); on failure, emit structured error \citep{wu2024mirage,yirage2026}.
+\item Emit proof certificate: hash of sync IR + check results + participating barrier ids \citep{mpk2025,taxbreak2026}.
+\end{enumerate}
+Certificates are versioned artifacts shipped beside compiled kernels---operators diff certificate on deploy \citep{patel2025llminference,yirage2026}.
+
+\paragraph{Interaction with prior passes.}
+Memory pass change $\Rightarrow$ re-run tiling $\Rightarrow$ re-run pipeline $\Rightarrow$ re-run sync---skipping sync after layout change is a common regression \citep{wu2024mirage,yirage2026,dao2022flashattention}.
+Role pass change $\Rightarrow$ re-run sync even if pipeline depth unchanged---participant sets changed \citep{shah2024flashattention3,mpk2025}.
+Pipeline-only depth tweak $\Rightarrow$ sync must regenerate ring indices; never patch barrier ids in emitted CUDA \citep{semianalysis2024tma,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Pass search for minimal scope.}
+For each dependency edge, sync pass tries warp $\rightarrow$ mbarrier $\rightarrow$ block in order---stops at first legal primitive \citep{yirage2026,shah2024flashattention3,nvidia2022hopper,chen2020compilerbasedhardw}.
+Widening requires proof that narrower scopes cannot express the dependency \citep{wu2024mirage,mpk2025,patel2025llminference}.
+
+\paragraph{Depth-sensitive barrier rings.}
+Pipeline depth $D$ from Ch.~8 implies $D$ mbarrier slots in ring---sync pass generates consistent cyclic order \citep{semianalysis2024tma,dao2022flashattention,shah2024flashattention3}.
+Changing $D$ without regenerating sync IR is high-risk merge \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Precision and layout interaction.}
+INT4/FP8 packing changes which warps touch which bytes---barrier byte counts must update with dtype lowering \citep{taxbreak2026,yirage2026,shah2024flashattention3}.
+Sync pass re-runs when memory pass changes tile layout \citep{wu2024mirage,chen2020compilerbasedhardw,dao2022flashattention}.
+
+\paragraph{Reproducibility across GPU generations.}
+Hand-tuned barrier counts assuming fixed warp counts break on next SKU \citep{nvidia2022hopper,patel2025llminference,taxbreak2026}.
+Regenerated sync IR from dependency graph ports across fleet \citep{yirage2026,chen2020compilerbasedhardw,mpk2025}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Archive sync-pass certificate on every barrier-lowering change \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\section{Sync Pitfalls, Checklist, and Debug}
+\label{sec:ch09_sync_pitfalls}
+
+\subsection{Five common sync anti-patterns}
+\begin{enumerate}
+\item \textbf{Over-coarse sync.}
+\emph{Symptom:} ms/token up after ``adding safety sync'' \citep{taxbreak2026,patel2025llminference,shah2024flashattention3}.
+\emph{Root cause:} block sync replaced mbarrier handoff \citep{semianalysis2024tma,yirage2026}.
+\emph{Fix:} narrow scope per Table~\ref{tab:ch09_sync_cost_ladder} \citep{nvidia2022hopper}.
+\emph{Prevention:} scope justification on every sync site \citep{chen2020compilerbasedhardw}.
+\emph{Decode note:} at batch-1, one unnecessary \texttt{\_\_syncthreads} per layer across 32 layers can add tens of microseconds per token---often larger than the arithmetic saved by fusion \citep{patel2025llminference,memoryfloor2026}.
+
+\item \textbf{Barrier pairing error.}
+\emph{Symptom:} hang or rare corruption on multi-buffer pipeline \citep{shah2024flashattention3,semianalysis2024tma}.
+\emph{Root cause:} arrive/wait count or byte mismatch \citep{nvidia2022hopper,yirage2026}.
+\emph{Fix:} regenerate from pipeline IR; golden diff \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\emph{Prevention:} static arrival check (Table~\ref{tab:ch09_deadlock_checks}) \citep{yirage2026,chen2020compilerbasedhardw}.
+\emph{Decode note:} weight and KV streams each carry independent rings---swapping $b_0$ indices across streams is a common copy-paste failure \citep{kwon2023vllm,dao2023flashdecoding}.
+
+\item \textbf{Conditional barrier.}
+\emph{Symptom:} nondeterministic hang \citep{nvidia2022hopper,shah2024flashattention3}.
+\emph{Root cause:} barrier inside branch not taken by all warps \citep{yirage2026}.
+\emph{Fix:} hoist sync; restructure control flow \citep{chen2020compilerbasedhardw,patel2025llminference}.
+\emph{Prevention:} CFG coverage in sync pass \citep{wu2024mirage}.
+\emph{Decode note:} variable sequence length tempts \texttt{if (len > bucket)} around barriers---use separate graph buckets with uniform CFG per bucket instead \citep{nvidia2024cudagraphs,kwon2023vllm}.
+
+\item \textbf{CPU false sharing.}
+\emph{Symptom:} CPU decode slower than single-thread \citep{dlbook,memoryfloor2026}.
+\emph{Root cause:} hot counters on shared cache line \citep{patel2025llminference,taxbreak2026}.
+\emph{Fix:} line padding; per-thread private accumulators \citep{chen2020compilerbasedhardw}.
+\emph{Prevention:} layout review on parallel loops \citep{yirage2026}.
+\emph{Decode note:} speculative decoding threads updating a shared acceptance counter is a frequent offender---pad to 64\,B or shard counters per thread \citep{patel2025llminference,dlbook}.
+
+\item \textbf{NPU token omission.}
+\emph{Symptom:} array frozen mid-layer \citep{amd2024xdna,amd2024aie}.
+\emph{Root cause:} wait without matching DMA complete token \citep{yirage2026}.
+\emph{Fix:} complete token graph; re-validate statically \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\emph{Prevention:} token coverage check (Table~\ref{tab:ch09_deadlock_checks}) \citep{amd2024xdna,yirage2026}.
+\emph{Decode note:} last tile in spatial chain still needs forward token to host or next subgraph---omitting ``tail'' token hangs the entire array \citep{amd2024aie,patel2025llminference}.
+\end{enumerate}
+
+\paragraph{Debug playbook.}
+Hang $\rightarrow$ dump last mbarrier/token index $\rightarrow$ compare pipeline IR $\rightarrow$ run sync-pass bisect \citep{shah2024flashattention3,yirage2026,taxbreak2026,memoryfloor2026}.
+Corruption without hang $\rightarrow$ race before sync---check byte counts and ordering \citep{semianalysis2024tma,dao2022flashattention,nvidia2022hopper}.
+
+\paragraph{Hang bisect procedure (step-by-step).}
+\textbf{1. Capture:} GPU hang dump includes PC, barrier id, warp mask, context bucket id \citep{nvidia2022hopper,shah2024flashattention3}.
+\textbf{2. Map id:} look up barrier id in sync IR export---identify stream (weight vs KV), buffer slot, producer/consumer role ids \citep{yirage2026,semianalysis2024tma}.
+\textbf{3. CFG check:} verify active bucket's CFG path includes that barrier for all participating warps \citep{nvidia2024cudagraphs,patel2025llminference}.
+\textbf{4. Pairing check:} compare arrive count logged in debug build vs expected from pipeline depth $D$ \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\textbf{5. Bisect pass:} replay subgraph with sync pass on/off in simulator; if off hangs disappear, fault is in inserted sync---if on still hangs, fault is in pipeline IR \citep{wu2024mirage,yirage2026,mpk2025}.
+\textbf{6. Fix path:} regenerate from pipeline IR (Pattern~2), never add block sync as step~6 shortcut \citep{taxbreak2026,patel2025llminference}.
+Median time-to-root-cause under 2 hours when postmortem bundle (Pattern~6) is complete---without bundle, teams loop for days \citep{shah2024flashattention3,memoryfloor2026}.
+
+\subsection{Sync design self-check}
+\begin{itemize}
+\item[$\square$] Every dependency uses minimal-scope primitive
+\item[$\square$] All barrier/token arrive and wait counts match on all CFG paths
+\item[$\square$] No sync inside divergent branches
+\item[$\square$] Wait-for graph acyclic
+\item[$\square$] Decode reductions use shuffle/atomics where possible
+\item[$\square$] CPU false sharing and NUMA remote atomics reviewed
+\item[$\square$] Quadruple legality (Ch.~6--9) archived
+\end{itemize}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Block merge without checklist + sync-pass certificate \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{Sync Engineering Patterns}
+\label{sec:ch09_sync_patterns}
+
+\paragraph{Pattern 1: Scope worksheet.}
+\textbf{Scene:} engineer adds \texttt{\_\_syncthreads} ``to be safe'' \citep{shah2024flashattention3,taxbreak2026}.
+\textbf{Solution:} list dependency units; pick narrowest row in Table~\ref{tab:ch09_sync_cost_ladder} \citep{yirage2026,nvidia2022hopper}.
+\textbf{Benefit:} avoids decode critical-path tax \citep{patel2025llminference,memoryfloor2026}.
+\textbf{When:} every new sync site \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Pattern 2: mbarrier ring from pipeline IR.}
+\textbf{Scene:} hand-edited barrier indices on ping-pong \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Solution:} generate ring from Ch.~8 depth $D$ and buffer map \citep{yirage2026,shah2024flashattention3}.
+\textbf{Benefit:} pairing errors eliminated \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\textbf{When:} any pipeline depth change \citep{taxbreak2026}.
+
+\paragraph{Pattern 3: Shuffle-before-sync.}
+\textbf{Scene:} block barrier for softmax partial max \citep{dao2022flashattention,shah2024flashattention3}.
+\textbf{Solution:} warp shuffle reduce; atomic only if cross-warp needed \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Benefit:} removes full CTA stall \citep{taxbreak2026,yirage2026}.
+\textbf{When:} decode attention stats \citep{kwon2023vllm}.
+
+\paragraph{Pattern 4: Tri-hardware sync row.}
+\textbf{Scene:} GPU mbarrier plan ported literally to NPU \citep{amd2024xdna,taxbreak2026}.
+\textbf{Solution:} Table~\ref{tab:ch09_tri_hw_sync} per backend lowering \citep{yirage2026,patel2025llminference}.
+\textbf{Benefit:} fleet-safe coordination \citep{chen2020compilerbasedhardw,wu2024mirage}.
+\textbf{When:} multi-backend builds \citep{mpk2025}.
+
+\paragraph{Pattern 5: Sync golden IR.}
+\textbf{Scene:} barrier drift on rebase \citep{yirage2026,shah2024flashattention3}.
+\textbf{Solution:} CI golden sync IR + certificate \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\textbf{Benefit:} hangs caught pre-silicon \citep{taxbreak2026,mpk2025}.
+\textbf{When:} sync pass or lowering changes \citep{nvidia2022hopper,amd2024aie}.
+
+\paragraph{Pattern 6: Hang postmortem bundle.}
+\textbf{Scene:} production hang with fused kernel \citep{taxbreak2026,patel2025llminference}.
+\textbf{Solution:} pipeline IR + sync IR + last barrier index + CFG bucket id \citep{yirage2026,shah2024flashattention3}.
+\textbf{Benefit:} fast root-cause \citep{semianalysis2024tma,chen2020compilerbasedhardw}.
+\textbf{When:} incident response \citep{memoryfloor2026,mpk2025}.
+
+\paragraph{Pattern usage.}
+Patterns~1--3 on kernel PRs; Patterns~4--5 in CI; Pattern~6 in on-call runbooks \citep{yirage2026,taxbreak2026,shah2024flashattention3,patel2025llminference}.
+
+\paragraph{Pattern selection guide.}
+\textbf{New sync site?} Start Pattern~1 worksheet before writing CUDA \citep{chen2020compilerbasedhardw,nvidia2022hopper}.
+\textbf{Pipeline depth change?} Pattern~2 regeneration mandatory---no manual barrier indices \citep{semianalysis2024tma,yirage2026}.
+\textbf{Softmax or norm reduction?} Pattern~3 shuffle path---defer block sync until Ch.~10 carrier proof requires it \citep{dao2022flashattention,shah2024flashattention3}.
+\textbf{Fleet triplet build?} Pattern~4 row per backend in CI matrix \citep{amd2024xdna,patel2025llminference,mpk2025}.
+\textbf{Compiler change?} Pattern~5 golden diff on every merge to \texttt{sync\_pass/} \citep{wu2024mirage,yirage2026}.
+\textbf{Production incident?} Pattern~6 bundle within 30 minutes of hang---barrier index + IR hashes narrow bisect \citep{taxbreak2026,shah2024flashattention3}.
+Patterns are not optional style---they are the operational encoding of Sections~\ref{sec:ch09_sync_hierarchy}--\ref{sec:ch09_yirage_sync_pass} \citep{chen2020compilerbasedhardw,mpk2025}.
+
+\section{Sync Review Workflow}
+\label{sec:ch09_sync_review}
+
+\paragraph{R1--R5.}
+R1: scope worksheet per sync site; R2: sync-pass certificate; R3: quadruple legality bundle; R4: golden IR diff; R5: checklist \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3,wu2024mirage}.
+\textbf{Gate A:} sync pass failure \citep{taxbreak2026}.
+\textbf{Gate B:} coarse sync on decode hot path without justification \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Gate C:} hang repro or watchdog in staging \citep{shah2024flashattention3,mpk2025}.
+
+\paragraph{Reviewer questions.}
+Is every Ch.~8 handoff covered by mbarrier/token? \citep{semianalysis2024tma,yirage2026}
+Any \texttt{\_\_syncthreads} on pipeline path? \citep{shah2024flashattention3,nvidia2022hopper}
+CFG buckets all proven? \citep{nvidia2024cudagraphs,patel2025llminference}
+CPU layout padded against false sharing? \citep{dlbook,chen2020compilerbasedhardw}
+
+\paragraph{PR rubric (expanded).}
+\textbf{Scope evidence:} worksheet row per sync site with primitive and justification \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Proof evidence:} sync-pass certificate hash matches CI golden \citep{wu2024mirage,mpk2025}.
+\textbf{Performance evidence:} Nsight stall delta or ms/token A/B from Table~\ref{tab:ch09_pr_template} \citep{patel2025llminference,shah2024flashattention3}.
+\textbf{Structural evidence:} quadruple legality bundle unchanged or intentionally updated with all four reports \citep{taxbreak2026,dao2022flashattention}.
+\textbf{Negative checklist:} confirm no conditional barriers, no hand-edited ring indices, no block sync replacing mbarrier handoff \citep{semianalysis2024tma,nvidia2022hopper}.
+Reviewers reject ``LGTM'' without certificate attachment---same culture as Ch.~8 pipeline IR reviews \citep{yirage2026,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Merge blocked without sync certificate + checklist \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{Decode Sync Benchmarking Methodology}
+\label{sec:ch09_sync_benchmarking}
+
+Measure sync cost the way Chapter~\ref{chap:ch03} measures decode---not FLOPs alone \citep{patel2025llminference,taxbreak2026,yirage2026}.
+
+\paragraph{Minimum benchmark bundle.}
+Batch-1 ms/token: kernel with minimal-scope sync vs coarse-sync variant on \emph{same} fusion region \citep{shah2024flashattention3,memoryfloor2026,dao2022flashattention}.
+Nsight: barrier wait cycles, \texttt{\_\_syncthreads} stall time, mbarrier wait histogram \citep{nvidia2022hopper,semianalysis2024tma,patel2025llminference}.
+Bytes/token and correctness hash unchanged---sync optimization must not trade bytes or numerics \citep{taxbreak2026,chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Nsight metrics interpretation.}
+\textbf{Barrier wait cycles:} if mbarrier wait exceeds compute on the same stage, check producer TMA latency or incorrect phase---not always ``add more sync'' \citep{semianalysis2024tma,shah2024flashattention3}.
+\textbf{Stall reasons on \texttt{\_\_syncthreads}:} high count on decode path is a red flag---map each stall to sync site worksheet; justify or remove \citep{patel2025llminference,nvidia2022hopper}.
+\textbf{Warp issue stall (not selected):} often follows barrier imbalance---one warp arrives early and sleeps while others finish divergent work before the barrier \citep{nvidia2022hopper,yirage2026}.
+Report before/after stall histograms in PR template Table~\ref{tab:ch09_pr_template}---numbers beat adjectives in review \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Acceptance thresholds (decode).}
+On batch-1 Llama-class kernels, coarse-sync A/B regression $>5\%$ ms/token without correctness fix is a revert unless scope worksheet proves block barrier unavoidable \citep{patel2025llminference,memoryfloor2026}.
+Zero hangs in 24h soak at max context bucket; zero sync-pass failures on golden IR diff \citep{taxbreak2026,yirage2026,mpk2025}.
+CPU: LLC coherence traffic should not rise when parallelizing decode helper loops---if it rises, suspect false sharing \citep{dlbook,chen2020compilerbasedhardw}.
+NPU: MAC utilization should not drop below pipeline pass prediction because token wait chains are too long---shorten spatial chain or overlap streams \citep{amd2024xdna,amd2024aie}.
+
+\paragraph{Scope A/B discipline.}
+Only change sync primitive scope between A and B---hold Ch.~6--8 IR constant \citep{yirage2026,wu2024mirage,dao2022flashattention}.
+Document each sync site scope in metadata for reproducibility \citep{chen2020compilerbasedhardw,mpk2025,shah2024flashattention3}.
+
+\paragraph{Hang testing.}
+Stress context buckets, batch sizes, and warp counts where CFG differs \citep{nvidia2024cudagraphs,kwon2023vllm,patel2025llminference}.
+Soak test with watchdog---hangs may be rare; coverage without soak is insufficient for sync \citep{taxbreak2026,mpk2025,yirage2026}.
+
+\paragraph{CPU/NPU sync metrics.}
+CPU: remote NUMA atomic rate, LLC coherence traffic \citep{dlbook,patel2025llminference,memoryfloor2026}.
+NPU: token wait cycles, MAC idle while DMA pending \citep{amd2024xdna,amd2024aie,yirage2026}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Sync optimization PR evidence template.}
+\label{tab:ch09_pr_template}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Field} & \textbf{Required content} \\
+\midrule
+Scope worksheet & Per-site primitive + justification \\
+Sync certificate & Pass output hash \\
+Stall delta & Barrier wait before/after \\
+ms/token & Batch-1 decode \\
+Quadruple legality & Ch.~6--9 reports \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach benchmark bundle on every sync-scope change PR \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{Megakernel Sync Composition (Chapters~6--9)}
+\label{sec:ch09_megakernel_composition}
+
+Synchronization is the glue that makes Ch.~6--8 composable---without proof, fusion is unsafe at fleet scale \citep{yirage2026,wu2024mirage,mpk2025,shah2024flashattention3}.
+
+\paragraph{Four-pass certification story.}
+Memory pass certifies bytes fit \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+Tiling pass certifies roles are static \citep{shah2024flashattention3,mpk2025}.
+Pipeline pass certifies movement overlaps compute \citep{semianalysis2024tma,yirage2026}.
+Sync pass certifies coordination cannot deadlock \citep{wu2024mirage,yirage2026,patel2025llminference}.
+Superoptimizer (Ch.~20) proposes; passes disprove bad candidates early \citep{mpk2025,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Why static roles unlock minimal sync.}
+Dynamic assignment would require pessimistic wide barriers---``sync everyone in case'' \citep{taxbreak2026,patel2025llminference,shah2024flashattention3}.
+Ch.~7 role IDs give sync pass a precise participant set per edge \citep{yirage2026,mpk2025,nvidia2022hopper}.
+This is the performance--correctness coupling of the MegaKernel stack \citep{dao2022flashattention,memoryfloor2026,semianalysis2024tma}.
+
+\paragraph{Pipeline handoffs are sync edges.}
+Every Ch.~8 mbarrier is a sync-pass edge with byte-count semantics \citep{semianalysis2024tma,shah2024flashattention3,dao2022flashattention}.
+Editing pipeline depth without regenerating sync proof is a top hang vector \citep{yirage2026,taxbreak2026,wu2024mirage}.
+Keep pipeline IR and sync IR hashes paired in CI \citep{chen2020compilerbasedhardw,mpk2025}.
+
+\paragraph{Barrier objects in residency.}
+mbarrier arrays, token slots, collective scratch---count in Ch.~6 peak like any other fast-memory resident \citep{memoryfloor2026,nvidia2022hopper,amd2024xdna}.
+Teams that forget barrier metadata spill or truncate depth silently \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Explicit vs implicit sync spectrum.}
+GPU: explicit barriers on partly dynamic machine \citep{nvidia2022hopper,shah2024flashattention3}.
+CPU: implicit coherence with hidden cost \citep{dlbook,patel2025llminference,memoryfloor2026}.
+NPU: fully explicit tokens---fully analyzable \citep{amd2024xdna,amd2024aie,yirage2026}.
+YiRage lowers one dependency graph three ways---Table~\ref{tab:ch09_tri_hw_sync} \citep{chen2020compilerbasedhardw,wu2024mirage,mpk2025}.
+
+\paragraph{Bulk-synchronous vs async trade (again).}
+Per-operator stacks sync once per kernel---simple, slow \citep{taxbreak2026,patel2025llminference}.
+Fused async kernels sync many times with narrow scope---fast when proven \citep{shah2024flashattention3,semianalysis2024tma,dao2022flashattention}.
+Deadlock risk is the price of overlap---pay with compile-time proof, not production hangs \citep{yirage2026,wu2024mirage,mpk2025}.
+
+\paragraph{Softmax preview (Ch.~10).}
+Online softmax needs warp-level reductions for $(m,\ell)$ stats---shuffle before any block sync \citep{dao2022flashattention,shah2024flashattention3,memoryfloor2026}.
+Carriers must stay consistent across pipeline stages sync pass already proved \citep{yirage2026,patel2025llminference,semianalysis2024tma}.
+Ch.~10 specializes carriers; Ch.~9 supplies scope discipline \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Incident response playbook.}
+On hang: capture barrier/token index, pipeline depth, context bucket, quadruple IR hashes \citep{taxbreak2026,shah2024flashattention3,yirage2026,mpk2025}.
+Bisect: sync pass on $\rightarrow$ off (if safe in lab); compare certificates \citep{wu2024mirage,chen2020compilerbasedhardw,semianalysis2024tma}.
+Never ``fix'' hangs by adding block sync without scope worksheet \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+
+\paragraph{Chapter~20 search interaction.}
+Megakernel candidates mutate fusion, tiles, depth---each mutation re-runs sync pass \citep{mpk2025,wu2024mirage,yirage2026}.
+Unprovable variants pruned before codegen saves compile farm and prevents toxic kernels entering soak \citep{chen2020compilerbasedhardw,taxbreak2026,patel2025llminference}.
+
+\paragraph{Serving fleet checklist (operator).}
+Version sync certificate with model weights; bucket graphs by context; alert on certificate drift in CI \citep{nvidia2024cudagraphs,kwon2023vllm,yirage2026,shah2024flashattention3}.
+Treat certificate mismatch as release blocker---same severity as weight checksum failure \citep{taxbreak2026,mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{Anti-pattern culture (recap).}
+No merge without sync pass green; no coarse sync without written justification; no conditional barriers---ever \citep{yirage2026,shah2024flashattention3,nvidia2022hopper,semianalysis2024tma}.
+Patterns in Section~\ref{sec:ch09_sync_patterns}; gates in Section~\ref{sec:ch09_sync_review} \citep{chen2020compilerbasedhardw,taxbreak2026,patel2025llminference}.
+
+\paragraph{End-to-end certification narrative.}
+A megakernel candidate flows: superoptimizer proposes fusion graph $\rightarrow$ memory pass proves bytes $\rightarrow$ tiling pass assigns static roles $\rightarrow$ pipeline pass schedules movement $\rightarrow$ \textbf{sync pass proves coordination} $\rightarrow$ codegen \citep{wu2024mirage,yirage2026,mpk2025,shah2024flashattention3}.
+Removing sync pass from CI is equivalent to shipping without tests---numerical tests do not observe deadlock \citep{taxbreak2026,patel2025llminference}.
+The certificate is the contract between compiler and serving: if certificate hash matches golden, operators trust barrier indices across deploys \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Teaching lab (90-minute).}
+\textbf{Part A:} students classify ten dependency edges into scope ladder rows \citep{shah2024flashattention3,dlbook}.
+\textbf{Part B:} inject one conditional barrier into sample IR; run sync pass; read error path output \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Part C:} Nsight compare minimal vs coarse sync on provided decode kernel \citep{patel2025llminference,nvidia2022hopper}.
+\textbf{Deliverable:} completed checklist + one-page scope worksheet---mirrors production review Gates A--C \citep{taxbreak2026,mpk2025}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Archive quadruple legality + sync certificate together on every fused-kernel release \citep{yirage2026,wu2024mirage,mpk2025,dao2022flashattention,shah2024flashattention3,chen2020compilerbasedhardw,taxbreak2026}.
 
 \section{Key Takeaways}
 \label{sec:ch09_key_takeaways}
 
+Synchronization turns Ch.~6--8 performance into \emph{safe} performance---minimal scope, static proof, per-target lowering \citep{yirage2026,shah2024flashattention3,dao2022flashattention,mpk2025}.
+
 \begin{itemize}
-\item \textbf{Synchronize at the narrowest correct scope.}
-Cost rises steeply from a warp barrier to a block barrier to a cluster barrier to a grid sync or multi-GPU collective, so use the narrowest scope a dependency spans \citep{shah2024flashattention3,patel2025llminference}. A coarse sync on the decode critical path is pure overhead with nothing to amortize it against \citep{taxbreak2026}.
+\item \textbf{Minimal-scope principle.}
+Cost rises from warp to collective---use narrowest primitive that satisfies the dependency (Table~\ref{tab:ch09_sync_cost_ladder}) \citep{shah2024flashattention3,patel2025llminference}.
+\textbf{Action:} scope worksheet on every sync site \citep{yirage2026,chen2020compilerbasedhardw}.
 
-\item \textbf{Pick the primitive per hardware class.}
-GPUs use barriers, transaction barriers, and atomics; CPUs use fences, atomics, and cache coherence; NPUs use locks and task-completion-tokens; multi-device uses collectives \citep{nvidia2022hopper,amd2024aie}. Minimize cross-core sharing and false sharing on a CPU; the NPU pattern is fixed at compile time \citep{amd2024xdna}.
+\item \textbf{Decode-adaptation principle.}
+Thin per-token work makes coarse sync disproportionately expensive \citep{taxbreak2026,memoryfloor2026,kwon2023vllm}.
+\textbf{Action:} shuffle/atomics for reductions; mbarrier for pipeline handoffs only \citep{dao2022flashattention,semianalysis2024tma}.
 
-\item \textbf{Treat deadlock as a first-class hazard.}
-Barrier-count mismatches, circular waits, and inconsistent barrier ordering hang a fused kernel without any numerical error \citep{shah2024flashattention3}. They are coordination bugs invisible to a correctness test and often shape- or configuration-dependent, so they hang in production rather than in testing \citep{nvidia2022hopper}.
+\item \textbf{Static-proof principle.}
+Deadlock is invisible to numerical tests---prove at compile time \citep{shah2024flashattention3,wu2024mirage,yirage2026}.
+\textbf{Action:} require sync-pass certificate in CI \citep{chen2020compilerbasedhardw,mpk2025}.
 
-\item \textbf{Make synchronization structural and checkable.}
-Generate arrive/wait counts and the circular barrier list from one specification, as CUTLASS pipeline classes do, so they cannot mismatch \citep{shah2024flashattention3}. A compiler can verify deadlock-freedom statically \citep{wu2024mirage}.
+\item \textbf{Hardware-adaptation principle.}
+GPU explicit barriers; CPU coherence+fences; NPU static tokens \citep{nvidia2022hopper,dlbook,amd2024xdna,amd2024aie}.
+\textbf{Action:} fill Table~\ref{tab:ch09_tri_hw_sync} per backend \citep{patel2025llminference,yirage2026}.
 
-\item \textbf{Generate and prove sync per target.}
-The YiRage sync pass inserts minimal, correct synchronization per class and rejects any region not provably deadlock-free, composing with the residency, role, and pipeline passes \citep{yirage2026,mpk2025}. Megakernels coordinate hundreds of units, so the proof is essential \citep{memoryfloor2026}.
+\item \textbf{Compiler-internalization principle.}
+Sync insertion belongs in YiRage pass, not hand CUDA \citep{yirage2026,wu2024mirage,shah2024flashattention3,mpk2025}.
+\textbf{Action:} golden sync IR + quadruple legality bundle \citep{chen2020compilerbasedhardw,taxbreak2026}.
 \end{itemize}
+
+\paragraph{How this chapter connects.}
+Ch.~8 pipelines need Ch.~9 proofs; Ch.~7 roles enable minimal edges; Ch.~6 budgets barrier objects \citep{semianalysis2024tma,shah2024flashattention3,dao2022flashattention,yirage2026}.
+Chapter~\ref{chap:ch10} applies these rules to online softmax---carriers and running stats with tight warp-level sync \citep{dao2022flashattention,memoryfloor2026,patel2025llminference}.
 
 \section{Conclusion}
 \label{sec:ch09_conclusion}
 
-Synchronization is what makes the static roles of Chapter~7 and the asynchronous pipelines of Chapter~8 safe: a hierarchy of scopes from warp barriers to multi-GPU collectives, with cost rising sharply as scope widens, so the discipline is to coordinate at the narrowest scope a dependency requires \citep{shah2024flashattention3,patel2025llminference}. Each hardware class supplies different primitives---GPU barriers, CPU fences, NPU tokens---and each introduces deadlock as a coordination hazard invisible to numerical tests, which is why the YiRage sync pass inserts minimal synchronization per target and proves it deadlock-free before codegen \citep{yirage2026,amd2024aie}. With residency, roles, movement, and synchronization all now compiler-managed and checked, the MegaKernel machinery is complete enough to tackle the algorithm that ties them together in the decode hot path: Chapter~\ref{chap:ch10} develops the online-softmax attention optimization that keeps the running statistics resident and synchronized across the very pipeline stages this chapter coordinated \citep{dao2022flashattention,memoryfloor2026}.
+Hierarchical synchronization completes the MegaKernel safety stack: residency, roles, pipelines, and now \emph{proved} coordination \citep{yirage2026,shah2024flashattention3,dao2022flashattention,mpk2025,wu2024mirage}.
+
+\paragraph{Closing metaphor.}
+Ch.~8 timed the conveyor; Ch.~9 installs the sensors and interlocks so boxes never collide \citep{semianalysis2024tma,shah2024flashattention3,dao2022flashattention}.
+Speed without interlocks is a recall event \citep{taxbreak2026,patel2025llminference,memoryfloor2026}.
+
+Chapter~\ref{chap:ch10} develops \textbf{online softmax}---the algorithm where running statistics must stay resident and synchronized across the pipeline stages this chapter secured \citep{dao2022flashattention,shah2024flashattention3,memoryfloor2026}.
+Carry quadruple legality bundle and mbarrier index table into softmax carrier design \citep{yirage2026,chen2020compilerbasedhardw,semianalysis2024tma}.
+
+\paragraph{MegaKernel spine recap.}
+Residency (Ch.~6) $\rightarrow$ roles (Ch.~7) $\rightarrow$ pipelines (Ch.~8) $\rightarrow$ \textbf{sync proof} (Ch.~9) $\rightarrow$ online softmax carriers (Ch.~10) $\rightarrow$ full decoder assembly (Ch.~11) \citep{dao2022flashattention,mpk2025,yirage2026,shah2024flashattention3}.
+Each link is a compile-time pass with artifacts; skipping one link voids the chain \citep{wu2024mirage,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Done criteria.}
+Scope worksheets signed, sync-pass certificate archived, checklist complete, no unjustified coarse sync on decode path \citep{yirage2026,shah2024flashattention3,patel2025llminference,taxbreak2026,chen2020compilerbasedhardw}.
+Proceed to Chapter~\ref{chap:ch10} with carrier sync plan attached \citep{dao2022flashattention,semianalysis2024tma}.
+
+\paragraph{Hands-on recap.}
+(1) Fill scope ladder per sync site. (2) Run sync pass. (3) Archive certificate. (4) Quadruple legality with Ch.~6--8. (5) Complete checklist \citep{taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025}.
+Performance without proof is not shippable megakernel engineering \citep{wu2024mirage,yirage2026,mpk2025}.
+
+\paragraph{Chapter artifact bundle (ship with kernel).}
+Export four files on every release: \texttt{sync\_ir.json}, \texttt{sync\_certificate.sha256}, \texttt{scope\_worksheet.md}, \texttt{quadruple\_legality.pdf} \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+On-call playbooks reference barrier index table derived from sync IR---when hang dumps ``barrier~3'', operators map to KV stream buffer~1 consumer wait \citep{shah2024flashattention3,semianalysis2024tma,patel2025llminference}.
+Ch.~10 softmax carriers inherit the same discipline: running max and sum reductions use shuffle paths proven here; carrier handoffs across tiles reuse mbarrier edges from pipeline IR \citep{dao2022flashattention,memoryfloor2026,yirage2026}.
+
+\paragraph{Teaching vs production.}
+Whiteboard scope ladder (Figure~\ref{fig:ch09_sync_cost_ladder}) for onboarding \citep{shah2024flashattention3,dlbook}.
+Automate Patterns~1--6 and sync golden IR in CI for fleet scale \citep{yirage2026,patel2025llminference,wu2024mirage,mpk2025}.
+Concepts in \S\ref{sec:ch09_sync_hierarchy}--\ref{sec:ch09_hardware_sync_pick}; gates in \S\ref{sec:ch09_sync_pitfalls}--\S\ref{sec:ch09_sync_review} \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Fleet note.}
+Triplet deployments need three sync lowerings from one IR---mbarrier plan must not ship verbatim to XDNA tokens \citep{amd2024xdna,patel2025llminference,yirage2026,nvidia2022hopper,chen2020compilerbasedhardw}.
+
+\paragraph{Long-context note.}
+Paged KV changes which warps touch which barriers per bucket---re-prove sync per graph bucket \citep{kwon2023vllm,dao2023flashdecoding,nvidia2024cudagraphs,yirage2026,shah2024flashattention3}.
+
+\paragraph{One-sentence chapter thesis.}
+Ch.~6--8 make decode fast; Ch.~9 makes that speed \emph{safe}---minimal-scope sync with compile-time deadlock proof \citep{dao2022flashattention,shah2024flashattention3,semianalysis2024tma,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,mpk2025,wu2024mirage}.
+
+\paragraph{Part IV milestone.}
+With Ch.~9 complete, Part~IV has covered the four MegaKernel structure pillars---residency, roles, pipelines, and synchronization---that turn operator graphs into provably correct fused decode kernels \citep{dao2022flashattention,mpk2025,yirage2026,shah2024flashattention3}.
+Part~V begins with algorithm specialization: online softmax carriers that consume the sync discipline established here \citep{dao2022flashattention,memoryfloor2026,patel2025llminference}.
+
+\paragraph{Exit artifacts.}
+Leave with: scope worksheets, sync-pass certificate, quadruple legality bundle, checklist, mbarrier/token index table for Ch.~10 \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention,shah2024flashattention3,semianalysis2024tma,patel2025llminference,taxbreak2026}.
+Proceed to Chapter~\ref{chap:ch10} only when sync proof is green \citep{dao2022flashattention,memoryfloor2026,mpk2025}.
+
+\paragraph{Reader commitment.}
+Before closing this chapter, run sync pass on your current fused decode kernel and archive the certificate---if the pass fails, you have found the bug before your users do \citep{yirage2026,wu2024mirage,taxbreak2026,shah2024flashattention3}.
+Correctness is not a phase after performance; it is the constraint that makes performance shippable \citep{mpk2025,patel2025llminference,chen2020compilerbasedhardw}.
+
+End of Chapter~\ref{chap:ch09}---correctness pillar complete for decode serving.
+Archive the quadruple legality bundle before starting Chapter~\ref{chap:ch10} softmax carrier worksheets \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch09" \theabspage}

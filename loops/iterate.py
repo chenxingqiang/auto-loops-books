@@ -221,25 +221,38 @@ def run_research(spec: ChapterSpec, *, skip: bool, dry_run: bool) -> list[str]:
     if skip:
         return ["research: skipped"]
 
-    if dry_run or not os.environ.get("SERPAPI_KEY"):
-        from research_tools import extract_chapter_keywords, generate_chapter_queries
+    from research_tools import (
+        extract_chapter_keywords,
+        generate_chapter_queries,
+        load_inherited_papers,
+        run_chapter_research,
+    )
+    from research_keyword_specs import chapter_spec_entry
 
+    if dry_run or not os.environ.get("SERPAPI_KEY"):
         out = RESEARCH_ROOT / spec.chapter_id
         out.mkdir(parents=True, exist_ok=True)
         keywords = extract_chapter_keywords(spec)
         queries = generate_chapter_queries(spec, keywords)
+        cfg = chapter_spec_entry(spec.chapter_id)
+        inherited = load_inherited_papers(spec, keywords) if cfg.get("inherit_prior_chapters", True) else []
         (out / "keywords.json").write_text(
             json.dumps([{"term": k, "weight": w} for k, w in keywords], indent=2),
             encoding="utf-8",
         )
         (out / "queries.json").write_text(json.dumps(queries, indent=2), encoding="utf-8")
         reason = "dry-run" if dry_run else "SERPAPI_KEY unset"
-        return [f"research: {reason} — keywords/queries only"]
-
-    from research_tools import run_chapter_research
+        return [
+            f"research: {reason} — {len(keywords)} keywords, {len(queries)} queries, "
+            f"{len(inherited)} inherited from prior chapters"
+        ]
 
     result = run_chapter_research(spec, dry_run=False)
-    return [f"research: {result['paper_count']} papers -> {result.get('output_dir', '')}"]
+    inherited = result.get("inherited_count", 0)
+    return [
+        f"research: {result['paper_count']} papers ({inherited} inherited) "
+        f"-> {result.get('output_dir', '')}"
+    ]
 
 
 def run_fact_verification(

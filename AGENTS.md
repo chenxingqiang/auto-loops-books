@@ -15,7 +15,7 @@
 9. [当前轮次笔记](#9-当前轮次笔记)
 10. [环境与 Gotchas](#10-环境与-gotchas)
 
-（§5.5 [目录迭代](#55-目录迭代agent-可改--内容不足时必用)）
+（§5.5 [目录迭代](#55-目录迭代agent-可改--内容不足时必用) · §5.6 [全书风格工程化三层循环](#56-全书风格工程化三层迭代循环)）
 
 ---
 
@@ -38,7 +38,7 @@
 |------|------|
 | **书稿终态** | **30** 章 **Fregly-ready**（非仅 `chapter_ready`）；Part VIII = runtime + 推理框架 + YiRage 协同 |
 | **样章对照** | [`reference-chapter-1.pdf`](reference-chapter-1.pdf) — mechanical sympathy、goodput、profile-first、**Key Takeaways → Conclusion** |
-| **文风契约** | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §I–§VIII，§七 Fregly 映射 |
+| **文风契约** | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §I–§VIII，§七 Fregly 映射；**风格生产流程**见本文 §5.6 |
 | **Harness 终态** | Agent 少猜、少重复劳动：`book-loop` 一步产出完整 `agent_tasks` + 可复现 gate；协议单源、路径一致 |
 
 ### 1.3 默认行为
@@ -191,6 +191,8 @@ uv run book_prepare.py --chapter ch01
 
 ## 5. Book Loop 书稿迭代（内容轨）
 
+> **风格工程化主流程**：Fregly/O'Reilly 对齐的批量改造见 **[§5.6 全书风格工程化三层迭代循环](#56-全书风格工程化三层迭代循环)**。本节 §5.1–§5.5 为单轮 PSIVE 操作细则；深度改稿时两层同时遵守。
+
 ### 5.1 执行前闸门（动笔 LaTeX 前必做）
 
 **四轮自问**（策略卡片 1～2 句/问）：
@@ -315,9 +317,278 @@ uv run research_tools.py --chapter <new_id> --dry-run   # 新章/新节
 - **禁止：** 修改 `word_score` 权重表、`evaluate_chapter` 公式、`compile_book` 逻辑  
 - **原则：** 用结构解决「写不满 / 写不深」，不用降低 rubric 逃避
 
+### 5.6 全书风格工程化：三层迭代循环
+
+> **目标**：把「风格对齐」从一次性润色变成**可标准化、可批量复制、可量化验收**的内容生产流程——类似软件迭代发布：先搭统一基线 → 逐章闭环改造 → 全稿收敛对齐。每层有独立交付物、门禁与回滚点。
+>
+> **对标**：O'Reilly / Fregly 工业实战体例（[`reference-chapter-1.pdf`](reference-chapter-1.pdf)）；**基线 v1.0** = [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §七 + 本文；**试点章** = ch01（Fregly 改造已完成，见 `books/research/ch01/fregly_style_brief.md`）。
+
+```mermaid
+flowchart TB
+  L1[Layer 1 全书基线循环] --> L2[Layer 2 单章改造闭环]
+  L2 --> L3[Layer 3 全稿收敛循环]
+  L1 -->|规范手册 v1.x| L2
+  L2 -->|30 章终稿| L3
+  L3 -->|补丁| L1
+```
+
+三层循环与 PSIVE 的关系：**Layer 1 = Evolve（契约）**；**Layer 2 = 内容轨主循环（Perceive→Verify 按 Phase）**；**Layer 3 = 全书级 Verify + Evolve**。单轮 `book-loop` 仍只攻 **一章或一项 harness**；Layer 2 的一章可跨多轮 Loop R{n} 完成四个 Phase。
+
 ---
 
-## 6. 每轮 Git 闭环
+#### Layer 1 — 全书风格基线循环
+
+**目标**：输出可执行的《风格与内容规范》，作为全章改造唯一标尺。
+
+| 步骤 | 动作 | 交付物 |
+|------|------|--------|
+| 1 标杆拆解 | 拆解 O'Reilly/Fregly 六维：叙事结构、语言调性、读者梯度、图表规范、模块范式、术语引用 | 规则条目写入 `WRITING_STYLE.md` §七 |
+| 2 手册 v0.9 | 7 段式章骨架、禁用/推荐表述、术语表、图表规范、验收 checklist | `WRITING_STYLE.md` + 本文 §5.6 |
+| 3 试点验证 | **ch01** 完整走 Layer 2；验证模板可承载技术深度 | `fregly_style_brief.md`、ch01 tex |
+| 4 冻结 v1.0 | 试点通过 → 冻结基线；后续仅 **补丁**（每完成 3 章复盘 15min，v1.1、v1.2…） | §9 笔记 + `WRITING_STYLE` 小版本 |
+
+**六维规则摘要（Agent 必遵）**
+
+| 维度 | 合格标准 |
+|------|----------|
+| 叙事结构 | 钩子 → 本章目标 → 概念铺垫 → 痛点拆解 → 方法落地 → Takeaways → 承上启下 |
+| 语言调性 | 工程师对话感；少用论文腔（「本文」「综上所述」）；可用「你」「实践中」「很多团队会…」 |
+| 读者梯度 | 缩写首次：**全称 + 1 句通俗解释**；核心概念配 **1 个工程类比**；预备知识段 |
+| 图表 | 核心对比优先图；表脚注：**硬件/配置 + 数据来源**；禁 `Pending` / 待补充占位 |
+| 模块范式 | Key Takeaways = **粗体原则 + 段落 + 行动指引**（非单行 bullet）；实践启示 / 反模式 |
+| 术语引用 | 全书术语表一致；`\citep{}` 句内；goodput 四指标符号统一 |
+
+**基线门禁（Layer 1 完成）**：ch01 通过 §5.6 单章 checklist；`WRITING_STYLE.md` §七 与 ch01 结构一致。
+
+---
+
+#### Layer 2 — 单章标准化改造闭环（核心生产循环）
+
+**迭代单元**：1 章；建议 **2 轮** `deep-rewrite` + 手改；批量推进时每周约 2 章。  
+**回滚**：某 Phase 门禁失败 → **仅回退该 Phase**，不进入下一章入库。
+
+**标准 7 段式章骨架**（映射到 `\section` / `\paragraph`，技术章可增子节）
+
+1. **开篇钩子** — 工业场景 / 踩坑案例（1–2 段）；可引用公开部署数据  
+2. **本章目标** — 读者学完能做什么（诊断 / 设计 / 落地）  
+3. **基础概念铺垫** — 术语 + 类比 + 预备知识  
+4. **核心技术拆解** — 痛点 → 根因 → 方案（分小节递进）  
+5. **工程落地指引** — 实践启示、反模式、适用边界  
+6. **Key Takeaways** — 工程原则 + 行动指引  
+7. **承上启下** — Conclusion 指向前后章 + worksheet gate  
+
+##### Phase 1 — 结构重构（搭骨架）
+
+| | |
+|--|--|
+| **输入** | 原稿 / stub tex |
+| **动作** | 剥离学术演绎序；按「问题→痛点→根因→方法→行动」重排；套 7 段式；删无工程价值的纯推导 |
+| **输出** | 大纲 + 骨架稿；同步 `OUTLINE` `SectionSpec`（§5.5） |
+| **门禁** | □ 7 段式齐全 □ 工程师认知顺序 □ 无冗余学术推导 |
+
+**命令**：`book-loop deep-rewrite --chapter chXX`（首轮）+ 读 `deep_rewrite_brief.md`
+
+##### Phase 2 — 内容工程化（填血肉）
+
+| | |
+|--|--|
+| **输入** | 骨架稿 |
+| **动作** | 缩写补全；工程类比；每核心点 **实践启示**；关键数据 **业务解读**（SLA/成本）；图表化对比；表注条件与来源；案例/反模式；除占位 |
+| **输出** | 工程化初稿 |
+| **门禁** | □ 缩写规则 □ 实践启示 □ 图表/表完整 □ 无占位 |
+
+**命令**：手改 tex + `book_visuals.py --plan/--render` + **`using-opentikz`**（架构/流水线 → `visuals/<ch>/opentikz/`）+ `fact_verify` + `research_tools --chapter`
+
+##### Phase 3 — 风格打磨（统一调性）
+
+| | |
+|--|--|
+| **输入** | 工程化初稿 |
+| **动作** | 学术腔→工程腔（对照 `WRITING_STYLE`）；短段落；公式加文字解读；`book_proper_nouns.py --fix` |
+| **输出** | 润色稿 |
+| **门禁** | □ 无论文腔 □ 节奏可读 □ 本章术语统一 |
+
+##### Phase 4 — 校验回归（质量闭环）
+
+| | |
+|--|--|
+| **输入** | 润色稿 |
+| **动作** | 跑 §5.6 checklist + 机器 gate；技术结论不改；前后章衔接；不达标标回退 Phase |
+| **输出** | **可入库终稿** |
+| **门禁** | checklist **100%** + `book_prepare` ready +（深度章）**Fregly-ready** q≥85 |
+
+**命令**：
+
+```bash
+python3 book_prepare.py --chapter chXX
+python3 book_spec_audit.py          # 可选全书审计
+cd books && bash make-chapter.sh chXX
+```
+
+**与 `book-loop` 映射**
+
+| Layer 2 Phase | 典型 Loop 动作 |
+|---------------|----------------|
+| P1 结构 | `deep-rewrite` 第 1 轮 |
+| P2 内容 | 手改 + research + **`book_visuals` + `using-opentikz`** + facts |
+| P3 风格 | 手改 + `book_proper_nouns` |
+| P4 校验 | `book_prepare` + Fregly checklist → commit |
+
+---
+
+#### Layer 3 — 全稿一致性收敛循环
+
+**时机**：30 章均通过 Layer 2 Phase 4 后执行；**3 轮**收敛。
+
+| 轮次 | 焦点 | 动作 |
+|------|------|------|
+| **R1 全局要素** | 术语、指标、格式 | 全书缩写/专名统一；goodput 四指标定义一致；图表编号与 bib 格式；Takeaways 范式一致；**OpenTikZ 全稿图宽/调色**（见 [`OPENTIKZ.md`](books/OPENTIKZ.md) §四） |
+| **R2 叙事线** | 逻辑与冗余 | Part 递进；伏笔回应；跨章重复删并；难度曲线 |
+| **R3 终审** | 通读与导航 | 章间语气拉齐；「见 Ch.X」导航；附录/索引 |
+
+**命令**：`book_spec_audit.py`、`book_proper_nouns.py`（全书）、`rg` 术语漂移扫描、`bash make.sh`
+
+**收敛门禁**：audit P0=0；30/30 Fregly-ready；全书 `make.sh` 绿。
+
+---
+
+#### 单章验收 Checklist（Layer 2 Phase 4 必过）
+
+| 类别 | 检查项 |
+|------|--------|
+| **结构** | □ 工业钩子 □ 本章学习目标 □ 承上启下 |
+| **读者友好** | □ 缩写首次全称+解释 □ 核心概念有类比 □ 无跳步断层 |
+| **工程价值** | □ 核心点有实践启示 □ 关键数据有业务解读 □ 方案适用边界 |
+| **数据图表** | □ 核心对比有图 □ 表注条件+来源 □ 无 Pending □ 架构图走 `opentikz/` 且 `compile_ok` |
+| **风格语言** | □ 无学术/论文腔 □ 段落节奏 □ 术语符合全书表 |
+| **收尾** | □ Takeaways = 原则+行动 □ 技术结论准确 □ `verified_facts.jsonl` |
+
+Agent 在 `agent_tasks` 或 commit 前自检；深度章另加 `WRITING_STYLE.md` §七.6 Fregly 清单。
+
+---
+
+#### 角色配置与协作机制
+
+> **原则**：权责清晰、节点明确、按需介入。核心执行团队全程闭环；扩展支持团队在特定 Phase 介入。每角色与迭代阶段、门禁一一绑定。
+
+**本仓库 Agent 默认映射**（无人值守 Loop 时）
+
+| 人工角色 | Agent / 脚本 承担 | 人工保留 |
+|----------|-------------------|----------|
+| 工程化编辑 | **主执行**：tex 改写、术语、风格、Phase 1–3 | — |
+| QA / 门禁管理员 | `book_prepare.py`、`book_spec_audit.py`、§5.6 checklist | — |
+| 技术主编 | 用户 / §9 笔记裁决；风格-技术冲突时 escalate | 终验签字 |
+| 原技术作者 | `verified_facts.jsonl`、`fact_verify`、原稿 tex | 技术复核 |
+| 技术审校 | `deep_rewrite_brief`、Fregly q≥85 门槛 | Phase 4 外审 |
+| 可视化设计师 | `book_visuals.py` + **`using-opentikz` Skill** | 复杂定制架构图终审 |
+| 工业界外审 | — | 试点 / 全稿试读 |
+| 排版编辑 | `make.sh`、LaTeX 模板 | 出版级版式 |
+
+##### 核心执行团队（全程贯穿三层循环）
+
+| 角色 | 定位 | 核心职责 | Layer 1 | Layer 2 | Layer 3 |
+|------|------|----------|---------|---------|---------|
+| **技术主编** | 技术质量与风格最终裁决；节奏总控 | 审批规范手册；裁决技术/风格冲突；验收章终稿与全稿；协调资源 | 牵头标杆拆解；审批 v1.0；验收 ch01 试点 | 审批结构大纲；**Phase 4 终验主审**；处理争议 | 牵头三轮收敛；终审全书 |
+| **工程化编辑** | 风格改造主力 | 落地规范；结构/工程化/打磨；维护术语表与格式；输出各阶段稿 | 起草手册；**独立完成 ch01 试点** | **Phase 1–3 主责**；按门禁迭代至通过 | 全局术语、格式、语气拉齐 |
+| **原技术作者** | 内容主权人 | 原稿与实验数据；答疑；复核结论/公式/数据；补充边界 | 试点评审：深度不折损 | **Phase 2 内容门禁主审**；补工程细节 | 全书技术逻辑连贯性 |
+| **技术审校** | 工业实践第三方 | 落地可行性；行业范式；反模式/案例真实性 | 试点：工程价值达标 | **Phase 4 终验参与** | R2 逻辑连贯性 |
+
+##### 扩展支持团队（按需介入）
+
+| 角色 | 介入节点 | 核心产出 |
+|------|----------|----------|
+| **信息可视化设计师** | Layer 2 **Phase 2**；Layer 3 R1 图表统一 | 数据图 + **OpenTikZ** 架构/流水线（见 §5.6 OpenTikZ） |
+| **工业界外审**（目标读者） | Layer 1 试点试读；Layer 3 **R3** 抽样通读 | 「读不懂 / 没价值 / 不落地」反馈 |
+| **排版 / 出版编辑** | Layer 3 全程 | 标题层级、bib、目录索引、出版合规 |
+| **QA / 门禁管理员** | Layer 2 **每 Phase**；Layer 3 终验 | checklist 逐项核验；不达标跟踪；进度与质量数据（小团队可由主编或工程化编辑兼任） |
+
+##### 门禁评审主责制
+
+| Phase | 主审 | 副审 / 参与 | 不通过 |
+|-------|------|-------------|--------|
+| **P1 结构** | 技术主编 | 工程化编辑 | 回退 P1；二次不过 → 专项会 |
+| **P2 内容** | 原技术作者 | 技术审校 | 回退 P2 |
+| **P3 风格** | 工程化编辑 | 术语管理（`book_proper_nouns`） | 回退 P3 |
+| **P4 终验** | 技术主编 | 技术审校 + 外审代表 | 回退标定 Phase |
+
+**版本留痕**：每章按阶段标记 `v0.1 结构稿` → `v0.2 工程化初稿` → `v0.3 风格润色稿` → `v1.0 终稿`；评审意见写入 `books/research/chXX/*_brief.md` 或 commit message，支持回溯。
+
+**争议裁决**
+
+| 类型 | 规则 |
+|------|------|
+| 技术争议 | 原作者 vs 技术审校不一致 → **技术主编** 结合工业实践裁决 |
+| 风格争议 | 以 `WRITING_STYLE.md` + §5.6 为准；手册未覆盖 → **技术主编** 按目标读者定位裁决 |
+
+##### 小团队精简配置
+
+| 规模 | 配置 |
+|------|------|
+| **极简（2 人）** | 技术主编（兼审校、QA）+ 工程化编辑（兼原作者、术语、基础图表） |
+| **标准（3 人）** | 技术主编 + 工程化编辑 + 原作者（兼技术审校） |
+
+无人值守 Agent Loop 等价于 **工程化编辑 + QA**，技术主编/原作者/审校由用户在 Phase 2/4 或 §9 里程碑介入。
+
+---
+
+#### OpenTikZ 绘图工程化
+
+> **手册**：[`books/OPENTIKZ.md`](books/OPENTIKZ.md) · **Skill**：`using-opentikz`（`OTROOT = ~/.cursor/skills/opentikz`，**Mode A** 复制到本书后编辑，不改库内文件）
+
+解决全书插图**风格割裂、编译不稳、难版本化**；与 `book_visuals.py` **分工**：
+
+| 图类 | 工具 | 输出目录 |
+|------|------|----------|
+| 数据图（roofline、bar、实测对比） | `book_visuals --render` | `visuals/<ch>/generated/` |
+| 架构 / 流水线 / 系统框图（~80%） | **OpenTikZ 模板** + `edit_contract` | `visuals/<ch>/opentikz/` |
+| 原子图标（GPU、队列、attention） | OpenTikZ `icons/` `\input` | `opentikz/icons/` |
+| 旧位图 / 专属示意图 | PNG→TikZ 或描述生成（Mode 3/4） | `opentikz/` |
+
+**四种模式**：① 图标复用 ② **模板编辑（最高频）** ③ PNG 转绘 ④ 描述生成。模板映射例：`architecture_figure`→`system-block-diagram`，`pipeline_figure`→`inference-serving`/`flowchart`，encoder→`encoder-decoder`，分布式→`distributed-training`。
+
+**迭代绑定**
+
+| 层 / Phase | 动作 |
+|------------|------|
+| Layer 1 | 冻结「概念图=OpenTikZ、数据图=book_visuals」双轨规范 |
+| Layer 2 **P2** | `--plan --audit` → 分轨产出 → `insert-visuals` → `make-chapter.sh` |
+| Layer 3 **R1** | 全稿图宽（89mm 单栏）、调色、图题句式、禁混 matplotlib 架构截图 |
+
+**硬规则**：模板改前读 `edit_contract`；交付前 `compile_ok`；benchmark 数字 **禁止** OpenTikZ 手写（走 `verified_facts` + `book_visuals`）。CC0 无出版版权风险。
+
+**Phase 2 插图门禁（叠加 checklist）**：□ `opentikz/` 或 `generated/` 齐 □ 无 `placeholder_figure` 残留 □ `% OPENTIKZ:` 来源注释 □ 表注硬件/配置+来源
+
+---
+
+#### 节奏参考（30 章全书）
+
+| 阶段 | 周期 | 产出 |
+|------|------|------|
+| 基线 Layer 1 | 第 1–2 周 | 规范 v1.0；**ch01 试点** ✓ |
+| 单章 Layer 2 | 第 3–10 周 | ~2 章/周 × 4 Phase；其余 29 章 |
+| 收敛 Layer 3 | 第 11–12 周 | 3 轮全局对齐 |
+| 终审 | 第 13 周 | 全书 Fregly-ready + CI 绿 |
+
+**当前进度（随 §9 更新）**：Layer 1 试点 ch01 完成；Layer 2 **ch02–ch04** Fregly 改造完成；Part I **3/3** ✓；Part II ch04 开篇 ✓；Layer 2 批量从未 Fregly-ready 章继续。
+
+---
+
+#### 配套交付物（动态维护）
+
+|  artifact | 路径 / 状态 |
+|-----------|-------------|
+| 风格与内容规范 v1.0 | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) |
+| 单章验收 checklist | 本文 §5.6 上表 + §七 |
+| 全书术语表 | `book_proper_nouns` 输出 + `WRITING_STYLE` 专名段（待扩充） |
+| 7 段式章模板 | 本文 §5.6 + ch01 正文对照 |
+| 角色与门禁 | 本文 §5.6「角色配置与协作机制」 |
+| **OpenTikZ 绘图** | [`books/OPENTIKZ.md`](books/OPENTIKZ.md) + `using-opentikz` Skill |
+| 章改造 brief | `books/research/chXX/fregly_style_brief.md` / `deep_rewrite_brief.md` |
+
+**禁止**：为过 checklist 而 `ensure_min_words`  padding；为过 gate 而改 `book_prepare` 权重。
+
+---
+
 
 验证通过 → **进化文档（§9 笔记）→ commit → push → pull --rebase → 扫描 → Loop R{n+1}**。勿等用户再说 go。
 
@@ -364,11 +635,11 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 ## 7. 单轮检查清单
 
 ```
-[ ] 0. 分流：内容 / harness / **目录**？闸门已完成；若 words/coverage 卡住 → 先 §5.5
+[ ] 0. 分流：内容 / harness / **目录** / **风格 Phase**？闸门已完成；Fregly 章走 §5.6 Layer 2
 [ ] 1. 感知：book-loop status + book_prepare + loop_state.json
-[ ] 2. 策略：1 主攻点；选定 step / deep-rewrite / harness patch
-[ ] 3. 落地：最小 diff；AGENT_SKIP 禁 batch
-[ ] 4. 验证：make.sh + book_prepare +（深度）Fregly checklist q≥85
+[ ] 2. 策略：1 主攻点；选定 step / deep-rewrite / harness patch；标明 P1–P4 哪一 Phase
+[ ] 3. 落地：最小 diff；AGENT_SKIP 禁 batch；7 段式 / 缩写 / 无 Pending
+[ ] 4. 验证：make.sh + book_prepare + §5.6 checklist +（深度）Fregly q≥85；标明本 Phase **主审**（§5.6 门禁表）
 [ ] 5. 进化：§9 笔记 + 必要时 WRITING_STYLE / loops/README / program_books
 [ ] 6. Git：selective add → HEREDOC commit → status 确认
 [ ] 7. Push + pull --rebase；失败重试一次
@@ -384,14 +655,15 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 |----|------|
 | Orchestrator | `uv run book-loop status\|step\|run\|deep-rewrite\|insert-visuals` |
 | 评分 | `book_prepare.py --list/--chapter` |
-| 研究 | `research_tools.py` |
-| 图表 | `book_visuals.py --plan/--render/--audit` |
+| 研究 | `research_tools.py`、`research_keyword_specs.py`（`books/research/keyword_specs.json`） |
+| 图表 | `book_visuals.py --plan/--render/--audit`；架构图 **`using-opentikz`** → [`books/OPENTIKZ.md`](books/OPENTIKZ.md) |
 | 事实 | `fact_verify.py`、`verified_facts.jsonl` |
 | 引用 | `citation_loop.py`、`citations_merged.bib` |
 | Prose 工具 | `book_agent_rewrite.py`、`book_prose_upgrade.py`、`book_proper_nouns.py` |
 | 编译 | `books/make.sh` |
 | 状态 | `loops/loop_state.json`、`book_results.tsv` |
 | 契约 | **本文**、`program_books.md`、`WRITING_STYLE.md`、`book_content.md` |
+| **风格流程** | 本文 **§5.6**（三层循环 + 单章 checklist + **角色/门禁**） |
 
 ---
 
@@ -428,12 +700,23 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 - **Loop R26（2026-06-09，内容轨）**：**ch29 扩写** — YiRage runtime decode benchmarking 节 + 表 + PK/CI/operator 段落；4212→**5000** words，q=**94.0**，cov=100%；**4/30** ready（ch05/ch11/ch14/ch29）。
 - **Loop R31（2026-06-09，内容轨）**：**ch28 扩写** — `Framework decode benchmarking methodology` 节 + 表 + scheduler/paging/plugin 段落；3691→**5000** words，q=**94.0**，cov=100%；**8/30** ready；Part VIII **3/3** ✓。
 - **Loop R32（2026-07-04，harness 轨）**：**每章单独构建** — `book_prepare.compile_chapter()` + `--chapter` 默认单章 PDF（`books/pdf/chXX.pdf`）；`book-loop step`/`deep-rewrite` 改单章编译；`make-chapter.sh --all` → `--compile-all-chapters`；全书仍 `bash make.sh` / CI。
-- **Loop R33（2026-07-04，内容轨）**：**ch01 外部审稿修订 + 5000w** — 结构重组（roofline 前置、diagnostic 并入 overhead、anti-patterns 后置）、引用/数据/术语规范化（TaxBreak/LIMINAL/MMA/ADF、三层优化边界、10:1 decode:prefill）；扩写 workload/benchmark/MoE/KV 段落；3729→**5000** words，q=**94.0**，cov=100%；`python3 book_prepare.py --chapter ch01` → ready；**9/30** ready；Part I **2/2** ✓。
+- **Loop R33（2026-07-04，内容轨）**：**ch01 外部审稿修订 + 5000w** — 结构重组（roofline 前置、diagnostic 并入 overhead、anti-patterns 后置）、引用/数据/术语规范化；3729→**5000** words，q=**94.0**；**9/30** ready；Part I ch01 ✓。
+- **Loop R34（2026-07-04，harness 轨）**：**每章定制文献检索** — `books/research/keyword_specs.json`（30 章 queries/keywords/year_lo）；`research_tools` 前序章 `citation_catalog` 复用 + `--no-inherit`；`research_keyword_specs.py --generate|--validate`。
+- **Loop R35（2026-07-04，契约轨）**：**全书风格工程化三层循环** — 写入 `AGENTS.md` §5.6（Layer 1 基线 / Layer 2 单章四 Phase / Layer 3 全稿收敛 + checklist）；ch01 为 Layer 1 试点；Layer 2 批量从 ch02 起。
+- **Loop R36（2026-07-04，契约轨）**：§5.6 **角色配置与协作机制** — 核心四角色 + 扩展支持；Phase 1–4 门禁主审制；版本留痕与争议裁决；Agent 默认映射工程化编辑+QA；小团队 2/3 人精简方案。
+- **Loop R37（2026-07-04，契约轨）**：**OpenTikZ 绘图工程化** — [`books/OPENTIKZ.md`](books/OPENTIKZ.md)（四模式、与 `book_visuals` 分轨、`opentikz/` 目录约定）；§5.6 写入 Layer 2 P2 / Layer 3 R1 绑定；Skill `using-opentikz`。
+- **Loop R38（2026-07-05，内容轨）**：**ch03 Fregly / O'Reilly 对齐** — 工业钩子 + 约束矩阵 + GPU/CPU/NPU 约束闭环 + 三类硬件对比表 + 5 图；Review gate→实践验收点；Key Takeaways 原则+Action；新增 `sec:migration_mistakes`；4011→**5003** words，q=**94.0**，cov=100%；`books/research/ch03/fregly_style_brief.md`；Part I **3/3** ✓。
+- **Loop R39（2026-07-05，内容轨）**：**ch04 Fregly / O'Reilly 对齐** — 优化优先级金字塔 + 删膨胀 benchmark（~70段→4类精简）+ 特性闭环 + 量化案例表 + 7 工程模式 + 5 反模式；5000→**5000+** words，q=**94.0**，cov=100%；5 图 6 表；`books/research/ch04/fregly_style_brief.md`；Part II 开篇 ✓。
+- **Loop R40（2026-07-05，内容轨）**：**ch05 Fregly / O'Reilly 对齐** — 删 1.8 节后重复堆砌 + 引用瘦身 + 静态规则/映射/门禁结构化 + 6 工程模式 + 量化案例表 + YiRage lowering I/O；**4922** words，q=**99.7**，cov=100%；8 表 2 图；`books/research/ch05/fregly_style_brief.md`；Part II ch05 ✓。
+- **Loop R41（2026-07-05，内容轨）**：**ch06 Fregly / O'Reilly 对齐** — 跨硬件驻留方法论中枢：四步法 + 删 Ch3–5 硬件复述 + 三硬件案例表 + YiRage memory pass 深化 + 6 工程模式 + 5 反模式 + 自查清单；**5000+** words，q=**99.9**，cov=100%；6 图 5 表；`books/research/ch06/fregly_style_brief.md`；Part II ch06 ✓。
+- **Loop R42（2026-07-05，内容轨）**：**ch07 Fregly / O'Reilly 对齐** — MegaKernel 结构支柱：静态角色 + 三维决策框架 + 解码比例算例 + L1–L3 静态化阶梯 + 三硬件角色映射 + YiRage tiling pass + 6 工程模式 + 5 反模式；**5000+** words，q≥94，cov=100%；6 图 6 表；`books/research/ch07/fregly_style_brief.md`；Part IV 开篇 ✓。
+- **Loop R43（2026-07-05，内容轨）**：**ch08 Fregly / O'Reilly 对齐** — MegaKernel 执行支柱：三步流水线深度决策 + 删 Ch4–6 硬件复述 + 解码 prologue 算例 + 三硬件流水线表 + 权重/KV 多流 + YiRage pipeline pass + 6 工程模式 + 5 反模式；**5000** words，q=**94.0**，cov=100%；6 图 6 表；`books/research/ch08/fregly_style_brief.md`；Part IV ch08 ✓。
+- **Loop R44（2026-07-05，内容轨）**：**ch09 Fregly / O'Reilly 对齐** — MegaKernel 正确性支柱：同步层级量化阶梯 + 删 Ch4–8 硬件复述 + Llama 解码 sync 算例 + 三硬件同步表 + 死锁静态检测五步 + YiRage sync pass + 6 工程模式 + 5 反模式 + 7 项自查清单；**5000+** words，q≥94，cov=100%；6 图 6 表；`books/research/ch09/fregly_style_brief.md`；Part IV ch09 ✓。
 - **Loop R30（2026-06-09，内容轨）**：**ch30 扩写** — `Co-design decode benchmarking methodology` 节 + 表 + framework/compiler/runtime 三方可计数段落；4100→**5000** words，q=**94.0**，cov=100%；**7/30** ready（ch02/ch04/ch05/ch11/ch14/ch29/ch30）；Part VIII **2/3**。
 - **Loop R29（2026-06-09，内容轨）**：**ch02 扩写** — 剥离 pad 模板段 + `Dataflow mindset benchmarking methodology` 节 + 表 + export/triplet/CI/MoE/FlashAttention 段落；4140→**5000** words，q=**94.0**，cov=100%；**6/30** ready（ch02/ch04/ch05/ch11/ch14/ch29）。
 - **Loop R28（2026-06-09，目录轨）**：对标 Fregly PDF 全栈目录 — `book_content.md` §2/§4.5/§五 重写（产出导向 Part 名、具名机制小节、Lowering Arc）；`outline_extended.json` Part 标题同步；**未**物理重排 ch01–30 tex。
 - **Loop R27（2026-06-09，内容轨）**：**ch04 扩写** — Hopper decode benchmarking 节 + 表 + Nsight/CI/operator 段落；4149→**5000** words，q=**94.0**，cov=100%；**5/30** ready（ch04/ch05/ch11/ch14/ch29）。
-- **内容 R-next**：扩写 ch03…至 ≥5000w；Part VII 短章（ch22–27）需大幅 Fregly 扩写。
+- **内容 R-next**：按 §5.6 Layer 2 对 ch02–ch30 逐章四 Phase 改造；扩写至 ≥5000w；Part VII 短章优先 Fregly deep-rewrite。
 - **Loop R22（2026-06-09，harness+内容轨）**：`iterate.py status` 输出 **Pad residual** 列表（`pad_residual_chapters`）；**ch15 Fregly deep-rewrite** — XLA HW matrix/passes/codegen/tuning/case study + backend 表；2090→**825** words，`min_words` 2050→**800**，q=**97.4**，pad **OK**；**30/30** ready。
 - **内容 R-next**：Part VI **ch16–17** 逐章 Fregly deep-rewrite；**ch24** residual pad。
 - **Harness R-next**：`iterate.py` 在 non-ready 章也显示 pad residual 优先级。

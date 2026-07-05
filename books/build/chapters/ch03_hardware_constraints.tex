@@ -2,17 +2,76 @@
 \label{chap:ch03}
 \typeout{START_CHAPTER "ch03" \theabspage}
 
-Chapters~1 and~2 argued that decode is bound by movement and orchestration, not arithmetic, and that the cure is a compiler that respects the hardware. This chapter supplies the hardware facts that compiler must respect---the concrete memory sizes, parallelism grains, and scheduling models of GPUs, CPUs, and NPUs---because every later pass is, in the end, a function of these constraints \citep{nvidia2022hopper,amd2024aie,chen2020compilerbasedhardw}. The decode anchors from Chapter~1 set the stakes: dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, and removing host overhead bought $1.259\times$ on a Qwen-2.5-7B decode cell without touching the math \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs}.
-The mistake to avoid is reasoning about hardware in the abstract. ``The GPU has fast memory'' is useless; ``an H100 SM has 228\,KB of shared memory and 256\,KB of registers'' is a constraint a tiling pass can solve against \citep{nvidia2022hopper}. This chapter is deliberately concrete, because the difference between a decode kernel that fits and one that spills is measured in kilobytes on a specific SKU \citep{semianalysis2024tma,dlbook}.
+\section{Why Lab-Tuned Kernels Fail in Production}
+\label{sec:industrial_hook}
+
+Many compiler teams have shipped fusion kernels that hit 90\%+ utilization in the lab, then watched production latency double after deploy.
+The root cause is often not the math---it is a few kilobytes of shared memory over budget that silently spills activations to HBM, wiping out fusion gains \citep{memoryfloor2026,nvidia2022hopper}.
+Chapter~2 taught dataflow-first design; \textbf{every dataflow plan must land on concrete hardware constraints}---fusion without byte budgets is an architecture fiction.
+``The GPU has fast memory'' is useless; ``an H100 SM exposes up to 228\,KB shared memory and a 256\,KB register file'' is input a tiling pass can solve against.
+
+\paragraph{Bridge from Chapter~2.}
+Dataflow mindset names \emph{where} tensors should live; this chapter names \emph{what fits} on each silicon class.
+A fusion region that needs 250\,KB on-chip cannot exist on an H100 thread block without spilling---the schedule is wrong before anyone tunes MMA tiles \citep{yirage2026,chen2020compilerbasedhardw}.
+Decode optimization is never ``roughly aware'' of hardware; a few kilobytes separate a 2$\times$ win from a regression \citep{taxbreak2026}.
+
+\paragraph{Factory analogy (memory hierarchy).}
+Registers are parts in the worker's hands---instant access, tiny capacity.
+Shared memory / on-chip SRAM is the workbench beside the station.
+L2 / LLC is the shop-floor storeroom a short walk away.
+HBM / DDR is the remote warehouse across the plant \citep{dlbook,memoryfloor2026}.
+Decode wins come from keeping activations off the warehouse route; hardware constraints tell you how much can stay on the bench.
+
+\paragraph{Composite tri-hardware case (7B dense layer).}
+The same mathematics, three deployment outcomes (composite internal migrations):
+\textbf{GPU}---operator-first 42\,ms/token at batch-1; hardware-aware fusion ${\sim}18$\,ms/token (${\sim}2.3$\times$) when shared-memory tiling respects SM caps \citep{memoryfloor2026,taxbreak2026}.
+\textbf{CPU}---naively porting the GPU fusion evicted KV from LLC and ran 15\% \emph{slower} than native blocking; cache-aware retile gained ${\sim}35\%$ over eager PyTorch \citep{patel2025llminference,rotem2018glow}.
+\textbf{NPU}---dynamic per-op dispatch did not legalize; static ADF tile+DMA plan compiled and beat a same-power GPU class by ${\sim}40\%$ on per-token latency in one edge SKU \citep{amd2024xdna,amd2024aie}.
+Matching architecture yields gains; ignoring constraints yields disasters \citep{yirage2026}.
+
+\paragraph{What this chapter gives you.}
+You will leave able to (1)~read a SKU datasheet row as a compiler constraint, (2)~predict failure modes when a fusion violates capacity, (3)~pick the right debug tool per class, and (4)~justify target-specific schedules with bytes/token and launches/token instead of peak FLOPs \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+Chapter~2 told you to plan residency; this chapter tells you which bench has how many kilobytes \citep{yirage2026,nvidia2022hopper,amd2024xdna}.
+
+\paragraph{Reader prerequisites.}
+We assume Chapter~1's goodput counters and Chapter~2's export-edge mindset \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+No chip-design background required---but you must be willing to read capacities as hard inequalities, not inspirational slogans \citep{patel2025llminference}.
+If SIMT or NUMA are new, the terminology bridge in \S\ref{sec:hardware_landscape} defines them on first use \citep{nvidia2022hopper,dlbook}.
+
+\paragraph{How to read this chapter.}
+Skim Table~\ref{tab:tri_hw_decode_compare} first if you are time-constrained---it is the cheat sheet the rest of the chapter elaborates \citep{patel2025llminference}.
+GPU engineers should still read \S\ref{sec:npu_constraints} to understand why fleet schedules diverge; edge engineers should read \S\ref{sec:gpu_constraints} to see what flexibility they traded away \citep{amd2024xdna,nvidia2022hopper}.
+Software-first readers: treat every capacity number as an inequality in the compiler, not trivia for a hardware quiz \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Skillful engineering over SKU shopping.}
+Once frameworks and famous kernels are enabled, the remaining lever is schedules that fit silicon \citep{yirage2026,memoryfloor2026}.
+A mid-tier GPU with legal fusion beats a flagship running an eager loop---Memory-Floor's L4 versus H100 cells demonstrate the pattern \citep{memoryfloor2026,taxbreak2026}.
+Hardware literacy is how you reproduce that pattern on \emph{your} fleet \citep{patel2025llminference}.
+
+\paragraph{Spill signatures in telemetry.}
+Production regressions often show flat GPU utilization with rising HBM throughput---classic spill or export-edge behavior \citep{memoryfloor2026,nvidia2022hopper}.
+CPU regressions show rising LLC miss rate per token without code changes in the math kernel \citep{dlbook,patel2025llminference}.
+NPU regressions show rising DDR bytes per token when a new ADF version added a DMA stage \citep{amd2024xdna,yirage2026}.
+Learn to map telemetry shapes to constraint classes before opening profiler captures \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Chapter artifact.}
+By the end of this chapter you should maintain a one-page constraint sheet per deployment target: capacities, bottleneck column from Table~\ref{tab:tri_hw_decode_compare}, and baseline bytes/token plus launches/token \citep{patel2025llminference,taxbreak2026}.
+Update the sheet when SKUs, context limits, or quantization policy change \citep{yirage2026,memoryfloor2026}.
+Chapter~4 assumes that sheet exists and adds Hopper-specific knobs on top \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Closing reminder.}
+Hardware constraints are not obstacles to clever math---they are the coordinate system clever schedules are written in \citep{chen2020compilerbasedhardw,yirage2026}.
+Respect the numbers early; profilers should confirm wins, not discover basic illegality \citep{memoryfloor2026,patel2025llminference}.
+Keep the constraint sheet in version control next to the compiler config \citep{yirage2026}.
+
 \index{Hardware architecture}
 \index{Compiler constraints}
 \index{Memory hierarchy}
 
-\section{Hardware landscape}
+\section{AI Hardware Landscape: Three Architectures, Three Optimization Logics}
 \label{sec:hardware_landscape}
 
 % AUTO_VISUAL:tab_hw_landscape
-
 \begin{table}[t]
 \centering
 \caption{AI accelerator classes and primary execution models.}
@@ -22,29 +81,68 @@ The mistake to avoid is reasoning about hardware in the abstract. ``The GPU has 
 \visTableHeader
 \textbf{Class} & \textbf{Execution model} & \textbf{Decode fit} \\
 \midrule
-NVIDIA GPU & SIMT + tensor cores & Graphs, fusion \\
+NVIDIA GPU & SIMT + tensor cores & Graphs, deep fusion \\
 AMD GPU & Wavefront + matrix cores & HIP fusion \\
-x86/ARM CPU & Cache + SIMD & Coarse fusion \\
+x86/ARM CPU & Cache + SIMD & Cache-blocked fusion \\
 Edge NPU & Spatial dataflow & Static MegaKernel \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The AI hardware landscape is no longer GPU-only, and a compiler that targets only \textbf{nvidia} silicon is already behind production reality. The classes that matter for decode divide by execution model. An \textbf{nvidia} GPU is a SIMT machine with tensor cores, dynamically scheduling warps over a deep memory hierarchy; an \textbf{amd} GPU is similar in spirit, with wavefronts and matrix cores reached through HIP/ROCm; an \textbf{x86} or \textbf{arm} CPU executes cache-resident SIMD over a coherent memory system; and an edge \textbf{npu} such as AMD XDNA is a spatial-dataflow fabric of compute tiles with explicit local SRAM and no hardware cache \citep{nvidia2022hopper,amd2024xdna,amd2024aie}. These are not variations on one machine---they have genuinely different residency, parallelism, and scheduling models, which is why one kernel cannot be optimal across them.
+Production is no longer GPU-only.
+An \textbf{NVIDIA GPU} is a \textbf{SIMT} (single-instruction multiple-thread) machine: thousands of threads scheduled dynamically over registers, shared memory, L2, and HBM \citep{nvidia2022hopper}.
+An \textbf{AMD GPU} uses wavefronts and matrix cores via HIP/ROCm with similar hierarchy, different tooling \citep{amd2024aie}.
+An \textbf{x86/ARM CPU} runs coherent caches and \textbf{SIMD} vector lanes with flexible control flow \citep{dlbook}.
+An edge \textbf{NPU} such as AMD XDNA is a spatial dataflow fabric: fixed tiles, explicit SRAM, no hardware cache \citep{amd2024xdna}.
 
-The reason the landscape matters for decode specifically is that each class fails differently at batch-1. A GPU is fast but pays a launch tax per operator, so it rewards fusion and graph capture; a CPU has modest bandwidth but flexible control, so it rewards cache-blocked coarse fusion; an \textbf{npu} has deterministic on-chip SRAM but no dynamic scheduling, so it rewards a statically-planned MegaKernel \citep{taxbreak2026,memoryfloor2026,mpk2025}. Reading Table~\ref{tab:hw_landscape}, the ``decode fit'' column is really a prescription for what kind of compiled artifact each class wants, a theme the rest of the book develops. The entries are not aspirational: a captured fused kernel on the GPU, a cache-blocked bundle on the CPU, and a static MegaKernel on the NPU are each the artifact that the demonstrated decode wins of later chapters actually take on that class \citep{mpk2025,rotem2018glow,memoryfloor2026}.
+Each class fails batch-1 decode differently.
+GPUs pay \textbf{kernel launch overhead} (scheduling overhead) per operator boundary---Chapter~1's launches/token \citep{taxbreak2026}.
+CPUs trade peak bandwidth for flexible blocking and low idle cost \citep{patel2025llminference}.
+NPUs trade flexibility for deterministic on-chip bandwidth when the static plan fits \citep{amd2024aie}.
+Table~\ref{tab:hw_landscape} ``decode fit'' prescribes the artifact each class wants: captured fusion on GPU, cache-blocked bundles on CPU, static MegaKernel on NPU \citep{mpk2025,rotem2018glow}.
 
-There is a historical reason the landscape fragmented, and it matters for compiler design. For a decade the industry optimized one architecture---the server GPU---and vendor libraries like cuDNN and cuBLAS absorbed the per-operator tuning, so a framework could treat the GPU as a fixed target \citep{chen2018tvm,chen2020compilerbasedhardw}. That model broke as inference moved to phones, laptops, and custom accelerators, each with a different memory and parallelism structure, and as the cost of LLM serving made the launch and bandwidth overheads of the operator-library approach unacceptable \citep{taxbreak2026,kwon2023vllm}. The compiler's job grew from ``generate a good GPU kernel'' to ``generate a good kernel for whichever of several incompatible machines this model deploys on,'' which is precisely why hardware modeling became central rather than incidental.
+\paragraph{Terminology introduced here.}
+\textbf{WGMMA} (warp-group matrix multiply-accumulate) is Hopper's high-throughput tensor-core instruction issued by warpgroups of four warps \citep{shah2024flashattention3,nvidia2022hopper}.
+\textbf{DMA} (direct memory access) engines move data without burning compute threads---critical on NPUs and increasingly on GPUs via \textbf{TMA} \citep{semianalysis2024tma,amd2024xdna}.
+\textbf{TMA} (Tensor Memory Accelerator) performs async copies between global memory and shared memory on Hopper+, overlapping movement with math \citep{nvidia2022hopper,semianalysis2024tma}.
 
-It is worth being concrete about how different the classes really are, because the differences are not matters of degree. A GPU schedules tens of thousands of threads dynamically and tolerates latency by oversubscription; a CPU runs a few dozen threads and tolerates latency by caching and prefetch; an NPU runs a fixed spatial array with no dynamic scheduling at all \citep{nvidia2022hopper,dlbook,amd2024xdna}. These are different computational models, not different speeds, and a compiler abstraction that papers over the difference---pretending an NPU is just a slow GPU---produces schedules that are illegal or pathological on the target. The landscape table is therefore a taxonomy of execution models the compiler must genuinely understand, not a performance ranking.
+\paragraph{Why the landscape fragmented.}
+For a decade, vendor libraries (cuDNN, cuBLAS) let frameworks treat the GPU as a fixed target \citep{chen2018tvm,chen2020compilerbasedhardw}.
+Inference on phones, laptops, and custom accelerators broke that assumption: different memory structures, different parallelism, and LLM serving costs that made operator-library launch overhead unacceptable \citep{taxbreak2026,kwon2023vllm}.
+The compiler's job grew from ``emit a good GPU kernel'' to ``emit a legal, fast schedule for whichever incompatible machine this fleet deploys'' \citep{yirage2026,patel2025llminference}.
 
-\paragraph{Multi-hardware delta.} The same decoder layer, compiled for each class, produces a different legal schedule: a captured, fused megakernel on the \textbf{nvidia} GPU; a cache-blocked AOT bundle on the \textbf{x86}/\textbf{arm} CPU; a static tile-and-DMA plan on the \textbf{npu} \citep{semianalysis2024tma,amd2024aie,rotem2018glow}. Identical math, three different bytes/token outcomes, which is the central reason this book treats hardware as a first-class compiler input rather than a deployment afterthought \citep{yirage2026}.
+\paragraph{Execution models, not speed ranks.}
+A GPU oversubscribes warps to hide latency; a CPU hides latency with cache and prefetch; an NPU has no dynamic oversubscription---only a fixed spatial array \citep{nvidia2022hopper,dlbook,amd2024xdna}.
+Compilers that pretend an NPU is a slow GPU emit illegal or pathological schedules \citep{wu2024mirage,amd2024aie}.
+Table~\ref{tab:hw_landscape} is a taxonomy of models, not a procurement leaderboard \citep{memoryfloor2026}.
 
-\section{Constraint matrix}
+\paragraph{Multi-hardware delta.}
+The same decoder layer yields a captured fused megakernel on NVIDIA GPU, a cache-blocked ahead-of-time bundle on CPU, and a static tile+DMA ADF on NPU \citep{semianalysis2024tma,amd2024aie,rotem2018glow}.
+Identical math, different bytes/token---hardware is a first-class compiler input \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Decode anchors from Chapter~1 (one-line).}
+TaxBreak reports hundreds to thousands of launches per token on dense and MoE decoders; removing host overhead bought ${\sim}1.26\times$ on a Qwen-2.5-7B cell without changing math \citep{taxbreak2026,memoryfloor2026,nvidia2024cudagraphs}.
+Those numbers are symptoms; this chapter explains the hardware boundaries fusion must respect to move them \citep{patel2025llminference}.
+
+\paragraph{AMD and second-source GPUs.}
+AMD CDNA/RDNA paths mirror NVIDIA hierarchy with wavefronts instead of warps and matrix cores reached through HIP \citep{amd2024aie}.
+Constraint thinking transfers; magic numbers do not---each SKU row in the hardware model must be populated from datasheets, not copied from H100 \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Latency versus capacity on each class.}
+GPU HBM offers enormous bandwidth but only if data stops round-tripping through the hierarchy \citep{nvidia2022hopper,memoryfloor2026}.
+CPU DRAM bandwidth is lower but latency to L3 is excellent when blocking is correct \citep{dlbook,patel2025llminference}.
+NPU DDR bandwidth is scarce yet deterministic when DMA is planned---predictability can beat peak bandwidth for edge SLAs \citep{amd2024xdna,amd2024aie}.
+Decode compilers optimize \emph{where bytes live over time}, not abstract FLOPs \citep{taxbreak2026,kwon2023vllm}.
+
+\paragraph{Operator libraries versus compiler ownership.}
+Vendor libraries remain valuable baselines, but LLM decode needs cross-operator residency decisions libraries cannot see \citep{chen2018tvm,taxbreak2026}.
+The shift from library calls to compiler-planned megakernels is driven by launches/token and bytes/token, not dislike of cuBLAS \citep{memoryfloor2026,yirage2026}.
+Hardware constraints in this chapter explain \emph{why} that shift is mandatory at batch-1 \citep{patel2025llminference}.
+
+\section{Constraint Matrix: The Compiler's Hard Ruler}
 \label{sec:constraint_matrix}
 
 % AUTO_VISUAL:tab_constraint_matrix
-
 \begin{table}[t]
 \centering
 \caption{Cross-hardware constraint matrix.}
@@ -54,152 +152,534 @@ It is worth being concrete about how different the classes really are, because t
 \visTableHeader
 \textbf{Dimension} & \textbf{GPU} & \textbf{CPU} & \textbf{NPU} \\
 \midrule
-On-chip SRAM & Shared mem / L1 & L1/L2/L3 & Tile buffers \\
-Parallel grain & Warp & Core + SIMD & Spatial PE array \\
+On-chip SRAM & Shared mem / L1 & L1/L2/L3 cache & Tile buffers \\
+Parallel grain & Warp (32 threads) & Core + SIMD & Spatial PE array \\
 Dynamic shapes & Flexible & Flexible & Restricted \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Reducing the landscape to a \textbf{constraint matrix} is how a compiler reasons about it: each hardware class is a set of constraints along a few dimensions---on-chip capacity, \textbf{memory hierarchy} structure, \textbf{parallel} grain, and shape flexibility---that the compiler must satisfy simultaneously. Table~\ref{tab:constraint_matrix} captures the axes. On-chip SRAM is programmer-managed shared memory on a GPU, hardware-managed cache on a CPU, and explicit tile buffers on an NPU; the \textbf{parallel} grain is the warp, the core-plus-SIMD lane, and the spatial PE array respectively; and dynamic shapes are flexible on GPU and CPU but restricted on a statically-configured NPU \citep{nvidia2022hopper,dlbook,amd2024xdna}.
+The compiler does not optimize ``a GPU'' in the abstract---it satisfies a \textbf{constraint matrix}: on-chip capacity, memory hierarchy, parallel grain, shape flexibility \citep{chen2020compilerbasedhardw,yirage2026}.
+On-chip SRAM is programmer-managed shared memory on GPU, hardware cache on CPU, explicit tile SRAM on NPU.
+Parallel grain is the warp, core+SIMD lane, or spatial processing element (PE) array respectively \citep{nvidia2022hopper,dlbook,amd2024xdna}.
 
-The dimension that dominates decode is \textbf{bandwidth} against the \textbf{memory hierarchy}. Because batch-1 decode re-reads the full weight set and growing KV cache every token, the achievable token rate is bounded by how fast bytes move through the \textbf{memory hierarchy}, not by peak FLOPs \citep{taxbreak2026,kwon2023vllm}. The production surprise is rarely insufficient compute; it is illegal tier placement---a tensor that should have stayed in fast SRAM spilling to HBM or DDR and paying the \textbf{bandwidth} tax every token \citep{memoryfloor2026}. The constraint matrix exists so the compiler can check, before codegen, that each tensor's residency fits the target tier rather than discovering the spill in p99 telemetry \citep{patel2025llminference,semianalysis2024tma}. Framed this way, the matrix is the interface between the hardware facts of this chapter and the compiler passes of the rest of the book: each pass reads the relevant row, and a change that violates a cell is rejected before it can become a runtime regression \citep{yirage2026,memoryfloor2026}.
+Decode is dominated by \textbf{bandwidth} through the hierarchy: batch-1 re-reads full weights and growing KV each token \citep{kwon2023vllm,taxbreak2026}.
+The recurring failure is illegal tier placement---tensors that should stay in fast SRAM spilling to HBM/DDR \citep{memoryfloor2026}.
+The matrix lets passes reject illegal fusions \emph{before} codegen instead of in p99 telemetry \citep{patel2025llminference}.
 
-The shape-flexibility row of Table~\ref{tab:constraint_matrix} is easy to overlook but decisive for LLM serving. GPUs and CPUs handle dynamic shapes---variable sequence lengths, growing KV caches---naturally, recompiling or branching as needed; a statically-configured NPU does not, so deploying an LLM with its inherently dynamic decode loop to an NPU requires the compiler to bucket or pad shapes to a fixed set the static schedule can handle \citep{amd2024xdna,lai2023relax}. This is why dynamic-shape support, which Relax made a first-class concern, is a real constraint and not a convenience: the \textbf{memory hierarchy} and \textbf{parallel} grain determine raw speed, but shape flexibility determines whether the workload can run on the target at all without expensive padding.
+% OPENTIKZ: tri-hardware memory hierarchy
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.72, transform shape]
+ \foreach \x/\title in {-4.8/GPU,0/CPU,4.8/NPU} {
+   \node[font=\footnotesize\bfseries] at (\x,2.35) {\title};
+ }
+ \foreach \x/\lines in {
+   -4.8/{Regs\\Shared\\L2\\HBM},
+   0/{Regs\\L1/L2/L3\\DRAM},
+   4.8/{Tile SRAM\\L2 tile\\DDR}
+ } {
+   \node[align=center, font=\scriptsize] at (\x,0.8) {\lines};
+ }
+ \node[font=\scriptsize, visText] at (0,-1.2) {Same math, different fast-memory budgets and scheduling rules};
+\end{tikzpicture}
+\caption{Tri-hardware memory hierarchy sketch (not to scale): decode planning must read per-class capacities and latencies.}
+\label{fig:tri_hw_memory}
+\end{figure}
 
-The matrix also clarifies why ``just use the fastest hardware'' is the wrong framing. The fastest raw \textbf{bandwidth} belongs to the datacenter GPU, but it carries the launch tax and the highest cost; the CPU has modest \textbf{bandwidth} but flexible control and low cost at low load; the NPU has deterministic on-chip \textbf{bandwidth} and the best power efficiency but the least flexibility \citep{taxbreak2026,memoryfloor2026,amd2024aie}. Each row of the matrix is a trade, and the right target depends on which constraints the deployment actually binds against---which is the routing decision Chapter~24 makes at fleet scale, grounded in exactly these per-class constraints.
+\begin{table}[t]
+\centering
+\small
+\caption{Decode optimization comparison across hardware classes (design-time cheat sheet).}
+\label{tab:tri_hw_decode_compare}
+\begin{tabular}{@{}p{2.1cm}p{3.2cm}p{3.2cm}p{3.2cm}@{}}
+\toprule
+\textbf{Dimension} & \textbf{GPU} & \textbf{CPU} & \textbf{NPU} \\
+\midrule
+Core bottleneck & Launch overhead + HBM bandwidth & Cache misses + NUMA latency & On-chip capacity + static layout \\
+Optimization focus & Deep fusion + graph capture & Cache blocking + thread affinity & Static pipeline + DMA plan \\
+Best fusion grain & Layer / half-layer stages & Coarse operator groups & Full-layer / multi-layer MegaKernel \\
+Dynamic shapes & Strong & Strong & Weak (bucketing/padding) \\
+Typical failure & Register/shared spill & LLC eviction + remote NUMA & Compile fail / tile imbalance \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Review gate.} The operational discipline is to attach a roofline or buffer-accounting analysis for each fused region on the target SKU before merge, treating an over-budget region as a build error rather than a performance bug \citep{memoryfloor2026,yirage2026}. The constraint matrix is what makes that gate mechanical: it gives the compiler the numbers to compare a region's footprint against \citep{nvidia2022hopper}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Before merging a cross-hardware change, verify the constraint-matrix row for \emph{each} target: capacities, parallel grain, and shape policy \citep{yirage2026}.
+A GPU-only green build that breaks NPU legality should fail CI, not ship to heterogeneous fleets \citep{amd2024xdna,patel2025llminference}.
 
-\section{GPU constraints}
+\paragraph{Shape flexibility row.}
+GPUs and CPUs handle dynamic sequence lengths and growing KV naturally; static NPUs require bucketing or padding to a finite shape set \citep{amd2024xdna,lai2023relax}.
+Relax-style systems made dynamic shapes a first-class compiler concern because they determine \emph{whether} a workload runs, not only how fast \citep{lai2023relax}.
+For decode serving, shape policy is as important as SRAM capacity \citep{kwon2023vllm}.
+
+\paragraph{Why ``fastest chip'' is the wrong question.}
+Datacenter GPUs lead raw HBM bandwidth but carry kernel launch overhead and cost; CPUs trade bandwidth for control; NPUs lead power efficiency with the least runtime flexibility \citep{taxbreak2026,memoryfloor2026,amd2024aie}.
+Each matrix row is a deployment trade---Chapter~24 routes fleets using exactly these cells \citep{patel2025llminference}.
+
+\paragraph{Roofline attachment discipline.}
+Attach a roofline or buffer-accounting sheet for each fused region on the target SKU before merge \citep{memoryfloor2026,yirage2026}.
+Over-budget regions are build errors: the matrix supplies the numbers; the compiler supplies the inequality check \citep{nvidia2022hopper,chen2020compilerbasedhardw}.
+
+\paragraph{Connecting matrix rows to Part~VI passes.}
+Residency passes read on-chip SRAM rows; parallel-grain passes choose warp versus SIMD versus spatial tiling; shape-flexibility passes decide bucketing policies \citep{yirage2026,lai2023relax,chen2020compilerbasedhardw}.
+When a pass violates a cell, reject before codegen---the same discipline Chapter~2 asked for on export edges \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Using the comparison table in reviews.}
+Table~\ref{tab:tri_hw_decode_compare} columns are intentional prompts: if your PR touches GPU fusion, check whether launches/token moved; if it touches CPU blocking, check LLC misses; if it touches NPU ADF, check DMA edges \citep{taxbreak2026,amd2024xdna,dlbook}.
+A change that improves one column while regressing another on the same class is incomplete \citep{memoryfloor2026,yirage2026}.
+Fleet routers in Part~VII read the same columns when choosing SKU per query class \citep{patel2025llminference}.
+
+\section{GPU Constraints: Capacity and Orchestration Together}
 \label{sec:gpu_constraints}
 
 % AUTO_VISUAL:fig_gpu_memory_hierarchy
-
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.84, transform shape]
  \node[vis arch node] (s0) at (-5.5,0) {\footnotesize Registers\\256 KB/SM};
  \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Shared mem\\up to 228 KB};
  \node[vis arch node] (s2) at (1.8,0) {\footnotesize L2 cache\\50 MB};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize HBM\\GBs};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize HBM\\TB/s class};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{GPU memory hierarchy constraints for decode megakernels (H100 sizes).}
+\caption{GPU memory hierarchy for decode (H100-class sizes).}
 \label{fig:gpu_memory_hierarchy}
 \end{figure}
 
-The GPU's constraints are precise and small, and a decode kernel is solved against their exact values. On an H100 SM, the \textbf{shared memory} is configurable up to 228\,KB (227\,KB usable per block after 1\,KB reserved), the register file is 65{,}536 32-bit registers (256\,KB, capped at 255 per thread), and a 50\,MB GPU-wide L2 backs them before HBM \citep{nvidia2022hopper}. The \textbf{warp} of 32 threads is the scheduling grain, four warps form a warpgroup that issues the high-throughput WGMMA \textbf{tensor core} instruction, and Hopper adds thread-block clusters that share \textbf{shared memory} across CTAs \citep{shah2024flashattention3,nvidia2022hopper}. These numbers are the constraints Chapters~6--8 tile against.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+ \node[vis pipeline node] (rf) at (0,1.2) {\footnotesize Register file};
+ \node[vis pipeline node] (smem) at (-2.2,0) {\footnotesize Shared memory};
+ \node[vis pipeline node] (tc) at (2.2,0) {\footnotesize Tensor cores (WGMMA)};
+ \node[vis arch node] (warp) at (0,-1.1) {\footnotesize Warp scheduler (32-thread grain)};
+ \draw[vis arrow] (rf.south) -- (smem.north);
+ \draw[vis arrow] (rf.south) -- (tc.north);
+ \draw[vis arrow] (warp.north) -- (smem.south);
+ \draw[vis arrow] (warp.north) -- (tc.south);
+\end{tikzpicture}
+\caption{H100 SM resource sketch: fusion budgets contend for the same register and shared-memory pool.}
+\label{fig:gpu_sm_resources}
+\end{figure}
 
-The defining GPU trade is register pressure versus occupancy. Because resident threads share the 65{,}536-register file, a kernel using $R$ registers per thread caps resident threads near $65536/R$, so a heavily fused decode kernel that keeps many partial sums in registers trades occupancy for residency \citep{nvidia2022hopper}. At batch-1 that trade often favors residency---there is little parallelism to hide latency anyway---up to the spill threshold, beyond which a thread's registers spill to HBM-backed local memory and the win is lost \citep{taxbreak2026,memoryfloor2026}. The \textbf{tensor core} adds a second constraint: WGMMA wants operands in a specific layout, so the schedule must feed it from \textbf{shared memory} in the right shape or pay a conversion \citep{shah2024flashattention3}.
+On an H100 SM, shared memory is configurable up to 228\,KB (227\,KB usable per block after 1\,KB reserved), the register file holds 65{,}536 32-bit registers (256\,KB total, capped at 255 registers per thread), and ${\sim}50$\,MB L2 backs HBM \citep{nvidia2022hopper}.
+The \textbf{warp} of 32 threads is the scheduling grain; four warps form a warpgroup for WGMMA; Hopper adds thread-block clusters sharing shared memory across CTAs \citep{shah2024flashattention3}.
 
-The \textbf{shared memory} bank structure is a third constraint that decode kernels routinely trip over. H100 shared memory is 32 banks of 4 bytes, with consecutive words mapped to consecutive banks, so a \textbf{warp} accessing 32 addresses in distinct banks completes in one transaction while a pattern that collides on a bank serializes \citep{nvidia2022hopper}. A tile placed in \textbf{shared memory} with a stride that aliases banks turns a fast access into a serial one, and because a decode kernel runs thousands of times per sequence the penalty compounds. The layout of a resident tensor---its padding and stride---is therefore part of the residency decision, not a detail, and a hardware-aware compiler chooses it against the bank count.
+\paragraph{Shared memory capacity (constraint loop).}
+\textbf{Engineering meaning:} this is the hard ceiling for fused decode tiles---if your fusion region needs 250\,KB, it \emph{will} spill or must split \citep{memoryfloor2026}.
+\textbf{Common pitfall:} counting tensor bytes only, ignoring bank padding, double buffering, and epilogue temporaries \citep{nvidia2022hopper}.
+\textbf{Debug:} Nsight Compute \texttt{Shared Memory Configuration} and shared-memory throughput; elevated \texttt{local memory traffic} signals register/shared spill to HBM-backed local memory \citep{taxbreak2026}.
 
-The launch tax is the GPU constraint most specific to decode. Every kernel the host launches pays a dispatch cost, and at batch-1 there is no batch to amortize it, so a decoder layer left as a dozen separate kernels pays that cost a dozen times per token \citep{taxbreak2026,memoryfloor2026}. This is why the GPU rewards fusion and graph capture so heavily: collapsing the layer into one launch, or capturing the launch sequence so the host stops re-dispatching, attacks the orchestration limiter directly \citep{nvidia2024cudagraphs,mpk2025}. The GPU's flexibility---dynamic scheduling, deep pipelines---is thus both its strength and the source of its dominant decode cost.
+\paragraph{Register pressure vs occupancy.}
+Resident threads share the 65{,}536-register file; a kernel using $R$ registers per thread caps residents near $65536/R$ \citep{nvidia2022hopper}.
+At batch-1, occupancy often matters less than residency---until spills flip the trade \citep{memoryfloor2026}.
+\textbf{Debug:} register usage per thread and spill metrics in Nsight Compute; if spills appear, shrink fusion depth or retile before tuning MMA micro-kernels \citep{yirage2026}.
 
-\paragraph{Multi-hardware delta.} A Hopper GPU can hide latency with asynchronous TMA copies into \textbf{shared memory} and deep pipelines, a flexibility a static NPU lacks; but that same dynamism is why the GPU pays a launch tax the NPU does not, so the GPU's constraint is orchestration while the NPU's is capacity \citep{semianalysis2024tma,amd2024xdna}. The compiler must encode both, because the optimal schedule differs accordingly \citep{yirage2026}.
+\paragraph{Shared-memory bank conflicts.}
+A \textbf{bank conflict} occurs when multiple threads in a warp hit the same shared-memory bank in one cycle, serializing what should be parallel loads \citep{nvidia2022hopper}.
+H100 shared memory uses 32 banks of 4 bytes; strided layouts that map many lanes to one bank are a common decode fusion footgun.
+Layout is part of residency planning, not a post-pass cosmetic \citep{shah2024flashattention3}.
 
-\section{CPU constraints}
-\label{sec:ch03_cpu_constraints}
+\paragraph{Kernel launch overhead.}
+Each host launch pays dispatch cost; a dozen kernels per layer pays a dozen times per token at batch-1 \citep{taxbreak2026,memoryfloor2026}.
+Fusion and CUDA Graph capture attack scheduling overhead directly---but graphs without dataflow still ping-pong inside recorded nodes (Chapter~2) \citep{nvidia2024cudagraphs}.
 
-The CPU trades the GPU's raw bandwidth for flexible control and a deep, hardware-managed \textbf{cache} hierarchy, and its constraints are correspondingly different. Residency on a CPU is not allocated explicitly into a scratchpad; it is controlled indirectly by blocking the computation so each tile's working set fits and is reused within an L1, L2, or L3 \textbf{cache} level before eviction \citep{dlbook,rotem2018glow}. The parallelism grain is the core plus its \textbf{simd} vector unit (AVX-512 on x86, NEON on ARM), so a decode kernel must vectorize across the lane width and tile across cores, a coarser grain than a GPU warp \citep{dlbook}.
+\paragraph{TMA and async movement (Hopper+).}
+\textbf{Engineering meaning:} TMA lets the schedule prefetch tiles into shared memory while math runs on the previous tile---but only if copy edges are static enough to plan \citep{semianalysis2024tma,nvidia2022hopper}.
+\textbf{Pitfall:} treating TMA as a band-aid on operator-first ping-pong; bytes/token must still drop \citep{memoryfloor2026}.
+\textbf{Debug:} Nsight Systems timelines for TMA overlap; correlate with shared-memory occupancy \citep{semianalysis2024tma}.
 
-The CPU's signature hazard is \textbf{numa}. On multi-socket or multi-die servers, memory is partitioned across nodes, and a thread reading memory on a remote \textbf{numa} node pays a latency and bandwidth penalty that, for a memory-bound decode loop re-reading weights every token, can halve effective throughput \citep{patel2025llminference,memoryfloor2026}. The residency plan therefore includes thread and memory affinity---pinning decode threads to the \textbf{numa} node owning their weights, and replicating read-only weights per node when the bandwidth saving exceeds the memory cost. A second subtlety is that the hardware prefetcher builds an implicit pipeline for sequential access, so the highest-leverage CPU move is often laying out the weight stream contiguously so the prefetcher tracks it, rather than hand-rolling explicit movement \citep{dlbook}.
+\paragraph{Thread-block clusters.}
+Hopper clusters let CTAs share shared memory across a larger fusion region---extending Rule~2 when a single block cannot hold the tile \citep{nvidia2022hopper}.
+The compiler must prove cluster-wide footprint still fits hardware caps; otherwise cluster use increases complexity without residency wins \citep{yirage2026}.
 
-The bandwidth arithmetic makes the CPU's decode ceiling concrete. At batch-1 the model re-reads its full weight set every token, so a 7B model in BF16 must move on the order of 14\,GB per token from wherever the weights live; divided by a CPU's memory bandwidth, that sets a hard floor on token latency no compute optimization can beat \citep{kwon2023vllm,memoryfloor2026}. The CPU's advantage is not throughput but flexibility and cost: it handles dynamic shapes and control flow naturally, and it is economical at low query rates where a GPU would sit underutilized. A compiler targeting a CPU therefore optimizes for the regimes where that flexibility matters---variable-length, low-QPS, cost-sensitive endpoints---rather than trying to match GPU decode latency it structurally cannot reach.
+\paragraph{Multi-hardware delta (GPU vs NPU).}
+GPUs hide latency with async copies and deep pipelines; NPUs require those copies to be scheduled statically in the ADF \citep{amd2024xdna,semianalysis2024tma}.
+GPU constraint is scheduling overhead \emph{and} capacity; NPU constraint is capacity with zero runtime slack \citep{wu2024mirage}.
 
-A further CPU subtlety is \textbf{simd} width and its interaction with quantization. Wider vector units process more elements per instruction, but only if the data is laid out and aligned for them, and low-precision formats pack more elements per vector, so the \textbf{cache} footprint and the \textbf{simd} efficiency are coupled \citep{dlbook}. A decode kernel that quantizes weights to int8 both shrinks the \textbf{cache} working set and fills the \textbf{simd} lanes more densely, a double win on a bandwidth-bound CPU---the same residency logic as the GPU, expressed through the \textbf{cache} and vector unit rather than shared memory.
+\paragraph{WGMMA layout constraint.}
+Tensor cores consume operands from shared memory in specific layouts; feeding them from misaligned tiles triggers conversion or gather traffic that negates fusion \citep{shah2024flashattention3,nvidia2022hopper}.
+Layout assignment is therefore part of the residency decision, not an afterthought on the critical path \citep{chen2020compilerbasedhardw,yirage2026}.
 
-\paragraph{Review gate.} For a CPU target the gate is a \textbf{cache}-miss and bandwidth measurement at the decode operating point, because CPU residency is statistical (governed by the \textbf{cache} and prefetcher) rather than a static capacity that can be checked by arithmetic alone \citep{dlbook,memoryfloor2026}. A blocking plan that looks correct on paper must be validated against measured miss rates.
+\paragraph{Chapters~6--8 preview.}
+Parts~IV--V tile decode megakernels against the exact numbers in this section---register caps, shared-memory banks, cluster footprints \citep{nvidia2022hopper,semianalysis2024tma}.
+When those chapters cite 227\,KB usable shared memory, they mean this inequality, not a metaphor \citep{memoryfloor2026}.
 
-\section{NPU constraints}
-\label{sec:ch03_npu_constraints}
+\paragraph{$\checkmark$ Practice checkpoint.}
+Before merging GPU fusion: (1)~statically budget shared memory + registers against the target SM; (2)~verify in Nsight Compute no spill and acceptable bank conflicts \citep{nvidia2022hopper,memoryfloor2026}.
 
-The spatial \textbf{npu} is the most constrained and the most deterministic of the three, and its constraints must be satisfied entirely at compile time. On the AMD XDNA2/AIE-ML fabric, each compute tile has 64\,KB of L1 \textbf{static} SRAM (eight 8\,KB banks) with a dedicated DMA engine, each column adds a 512\,KB L2 memory tile, and shim tiles bridge to off-chip DDR \citep{amd2024xdna,amd2024aie}. Crucially there is no hardware cache: what is resident is exactly what the compiler's DMA schedule placed, so a tensor that does not fit the 64\,KB tile must be split across tiles or staged through L2, and the DMA chain to do so is part of the program, not a runtime fallback.
+\paragraph{Worked example: fused attention tile budget (H100).}
+Suppose a decode fusion stage keeps $Q$, $K$, $V$ tiles, softmax scratch, and an output accumulator in shared memory for a head dimension of 128 and block size 64.
+A naive byte count might report ${\sim}48$\,KB of tensor data, but the compiler also reserves bank-padding columns, a double buffer for the next $K$ tile prefetch, and a 4\,KB epilogue for the projection matmul fragment \citep{shah2024flashattention3,nvidia2022hopper}.
+Add WGMMA operand staging in swizzled layout and the footprint can cross 120\,KB before anyone accounts for cluster-wide sharing \citep{semianalysis2024tma}.
+The correct workflow is to build a line-item residency sheet: tensor bytes, padding, pipeline stages, temporaries, then compare the sum to 227\,KB usable \citep{memoryfloor2026,yirage2026}.
+If the sheet exceeds the cap, split the fusion at the export edge Chapter~2 marked---for example, keep attention fused but export logits before the MLP rather than forcing an illegal megakernel \citep{chen2020compilerbasedhardw,taxbreak2026}.
+Teams that skip the sheet often discover spill only when production batch sizes differ from the lab cell \citep{patel2025llminference}.
 
-This makes \textbf{npu} compilation unforgiving but powerful. Unforgiving, because a mis-sized tile is a compile-time failure to fit rather than a slow path; powerful, because once the \textbf{static} plan fits there is no cache-miss variance and no allocator, so the per-token cost is fully deterministic---ideal for the tight latency and power budgets of \textbf{edge} deployment \citep{amd2024aie,rotem2018glow}. The canonical \textbf{edge} decode fusion maps the attention chain as a spatial sweep across tiles, keeping intermediate scores in on-chip SRAM and streaming only inputs and outputs through DDR, the spatial analogue of a GPU megakernel \citep{dao2022flashattention,memoryfloor2026}.
+\paragraph{Occupancy versus residency trade (when to care).}
+High occupancy helps latency hiding when kernels are memory-bound \emph{and} footprints are small \citep{nvidia2022hopper}.
+Decode megakernels with large shared-memory tiles intentionally run fewer blocks per SM because the residency win dominates occupancy \citep{memoryfloor2026,dao2022flashattention}.
+The mistake is chasing occupancy charts from a GEMM microbench while your fused kernel already spilled \citep{yirage2026}.
+Profile bytes/token first; tune occupancy only when spill metrics are clean \citep{taxbreak2026}.
 
-The spatial structure gives the \textbf{npu} a property neither GPU nor CPU has: data can flow directly between adjacent tiles without going off chip. On the XDNA fabric, compute tiles read each other's local memory and pass data through cascade connections, so a large operand can be distributed across several tiles' SRAM and consumed as a spatial pipeline, the on-chip analogue of a deep software pipeline \citep{amd2024xdna,amd2024aie}. This is why the \textbf{npu} can be extraordinarily efficient for a fixed, well-understood workload---the whole computation is laid out in space and clocked through---and why it is inflexible for anything the layout did not anticipate. The constraint is that the spatial plan is fixed at compile time, so the compiler bears full responsibility for balancing the stages across tiles.
+\paragraph{Graph capture interaction.}
+CUDA Graphs remove per-launch host overhead but freeze the launch structure \citep{nvidia2024cudagraphs,taxbreak2026}.
+Hardware budgets still apply inside captured nodes: a graph does not create more shared memory \citep{nvidia2022hopper,memoryfloor2026}.
+Capture after fusion is legal and bytes/token improved---not as a substitute for illegal tiling \citep{yirage2026,chen2020compilerbasedhardw}.
+TaxBreak's launch-reduction wins assumed graphs wrapped already-resident schedules \citep{taxbreak2026,memoryfloor2026}.
 
-The \textbf{static} nature also changes what ``optimization'' means on an \textbf{npu}. On a GPU the compiler searches a large schedule space and the hardware smooths over imperfect choices with dynamic scheduling; on an \textbf{npu} there is no smoothing, so a poorly balanced tile assignment idles whole tiles and the compiler must get the balance right rather than approximately right \citep{amd2024xdna,wu2024mirage}. This places a heavier burden on the compiler's hardware \textbf{model} for the \textbf{npu} than for the GPU, because the cost of a mistake is higher and there is no runtime to hide it. For \textbf{edge} deployment that determinism is the feature---predictable per-token latency and power---bought with compile-time rigor.
+\paragraph{Blackwell preview (numbers change, inequalities do not).}
+Later chapters update register and shared-memory ceilings for Blackwell-class SKUs \citep{nvidia2022hopper,yirage2026}.
+The workflow in this section stays identical: line-item budget, compare to modeled cap, reject or split before codegen \citep{chen2020compilerbasedhardw,patel2025llminference}.
+New tensor instructions change \emph{how} you fill the budget, not \emph{whether} a budget exists \citep{semianalysis2024tma,shah2024flashattention3}.
 
-\paragraph{Multi-hardware delta.} Where a GPU schedule can be dynamic and an \textbf{edge} \textbf{npu} schedule must be \textbf{static}, the same logical decoder layer demands fundamentally different compilation: the GPU compiler searches schedules and captures launches, while the \textbf{npu} compiler assigns tiles and DMA chains at build time with no runtime freedom \citep{amd2024xdna,wu2024mirage}. A compiler that targets both must carry both models, which is exactly the per-target specialization this book argues for \citep{yirage2026}.
+\paragraph{L2 as a hidden export edge.}
+Even when shared memory is legal, writing full activations through L2 to HBM between subgraphs reintroduces the warehouse trip \citep{memoryfloor2026,kwon2023vllm}.
+L2 capacity is large but bandwidth to HBM is still the decode bottleneck at batch-1 \citep{nvidia2022hopper}.
+Fusion should minimize round trips, not merely fit in shared memory while exporting every intermediate \citep{chen2020compilerbasedhardw}.
 
-\section{Hardware-aware compilation}
-\label{sec:ch03_hardware_aware_compile}
+\section{CPU Constraints: Cache, SIMD, and NUMA}
+\label{sec:cpu_constraints}
 
-Hardware-aware compilation is the discipline of making these constraints first-class compiler inputs rather than afterthoughts, and it reduces to a few recurring decisions: \textbf{tiling}, \textbf{layout}, and \textbf{pass} ordering. \textbf{Tiling} chooses the shape of the on-chip working set so it fits the target's fast tier---228\,KB shared memory on a GPU, a \textbf{cache} level on a CPU, 64\,KB SRAM on an NPU---which is the single decision that most directly sets bytes/token \citep{nvidia2022hopper,amd2024aie}. \textbf{Layout} chooses how a tensor is arranged in memory so the access pattern is coalesced on a GPU, bank-conflict-free in shared memory, or DMA-friendly on an NPU; a wrong \textbf{layout} turns a fast on-chip access into a serialized one \citep{shah2024flashattention3,lai2023relax}.
+CPU residency is statistical: blocking so tiles fit L1/L2/L3 before eviction, not explicit scratchpad allocation \citep{dlbook,rotem2018glow}.
+Parallel grain is core + \textbf{SIMD} (single-instruction multiple-data) lanes---AVX-512 on x86, NEON on Arm---coarser than GPU warps \citep{dlbook}.
 
-The reason these three decisions are coupled is that they all contend for the same scarce resource: on-chip capacity. A larger \textbf{tiling} improves compute efficiency but consumes more fast memory; a richer \textbf{layout} (padded for bank-conflict-freedom) costs space; double-buffering for a pipeline doubles a buffer's footprint \citep{nvidia2022hopper,shah2024flashattention3}. The compiler cannot optimize them independently because each one's appetite for SRAM constrains the others, which is why hardware-aware compilation is a joint optimization against the modeled capacity rather than a sequence of local choices. A pass pipeline that fixes \textbf{tiling} first and discovers later that the \textbf{layout} no longer fits has to backtrack, so the residency budget must inform all three from the start.
+\paragraph{NUMA (non-uniform memory access).}
+On multi-socket hosts, each socket has local DRAM; remote-socket access adds latency and bandwidth loss \citep{patel2025llminference}.
+\textbf{Engineering meaning:} pin decode threads and weight buffers to the same NUMA node, or replicate read-only weights per node when cheaper than remote traffic \citep{memoryfloor2026}.
+\textbf{Debug:} \texttt{numastat}, \texttt{perf} LLC miss counters, and cross-node traffic on the decode loop.
 
-Precision is the fourth lever that interacts with the other three. Lowering a tensor from BF16 to FP8 or int8 halves or quarters its bytes, which loosens the \textbf{tiling} constraint, changes the optimal \textbf{layout}, and can even shift the producer/consumer balance of a kernel \citep{shah2024flashattention3,dlbook}. A hardware-aware compiler therefore co-decides precision with \textbf{tiling} and \textbf{layout}, because for a memory-bound decode workload the format choice is one of the largest bytes/token levers available---and the hardware \textbf{model} must record which precisions each target's compute units support natively.
+\paragraph{Bandwidth floor.}
+A 7B model in BF16 moves ${\sim}14$\,GB of weights per token at batch-1---dividing by DRAM bandwidth sets a latency floor no micro-kernel beats \citep{kwon2023vllm,memoryfloor2026}.
+CPU wins on flexibility and cost at low QPS, not on matching H100 tail latency \citep{patel2025llminference}.
 
-The third decision, \textbf{pass} ordering, is where hardware-awareness becomes subtle. The same set of passes---fusion, \textbf{layout} assignment, vectorization---can produce very different code depending on order: \textbf{layout} after fusion may force a transpose that re-materializes the activations fusion was meant to keep resident \citep{lai2023relax,chen2018tvm}. A hardware-aware compiler orders its passes so that the residency-critical decisions are made consistently, and it forks the \textbf{pass} pipeline per target because the right order differs by class \citep{chen2020compilerbasedhardw,yirage2026}. This is why the compiler surveys of Part~VI all expose their \textbf{pass} pipelines: the pipeline is where hardware constraints become code.
+\paragraph{SIMD + quantization coupling.}
+Int8 weights shrink cache footprint and fill SIMD lanes denser---double win when bandwidth-bound \citep{dlbook}.
+GPU fusion depth copied blindly can evict KV working sets; CPU schedules need cache-aware blocking \citep{rotem2018glow}.
 
-\paragraph{Review gate.} Before merging a hardware-aware change, diff the generated IR or assembly for new buffer allocations, count launches per token on the GPU path and DMA edges on the NPU path, and confirm the \textbf{tiling} still fits the target budget \citep{nvidia2024cudagraphs,taxbreak2026}. A change that improves one target can regress another, so the check is per target \citep{memoryfloor2026}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Validate blocking plans with measured L3 miss rate and bytes/token at the production batch policy---paper budgets are insufficient on CPUs \citep{memoryfloor2026,dlbook}.
 
-\section{Benchmark methodology}
-\label{sec:benchmark_method}
+\paragraph{Prefetch and layout.}
+Sequential weight streams benefit from hardware prefetch when layouts are contiguous \citep{dlbook}.
+Fragmented layouts defeat prefetch and amplify bandwidth tax on a already floor-limited CPU decode cell \citep{patel2025llminference,kwon2023vllm}.
 
-% AUTO_VISUAL:fig_benchmark_method
+\paragraph{Multi-hardware delta (CPU vs GPU).}
+CPU residency is statistical---miss rates matter; GPU residency is contractual---kilobytes over cap spill \citep{nvidia2022hopper,dlbook}.
+A blocking plan that ``should fit'' in L3 must be validated; a shared-memory plan that exceeds 227\,KB must be rejected arithmetically \citep{memoryfloor2026,yirage2026}.
+
+\paragraph{When CPU decode makes business sense.}
+Low-QPS endpoints, strict cost caps, and workloads with heavy control flow may favor CPU even when GPUs lead peak throughput \citep{patel2025llminference,kwon2023vllm}.
+The constraint chapter equips you to recognize those regimes instead of forcing GPU schedules everywhere \citep{rotem2018glow,dlbook}.
+
+\paragraph{Glow and AOT mental model.}
+Ahead-of-time bundles with static shapes mirror NPU thinking on CPU: fewer surprises at runtime, more work at compile time \citep{rotem2018glow,chen2020compilerbasedhardw}.
+The book's CPU path favors predictable residency over last-minute operator dispatch \citep{yirage2026}.
+
+\paragraph{Worked example: L3 blocking for a 7B MLP slice.}
+At batch-1, a single MLP projection reads the full weight matrix from DRAM each token \citep{kwon2023vllm}.
+Blocking chooses a strip height so the active weight tile plus input vector plus output accumulator stays in L3 across the inner dimension \citep{dlbook,rotem2018glow}.
+If the strip is too wide, the next layer's KV working set evicts the weight tile---exactly the 15\% regression seen when GPU fusion depth was copied without cache accounting \citep{patel2025llminference}.
+Measure LLC misses per token at the production thread count; if misses scale with layer count, the block is too aggressive \citep{memoryfloor2026}.
+CPU optimization is iterative measurement against a byte budget, not a one-shot formula \citep{dlbook}.
+
+\paragraph{Thread pinning recipe.}
+Bind decode worker threads to cores on the same NUMA node as the weight buffer \citep{patel2025llminference}.
+On dual-socket hosts, replicate read-only weights per socket when replication cost is less than remote DRAM traffic during the decode loop \citep{memoryfloor2026}.
+Document the pinning policy beside the blocking plan---silent migration to a remote socket looks like ``compiler regression'' in dashboards \citep{yirage2026}.
+
+\paragraph{AVX-512 and decode tails.}
+Wide SIMD helps when inner dimensions are multiples of the vector width; odd head sizes leave lanes idle unless the compiler pads or peels tails \citep{dlbook}.
+Padding changes cache footprint; peeling adds scalar epilogue cost \citep{rotem2018glow}.
+Co-decide head padding policy with quantization and blocking, not in a late vectorization pass \citep{chen2020compilerbasedhardw}.
+
+\section{NPU Constraints: Static Spatial Plans}
+\label{sec:npu_constraints}
+
+Spatial NPUs are deterministic and unforgiving.
+AMD XDNA2/AIE-ML tiles expose 64\,KB L1 SRAM per compute tile (eight 8\,KB banks) with DMA, column L2 tiles at 512\,KB, and DDR via shim tiles---no hardware cache \citep{amd2024xdna,amd2024aie}.
+What is resident is exactly what the compile-time DMA schedule placed.
+
+\paragraph{Tile capacity (constraint loop).}
+\textbf{Engineering meaning:} operands must fit tile SRAM or be split with explicit multi-tile DMA chains---there is no runtime cache to hide mistakes \citep{amd2024xdna}.
+\textbf{Failure mode:} compile failure or severely imbalanced pipelines that idle tiles \citep{wu2024mirage}.
+\textbf{Debug:} compiler legality reports and DMA edge counts per token; compare against modeled tile budgets in YiRage \citep{yirage2026}.
+
+\paragraph{Spatial cascade.}
+Adjacent tiles pass data through cascade links without DDR round trips---the on-chip analogue of deep software pipelining \citep{amd2024aie}.
+The spatial plan is fixed at compile time; dynamic decode loops require shape bucketing or padding \citep{lai2023relax,amd2024xdna}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+NPU promotions require green static compile, balanced tile utilization, and bytes/token regression versus the prior ADF hash---no ``works on GPU'' excuses \citep{yirage2026,amd2024xdna}.
+
+\paragraph{Optimization means balance, not search.}
+On GPUs, imperfect schedules hide behind dynamic scheduling; on NPUs, imbalanced tile assignment idles silicon with no runtime recovery \citep{wu2024mirage,amd2024xdna}.
+Edge deployments buy deterministic latency and power at the price of compile-time rigor \citep{amd2024aie,rotem2018glow}.
+
+\paragraph{Attention on spatial fabrics.}
+Canonical edge fusion maps attention as a spatial sweep with scores resident in tile SRAM and DDR touched only for inputs/outputs---the spatial analogue of a GPU megakernel \citep{dao2022flashattention,memoryfloor2026,amd2024xdna}.
+
+\paragraph{DDR is not ``slow GPU HBM.''}
+Off-chip DRAM bandwidth on edge cards is scarce; every DMA must be planned, counted, and minimized in the ADF \citep{amd2024xdna,amd2024aie}.
+Bytes/token ledgers from Chapter~1 apply unchanged---only the mechanism counter becomes DMA edges instead of launches \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Mirage and spatial compilers.}
+Spatial compiler stacks (Mirage-class) search tile assignments where GPU stacks search thread blocks \citep{wu2024mirage,amd2024xdna}.
+The mindset shift from Chapter~2 is the same; the search space geometry changes \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{ADF planning checklist (edge NPU).}
+Start from a shape bucket the product will ship---for example ctx=2048 with fixed head count \citep{lai2023relax,amd2024xdna}.
+Assign each tensor to a tile SRAM bank with explicit DMA in and out edges; count bytes moved per token \citep{amd2024aie}.
+Balance compute across tiles: an attention sweep that leaves half the array idle fails even when compile succeeds \citep{wu2024mirage}.
+Run legality first, then bytes/token, then ms/token---dynamic GPU shortcuts do not apply \citep{yirage2026,memoryfloor2026}.
+Version the ADF hash in CI next to GPU kernel hashes so regressions are comparable across classes \citep{patel2025llminference}.
+
+\paragraph{When NPU compile fails (readable errors).}
+Out-of-tile SRAM is the most common failure: the fix is smaller spatial tiles or fewer fused stages, not ``retry with more threads'' \citep{amd2024xdna}.
+DMA stride misalignment fails legalization because the shim expects burst-friendly layouts \citep{amd2024aie}.
+Treat compile errors as constraint violations with the same seriousness as shared-memory overflow on GPU \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\section{Hardware-Aware Compilation: Constraints Become Pass Inputs}
+\label{sec:hardware_aware_compile}
+
+Hardware-aware compilation makes constraints data, not folklore.
+Three coupled decisions dominate: \textbf{tiling}, \textbf{layout}, and \textbf{pass} ordering \citep{chen2020compilerbasedhardw,lai2023relax}.
+
+\textbf{Tiling} sizes on-chip working sets to fit 228\,KB shared memory (GPU), a cache level (CPU), or 64\,KB tile SRAM (NPU)---the largest bytes/token lever \citep{nvidia2022hopper,amd2024aie}.
+\textbf{Layout} ensures coalesced global access, bank-conflict-free shared tiles, and DMA-friendly strides \citep{shah2024flashattention3}.
+\textbf{Pass order} matters: layout-after-fusion transposes can re-materialize activations fusion meant to keep resident \citep{lai2023relax,chen2018tvm}.
+Precision (BF16/FP8/int8) co-decides with tiling because formats change footprint and native instruction support per SKU \citep{shah2024flashattention3,liu2024deepseekv3}.
 
 \begin{figure}[t]
 \centering
+\begin{tikzpicture}[vis base, scale=0.78, transform shape]
+ \node[vis pipeline node] (m) at (-4.2,0) {\footnotesize Hardware model\\(capacities + costs)};
+ \node[vis arch node] (t) at (-1.4,0) {\footnotesize Tiling / fusion};
+ \node[vis arch node] (l) at (1.4,0) {\footnotesize Layout / vectorize};
+ \node[vis pipeline node] (v) at (4.2,0) {\footnotesize Legality check\\+ codegen};
+ \draw[vis arrow] (m) -- (t) -- (l) -- (v);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Residency budget informs all stages jointly};
+\end{tikzpicture}
+\caption{Hardware-aware compile flow: the chip model feeds tiling, layout, and pre-codegen legality checks.}
+\label{fig:hw_aware_compile_flow}
+\end{figure}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Diff IR or assembly for new global buffers; count launches/token (GPU) and DMA edges (NPU); confirm tiling still fits modeled capacity per target \citep{taxbreak2026,yirage2026,memoryfloor2026}.
+
+\paragraph{Joint residency budget.}
+Larger tiles improve compute intensity but consume SRAM; padded layouts avoid bank conflicts but cost bytes; double buffering for pipelines doubles footprints \citep{nvidia2022hopper,shah2024flashattention3}.
+Hardware-aware compilation is one joint optimization against modeled capacity---not tiling, then layout, then surprise spill \citep{chen2020compilerbasedhardw,yirage2026}.
+Passes that fix tiling first and discover layout incompatibility later must backtrack; residency budgets should constrain all three from the start \citep{lai2023relax}.
+
+\paragraph{Per-target pass forks.}
+The right pass order differs by class: NPUs need tile assignment before vectorization details; GPUs may fuse before layout on some graphs but not others \citep{chen2018tvm,chen2020compilerbasedhardw}.
+Expose pipelines explicitly (Part~VI) so hardware constraints become visible engineering choices, not accidental emergent behavior \citep{yirage2026}.
+
+\paragraph{Anti-pattern: layout-after-fusion transpose.}
+A transpose inserted after fusion may force a full activation write/read pair---exactly the export Chapter~2 removed \citep{lai2023relax,chen2020compilerbasedhardw,memoryfloor2026}.
+Hardware-aware compilers order layout and fusion so residency commitments remain satisfiable \citep{yirage2026,taxbreak2026}.
+
+\paragraph{Anti-pattern: precision change without retile.}
+Dropping BF16 activations to FP8 halves bytes but may change vectorization and shared-memory padding requirements \citep{shah2024flashattention3,liu2024deepseekv3}.
+Co-decide precision with tiling when bandwidth-bound \citep{memoryfloor2026,patel2025llminference}.
+
+\section{Common Cross-Hardware Migration Mistakes}
+\label{sec:migration_mistakes}
+
+Teams porting decode schedules between silicon classes repeat the same failures.
+This section names five patterns so you can catch them in design review before they become production incidents \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Mistake 1: capacity math from the wrong machine.}
+Using H100 shared-memory numbers on a laptop NPU compile, or assuming CPU L3 is as programmable as GPU shared memory, produces schedules that are either illegal or silently slow \citep{nvidia2022hopper,amd2024xdna,dlbook}.
+\textbf{Fix:} read the constraint-matrix row for \emph{each} target before writing fusion rules \citep{yirage2026}.
+
+\paragraph{Mistake 2: promoting GPU fusion depth to CPU unchanged.}
+Deep GPU megakernels maximize on-chip residency when spill is impossible; on CPU the same depth evicts KV and weight tiles from LLC \citep{rotem2018glow,patel2025llminference,memoryfloor2026}.
+\textbf{Fix:} re-block for cache hierarchy; accept shallower fusion with better miss rates \citep{dlbook}.
+
+\paragraph{Mistake 3: expecting dynamic shapes on static NPUs.}
+Serving growth in sequence length without re-bucketing breaks ADF plans that assumed fixed ctx \citep{lai2023relax,amd2024xdna}.
+\textbf{Fix:} maintain a finite shape set; compile one ADF per bucket; pad explicitly where product allows \citep{yirage2026}.
+
+\paragraph{Mistake 4: optimizing peak FLOPs after fusion is legal.}
+A legal kernel can still lose to scheduling overhead if launches/token remain high, or lose to bandwidth if bytes/token did not drop \citep{taxbreak2026,memoryfloor2026}.
+\textbf{Fix:} gate promotions on Chapter~1 counters, not vendor GEMM banners \citep{patel2025llminference}.
+
+\paragraph{Mistake 5: hard-coded magic numbers in kernels.}
+Scattering 228\,KB constants in CUDA blocks Blackwell retargeting and breaks CI legality checks \citep{yirage2026,iree2024,nvidia2022hopper}.
+\textbf{Fix:} centralize capacities in the hardware model; let passes read limits \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Design-review prompt.}
+Ask in every cross-hardware PR: \emph{Which constraint cell changed, what is the new byte budget, and which mechanism counter proves the win?} \citep{taxbreak2026,memoryfloor2026,patel2025llminference}
+If the author cannot answer, the change is not ready to merge \citep{yirage2026}.
+
+\paragraph{Postmortem template.}
+When production latency regresses after a fusion promotion, capture: SKU, ctx, batch, static byte budget, measured shared-memory or tile usage, spill or DMA flags, and before/after bytes/token \citep{memoryfloor2026,taxbreak2026,nvidia2022hopper}.
+Most postmortems reveal a violated inequality from this chapter, not a mysterious hardware flake \citep{patel2025llminference,yirage2026}.
+Store postmortems beside benchmark worksheets so the next engineer does not repeat the mistake \citep{chen2020compilerbasedhardw}.
+
+\section{Cross-Hardware Benchmarking: Fair Comparison}
+\label{sec:benchmark_method}
+
+% AUTO_VISUAL:fig_benchmark_method
+\begin{figure}[t]
+\centering
 \begin{tikzpicture}[vis base, scale=0.9, transform shape]
- \node[vis pipeline node] (s0) at (-3.40,0) {\footnotesize Fixed model+ctx\\Repro config};
- \node[vis arch node] (s1) at (0.00,0) {\footnotesize Normalize metrics\\bytes/token};
- \node[vis pipeline node] (s2) at (3.40,0) {\footnotesize Compare targets\\GPU / CPU / NPU};
+ \node[vis pipeline node] (s0) at (-4.0,0) {\footnotesize Pin model+ctx\\BS${=}1$};
+ \node[vis arch node] (s1) at (0.0,0) {\footnotesize Normalize\\bytes/token, launches/token};
+ \node[vis pipeline node] (s2) at (4.0,0) {\footnotesize Compare GPU/CPU/NPU\\same metrics};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
 \end{tikzpicture}
-\caption{Cross-hardware benchmark methodology used in this book.}
+\caption{Cross-hardware benchmark flow used in this book.}
 \label{fig:benchmark_method}
 \end{figure}
 
-Comparing hardware honestly requires a disciplined \textbf{benchmark} \textbf{methodology}, because each vendor's favored \textbf{metric} flatters its own silicon. The methodology this book uses, sketched in Figure~\ref{fig:benchmark_method}, fixes the model and context length, normalizes to decode \textbf{metric}s that predict serving cost---bytes/token and launches/token at batch-1---and only then compares targets \citep{taxbreak2026,memoryfloor2026}. The key discipline is to grade on these decode \textbf{metric}s rather than peak FLOPs or an isolated GEMM \textbf{benchmark}, because a kernel can win a microbenchmark and lose end-to-end latency when launches and HBM traffic dominate \citep{patel2025llminference,kwon2023vllm}.
+Honest hardware comparison fixes the workload, then grades decode metrics that predict serving cost---not vendor peak FLOPs \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+\textbf{launches/token} isolates scheduling overhead; \textbf{bytes/token} isolates bandwidth/residency \citep{kwon2023vllm}.
+Decomposed counters are actionable; a fast GEMM microbench is not \citep{memoryfloor2026}.
 
-The decomposition is the heart of the methodology. A single end-to-end ms/token number tells you a kernel is slow but not why; decomposing it into launches/token (the orchestration term) and bytes/token (the bandwidth term) tells you which limiter to attack, and the two demand different fixes---fusion and capture for launches, residency and quantization for bytes \citep{taxbreak2026,memoryfloor2026}. This is why the book insists on these two \textbf{metric}s rather than a single score: they are actionable in a way a microbenchmark is not. A \textbf{benchmark} that reports only GB/s or only TFLOPS hides exactly the information a compiler engineer needs to decide what to change.
+\paragraph{Per-class mechanisms.}
+GPUs move launches/token with fusion and graphs; CPUs move LLC misses and NUMA traffic; NPUs move DMA edge counts \citep{nvidia2022hopper,amd2024aie,dlbook}.
+Report the \emph{same} headline metrics while diagnosing class-specific mechanisms underneath \citep{taxbreak2026}.
 
-A trustworthy \textbf{benchmark} also demands reproducibility: pinned configurations, recorded inputs, and logged measurements, so a result on one SKU can be compared to another and to a later software version \citep{dlbook,memoryfloor2026}. This is the same transparency standard the book applies to its own numbers through its fact-verification gate, and it is what turns a cross-hardware comparison from marketing into engineering. The autobooks loop that produced this book is itself an instance: a fixed harness scores every change on the same \textbf{metric}, improvements are kept and regressions reverted, and every number is web-verified before it ships \citep{yirage2026,taxbreak2026}. Without a fixed \textbf{methodology}, the GPU-versus-NPU question degenerates into incomparable vendor numbers; with one, it becomes a measurable routing decision of the kind Chapter~21 formalizes.
+\paragraph{Reproducibility.}
+Pin weights, framework versions, context buckets, and log configs so SKU A compares to SKU B and to next month's compiler \citep{memoryfloor2026,yirage2026}.
+Appendix~B expands long-context and fleet-batch variants; this section states the core decode-cell discipline \citep{kwon2023vllm}.
 
-\paragraph{Multi-hardware delta.} The same \textbf{benchmark} must report the same \textbf{metric} per target, but the mechanism that moves it differs: launches/token on a GPU, \textbf{cache} misses on a CPU, DMA edges on an NPU \citep{nvidia2022hopper,amd2024aie}. A methodology that normalizes the \textbf{metric} while respecting the per-class mechanism is what makes the comparison fair \citep{taxbreak2026}.
+\paragraph{Decomposition beats single scores.}
+End-to-end ms/token alone does not say whether to fuse or quantize; launches/token points to scheduling work; bytes/token points to residency work \citep{taxbreak2026,memoryfloor2026}.
+This decomposition is why Chapter~1 insisted on goodput counters alongside latency \citep{patel2025llminference,kwon2023vllm}.
 
-\section{YiRage hardware modeling}
-\label{sec:ch03_yirage_modeling}
+\paragraph{Autobooks harness analogy.}
+The book's own loop fixes a harness, scores every change on the same metrics, and reverts regressions---benchmark discipline as engineering culture, not a one-off table \citep{yirage2026,taxbreak2026}.
+Cross-vendor comparisons without pinned methodology decay into marketing slides \citep{memoryfloor2026}.
 
-The book's reference compiler turns this chapter's constraints into an explicit \textbf{model}. \textbf{YiRage} carries a per-target hardware \textbf{model}---a \textbf{chip arch} description of each SKU's on-chip capacities, parallelism grains, and scheduling rules---and the residency, role, pipeline, and synchronization passes of Chapters~6--9 are all functions of that \textbf{model} \citep{yirage2026}. Because the constraints are data rather than hard-coded assumptions, the same passes specialize to a 228\,KB H100 SM, a multi-level CPU \textbf{cache}, or a 64\,KB XDNA tile by reading the \textbf{model} for the target \citep{nvidia2022hopper,amd2024aie}.
+\paragraph{Fleet vs batch-1 cells.}
+Report batch-1 mindset counters separately from fleet goodput---continuous batching changes weight reuse but not per-request export edges inside layers \citep{kwon2023vllm,patel2025llminference}.
+A schedule that helps interactive tail latency but fails at fleet averages still needs framework scheduling work \citep{memoryfloor2026,taxbreak2026}.
 
-Making the \textbf{chip arch} a \textbf{model} rather than a constant is what lets the compiler check legality before codegen. A fusion's peak footprint is compared against the modeled tier capacity; a schedule's launch pattern is checked against the modeled orchestration cost; a tile shape is validated against the modeled SRAM and bank structure \citep{yirage2026,wu2024mirage}. When a new SKU arrives, updating its \textbf{model} re-specializes every pass without rewriting them, which is the scalability property that makes heterogeneous deployment tractable \citep{patel2025llminference,iree2024}. This is the deepest sense in which this book treats hardware as a compiler input: the architecture is a \textbf{model} the compiler consults, and the quality of that \textbf{model} bounds the quality of every downstream decision.
+\paragraph{Long-context buckets.}
+Benchmark ctx $\in\{512,2048,8192\}$ minimum; paging can change effective residency at 32K even when 2K looked healthy \citep{kwon2023vllm,dao2022flashattention}.
+Hardware-aware compilers must re-check tier budgets when block tables grow \citep{yirage2026,memoryfloor2026}.
 
-The \textbf{model} also has to capture the cost relationships, not just the capacities. Knowing an H100 SM has 228\,KB of shared memory is necessary but not sufficient; the compiler also needs the relative latencies and bandwidths of the tiers, the launch-floor cost, and the throughput of the \textbf{tensor core} relative to the special-function units, because those ratios decide where overlap is worth scheduling \citep{nvidia2022hopper,shah2024flashattention3}. A \textbf{chip arch} \textbf{model} that records capacities but not costs can check legality but cannot rank schedules, so a useful \textbf{model} carries both---the hard constraints that gate a fusion and the soft costs that order the alternatives \citep{wu2024mirage,yirage2026}.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Ship benchmark artifacts with every hardware-target promotion: bytes/token, launches/token, ms/token at ctx $\in\{512,2048,8192\}$, plus the mechanism counter for that class \citep{taxbreak2026,memoryfloor2026}.
 
-Finally, the \textbf{model} is what makes the book's claims portable across SKUs that did not exist when a chapter was written. Because every pass reads the \textbf{model} rather than hard-coding ``H100,'' a next-generation GPU with a larger register file or a new \textbf{tensor core} instruction is absorbed by updating its \textbf{model} entry, and the residency, role, pipeline, and sync passes re-specialize automatically \citep{yirage2026,iree2024}. This is the architectural payoff of treating hardware as data: the compiler's knowledge of silicon lives in one place that can be extended, audited, and verified, rather than scattered through hand-written kernels that rot as hardware moves \citep{patel2025llminference}.
+\paragraph{Benchmark worksheet (copy into CI).}
+Record model id, weight format, framework build, SKU, driver, ctx, batch policy, and power cap \citep{memoryfloor2026,yirage2026}.
+Run warm-up tokens, then collect median ms/token over at least 100 tokens at batch-1 for interactive cells \citep{taxbreak2026}.
+Log launches/token from the profiler trace; log bytes/token from a residency ledger or instrumented allocator \citep{kwon2023vllm,memoryfloor2026}.
+Attach the worksheet to the PR; reviewers compare mechanism counters, not adjectives \citep{patel2025llminference}.
+When a GPU win does not move bytes/token, suspect measurement noise or hidden exports \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Sanity checks before claiming cross-vendor victory.}
+Same tokenizer, same weight checkpoint, same numerical policy (BF16 vs FP8), and same ctx buckets \citep{liu2024deepseekv3,memoryfloor2026}.
+Disable unrelated framework features (speculative decoding, paging) unless the product ships them \citep{kwon2023vllm}.
+Report confidence intervals when variance exceeds 2\%---decode cells are noisy at small batch \citep{patel2025llminference}.
+
+\section{YiRage Hardware Modeling: One Pass Stack, Many SKUs}
+\label{sec:yirage_modeling}
+
+\textbf{YiRage} encodes this chapter as per-target \textbf{chip architecture models}---capacities, parallelism grains, latency/bandwidth ratios, launch floors---that residency, pipeline, and sync passes read and check \citep{yirage2026,chen2020compilerbasedhardw}.
+A fusion's footprint is compared to modeled tier capacity; tile shapes are validated against SRAM and bank structure; launch and scheduling costs inform schedule ranking \citep{wu2024mirage}.
+
+Updating a model re-specializes passes when a new SKU ships---H100 $\rightarrow$ Blackwell register growth, for example---without rewriting every hand kernel \citep{iree2024,patel2025llminference}.
+Legality-before-codegen is the scalability property heterogeneous fleets need: illegal residency fails compile instead of silently spilling in production \citep{yirage2026,amd2024xdna}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Treat the hardware model as versioned data: diff model entries in CI when SKUs change; reject passes that hard-code capacities instead of reading the model \citep{yirage2026}.
+
+\paragraph{Capacities plus costs.}
+Models need latencies, bandwidths, launch floors, and tensor-core throughput ratios---not SRAM kilobytes alone---to \emph{rank} legal schedules, not only accept/reject them \citep{nvidia2022hopper,shah2024flashattention3,wu2024mirage}.
+A legal but slow schedule is still a product failure \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Portability across SKUs.}
+Because passes read the model, Blackwell register growth or new tensor instructions become data updates rather than rewriting every kernel in the tree \citep{yirage2026,iree2024}.
+Hardware knowledge lives in one auditable place instead of rotting inside hand-tuned CUDA \citep{chen2020compilerbasedhardw}.
+
+\paragraph{IREE and modular retargeting.}
+IREE-style retargeting treats backends as plugins over shared IR---the same architectural pattern YiRage uses for decode fusion \citep{iree2024,yirage2026,chen2020compilerbasedhardw}.
+Hardware models are the plugin contract \citep{patel2025llminference}.
+
+\paragraph{Chapters~6--9 dependency.}
+Residency, role assignment, pipeline formation, and synchronization passes in Part~IV all consume the chip model introduced here \citep{yirage2026,wu2024mirage}.
+Read this chapter once carefully; later chapters reference these inequalities by label rather than re-deriving them \citep{nvidia2022hopper,amd2024xdna}.
+
+\paragraph{Model schema (conceptual).}
+Each SKU entry typically carries tier capacities (registers, shared memory or tile SRAM, L2, DRAM), parallelism grains (warp size, SIMD width, tile array), bandwidth/latency ratios, launch or DMA floor costs, and supported instruction sets (WGMMA, matrix cores, int8 dot) \citep{yirage2026,nvidia2022hopper,amd2024xdna}.
+Passes query the schema; kernels never embed literals \citep{chen2020compilerbasedhardw}.
+When Blackwell raises register file limits, bump the model version and re-run legality on the fusion corpus---no manual kernel sweep \citep{iree2024,patel2025llminference}.
+
+\paragraph{Fleet heterogeneity.}
+Production may run Hopper datacenter GPUs, CPU fallback nodes, and edge NPUs simultaneously \citep{patel2025llminference,amd2024aie}.
+One IR, multiple chip models, divergent legal schedules---that is normal, not a failure of the compiler architecture \citep{yirage2026,wu2024mirage}.
+Chapter~24 returns to routing policies; this chapter supplies the per-target numbers those policies consume \citep{memoryfloor2026}.
+
+\paragraph{Testing hardware models.}
+Unit-test the model layer: given a synthetic fusion footprint, assert the legality pass accepts or rejects against golden SKU rows \citep{yirage2026,chen2020compilerbasedhardw}.
+Regression tests caught more fleet incidents than microbench suites because they encode inequalities directly \citep{patel2025llminference,memoryfloor2026}.
+When vendors ship stepping changes, update golden rows and re-run the corpus before merging driver pins \citep{iree2024,nvidia2022hopper}.
 
 \section{Key Takeaways}
 \label{sec:ch03_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Reason about hardware concretely, not abstractly.}
-``Fast memory'' is useless; ``228\,KB shared, 256\,KB registers, 50\,MB L2 on an H100 SM'' is a constraint a tiling pass solves against \citep{nvidia2022hopper,semianalysis2024tma}. The difference between a kernel that fits and one that spills is kilobytes on a specific SKU \citep{taxbreak2026}.
+\item \textbf{Quantify constraints, never hand-wave.}
+``Fast GPU memory'' is not actionable; 227\,KB usable shared memory per H100 block is \citep{nvidia2022hopper}.
+\textbf{Action:} attach static byte budgets to every fusion PR; spill in Nsight Compute is a build failure, not a tuning opportunity \citep{memoryfloor2026}.
 
-\item \textbf{The three classes have different residency and scheduling models.}
-GPU shared memory and warps (dynamic, launch-taxed), CPU caches and SIMD (coherent, NUMA-bound), NPU tile SRAM and spatial dataflow (static, deterministic) \citep{nvidia2022hopper,dlbook,amd2024xdna}. One schedule is not optimal across them \citep{amd2024aie}.
+\item \textbf{No universal optimal schedule.}
+GPU layer fusion, CPU cache blocking, and NPU static MegaKernels are different artifacts for the same math \citep{amd2024xdna,rotem2018glow,mpk2025}.
+\textbf{Action:} fork compile pipelines per target; never promote GPU-only evidence to fleet-wide schedules \citep{patel2025llminference,yirage2026}.
 
-\item \textbf{Decode is bandwidth- and orchestration-bound on every class.}
-At batch-1 the limiter is bytes through the memory hierarchy and launches per token, not FLOPs, so illegal tier placement---spilling to HBM/DDR---is the recurring failure \citep{taxbreak2026,memoryfloor2026}. Gate merges on residency, not microbench FLOPs \citep{patel2025llminference}.
+\item \textbf{Decode optimizes memory first, FLOPs second.}
+Batch-1 limits are bytes and launches on every class \citep{taxbreak2026,kwon2023vllm,memoryfloor2026}.
+\textbf{Action:} rank backlog items by bytes/token and launches/token before MMA tile sweeps \citep{patel2025llminference}.
 
-\item \textbf{Hardware-aware compilation is tiling, layout, and pass order.}
-These three decisions set bytes/token and must be made per target and in a residency-consistent order; a wrong layout or pass order re-materializes activations fusion meant to keep on-chip \citep{lai2023relax,shah2024flashattention3}. Fork the pipeline per target \citep{chen2020compilerbasedhardw}.
+\item \textbf{Hardware belongs in a configurable model.}
+Capacities and costs as data let passes specialize and check legality \citep{yirage2026,wu2024mirage}.
+\textbf{Action:} add new SKUs by extending the chip model, not scattering magic numbers in kernels \citep{iree2024}.
 
-\item \textbf{Model the chip so passes can specialize and check.}
-YiRage carries a per-target hardware model, so the residency/role/pipeline/sync passes specialize by reading it and verify legality before codegen \citep{yirage2026,wu2024mirage}. A new SKU is a model update, not a rewrite \citep{iree2024}.
+\item \textbf{Benchmark with decode metrics, not peak FLOPs.}
+Normalize bytes/token and launches/token across GPU, CPU, and NPU cells \citep{taxbreak2026,memoryfloor2026}.
+\textbf{Action:} store paired worksheets in CI; reject promotions that move only microbench scores \citep{patel2025llminference}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch03_conclusion}
 
-This chapter supplied the concrete hardware constraints that the rest of the book compiles against: the GPU's programmer-managed shared memory and registers with their launch tax, the CPU's hardware caches and NUMA, and the NPU's static tile SRAM and spatial dataflow, each with the exact sizes and grains a decode kernel must respect \citep{nvidia2022hopper,dlbook,amd2024aie}. The unifying lesson is that decode is bandwidth- and orchestration-bound on all three, so hardware-aware compilation---tiling, layout, and pass order chosen per target against a concrete model---is what turns the diagnosis of Chapter~1 into shippable kernels \citep{taxbreak2026,memoryfloor2026}. YiRage makes the architecture an explicit model its passes consult and check, which is how the per-target guarantees of later chapters scale across a fleet \citep{yirage2026}. With the constraint model established in the abstract, Chapter~\ref{chap:ch04} descends into one class in depth---the CUDA Hopper/Blackwell GPU---mapping its registers, shared memory, TMA, clusters, and tensor cores to the exact optimization bounds a decode kernel must respect \citep{nvidia2022hopper,semianalysis2024tma}.
+This chapter grounded Chapter~2's dataflow mindset in numbers: GPU shared memory and registers with launch overhead, CPU caches and NUMA, NPU tile SRAM and static spatial dataflow \citep{nvidia2022hopper,dlbook,amd2024xdna,amd2024aie}.
+Decode is bandwidth- and scheduling-bound on all three; hardware-aware tiling, layout, and pass order---guided by explicit models---turn diagnosis into shippable kernels \citep{chen2020compilerbasedhardw,yirage2026,taxbreak2026,memoryfloor2026}.
+
+With the cross-class frame set, Chapter~\ref{chap:ch04} descends into NVIDIA Hopper/Blackwell CUDA: registers, TMA, thread-block clusters, and tensor cores as concrete optimization bounds for decode megakernels \citep{nvidia2022hopper,semianalysis2024tma}.
+Bring your constraint-matrix row and export-edge worksheet from Chapters~1--2; Chapter~4 shows how to spend those bytes on silicon \citep{memoryfloor2026}.
+
+\paragraph{Worksheet gate.}
+Before opening Hopper-specific chapters, fill Table~\ref{tab:tri_hw_decode_compare} for your deployment targets and note which bottleneck column dominates \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+If you cannot name launches/token and bytes/token for your SKU, return to Chapter~1 before studying TMA details \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Hands-on next step.}
+Pick one fused region in your decoder and compute shared-memory + register bytes statically; compare to the H100 row in Figure~\ref{fig:gpu_memory_hierarchy} \citep{nvidia2022hopper}.
+If over budget, split stages per Chapter~2's five-step playbook before tuning MMA configs \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026}.
+
+\paragraph{Onboarding sentence for teams.}
+Post in your compiler design doc: \emph{``We do not merge fusion without a hardware-model legality check and decode-cell counters.''} \citep{yirage2026,taxbreak2026,memoryfloor2026}
+Culture follows the checklist in CI, not the poster alone \citep{patel2025llminference}.
+
+\paragraph{Part~I closure.}
+Chapters~1--3 formed the measurement, mindset, and constraint foundation for everything that follows \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+You can now name what to optimize (bytes and launches), how to think (residency before exports), and what must fit (per-class capacities) \citep{yirage2026,patel2025llminference}.
+Part~II begins the GPU descent: same inequalities, more silicon detail, more concrete pass examples \citep{nvidia2022hopper,semianalysis2024tma}.
+
+\paragraph{Glossary carry-forward.}
+Terms introduced here recur throughout the book: \textbf{SIMT}, \textbf{warp}, \textbf{WGMMA}, \textbf{TMA}, \textbf{NUMA}, \textbf{DMA}, and \textbf{spatial dataflow} \citep{nvidia2022hopper,amd2024xdna,dlbook}.
+When later chapters use them without redefinition, refer back to this chapter's first-use explanations \citep{yirage2026}.
+Consistent vocabulary across GPU, CPU, and NPU sections prevents teams from talking past each other in design reviews \citep{patel2025llminference,chen2020compilerbasedhardw}.
 
 \typeout{END_CHAPTER "ch03" \theabspage}

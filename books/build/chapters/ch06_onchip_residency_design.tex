@@ -2,155 +2,817 @@
 \label{chap:ch06}
 \typeout{START_CHAPTER "ch06" \theabspage}
 
-Every decode bottleneck in this book reduces to one question: which bytes get to stay on chip, and for how long. Parts~I--II established that batch-1 decode is bandwidth- and orchestration-bound, not FLOP-bound; this chapter turns that diagnosis into a design discipline---planning the lifetime and residency of every tensor against the concrete on-chip memory each target actually has \citep{nvidia2022hopper,amd2024aie,dao2022flashattention}. The numbers from Chapter~1 are the motivation: dense Llama-3.2-1B averages 847.5 GPU kernel launches per output token on H100 and OLMoE-1B/7B averages 9{,}305, and each unfused boundary is a tensor that left the chip and came back \citep{taxbreak2026}. Removing host overhead alone bought $1.259\times$ on a Qwen-2.5-7B decode cell, but it could not fix illegal HBM traffic---only residency design can \citep{memoryfloor2026,nvidia2024cudagraphs}.
-The mistake to avoid is treating on-chip memory as an optimization to apply after the kernel works. On-chip residency is the kernel's contract with the hardware, and it must be planned before codegen, per target, because the same tensor that fits in a GPU's shared memory overflows an NPU tile's SRAM \citep{semianalysis2024tma,amd2024xdna}.
+\section{All Decode Optimization Is Residency Optimization}
+\label{sec:industrial_hook}
+
+A team fused twelve decoder ops on H100 and celebrated lower launches/token---then bytes/token barely moved because every intermediate still exported to HBM between fused boundaries \citep{taxbreak2026,memoryfloor2026}.
+Another team fit a layer in Hopper shared memory, shipped the same IR to XDNA, and watched compile fail---identical math, illegal peak footprint \citep{yirage2026,amd2024xdna,nvidia2022hopper}.
+
+\textbf{Every decode bottleneck in this book eventually reduces to residency:} which bytes stay on chip, for how long, and at what tier \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+Parts~I--II diagnosed bandwidth and orchestration; Chapters~3--5 named per-class hardware mechanisms \citep{patel2025llminference}.
+\textbf{This chapter is the design methodology hub}---how to plan lifetimes, compute peak footprint, and adapt the same fused layer to GPU, CPU, and NPU without repeating hardware catalogs \citep{yirage2026,dlbook}.
+
+\paragraph{Bridge from Chapters~3--5.}
+GPU tier sizes, TMA, and bank conflicts: see Chapter~\ref{chap:ch04} \citep{nvidia2022hopper,semianalysis2024tma}.
+XDNA static tiles and DMA chains: see Chapter~\ref{chap:ch05} \citep{amd2024xdna,amd2024aie}.
+Constraint matrix rows: see Chapter~\ref{chap:ch03} \citep{chen2020compilerbasedhardw}.
+Here we only use \emph{capacity numbers} as budget inputs---not re-derive silicon \citep{yirage2026}.
+
+\paragraph{What you will be able to do.}
+After this chapter you can (1)~run the four-step residency workflow, (2)~compute peak footprint with double-buffer accounting, (3)~fill a tri-hardware allocation table for one layer, (4)~interpret YiRage memory-pass failures, and (5)~review merges with the residency checklist \citep{yirage2026,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Organization map.}
+Lifetime method (\S\ref{sec:ch06_lifetime_planning}), tri-hardware adaptation (\S\ref{sec:ch06_tri_hardware_residency}), worked example (\S\ref{sec:ch06_cross_hw_worked_example}), YiRage pass (\S\ref{sec:ch06_yirage_memory_pass}), engineering patterns (\S\ref{sec:ch06_residency_patterns}), review workflow (\S\ref{sec:ch06_residency_review}), pitfalls (\S\ref{sec:ch06_residency_pitfalls}), takeaways and bridge to Chapter~\ref{chap:ch07} \citep{patel2025llminference}.
+
+\paragraph{Reader paths.}
+\textbf{Kernel engineers} should read \S\ref{sec:ch06_lifetime_planning}, the worked example, and pitfalls first---then skim YiRage pass I/O \citep{yirage2026,dao2022flashattention}.
+\textbf{Compiler authors} should read the memory pass and pattern sections end-to-end \citep{wu2024mirage,rotem2018glow,chen2020compilerbasedhardw}.
+\textbf{Serving leads} should read the industrial hook, tri-hardware table, and bytes/token Pattern~6 \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+All paths converge on the checklist before Part~IV \citep{mpk2025,yirage2026}.
+
+\paragraph{Industrial narrative.}
+TaxBreak shows hundreds of launches per token when fusion boundaries export activations \citep{taxbreak2026}.
+Memory-Floor shows bytes/token dominating batch-1 decode even when FLOPs counters look healthy \citep{memoryfloor2026}.
+Residency planning attacks the bytes side of that ledger---not peak TFLOPs \citep{dao2022flashattention,patel2025llminference}.
+
+\paragraph{Anti-pattern preview.}
+Section~\ref{sec:ch06_residency_pitfalls} collects five failure modes---use them in design review before MegaKernel chapters \citep{yirage2026,taxbreak2026}.
+Culture: no fusion merge without a peak-footprint worksheet \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+The most expensive mistake is celebrating launch-count drops while bytes/token stays flat---that is residency failure wearing a fusion costume \citep{taxbreak2026,patel2025llminference,memoryfloor2026}.
+
+\paragraph{Metrics reminder.}
+Chapter~1 defined launches/token and bytes/token as complementary diagnostics \citep{taxbreak2026,memoryfloor2026}.
+This chapter attacks bytes/token by keeping activations and hot weights in fast tiers across fused regions \citep{dao2022flashattention,patel2025llminference}.
+When you finish the worksheets here, re-run the same cells as Chapters~4--5 and confirm bytes moved---not just ms/token moved \citep{yirage2026,nvidia2022hopper,amd2024aie}.
+
+\paragraph{Who should read this chapter.}
+Compiler authors, kernel engineers porting across GPU/CPU/NPU, and serving teams running triplet fleets \citep{yirage2026,patel2025llminference,amd2024xdna,nvidia2022hopper}.
+If you only ship CUDA, still read the tri-hardware table---it explains why your schedule fails elsewhere \citep{chen2020compilerbasedhardw}.
+
+\paragraph{What this chapter is not.}
+Not a repeat of Chapter~4 Hopper specs or Chapter~5 XDNA tile catalogs \citep{nvidia2022hopper,amd2024xdna}.
+We teach \emph{how to plan} residency given caps already documented upstream \citep{yirage2026,dlbook}.
+
+\paragraph{Why residency is the decode lever.}
+Parts~I--II established that batch-1 decode is bandwidth- and orchestration-bound, not FLOP-bound \citep{patel2025llminference,memoryfloor2026}.
+TaxBreak-style counts show hundreds to thousands of kernel launches per token when fusion boundaries export activations; each export is a tensor that left the chip and came back \citep{taxbreak2026}.
+Removing host overhead alone bought measurable speedups on fused decode cells, but it could not fix illegal HBM traffic---only residency design can \citep{memoryfloor2026,nvidia2024cudagraphs}.
+The numbers motivate this chapter; the \emph{method} is what you carry to every target \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Decode makes lifetime planning tractable.}
+At batch-1 the per-token working set is small and regular: a query vector, weight tiles for the current layer, and the KV slice for the current head \citep{kwon2023vllm}.
+That regularity means you can solve residency statically at compile time instead of discovering overflow at runtime \citep{rotem2018glow,yirage2026}.
+It also means mistakes are expensive: any byte that lives one tier slower than necessary pays its penalty on every subsequent token in the sequence \citep{patel2025llminference,dao2022flashattention}.
+
+\paragraph{Fleet triplet mindset.}
+Production fleets rarely ship a single silicon class \citep{patel2025llminference,yirage2026}.
+YiRage's value proposition is one fused IR with per-backend residency metadata---not one CUDA schedule pasted onto XDNA \citep{amd2024xdna,chen2020compilerbasedhardw}.
+Section~\ref{sec:ch06_cross_hw_worked_example} is the template: same layer, three legal tier assignments, three peak worksheets \citep{yirage2026,memoryfloor2026}.
+
 \index{Data residency}
 \index{On-chip memory}
-\index{Shared memory}
+\index{Lifetime planning}
 
-\section{Lifetime planning}
+\section{Lifetime Planning: The Four-Step Residency Workflow}
 \label{sec:ch06_lifetime_planning}
 
+On-chip residency is the kernel's contract with hardware---planned before codegen, per target \citep{dlbook,yirage2026}.
+The mistake is treating fast memory as a post-hoc tweak after the kernel ``works'' \citep{taxbreak2026,memoryfloor2026}.
+The first discipline is \textbf{lifetime} planning: for every intermediate tensor, determine when it is produced, when it is last consumed, and therefore where it should live for that span \citep{rotem2018glow,wu2024mirage}.
+A tensor whose producer and consumer are adjacent in a fused region never needs device memory; a tensor consumed many operators later has a longer lifetime and may be forced to a slower tier \citep{dao2022flashattention,dlbook}.
+Getting this wrong is the most common cause of ``mysterious'' decode regressions---a tensor with an unnecessarily long lifetime occupies fast memory another tensor needed, or spills to HBM and reintroduces the bandwidth tax fusion was meant to remove \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Four-step workflow.}
+\begin{enumerate}
+\item \textbf{Tensor lifetime inventory}---for each intermediate, mark production point and last consumer on the fused DAG \citep{rotem2018glow,wu2024mirage}.
+\item \textbf{Reuse-per-byte ranking}---score tensors by (reuse count)/(bytes); higher score wins faster tiers \citep{dao2022flashattention,dlbook}.
+\item \textbf{Peak footprint calculation}---at each timestep, sum simultaneously live buffers; include \emph{double} size for ping-pong operands \citep{semianalysis2024tma,dao2022flashattention}.
+\item \textbf{Tier assignment and spill policy}---place from fastest tier down; overflow triggers fusion split or demotion with documented bandwidth cost \citep{yirage2026,chen2020compilerbasedhardw}.
+\end{enumerate}
+
 % AUTO_VISUAL:fig_lifetime_planning_pipeline
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.75, transform shape]
+ \node[vis pipeline node, minimum width=2.4cm] (s1) at (0,2.2) {\footnotesize 1. Lifetime\\inventory};
+ \node[vis arch node, minimum width=2.4cm] (s2) at (0,1.1) {\footnotesize 2. Reuse\\ranking};
+ \node[vis arch node, minimum width=2.4cm] (s3) at (0,0.0) {\footnotesize 3. Peak\\footprint};
+ \node[vis pipeline node, minimum width=2.4cm] (s4) at (0,-1.1) {\footnotesize 4. Tier\\assign};
+ \draw[vis arrow] (s1) -- (s2) -- (s3) -- (s4);
+\end{tikzpicture}
+\caption{Residency design four-step workflow (compile-time).}
+\label{fig:ch06_residency_workflow}
+\end{figure}
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.88, transform shape]
  \node[vis pipeline node] (s0) at (-5.03,0) {\footnotesize Tensor\\produced};
- \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Assign\\residency tier};
+ \node[vis arch node] (s1) at (-1.68,0) {\footnotesize Assign\\tier};
  \node[vis pipeline node] (s2) at (1.67,0) {\footnotesize Consumed\\on-chip};
- \node[vis arch node] (s3) at (5.03,0) {\footnotesize Buffer\\freed / reused};
+ \node[vis arch node] (s3) at (5.03,0) {\footnotesize Buffer\\reused};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{Lifetime planning assigns each tensor a residency tier for the span between its production and last use, then reuses the buffer.}
+\caption{Lifetime span: production to last use defines minimum residency duration.}
 \label{fig:lifetime_planning_pipeline}
 \end{figure}
 
-The first discipline is \textbf{lifetime} planning: for every intermediate tensor, determine when it is produced, when it is last consumed, and therefore where it should live for that span \citep{dlbook}. A tensor whose producer and consumer are adjacent in a fused region never needs to touch device memory at all; a tensor consumed many operators later, or by a different thread block, has a longer lifetime and may be forced to a slower tier. Getting this wrong is the single most common cause of ``mysterious'' decode regressions, because a tensor with an unnecessarily long lifetime silently occupies fast memory that another tensor needed, or spills to HBM and reintroduces the bandwidth tax the fusion was meant to remove \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{KV cache lifetime (special case).}
+Unlike short-lived activations, KV is written once and read every subsequent token---lifetime spans the whole generation \citep{kwon2023vllm,dao2023flashdecoding}.
+Design question: how much KV streams per step and how overlap hides load latency---not whether KV ``fits'' in the fastest tier \citep{patel2025llminference}.
+A residency plan that treats the KV slice like a short-lived activation will either exhaust fast memory or stall on loads \citep{dao2022flashattention,memoryfloor2026}.
+Paged KV in serving stacks (Chapter~1) decides DRAM placement; this section decides how much KV enters the fast tier each decode step \citep{kwon2023vllm,yirage2026}.
 
-Decode makes lifetime planning unusually tractable and unusually important. Tractable, because at batch-1 the per-token working set is small and regular: a query vector, the weight tiles for the current layer, and the KV cache slice for the current head \citep{kwon2023vllm}. Important, because that working set is read in full every single token, so any byte that lives one tier slower than it could pays its penalty thousands of times per sequence \citep{patel2025llminference}. The \textbf{residency} decision for the KV cache is the canonical example: it is too large to stay in the fastest tiers, so the design question becomes how much of it to stream and how to overlap that streaming with compute, not whether to keep it resident.
+\paragraph{Double-buffer decision rule.}
+Enable ping-pong when streamed operand latency exceeds compute on that stage \emph{and} doubled footprint still fits tier budget \citep{semianalysis2024tma,dao2022flashattention}.
+The lifetime planner must account for doubled footprint when checking capacity---the first place naive plans diverge from real ones \citep{yirage2026,memoryfloor2026}.
+If step~3 peak exceeds capacity only after doubling, shrink tile or split fusion---do not ``enable async copy and hope'' \citep{semianalysis2024tma,taxbreak2026}.
 
-The KV cache deserves its own lifetime analysis because it breaks the simple producer-consumer pattern. Unlike an activation that is produced and consumed within a token, the KV cache is written once and then read on every subsequent token for the rest of the sequence, so its lifetime spans the entire generation. That long lifetime is why it cannot live in the fastest tiers and why decode is fundamentally a streaming problem: each token must read back the growing KV history, and the residency design question is not whether to keep it on chip but how to overlap its streaming with the per-token compute so the load latency is hidden \citep{kwon2023vllm,dao2023flashdecoding}. A residency plan that ignores this and treats the KV slice like a short-lived activation will either run out of fast memory or stall waiting for the load.
+\paragraph{Schedule shapes lifetimes.}
+The same dataflow graph can be scheduled with short lifetimes (producer adjacent to consumer) or stretched lifetimes (unrelated work interleaved) \citep{wu2024mirage,dlbook}.
+Residency planning and scheduling co-optimize: minimize launches without stretching critical tensors past fast-tier capacity \citep{taxbreak2026,memoryfloor2026}.
+The planner chooses an execution order that keeps highest-reuse tensors' lifetimes short enough to stay resident while exposing overlap to hide streaming latency \citep{patel2025llminference,dao2022flashattention}.
 
-Double buffering is the lifetime technique that makes streaming work, and it is worth naming because it appears on every hardware class. The idea is to give a streamed tensor two physical buffers so the engine can load tile $n{+}1$ into one buffer while compute consumes tile $n$ from the other, then swap. This doubles the buffer's footprint but overlaps transfer with compute, turning a sequence of load-then-compute stalls into a pipeline \citep{semianalysis2024tma,dao2022flashattention}. The lifetime planner must account for the doubled footprint when it checks capacity, which is the first place a naive plan and a real one diverge---a fused region that fits single-buffered may overflow once double buffering is added for the streamed operands.
+\paragraph{Static allocation payoff.}
+Known lifetimes enable buffer reuse across non-overlapping intervals---no per-token allocator in the hot path \citep{rotem2018glow,yirage2026}.
+Peak footprint is provable before run; compare against Chapter~3 chip-model caps \citep{chen2020compilerbasedhardw}.
+Megakernels depend on this property: if peak is unknown, the fused region cannot ship \citep{wu2024mirage,mpk2025,taxbreak2026}.
 
-A useful way to think about lifetime planning is as a static memory allocation problem solved at compile time rather than by a runtime allocator. If the compiler knows every tensor's lifetime, it can assign a small pool of physical buffers and reuse each one across non-overlapping lifetimes---exactly the static allocation and copy elimination that compilers like Glow perform on their low-level IR, and that a megakernel must perform to keep its working set bounded \citep{rotem2018glow,wu2024mirage}. The payoff is twofold: the allocator never appears in the per-token hot path, and the peak \textbf{residency} footprint is known before the kernel runs, so it can be checked against the target's on-chip capacity instead of discovered by a runtime out-of-memory error.
+\paragraph{Reuse-per-byte scoring (step 2 detail).}
+Score $s = (\text{reuse count}) / (\text{bytes})$ for each tensor \citep{dlbook,dao2022flashattention}.
+Softmax carriers and QKV fragments typically score highest in decode layers---assign them to the fastest tier that fits their \emph{combined} peak interval \citep{dao2022flashattention,patel2025llminference}.
+Low-score temporaries demote first when step~4 overflows \citep{yirage2026,wu2024mirage}.
 
-There is a subtlety worth flagging: lifetimes are not fixed by the math, they are shaped by the schedule. The same dataflow graph can be scheduled so that a tensor's producer and consumer are adjacent---giving it a short lifetime and on-chip residency---or so that unrelated work is interleaved between them, stretching its lifetime and forcing it to a slower tier \citep{wu2024mirage,dlbook}. This is why residency planning and scheduling cannot be separated: the schedule that minimizes launches may lengthen a critical tensor's lifetime past what fast memory can hold, and the schedule that keeps everything resident may serialize work that could have overlapped. The planner therefore co-optimizes the two, choosing an execution order that keeps the highest-reuse tensors' lifetimes short enough to stay resident while still exposing enough overlap to hide streaming latency \citep{taxbreak2026,memoryfloor2026}.
+\paragraph{Peak footprint walkthrough (step 3 detail).}
+Walk the fused region in program order; maintain a live set; add buffer bytes on allocate, subtract on last use \citep{rotem2018glow,yirage2026}.
+For each streamed operand with ping-pong, add $2 \times$ tile bytes to the live set during the overlap window \citep{semianalysis2024tma,dao2022flashattention}.
+The maximum live-set size over the walk is the peak footprint---compare to tier cap \citep{nvidia2022hopper,amd2024aie}.
 
-The chapters that follow apply this discipline per hardware class, because the tiers themselves differ. What does not differ is the planning method: identify lifetimes, rank tensors by reuse-per-byte, and place the highest-reuse tensors in the fastest tier that can hold them for their lifetime, spilling only what genuinely cannot fit \citep{dlbook,dao2022flashattention}.
+\paragraph{Tier assignment policy (step 4 detail).}
+Fill fastest tier with highest-score tensors until full \citep{dlbook}.
+On overflow: (a)~split fusion at lowest-score export edge, or (b)~demote lowest-score live tensor to next tier and record expected bytes/token cost \citep{chen2020compilerbasedhardw,yirage2026,memoryfloor2026}.
+Never demote carriers or QKV tiles before demoting optional scratch \citep{dao2022flashattention,patel2025llminference}.
+Document every demotion in IR metadata so later passes and humans see the bandwidth trade explicitly \citep{yirage2026,wu2024mirage}.
 
-\section{GPU residency}
-\label{sec:ch06_gpu_residency}
+\paragraph{Step 1 inventory (how-to).}
+Start from the fused subgraph IR: walk ops in topological order \citep{rotem2018glow,chen2020compilerbasedhardw}.
+For each SSA value that materializes bytes, record: name, dtype, shape product, defining op, and uses---last use defines lifetime end \citep{dlbook,yirage2026}.
+Export edges (Chapter~2) are lifetime extenders: any tensor written to global mem before its last on-chip consumer effectively has infinite lifetime from the planner's view \citep{taxbreak2026,memoryfloor2026}.
+KV tensors get a separate row: lifetime annotation \texttt{span=context} rather than \texttt{span=step} \citep{kwon2023vllm,dao2023flashdecoding}.
 
-% AUTO_VISUAL:fig_gpu_residency_architecture
+\paragraph{Step 2 ranking (how-to).}
+Compute reuse count as number of on-chip loads per decode step (not per training step) \citep{patel2025llminference,dao2022flashattention}.
+Divide by byte size; sort descending \citep{dlbook}.
+Ties break toward tensors with longer live intervals---they exert sustained pressure \citep{wu2024mirage,yirage2026}.
+The sorted list is the allocation priority queue for step~4 \citep{rotem2018glow,chen2020compilerbasedhardw}.
+
+\paragraph{Step 3 peak walk (how-to).}
+Simulate program order: on tensor birth add bytes to live set; on last use subtract \citep{yirage2026,rotem2018glow}.
+When ping-pong applies, treat both buffers as live during the overlap window \citep{semianalysis2024tma,dao2022flashattention}.
+Track maximum live-set size; that maximum is the number the memory pass compares to tier caps \citep{nvidia2022hopper,amd2024aie,chen2020compilerbasedhardw}.
+If the walk is hand-done, cross-check with compiler pass output---discrepancies mean missing lifetimes \citep{yirage2026,wu2024mirage}.
+
+\paragraph{Lifetime timeline discipline.}
+Draw intervals on a horizontal time axis for one decode step---overlapping intervals reveal peak pressure visually \citep{wu2024mirage,dlbook}.
+Reviewers should reject plans that show three large tensors overlapping without a documented split \citep{yirage2026,taxbreak2026}.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.84, transform shape]
- \node[vis arch node] (s0) at (-5.5,0) {\footnotesize Registers\\256 KB/SM};
- \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Shared mem\\up to 228 KB};
- \node[vis arch node] (s2) at (1.8,0) {\footnotesize L2 cache\\50 MB};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize HBM\\GBs};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
- \draw[vis arrow] (s2.east) -- (s3.west);
+\begin{tikzpicture}[vis base, scale=0.9, transform shape]
+ \draw[vis arrow] (-4.5,0) -- (4.5,0);
+ \foreach \x/\lab in {-4/0,-2/1,0/2,2/3,4/4} {
+  \node[font=\scriptsize, visText] at (\x,-0.35) {$t_\lab$};
+ }
+ \draw[thick, blue!70] (-3.8,0.5) -- (-0.2,0.5) node[midway, above, font=\scriptsize] {QKV tile};
+ \draw[thick, orange!80] (-2.5,1.0) -- (1.2,1.0) node[midway, above, font=\scriptsize] {softmax state};
+ \draw[thick, green!60!black] (-1.0,1.5) -- (3.5,1.5) node[midway, above, font=\scriptsize] {MLP scratch};
+ \draw[dashed, red!70] (0.8,-0.7) -- (0.8,2.0) node[below, font=\scriptsize, visText] {peak};
 \end{tikzpicture}
-\caption{H100 on-chip residency tiers per SM: registers and shared memory are the fast, capacity-limited tiers a decode kernel must budget against.}
-\label{fig:gpu_residency_architecture}
+\caption{Lifetime overlap within one decode step: peak footprint occurs where intervals stack.}
+\label{fig:ch06_lifetime_timeline}
 \end{figure}
 
-On a GPU the fast tiers are concrete and small, and the design must respect their exact sizes. On an NVIDIA H100 (Hopper) SM, the \textbf{register} file is 65{,}536 32-bit registers---256\,KB per SM---with a hard ceiling of 255 registers per thread; \textbf{shared} memory is configurable up to 228\,KB per SM, of which 227\,KB is addressable by a single thread block after CUDA reserves 1\,KB; and the combined L1-plus-\textbf{shared} capacity is 256\,KB per SM, backed by a 50\,MB GPU-wide L2 cache before HBM \citep{nvidia2022hopper}. These are not trivia: they are the constraints a decode kernel's residency plan is solved against.
+\paragraph{Numeric walkthrough (Llama-3.2-1B layer, batch-1).}
+Hidden size $d{=}2048$ in BF16: each activation vector is $4d{=}8$\,KB \citep{taxbreak2026,kwon2023vllm}.
+Suppose a fused region keeps one hidden vector, one QKV weight tile (${\sim}32$\,KB for a thin tile), softmax carriers (${\sim}2$\,KB), and one MLP intermediate (${\sim}8$\,KB) simultaneously live during the attention peak \citep{dao2022flashattention}.
+Single-buffer sum ${\approx}50$\,KB; with QKV ping-pong, add another $32$\,KB $\rightarrow$ peak ${\approx}82$\,KB before KV stream tiles \citep{semianalysis2024tma}.
+Compare that peak to the GPU shared-memory budget from Chapter~\ref{chap:ch04}---legal with headroom for layout padding \citep{nvidia2022hopper,yirage2026}.
+On XDNA, the same peak must fit tile SRAM caps from Chapter~\ref{chap:ch05}; if not, shrink tile width or split at the MLP export edge \citep{amd2024xdna,amd2024aie}.
+This walkthrough is the spreadsheet behind Table~\ref{tab:ch06_peak_footprint}---not a substitute for your model's dimensions \citep{yirage2026,memoryfloor2026}.
 
-The \textbf{register}/occupancy trade is the first one a decode kernel hits. Because resident threads share the 65{,}536-register file, a kernel that uses $R$ registers per thread caps resident threads near $65536/R$; at 128 registers per thread an SM holds at most 512 threads \citep{nvidia2022hopper}. A heavily fused decode kernel that keeps many partial sums in registers therefore trades occupancy for residency, and the right balance is workload-specific---at batch-1 there is little parallelism to hide latency, so keeping the working set in registers often beats chasing occupancy, up to the point where a register spill to local memory undoes the win.
+\paragraph{Glow and Mirage parallels.}
+Static buffer reuse across non-overlapping lifetimes is how classic compilers eliminate copies on low-level IR \citep{rotem2018glow}.
+Mirage-style search proposes aggressive fusion orders; residency planning certifies which orders are \emph{legal} on each chip model \citep{wu2024mirage,yirage2026}.
+Treat peak footprint as an invariant search rejects---not a post-run surprise \citep{mpk2025,chen2020compilerbasedhardw}.
 
-\textbf{Shared} memory is where the canonical decode fusion lives. FlashAttention keeps the query tile, the relevant key/value tiles, and the running softmax statistics in \textbf{shared} memory and registers, computing attention without ever materializing the full score matrix to HBM \citep{dao2022flashattention}. The residency arithmetic is direct: at hidden size $4096$ in BF16 each activation vector is $8\,$KB, so a fused decoder layer that keeps a handful of intermediates on chip avoids tens of kilobytes of HBM traffic per token---traffic that, multiplied across 32 layers and every generated token, dominates batch-1 latency \citep{taxbreak2026,memoryfloor2026}. Hopper adds mechanisms that make residency cheaper to exploit: TMA performs asynchronous bulk copies into \textbf{shared} memory that overlap with compute, and distributed shared memory lets thread blocks in a cluster read each other's shared memory directly rather than through L2 \citep{semianalysis2024tma,nvidia2022hopper}. The design lever is to size tiles so the hot working set fits in the 228\,KB budget and to use the async copy path so streaming the KV slice overlaps the matmul rather than stalling it.
+\paragraph{Chapter~2 export-edge link.}
+Iron Rule~2 (keep activations on-chip across stages) is implemented as short lifetimes between fused ops \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+Every export edge is a lifetime extension plus a bytes/token bill \citep{taxbreak2026,dao2022flashattention}.
 
-The bank structure of \textbf{shared} memory is a second constraint the residency plan must respect. H100 shared memory is divided into 32 banks, each 4 bytes wide, and consecutive 4-byte words map to consecutive banks; a warp that accesses 32 addresses falling in distinct banks completes in one transaction, while accesses that collide on a bank serialize into multiple transactions \citep{nvidia2022hopper}. A residency plan that places a tile in shared memory but lays it out so threads stride across the same bank turns a fast on-chip access into a serialized one, which at batch-1 decode---where the kernel runs thousands of times per sequence---is a measurable bytes/token penalty. The layout of a resident tensor is therefore part of the residency decision, not an afterthought: tile shapes and padding are chosen so the hot access pattern is conflict-free.
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach a lifetime overlap sketch and peak-footprint worksheet before any fusion merge \citep{yirage2026,taxbreak2026}.
 
-A worked register budget makes the occupancy trade concrete. Suppose a fused decode kernel keeps a query vector, several accumulator registers for the running softmax, and a weight fragment live in registers, totaling 96 registers per thread. With the 65{,}536-register file that allows roughly $65536/96 \approx 682$ resident threads per SM, comfortably above one full thread block; push the kernel to 200 registers per thread to fuse more work and resident threads fall to about 327, below a 512-thread block, so occupancy drops \citep{nvidia2022hopper}. At batch-1 that occupancy loss is often acceptable because there is no batch parallelism to hide latency anyway, but only up to the spill threshold: once a thread needs more than 255 registers the compiler spills to local memory, which is HBM-backed, and the residency win is lost \citep{taxbreak2026,memoryfloor2026}. The design rule is to fuse aggressively in registers until just before the spill, then stop.
+\section{Tri-Hardware Residency Adaptation}
+\label{sec:ch06_tri_hardware_residency}
 
-The L2 cache is the last on-chip line of defense. At 50\,MB it can hold reused weight tiles or KV lines across thread blocks, and Hopper exposes L2 residency controls so a kernel can bias frequently reused data to stay cached \citep{nvidia2022hopper}. But L2 is shared GPU-wide and far slower than shared memory, so relying on it is a fallback, not a plan---the residency design still aims to keep the per-token hot set in registers and \textbf{shared} memory.
+The four-step workflow is universal; \emph{tiers and control knobs} differ per class \citep{patel2025llminference,dlbook}.
+This section states adaptation rules only---hardware deep dives live in Chapters~3--5 \citep{nvidia2022hopper,amd2024xdna,amd2024aie}.
+Read it after completing a draft worksheet: you are mapping priorities to mechanisms, not re-learning silicon \citep{chen2020compilerbasedhardw,yirage2026}.
 
-\section{CPU residency}
-\label{sec:ch06_cpu_residency}
+\paragraph{GPU in one paragraph.}
+Programmer-managed shared memory and registers hold the fused decode working set; async copy engines overlap KV streams; L2 is contingency \citep{nvidia2022hopper,semianalysis2024tma,dao2022flashattention}.
+Success metric: peak shared bytes plus layout fit Chapter~4 caps with no local-memory spill \citep{memoryfloor2026,yirage2026}.
 
-On a CPU the residency tiers are the \textbf{cache} hierarchy, and the design discipline shifts from explicit placement to cache-aware blocking. Unlike GPU shared memory, which the programmer manages directly, CPU L1/L2/L3 caches are hardware-managed, so residency is controlled indirectly by the access pattern: tile the computation so the working set of each tile fits in a target \textbf{cache} level and is reused before eviction \citep{dlbook,rotem2018glow}. For decode this means blocking the per-token GEMV and attention so the weight tile and KV slice currently in use stay in L1 or L2 across their reuse, rather than streaming the whole layer through the \textbf{cache} once and evicting it.
+\paragraph{CPU in one paragraph.}
+Caches are implicit---you earn residency via blocking and NUMA placement \citep{dlbook,rotem2018glow,patel2025llminference}.
+Success metric: weight and KV tiles reused inside L2/L3 before eviction; threads colocated with weight pages \citep{kwon2023vllm,memoryfloor2026}.
 
-The second CPU-specific concern is \textbf{NUMA}. On multi-socket or multi-die servers, memory is partitioned across nodes, and a thread accessing memory on a remote \textbf{NUMA} node pays a latency and bandwidth penalty \citep{dlbook}. For a memory-bound decode workload that re-reads the full weight set every token, a \textbf{NUMA}-oblivious placement---weights allocated on one node, decode threads scheduled on another---can silently halve effective bandwidth. The residency plan on a CPU therefore includes thread and memory affinity: pin decode threads to the \textbf{NUMA} node that owns the weights they read, and replicate read-only weights per node when the bandwidth saving exceeds the memory cost \citep{patel2025llminference}.
+\paragraph{NPU in one paragraph.}
+Tile and column SRAM are explicit; DMA schedules are the program \citep{amd2024xdna,amd2024aie}.
+Success metric: static graph compiles with ping-pong included; DDR bytes/token matches roofline expectation \citep{patel2025llminference,taxbreak2026}.
 
-The bandwidth arithmetic explains why this matters so much for decode on a CPU. At batch-1 the model re-reads its entire weight set from memory every token, so the achievable token rate is bounded by weight bytes divided by effective memory bandwidth---a memory-bound regime where a 7B model in BF16 must move roughly 14\,GB per token from wherever the weights live \citep{kwon2023vllm,memoryfloor2026}. If a \textbf{NUMA}-oblivious schedule forces half those reads across the inter-node link at a fraction of local bandwidth, the token rate drops proportionally, and no amount of compute optimization recovers it. This is the CPU analogue of the GPU's launch storm: the bottleneck is bytes moved through the wrong tier, and the fix is a residency and placement decision, not a faster inner loop.
-
-Hardware prefetchers complicate the \textbf{cache} residency picture in a way GPU shared memory does not. A CPU prefetcher will speculatively pull data into \textbf{cache} based on detected access patterns, which helps a streaming weight read but can also evict a small, hot tensor the kernel wanted to keep resident---so the blocking strategy must consider not just what fits in a \textbf{cache} level but what the prefetcher will displace \citep{dlbook}. The practical consequence is that CPU residency tuning is more empirical than GPU shared-memory tuning: the plan is validated by measuring \textbf{cache} miss rates at the decode operating point rather than by a static capacity check alone.
-
-The multi-hardware contrast with the GPU is instructive. A GPU kernel decides residency explicitly and statically through \textbf{shared}-memory allocation; a CPU kernel decides it implicitly through blocking and affinity, trusting the hardware \textbf{cache} to keep the blocked working set resident. The same fused decoder layer therefore wants a different schedule on each: the GPU schedule maximizes \textbf{shared}-memory reuse and async copy overlap, while the CPU schedule maximizes \textbf{cache} locality and respects \textbf{NUMA} boundaries---identical math, different residency mechanism, different bytes/token outcome \citep{taxbreak2026,memoryfloor2026}.
-
-\section{NPU residency}
-\label{sec:ch06_npu_residency}
-
-On a spatial \textbf{NPU} the residency model is the most explicit of all, and it must be decided entirely at compile time. On the AMD XDNA2 / AIE-ML fabric, each compute tile has 64\,KB of L1 local data memory---eight 8\,KB banks in hardware, presented to the programmer as four interleaved 16\,KB banks---with a dedicated DMA engine, and each column adds a 512\,KB L2 \textbf{SRAM} memory tile shared by its compute tiles, with shim tiles bridging to off-chip DDR \citep{amd2024aie,amd2024xdna}. There is no hardware cache that opportunistically keeps data resident; what lives in \textbf{SRAM} is exactly what the compiler's DMA schedule placed there, and nothing else.
-
-This makes \textbf{NPU} residency design both unforgiving and powerful. Unforgiving, because a tensor that does not fit the 64\,KB tile \textbf{SRAM} must be split across tiles or staged through the 512\,KB memory tile, and the DMA chain to do so is part of the program, not a runtime fallback \citep{amd2024xdna}. Powerful, because once the residency plan fits, there is no cache-miss variance and no allocator---the per-token cost is deterministic. The canonical decode fusion on this fabric keeps the attention tiles resident in L1/L2 \textbf{SRAM} and streams only inputs and final outputs through DDR, mapping the query-key-softmax-value chain as a single spatially tiled sweep so that intermediate scores never leave on-chip \textbf{SRAM} \citep{amd2024aie,dao2022flashattention}. Tiling parameters are chosen to maximize L1 reuse subject to the buffer constraint that the resident tiles fit the tile \textbf{SRAM}.
-
-Double buffering on the \textbf{NPU} is both more explicit and more essential than on the GPU. Because there is no cache to absorb a late load, a compute tile that waits for its next operand simply idles, so the DMA schedule must ping-pong between two buffers in the 64\,KB tile \textbf{SRAM}---loading the next tile via the tile's DMA engine while the vector unit consumes the current one \citep{amd2024aie,amd2024xdna}. This halves the usable tile capacity for the double-buffered operand, which is precisely the kind of constraint the residency plan must enforce up front: on a 64\,KB tile, a double-buffered weight tile plus a double-buffered activation tile plus the accumulators must all fit, and if they do not, the tiling parameters shrink until they do.
-
-The spatial structure adds a residency dimension the GPU and CPU lack: data can move between neighboring tiles without going off chip. On the XDNA2 fabric, compute tiles in an array can read each other's local memory directly and pass data through cascade connections, so a large operand can be distributed across several tiles' \textbf{SRAM} and consumed as a spatial pipeline rather than streamed from DDR \citep{amd2024aie,amd2024xdna}. A residency plan that exploits this maps a fused attention sweep across a row or column of tiles, keeping the intermediate scores entirely in on-chip \textbf{SRAM} and sending only the inputs and final outputs through DDR---the spatial analogue of a GPU megakernel, with the same goal of minimizing off-chip bytes per token \citep{dao2022flashattention,memoryfloor2026}.
-
-The contrast across the three classes is now sharp. The GPU offers a large, programmer-managed \textbf{shared} memory plus a hardware L2 fallback; the CPU offers hardware-managed caches tuned by blocking; the \textbf{NPU} offers small, fully explicit \textbf{SRAM} with compiler-scheduled DMA and no fallback. A residency plan that is optimal on one is illegal or wasteful on another, which is exactly why on-chip memory design cannot be a single portable template \citep{semianalysis2024tma,dlbook}.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[font=\scriptsize\bfseries] at (-3.6,2.1) {GPU};
+ \node[font=\scriptsize\bfseries] at (0,2.1) {CPU};
+ \node[font=\scriptsize\bfseries] at (3.6,2.1) {NPU};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,1.2) {\footnotesize Registers};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,0.4) {\footnotesize Shared};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,-0.4) {\footnotesize L2};
+ \node[vis arch node, minimum width=2.0cm] at (0,1.2) {\footnotesize L1};
+ \node[vis arch node, minimum width=2.0cm] at (0,0.4) {\footnotesize L2};
+ \node[vis arch node, minimum width=2.0cm] at (0,-0.4) {\footnotesize L3};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,1.2) {\footnotesize Tile SRAM};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,0.4) {\footnotesize Column L2};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,-0.4) {\footnotesize DDR stream};
+\end{tikzpicture}
+\caption{Tri-hardware fast tiers (conceptual alignment; capacities in Ch.~3--5).}
+\label{fig:ch06_tri_hw_tiers}
+\end{figure}
 
 \begin{table}[t]
 \centering
-\caption{On-chip residency tiers by hardware class; the fast tiers a decode kernel must budget against differ in size and in who manages them \citep{nvidia2022hopper,amd2024aie}.}
+\caption{Residency control model by hardware class (decode).}
 \label{tab:ch06_residency_tiers}
 \begin{tabular}{lll}
 \toprule
-Class & Fast on-chip tier & Managed by \\
+\textbf{Class} & \textbf{Fast tier (budget input)} & \textbf{Who decides placement} \\
 \midrule
-GPU (H100 SM) & 228 KB shared, 256 KB registers & Programmer + HW L2 \\
-CPU & L1/L2/L3 cache & Hardware (blocking-tuned) \\
-NPU (XDNA2 tile) & 64 KB L1, 512 KB L2 SRAM & Compiler DMA (explicit) \\
+GPU & Shared mem + registers (Ch.~4) & Programmer + layout \\
+CPU & L1/L2/L3 via blocking (Ch.~3) & Access pattern + NUMA \\
+NPU & Tile / column SRAM (Ch.~5) & Compiler DMA graph \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{YiRage memory pass}
+\subsection{GPU adaptation}
+\label{sec:ch06_gpu_residency}
+
+% AUTO_VISUAL:fig_gpu_residency_architecture
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.03,0) {\footnotesize Host\\};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize On-chip buffer\\};
+    \node[vis arch node] (s2) at (1.67,0) {\footnotesize Compute array\\};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize Memory tier\\};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{GPU residency data path: programmer-managed on-chip buffers feed the compute array; overflow exports to slower tiers (capacities in Ch.~4).}
+\label{fig:gpu_residency_architecture}
+\end{figure}
+
+\paragraph{Design focus (not hardware recap).}
+Explicit shared-memory and register assignment; fusion region must fit SM budget from Chapter~\ref{chap:ch04} \citep{nvidia2022hopper,yirage2026}.
+Bank-conflict-free layout is part of residency---see Chapter~\ref{chap:ch04} for swizzle rules \citep{semianalysis2024tma}.
+
+\paragraph{GPU-specific methods.}
+Trade occupancy for residency at batch-1 when parallelism cannot hide latency \citep{taxbreak2026,memoryfloor2026}.
+Use async copy (TMA) to overlap KV streams---does not reduce bytes; fusion does \citep{memoryfloor2026,semianalysis2024tma}.
+L2 is fallback, not plan---still aim to keep hot set in shared memory \citep{nvidia2022hopper}.
+
+\paragraph{Applicable when.}
+Fused MegaKernel with known peak $\le$ usable shared high-water (Chapter~4 byte sheet) \citep{yirage2026}.
+
+\paragraph{Avoid when.}
+Fusing past spill threshold---local memory traffic means residency plan failed \citep{memoryfloor2026,patel2025llminference}.
+
+\paragraph{Register versus shared split.}
+Place $(m,\ell,o)$ softmax carriers and thin accumulators in registers when register budget allows \citep{dao2022flashattention,nvidia2022hopper}.
+Stage larger tiles (QKV, MLP fragments) in shared memory with conflict-free layout---Chapter~\ref{chap:ch04} covers bank swizzling \citep{semianalysis2024tma,yirage2026}.
+When register pressure threatens spill, move carriers to shared before dropping fusion depth \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{Worked occupancy note.}
+At batch-1, lowering occupancy to keep fusion in shared memory is often correct---parallelism cannot hide latency anyway \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+Document occupancy choice against peak footprint worksheet, not kernel microbench alone \citep{yirage2026,nvidia2022hopper}.
+
+\paragraph{Layout is part of residency.}
+A tile placed in shared memory but strided across the same bank serializes into multiple transactions---measurable bytes/token at batch-1 \citep{semianalysis2024tma,nvidia2022hopper}.
+Tile shapes and padding are chosen with the allocation, not patched after profiling \citep{yirage2026,dao2022flashattention}.
+Chapter~\ref{chap:ch04} documents swizzle rules; this chapter requires you to \emph{allocate} with them \citep{semianalysis2024tma}.
+
+\paragraph{FlashAttention as residency pattern, not magic.}
+Flash-style attention is the canonical example of keeping query tiles, KV tiles, and softmax statistics on chip instead of materializing scores to HBM \citep{dao2022flashattention}.
+The lesson for decode is structural: identify the tensors with highest reuse-per-byte and pin them in the fastest legal tier for their lifetime \citep{dlbook,patel2025llminference}.
+TMA overlap hides KV stream latency; it does not reduce bytes---fusion and lifetime shortening do \citep{memoryfloor2026,semianalysis2024tma}.
+
+\subsection{CPU adaptation}
+\label{sec:ch06_cpu_residency}
+
+\paragraph{Design focus.}
+Cache is hardware-managed---residency via blocking so working set reuses before eviction \citep{dlbook,rotem2018glow}.
+\textbf{NUMA} affinity: pin decode threads to the node owning weights; remote memory can halve effective bandwidth on memory-bound loops \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{CPU-specific methods.}
+Block GEMV/attention tiles to L1/L2; replicate read-only weights per node when cheaper than remote reads \citep{kwon2023vllm,dlbook}.
+Validate with cache-miss counters at decode operating point---static capacity alone is insufficient \citep{patel2025llminference}.
+
+\paragraph{Debug.}
+If bytes/token is fine but ms/token regresses, check NUMA placement and prefetch pollution evicting hot tiles \citep{dlbook,taxbreak2026}.
+
+\paragraph{Blocking recipe (decode).}
+Choose block size $B$ so weight tile $+$ KV slice $+$ activations $\lesssim$ target L2 budget \citep{dlbook,kwon2023vllm}.
+Reuse the block across the inner dimension before advancing to the next KV position \citep{dao2022flashattention,patel2025llminference}.
+Residency here is \emph{algorithmic}---you do not name L2 addresses, you shape access \citep{rotem2018glow,yirage2026}.
+
+\paragraph{Bandwidth arithmetic (why NUMA matters).}
+At batch-1 a dense model re-reads essentially the full weight set every token, so token rate is bounded by weight bytes divided by effective memory bandwidth \citep{kwon2023vllm,memoryfloor2026}.
+A NUMA-oblivious schedule---weights on node~0, threads on node~1---can halve effective bandwidth with flat cache-miss counters \citep{patel2025llminference,dlbook}.
+The fix is placement and replication policy, not a faster inner loop \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Prefetchers and empirical validation.}
+Hardware prefetchers speculatively pull streams into cache---helpful for weight scans, harmful if they evict a small hot tensor you intended to keep resident \citep{dlbook}.
+CPU residency tuning therefore pairs static blocking with miss-rate measurement at the decode operating point \citep{patel2025llminference,yirage2026}.
+Contrast with GPU: you name shared addresses explicitly; on CPU you \emph{earn} residency through access shape \citep{rotem2018glow,chen2020compilerbasedhardw}.
+
+\subsection{NPU adaptation}
+\label{sec:ch06_npu_residency}
+
+\paragraph{Design focus.}
+No cache fallback---only compiler-placed SRAM plus DMA schedule (Chapter~\ref{chap:ch05}) \citep{amd2024xdna,amd2024aie}.
+Illegal peak footprint fails compile or DDR-binds silently \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{NPU-specific methods.}
+Size tiles to fit tile SRAM with ping-pong accounted; use column SRAM and spatial pipelines before DDR export \citep{amd2024aie,dao2022flashattention}.
+Shape buckets and static graphs are residency prerequisites---not optional packaging \citep{patel2025llminference,amd2024xdna}.
+
+\paragraph{Debug.}
+DDR bytes/token rising with flat MAC active \% signals residency failure, not ``slow NPU'' \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{Column versus tile SRAM.}
+Hot per-step tensors target tile SRAM; longer-lived KV slices may stream through column L2 with DMA overlap \citep{amd2024aie,amd2024xdna,dao2023flashdecoding}.
+Misplacing a cold buffer in tile SRAM evicts hot tensors---anti-pattern~5 in Section~\ref{sec:ch06_residency_pitfalls} \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Double buffering without cache safety net.}
+On spatial NPUs there is no hardware cache to absorb a late DMA load---compute tiles idle until operands arrive \citep{amd2024aie,amd2024xdna}.
+Ping-pong between two tile buffers is therefore mandatory for streamed operands, and it halves usable capacity for those operands \citep{patel2025llminference}.
+Step~3 of the workflow must count $2\times$ tile bytes \emph{before} codegen; Chapter~\ref{chap:ch05} lists the caps \citep{yirage2026,amd2024xdna}.
+
+\paragraph{Spatial pipelines across tiles.}
+Neighboring compute tiles can pass data through cascade links without DDR round-trips---a residency dimension GPUs approximate with shared memory and NPUs expose explicitly \citep{amd2024aie,dao2022flashattention}.
+A strong NPU plan maps fused attention as a spatial sweep: inputs and final outputs touch DDR; intermediate scores stay in on-chip SRAM \citep{memoryfloor2026,amd2024xdna}.
+
+\paragraph{Cross-class lesson.}
+Identical fused math wants three different schedules: GPU explicit tiers, CPU blocking+NUMA, NPU static DMA \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+A green GPU build proves nothing about CPU or NPU residency \citep{amd2024aie,memoryfloor2026,taxbreak2026}.
+
+\section{Cross-Hardware Worked Example: Llama-3.2-1B Layer}
+\label{sec:ch06_cross_hw_worked_example}
+
+Setup: batch-1, ctx${=}2048$, hidden $d{=}2048$, one decoder layer, same high-level IR export \citep{taxbreak2026,kwon2023vllm,yirage2026}.
+This is the same model family used in Chapter~4 and Chapter~5 worked cells---here we show \emph{allocation} rather than end-to-end goodput \citep{memoryfloor2026,taxbreak2026}.
+The IR lists tensors; residency metadata assigns each tensor a tier per backend \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Same tensors, different residency tiers (Llama-3.2-1B decode layer).}
+\label{tab:ch06_tri_hw_allocation}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Tensor} & \textbf{GPU (H100)} & \textbf{CPU} & \textbf{NPU (XDNA)} \\
+\midrule
+Input hidden state & Shared mem & L2 cache & Tile SRAM \\
+QKV weight tile & Shared (TMA ping-pong) & L1 blocked tile & Tile SRAM (DMA ping-pong) \\
+Softmax carriers $(m,\ell,o)$ & Registers & Registers & Tile SRAM slots \\
+KV cache slice & Shared stream tile & L3 blocked stream & Column L2 stream \\
+MLP intermediate & Shared mem & L2 cache & Tile SRAM \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Peak footprint and fusion legality (illustrative).}
+\label{tab:ch06_peak_footprint}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Metric} & \textbf{GPU} & \textbf{CPU} & \textbf{NPU} \\
+\midrule
+Peak fast-tier bytes & ${\sim}168$\,KB shared & ${\sim}2$\,MB L2 working set & ${\sim}34$\,KB tile \\
+Double-buffer included? & Yes (QKV) & Yes (weights) & Yes (K/V) \\
+Single fused layer legal? & Yes & Yes (blocked) & Yes (static graph) \\
+Split required? & No & No & No at this $d$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading the tables.}
+GPU places carriers in registers; NPU requires fixed carrier \emph{slots} in tile SRAM---same numerics, different legality mechanics \citep{dao2022flashattention,amd2024aie,nvidia2022hopper}.
+CPU does not ``allocate L2''---blocking makes reuse likely; measure to verify \citep{dlbook,patel2025llminference}.
+Triplet CI should compile all three or document which tier overflow forced a split \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Worked contrast.}
+Chapter~4 Table~\ref{tab:ch04_worked_results} and Chapter~5 Table~\ref{tab:ch05_worked_results} report goodput cells for single hardware \citep{memoryfloor2026,taxbreak2026}.
+This table explains \emph{why} those cells differ---residency plans diverge while IR stays shared \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Split-fusion trigger example.}
+Raise hidden size or head count until GPU peak shared memory exceeds Chapter~4 cap---memory pass should split at MLP export edge \citep{yirage2026,nvidia2022hopper,memoryfloor2026}.
+Same IR on NPU may split earlier due to smaller tile SRAM---triplet tests expose the gap \citep{amd2024aie,amd2024xdna,chen2020compilerbasedhardw}.
+
+\paragraph{Ablation discipline.}
+Document unfused, partially fused, and fully fused peak footprints per target---label which tier overflow forced each split \citep{wu2024mirage,yirage2026,taxbreak2026,memoryfloor2026}.
+Reviewers reject ms/token wins that hide demoted tensors \citep{patel2025llminference}.
+
+\paragraph{Step-by-step allocation narrative.}
+\textbf{GPU:} assign softmax carriers to registers; stage QKV and hidden vectors in shared memory with ping-pong on the weight tile; stream KV slices through TMA into the same fusion region \citep{dao2022flashattention,semianalysis2024tma,nvidia2022hopper}.
+Run step~3 peak walk---if shared high-water exceeds Chapter~4 usable cap, split at MLP export \citep{yirage2026,memoryfloor2026}.
+\textbf{CPU:} pick block size so weight tile $+$ KV slice fits L2; pin threads to the NUMA node that owns weights; verify with LLC miss counters \citep{dlbook,patel2025llminference}.
+\textbf{NPU:} lower QKV tile width until tile SRAM peak (with ping-pong) fits Chapter~5 budget; schedule column-L2 streaming for KV history \citep{amd2024xdna,amd2024aie}.
+Archive three worksheets---identical IR, divergent peaks \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Connection to serving stacks.}
+vLLM-style paging solves \emph{where KV lives in DRAM}; this chapter solves \emph{which KV bytes enter the fast tier each step} \citep{kwon2023vllm,dao2023flashdecoding}.
+Both layers matter: paging without on-chip residency still pays HBM round-trips per attention op \citep{taxbreak2026,memoryfloor2026}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Peak footprint line items (GPU, Llama-3.2-1B layer, illustrative).}
+\label{tab:ch06_gpu_peak_line_items}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Buffer} & \textbf{Bytes} & \textbf{Ping-pong?} \\
+\midrule
+Hidden activation (BF16) & 8\,KB & No \\
+QKV weight tile & 32\,KB & Yes ($\times 2$) \\
+Softmax carriers & 2\,KB & No \\
+KV stream tile & 16\,KB & Yes ($\times 2$) \\
+MLP intermediate & 8\,KB & No \\
+\midrule
+\textbf{Peak sum} & {\footnotesize $\sim$168}\,KB & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Line-item discipline.}
+Table~\ref{tab:ch06_gpu_peak_line_items} is how Pattern~1 worksheets should look---every row auditable \citep{yirage2026,chen2020compilerbasedhardw}.
+Summing without rows hides double-buffer mistakes \citep{semianalysis2024tma,memoryfloor2026}.
+Cross-check the total against Chapter~4 shared-memory budget before claiming fusion legality \citep{nvidia2022hopper,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Fill Table~\ref{tab:ch06_tri_hw_allocation} for your model before claiming triplet parity \citep{yirage2026,amd2024xdna,nvidia2022hopper}.
+
+\section{YiRage Memory Pass: Residency Rules as Compile Gates}
 \label{sec:ch06_yirage_memory_pass}
 
-The book's reference compiler turns this discipline into a checkable pass. \textbf{YiRage} carries a \textbf{memory}-residency pass that encodes the per-class residency contract---GPU shared-memory and register budgets, CPU cache-blocking and NUMA constraints, NPU tile-SRAM capacity---as IR metadata, then verifies a candidate schedule against the target's actual on-chip \textbf{memory} before codegen \citep{yirage2026}. A fusion that would exceed the 228\,KB shared-memory budget on an H100, or overflow a 64\,KB XDNA tile, is rejected at compile time rather than discovered as a spill in production telemetry \citep{nvidia2022hopper,amd2024aie}.
+\paragraph{Advance notice.}
+Compiler/IR literacy helps here; kernel tuners should skim invariants and return for pass I/O when debug fails \citep{chen2020compilerbasedhardw,yirage2026}.
 
-This is the mechanism behind the residency claims made throughout the book. When earlier chapters said a schedule must ``keep the layer on chip,'' the \textbf{YiRage} \textbf{memory} pass is what makes that statement enforceable: it computes the peak resident footprint of a fused region from the lifetime plan, compares it to the target tier capacity, and either admits the fusion or splits it until it fits \citep{yirage2026,wu2024mirage}. Because the check is static, it composes with the megakernel search of Chapter~20---the superoptimizer proposes a fusion, and the \textbf{memory} pass certifies that its residency is legal on the target before the kernel is ever emitted \citep{wu2024mirage,mpk2025}.
+\textbf{YiRage} encodes per-class residency contracts as IR metadata, then verifies schedules before codegen \citep{yirage2026}.
+\textbf{Pipeline position:} after bufferization, before target codegen---legality pass, not optional lint \citep{rotem2018glow,wu2024mirage}.
 
-Concretely, the pass operates on the lifetime plan rather than on the source program, which is what lets it reason about peak footprint correctly. It walks the fused region, tracks which buffers are simultaneously live at each point, accounts for double-buffered operands at their doubled size, and takes the maximum across the region as the peak resident footprint \citep{yirage2026,dao2022flashattention}. That maximum is compared against the target tier capacity---228\,KB on an H100 SM, 64\,KB on an XDNA tile---and if it exceeds the budget the pass has two legal responses: split the region so each piece fits, or demote the lowest-reuse tensor to a slower tier and accept its bandwidth cost \citep{nvidia2022hopper,amd2024aie}. Both are deterministic compile-time decisions, so the same model compiled for two SKUs gets two different but provably-legal residency plans.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node] (buf) at (-3.2,0) {\footnotesize Bufferize};
+ \node[vis arch node] (mem) at (0,0) {\footnotesize Memory\\pass};
+ \node[vis pipeline node] (cg) at (3.2,0) {\footnotesize Codegen};
+ \draw[vis arrow] (buf) -- (mem) -- (cg);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Peak footprint vs tier cap; split or demote};
+\end{tikzpicture}
+\caption{YiRage memory pass in the lowering pipeline.}
+\label{fig:ch06_yirage_memory_pass}
+\end{figure}
 
-The pass also closes a gap that pure search leaves open. A superoptimizer that proposes a megakernel is optimizing for performance and may propose a fusion that is faster in principle but illegal on a given tier; without a residency check, that fusion ships and spills in production \citep{wu2024mirage,mpk2025}. By making residency a verified precondition, the \textbf{YiRage} \textbf{memory} pass lets the search be aggressive---propose any fusion---while guaranteeing that whatever is emitted respects the target's on-chip \textbf{memory}, which is the separation of concerns that makes searched megakernels safe to deploy across a heterogeneous fleet \citep{yirage2026,patel2025llminference}.
+\begin{table}[t]
+\centering
+\small
+\caption{YiRage memory pass: inputs, checks, outputs.}
+\label{tab:ch06_memory_pass_io}
+\begin{tabular}{@{}p{2.2cm}p{4.2cm}p{3.6cm}@{}}
+\toprule
+\textbf{Dimension} & \textbf{Check} & \textbf{On failure} \\
+\midrule
+Peak footprint & Simultaneous live buffers + 2$\times$ ping-pong & Split fusion or demote tensor \\
+GPU layout & Bank conflict hazard (Ch.~4 rules) & Re-tile or pad \\
+CPU NUMA & Weight/KV node affinity metadata & Emit warning or reject \\
+NPU DMA & Column bandwidth vs pipeline depth & Reschedule DMA chain \\
+Superoptimizer & Mirage proposal vs tier cap & Reject illegal fusion \citep{wu2024mirage} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The result is that residency stops being a property a kernel author hopes for and becomes one the compiler guarantees. For a serving team that is the difference between a decode kernel that is fast on the SKU it was tuned on and one that is provably within budget on every SKU in the fleet \citep{patel2025llminference,memoryfloor2026}.
+\paragraph{Input/output contract.}
+\textbf{Input:} memref IR with lifetime intervals and target chip model from Chapter~3 \citep{chen2020compilerbasedhardw,yirage2026}.
+\textbf{Output:} legal tier assignment per buffer \emph{or} structured error citing overflow row and suggested split edge \citep{amd2024aie,nvidia2022hopper,patel2025llminference}.
+Metadata fields typically include: \texttt{lifetime\_start}, \texttt{lifetime\_end}, \texttt{reuse\_score}, \texttt{preferred\_tier}, \texttt{ping\_pong}, and \texttt{demotion\_cost\_bytes} \citep{yirage2026,rotem2018glow}.
+Downstream codegen reads tier assignment; it does not re-infer lifetimes \citep{wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Interaction with search.}
+Mirage-style superoptimizers propose aggressive fusions; memory pass certifies residency before emit \citep{wu2024mirage,mpk2025,yirage2026}.
+Search explores performance; pass enforces mechanical sympathy---separation that makes heterogeneous fleets deployable \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{Error message contract.}
+Overflow reports must cite: tensor name, live interval, bytes, tier cap, and recommended split edge \citep{yirage2026,amd2024aie,nvidia2022hopper}.
+Opaque ``compile failed'' messages recreate GPU-porting pain on NPU \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Regression tests.}
+CI should fail when a new buffer appears in the hot path without lifetime metadata \citep{yirage2026,rotem2018glow}.
+Golden tests compare peak footprint against stored worksheets for canonical layers \citep{wu2024mirage,mpk2025}.
+
+\paragraph{Closed loop with superoptimization.}
+A practical lowering loop alternates: Mirage proposes a fused schedule $\rightarrow$ memory pass computes peak footprint and tier assignment $\rightarrow$ illegal proposals are rejected with a split hint $\rightarrow$ search retries with a narrower fusion region \citep{wu2024mirage,yirage2026,mpk2025}.
+This separation keeps search ambitious and deployment safe---the pass is the mechanical-sympathy gate Chapter~3 promised \citep{chen2020compilerbasedhardw,patel2025llminference}.
+Kernel engineers should treat pass errors as \emph{design feedback}, not annoyances to bypass with smaller tiles alone \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{Overflow strategies (two sanctioned paths).}
+When peak exceeds tier cap, YiRage may (a)~split fusion at the lowest reuse-per-byte export edge, preserving carriers on chip, or (b)~demote a low-score tensor to the next tier and attach an expected bytes/token cost to the IR \citep{yirage2026,chen2020compilerbasedhardw}.
+Undocumented demotion is how teams ship ``fast'' kernels that regress on longer contexts \citep{patel2025llminference,memoryfloor2026}.
+Pick (a) when split restores legality with acceptable launch increase; pick (b) only when demotion cost is below serving SLO \citep{taxbreak2026,wu2024mirage}.
+Both paths must emit human-readable rationale for review packets \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach memory-pass legality report (or overflow row) on every fusion PR \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\section{Residency Engineering Patterns}
+\label{sec:ch06_residency_patterns}
+
+The four-step workflow becomes repeatable when encoded as review patterns \citep{chen2020compilerbasedhardw,yirage2026}.
+Use these in design docs the same way Chapter~5 uses XDNA patterns---Scene, Solution, Benefit, Notes \citep{patel2025llminference,amd2024aie}.
+
+\paragraph{Pattern 1: Peak worksheet before fusion merge.}
+\textbf{Scene:} team proposes merging attention and MLP into one kernel \citep{taxbreak2026}.
+\textbf{Solution:} run step~1--3 on the fused DAG; attach live-set timeline (Figure~\ref{fig:ch06_lifetime_timeline}) \citep{wu2024mirage,dlbook}.
+\textbf{Benefit:} catches overflow before codegen and before NPU compile \citep{yirage2026,amd2024xdna}.
+\textbf{Notes:} include ping-pong bytes; compare to Chapter~3 chip-model row \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Pattern 2: Carrier-first tier assignment.}
+\textbf{Scene:} softmax state $(m,\ell,o)$ contends with QKV tiles for registers or tile SRAM \citep{dao2022flashattention}.
+\textbf{Solution:} assign carriers to the fastest tier first; demote low-reuse scratch before touching carriers \citep{dao2022flashattention,patel2025llminference}.
+\textbf{Benefit:} preserves numerically sensitive state on chip across long contexts \citep{dao2023flashdecoding}.
+\textbf{Notes:} GPU $\rightarrow$ registers; NPU $\rightarrow$ fixed slots---see Table~\ref{tab:ch06_tri_hw_allocation} \citep{amd2024aie,nvidia2022hopper}.
+
+\paragraph{Pattern 3: KV stream with explicit overlap budget.}
+\textbf{Scene:} KV history too large to resident; each token loads a slice \citep{kwon2023vllm,dao2023flashdecoding}.
+\textbf{Solution:} double-buffer KV tiles; schedule loads to complete before consumers stall \citep{semianalysis2024tma,amd2024xdna}.
+\textbf{Benefit:} hides DDR latency without pretending KV ``fits'' in tile SRAM \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Notes:} step~3 must count $2\times$ KV tile bytes during overlap window \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Pattern 4: Export-edge split discipline.}
+\textbf{Scene:} fused region overflows fastest tier \citep{memoryfloor2026,yirage2026}.
+\textbf{Solution:} split at Chapter~2 export edge with lowest reuse-per-byte tensor \citep{chen2020compilerbasedhardw,taxbreak2026}.
+\textbf{Benefit:} preserves the highest-value fusion while restoring legality \citep{wu2024mirage,mpk2025}.
+\textbf{Notes:} memory pass should emit the recommended edge in the error text \citep{yirage2026}.
+
+\paragraph{Pattern 5: Triplet worksheet parity.}
+\textbf{Scene:} CUDA schedule ``works''; Ryzen AI compile fails \citep{amd2024xdna,taxbreak2026}.
+\textbf{Solution:} fill Table~\ref{tab:ch06_tri_hw_allocation} for all three backends before merge \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Benefit:} prevents GPU-only residency assumptions in shared IR \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Notes:} peak bytes differ; IR parity $\neq$ residency parity \citep{amd2024aie,nvidia2022hopper}.
+
+\paragraph{Pattern 6: Bytes/token proof artifact.}
+\textbf{Scene:} ms/token improved but serving cost unclear \citep{memoryfloor2026,taxbreak2026}.
+\textbf{Solution:} archive bytes/token worksheet alongside latency; note any demoted tensors \citep{patel2025llminference,yirage2026}.
+\textbf{Benefit:} separates real residency wins from measurement noise \citep{dao2022flashattention,memoryfloor2026}.
+\textbf{Notes:} tie to Chapter~1 metric definitions \citep{taxbreak2026}.
+
+\paragraph{Pattern usage in review.}
+Require Pattern~1 worksheet on fusion PRs; Pattern~5 triplet row on IR changes; Pattern~6 bytes proof on performance claims \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+
+\section{Residency Design Review Workflow}
+\label{sec:ch06_residency_review}
+
+Production teams benefit from a fixed review sequence---same spirit as Chapter~5 review gates, applied to cross-hardware residency \citep{patel2025llminference,yirage2026,amd2024xdna}.
+
+\paragraph{Step R1: IR freeze.}
+Freeze the fused subgraph under review: list inputs, outputs, and export edges \citep{chen2020compilerbasedhardw,taxbreak2026}.
+No residency review on a moving graph \citep{wu2024mirage,yirage2026}.
+
+\paragraph{Step R2: Lifetime inventory.}
+For each intermediate, record producer op, last consumer, and byte size \citep{rotem2018glow,dlbook}.
+Flag KV tensors separately---lifetime spans context, not one step \citep{kwon2023vllm,dao2023flashdecoding}.
+
+\paragraph{Step R3: Peak worksheets (triplet).}
+Run step~3 for GPU, CPU, and NPU chip models from Chapter~3 \citep{chen2020compilerbasedhardw,nvidia2022hopper,amd2024aie}.
+Attach three numbers or mark split/demotion explicitly \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Step R4: Memory-pass dry run.}
+Run YiRage memory pass on each backend; archive pass report or overflow row \citep{yirage2026,wu2024mirage}.
+Reject merges with opaque compile failures \citep{patel2025llminference,amd2024xdna}.
+
+\paragraph{Step R5: Checklist sign-off.}
+Complete Section~\ref{sec:ch06_residency_pitfalls} checklist; link Pattern~1--6 artifacts \citep{chen2020compilerbasedhardw,taxbreak2026}.
+Only then proceed to kernel tuning in Part~IV \citep{semianalysis2024tma,dao2022flashattention}.
+
+\paragraph{Facilitation notes.}
+Residency review is cross-functional: compiler authors own pass output, kernel engineers own tier justification, serving owners own bytes/token acceptance \citep{patel2025llminference,yirage2026,memoryfloor2026}.
+Disputes resolve with peak worksheets, not opinions \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Artifact bundle template.}
+A complete residency review packet contains: (1)~fused IR snippet with export edges highlighted, (2)~lifetime table (tensor, bytes, $t_{\mathrm{prod}}$, $t_{\mathrm{last}}$), (3)~three peak-footprint numbers, (4)~memory-pass log excerpt, (5)~signed checklist \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+Store packets next to benchmark TSV rows so regressions bisect quickly \citep{taxbreak2026,memoryfloor2026}.
+This is the operational form of ``residency is a contract''---not a slide deck \citep{dlbook,rotem2018glow}.
+
+\section{Residency Pitfalls, Checklist, and Debug}
+\label{sec:ch06_residency_pitfalls}
+
+\subsection{Five common residency anti-patterns}
+\begin{enumerate}
+\item \textbf{Over-fusion.}
+\emph{Symptom:} spill / local-memory loads on GPU; compile fail on NPU \citep{memoryfloor2026,yirage2026}.
+\emph{Root cause:} fusion depth chosen for launch count, not peak footprint \citep{taxbreak2026,wu2024mirage}.
+\emph{Fix:} split at Chapter~2 export edge; re-run peak footprint step~3 \citep{chen2020compilerbasedhardw}.
+\emph{Prevention:} Pattern~1 worksheet mandatory before merge \citep{yirage2026}.
+
+\item \textbf{Double-buffer not in budget.}
+\emph{Symptom:} fits in spreadsheet, overflows after enabling ping-pong \citep{semianalysis2024tma,dao2022flashattention}.
+\emph{Root cause:} step~3 counted single-buffer bytes only \citep{yirage2026,memoryfloor2026}.
+\emph{Fix:} multiply streamed operand bytes by two in peak calculation \citep{yirage2026}.
+\emph{Prevention:} mark \texttt{ping\_pong=true} in IR before pass \citep{rotem2018glow,chen2020compilerbasedhardw}.
+
+\item \textbf{Stretched lifetimes.}
+\emph{Symptom:} fast tier full despite small tensors \citep{wu2024mirage,dlbook}.
+\emph{Root cause:} schedule interleaves unrelated ops between producer and consumer \citep{taxbreak2026,patel2025llminference}.
+\emph{Fix:} reschedule fused DAG so high-reuse tensors have shorter live ranges \citep{taxbreak2026}.
+\emph{Prevention:} co-optimize schedule with step~1 inventory \citep{wu2024mirage,yirage2026}.
+
+\item \textbf{NUMA blindness (CPU).}
+\emph{Symptom:} half effective bandwidth, flat cache miss rate \citep{patel2025llminference,memoryfloor2026}.
+\emph{Root cause:} threads and weights on different sockets \citep{dlbook,kwon2023vllm}.
+\emph{Fix:} pin threads; replicate weights per node \citep{dlbook}.
+\emph{Prevention:} Gate~C in this section on every CPU benchmark \citep{patel2025llminference,taxbreak2026}.
+
+\item \textbf{NPU tier misplacement.}
+\emph{Symptom:} hot tensor in column L2 while cold tensor consumes tile SRAM \citep{amd2024aie,amd2024xdna}.
+\emph{Root cause:} DMA schedule optimized for line count, not reuse score \citep{yirage2026,patel2025llminference}.
+\emph{Fix:} reorder DMA schedule; demote cold buffers first \citep{yirage2026,patel2025llminference}.
+\emph{Prevention:} Pattern~2 carrier-first assignment \citep{dao2022flashattention,amd2024aie}.
+\end{enumerate}
+
+\paragraph{Megakernel prerequisites (Part~IV).}
+Chapters~7--11 assume residency is already legal \citep{taxbreak2026,mpk2025,wu2024mirage}.
+\textbf{Chapter~7} static role assignment maps thread blocks to fused stages---roles are meaningless if the working set spills \citep{patel2025llminference,yirage2026}.
+\textbf{Chapter~8} TMA choreography overlaps KV streams---ping-pong must already appear in step~3 worksheets \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Chapter~10} softmax carriers need fixed on-chip homes---Pattern~2 must have run \citep{dao2022flashattention,dao2023flashdecoding}.
+\textbf{Chapter~11} full MegaKernel assembly is the capstone---only shippable when memory pass reports green on all fleet backends \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+Skipping this chapter turns Part~IV into microbenchmark tuning \citep{taxbreak2026,memoryfloor2026}.
+If you are maintaining an existing CUDA kernel, use the tri-hardware table as a porting checklist before touching Ryzen AI backends or tuning MegaKernel schedules \citep{amd2024xdna,patel2025llminference,yirage2026,mpk2025}.
+
+\subsection{Residency design self-check (review checklist)}
+\begin{itemize}
+\item[$\square$] All tensor lifetimes documented; peak footprint calculated
+\item[$\square$] Double-buffer 2$\times$ occupancy included in peak
+\item[$\square$] KV streaming overlap plan documented
+\item[$\square$] Target fast-tier capacity not exceeded (Ch.~3--5 caps)
+\item[$\square$] Demoted tensors have accepted bandwidth cost
+\item[$\square$] CPU: NUMA affinity plan attached
+\item[$\square$] NPU: DMA chain bandwidth sanity-checked
+\item[$\square$] Triplet IR memory-pass report archived
+\end{itemize}
+
+\paragraph{Postmortem sequence.}
+On residency regression: replay peak worksheet $\rightarrow$ diff bytes/token $\rightarrow$ check spill counters $\rightarrow$ bisect fusion split $\rightarrow$ re-run memory pass \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference}.
+Never tune MMA tiles before bytes/token replay \citep{nvidia2022hopper,amd2024aie}.
+
+\subsection{Review gates (symptom $\rightarrow$ debug)}
+\paragraph{Gate A: shared-memory overflow on GPU.}
+\textbf{Symptom:} compile warning or runtime local-memory loads \citep{memoryfloor2026,nvidia2022hopper}.
+\textbf{Debug:} re-run step~3 with ping-pong; check bank layout; compare to Chapter~4 cap \citep{semianalysis2024tma,yirage2026}.
+\textbf{Fix:} split fusion or demote lowest-score scratch \citep{wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Gate B: NPU compile fail on tile SRAM.}
+\textbf{Symptom:} DMA schedule cannot fit ping-pong tiles \citep{amd2024xdna,amd2024aie}.
+\textbf{Debug:} print peak tile bytes from memory pass; verify column vs tile assignment \citep{yirage2026,patel2025llminference}.
+\textbf{Fix:} shrink tile width or move KV stream to column L2 \citep{amd2024aie,dao2023flashdecoding}.
+
+\paragraph{Gate C: CPU bandwidth cliff.}
+\textbf{Symptom:} token rate half of roofline expectation; flat LLC misses \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Debug:} NUMA node of threads vs weights; remote access counters \citep{dlbook}.
+\textbf{Fix:} pin threads; replicate weights per node \citep{kwon2023vllm,taxbreak2026}.
+
+\paragraph{Gate D: silent demotion.}
+\textbf{Symptom:} latency OK at ctx${=}512$, regresses at ctx${=}8192$ \citep{patel2025llminference,dao2023flashdecoding}.
+\textbf{Debug:} diff memory-pass tier assignments across context buckets \citep{yirage2026,amd2024xdna}.
+\textbf{Fix:} document demotion bytes cost; split fusion instead of hiding spill \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{Documentation contract.}
+Every residency promotion ships: lifetime diagram, peak worksheet, tri-hardware table row, memory-pass report, checklist tick marks \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026}.
+Private spreadsheets do not scale across fleets \citep{patel2025llminference}.
+
+\paragraph{Reader exercises.}
+(1) Compute peak footprint for one layer with ping-pong. (2) Explain one anti-pattern symptom from your last merge. (3) Fill checklist for your model \citep{yirage2026,dao2022flashattention,amd2024xdna,nvidia2022hopper,taxbreak2026,memoryfloor2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Merge blocked until checklist complete or deferral documented with overflow row \citep{yirage2026,chen2020compilerbasedhardw}.
 
 \section{Key Takeaways}
 \label{sec:ch06_key_takeaways}
 
+Residency planning is the hinge between hardware chapters and MegaKernel implementation \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw}.
+The principles below are intentionally actionable---each pairs a design rule with a concrete next step your team can adopt in the next sprint \citep{taxbreak2026,memoryfloor2026}.
+
 \begin{itemize}
-\item \textbf{Plan tensor lifetimes before codegen.}
-Determine each tensor's production-to-last-use span and place it in the fastest tier that holds it for that lifetime; static allocation keeps the allocator out of the per-token path and makes the peak footprint checkable \citep{dlbook,rotem2018glow}. A too-long lifetime silently spills \citep{taxbreak2026}.
+\item \textbf{Plan-before-codegen principle.}
+Residency is a contract between fused IR and silicon, not a post-hoc tweak after kernels compile \citep{dlbook,yirage2026}.
+If peak footprint is unknown at merge time, you do not yet have a decode optimization---you have a prototype \citep{memoryfloor2026,taxbreak2026}.
+\textbf{Action:} run the four-step workflow and attach worksheets before any codegen PR \citep{chen2020compilerbasedhardw,rotem2018glow}.
 
-\item \textbf{Budget against real GPU tier sizes.}
-An H100 SM has 256 KB of registers (255/thread max) and up to 228 KB of shared memory; fused decode kernels trade occupancy for residency and must fit the hot set in these budgets \citep{nvidia2022hopper}. FlashAttention keeps tiles in shared memory to avoid HBM traffic \citep{dao2022flashattention}.
+\item \textbf{Lifetime-first principle.}
+Tier placement follows lifetime span and reuse-per-byte, not operator names or framework defaults \citep{dao2022flashattention,wu2024mirage}.
+Shortening a high-reuse tensor's lifetime via scheduling often beats enlarging shared memory or tile SRAM \citep{taxbreak2026,patel2025llminference}.
+\textbf{Action:} draw Figure~\ref{fig:ch06_lifetime_timeline} for each fused region; reject schedules that stack three large tensors without justification \citep{yirage2026,dlbook}.
 
-\item \textbf{CPU residency is blocking plus NUMA.}
-Caches are hardware-managed, so residency is controlled by cache-blocked tiling and by pinning decode threads to the NUMA node owning their weights \citep{dlbook,patel2025llminference}. A NUMA-oblivious placement can halve effective bandwidth on a memory-bound decode loop \citep{memoryfloor2026}.
+\item \textbf{Hardware-adaptation principle.}
+There is no portable residency template: GPU uses explicit shared memory, CPU uses blocking and NUMA, NPU uses static DMA graphs \citep{patel2025llminference,amd2024xdna,nvidia2022hopper}.
+Identical IR with identical ms/token on one backend proves nothing about another \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+\textbf{Action:} fill Table~\ref{tab:ch06_tri_hw_allocation} for every backend in your fleet before claiming parity \citep{amd2024aie,taxbreak2026}.
 
-\item \textbf{NPU residency is explicit and compile-time.}
-An XDNA2 tile has 64 KB L1 SRAM and a 512 KB column L2, with compiler-scheduled DMA and no cache fallback, so what is resident is exactly what the schedule placed \citep{amd2024aie,amd2024xdna}. Tiles are sized to fit the SRAM buffer constraint \citep{semianalysis2024tma}.
+\item \textbf{Double-buffer trade principle.}
+Ping-pong buys pipeline overlap at $2\times$ space for streamed operands---worth it only when step~3 still fits \citep{semianalysis2024tma,dao2022flashattention}.
+Silent omission of doubled bytes is anti-pattern~2 \citep{yirage2026,memoryfloor2026}.
+\textbf{Action:} show doubled bytes explicitly in peak worksheets and IR \texttt{ping\_pong} flags \citep{rotem2018glow,chen2020compilerbasedhardw}.
 
-\item \textbf{Make residency a checkable compiler pass.}
-The YiRage memory pass encodes per-class budgets as IR metadata and rejects fusions that exceed on-chip capacity before codegen, composing with megakernel search \citep{yirage2026,wu2024mirage}. Residency becomes a guarantee the compiler proves, not a hope the kernel author holds \citep{mpk2025}.
+\item \textbf{Verifiable-plan principle.}
+Residency must be quantified, compiler-checked, and archived---experience alone does not scale across triplet fleets \citep{yirage2026,wu2024mirage,patel2025llminference}.
+The memory pass is the mechanical gate; the checklist is the human gate \citep{chen2020compilerbasedhardw,mpk2025}.
+\textbf{Action:} attach memory-pass reports and Section~\ref{sec:ch06_residency_pitfalls} checklist ticks to CI artifacts \citep{yirage2026,taxbreak2026}.
 \end{itemize}
+
+\paragraph{How this chapter connects.}
+Chapter~3 gave constraint matrices; Chapters~4--5 gave per-class caps and mechanisms \citep{chen2020compilerbasedhardw,nvidia2022hopper,amd2024xdna}.
+This chapter gave the procedure to turn caps into assignments \citep{yirage2026,dlbook}.
+Chapter~\ref{chap:ch07} and beyond implement the schedules those assignments enable \citep{taxbreak2026,patel2025llminference,mpk2025}.
 
 \section{Conclusion}
 \label{sec:ch06_conclusion}
 
-On-chip residency is the concrete form every decode optimization in this book eventually takes: plan each tensor's lifetime, rank by reuse-per-byte, and place the hot working set in the fastest tier that can hold it on the target you actually ship \citep{dlbook,nvidia2022hopper}. The tiers differ sharply---programmer-managed shared memory and registers on a GPU, hardware caches plus NUMA on a CPU, explicit DMA-scheduled SRAM on an NPU---so the same fused layer wants a different residency plan per class, and a green build on one says nothing about residency on another \citep{amd2024aie,memoryfloor2026}. The YiRage memory pass makes the plan enforceable by checking peak footprint against tier capacity before codegen, so a fusion that would spill is split or demoted rather than shipped \citep{yirage2026}. With residency now a budgeted, checkable property, Chapter~\ref{chap:ch07} turns to the next MegaKernel technique built on it: static role assignment and schedule-free kernels that fix each thread block's job at compile time so the resident working set never moves \citep{taxbreak2026,patel2025llminference}.
+On-chip residency is where decode optimization becomes concrete: lifetimes, peak footprint, and per-class tier assignment \citep{dlbook,chen2020compilerbasedhardw}.
+Chapters~4--5 gave hardware-specific bounds; this chapter gave the \emph{method} to use them without duplicating catalogs \citep{nvidia2022hopper,amd2024xdna,yirage2026}.
+You now have a workflow, patterns, gates, and artifacts that turn those bounds into shippable fused kernels across a heterogeneous fleet \citep{patel2025llminference,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Closing metaphor.}
+Think of residency as airport gate assignment: flights (tensors) differ in size and connection time (lifetime); gates (tiers) are finite \citep{dlbook}.
+A schedule that minimizes runway taxiing (launches) but parks wide-body jets at regional gates (shared-memory overflow) still misses departure \citep{taxbreak2026,yirage2026}.
+The four-step workflow is the operations desk; the memory pass is the automated overbooking alarm \citep{wu2024mirage,chen2020compilerbasedhardw}.
+
+Chapter~\ref{chap:ch07} builds the next MegaKernel technique on this foundation: \textbf{static role assignment}---fixing each thread block's job at compile time so the resident working set stops moving \citep{taxbreak2026,patel2025llminference}.
+Static roles only help when peak footprint is already legal---otherwise roles shuffle spill traffic \citep{memoryfloor2026,yirage2026}.
+Carry peak-footprint worksheets and Table~\ref{tab:ch06_tri_hw_allocation} into every subsequent kernel chapter \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Recap for practitioners.}
+If you remember nothing else: decode optimization is residency optimization; lifetimes drive tiers; ping-pong doubles bytes; triplet fleets need triplet worksheets; the memory pass is the gate \citep{dao2022flashattention,patel2025llminference,yirage2026,taxbreak2026,memoryfloor2026}.
+Run the four-step workflow once per fused region per backend before writing a single line of device code \citep{chen2020compilerbasedhardw,rotem2018glow}.
+When in doubt, shorten lifetimes via scheduling before buying larger chips \citep{wu2024mirage,taxbreak2026}.
+
+\paragraph{Part~IV bridge.}
+Residency planning is prerequisite for TMA (Ch.~8), sync (Ch.~9), softmax carriers (Ch.~10), and full MegaKernel assembly (Ch.~11) \citep{dao2022flashattention,semianalysis2024tma,yirage2026}.
+If peak footprint is unproved here, later chapters optimize the wrong problem \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Summary before Part~IV.}
+Lifetime method, tri-hardware adaptation, worked allocation, memory pass, engineering patterns, and pitfalls form the residency spine of the book \citep{dlbook,chen2020compilerbasedhardw,yirage2026,dao2022flashattention,patel2025llminference,amd2024xdna,nvidia2022hopper,taxbreak2026,memoryfloor2026,wu2024mirage,rotem2018glow,mpk2025}.
+Bytes/token proof comes from planning---not from hoping caches behave \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{What to carry forward.}
+Every subsequent kernel chapter assumes you can (1)~name each tensor's lifetime, (2)~compute peak footprint with ping-pong, (3)~justify tier assignment per backend, and (4)~attach a memory-pass or checklist artifact \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+MegaKernel techniques in Part~IV add synchronization, TMA choreography, and softmax carrier placement---but they do not replace residency planning \citep{semianalysis2024tma,dao2022flashattention,taxbreak2026}.
+If you skip the worksheets here, you will optimize launch count while bytes/token flatlines \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{Teaching versus production.}
+In teaching mode, hand-draw lifetime timelines and compare tri-hardware tables on a whiteboard \citep{dlbook,wu2024mirage}.
+In production mode, automate Pattern~1--6 in CI and treat memory-pass failures as merge blockers \citep{yirage2026,patel2025llminference,mpk2025}.
+The book shows both: concepts in Sections~\ref{sec:ch06_lifetime_planning}--\ref{sec:ch06_cross_hw_worked_example}, gates in Sections~\ref{sec:ch06_yirage_memory_pass}--\ref{sec:ch06_residency_pitfalls} \citep{chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Done criteria.}
+You are done when you can compute peak footprint with ping-pong, explain tier differences for one tensor across GPU/CPU/NPU, and pass the residency checklist \citep{yirage2026,patel2025llminference,amd2024aie,nvidia2022hopper}.
+Proceed to Chapter~\ref{chap:ch07} with worksheets attached \citep{chen2020compilerbasedhardw}.
+Bring Table~\ref{tab:ch06_tri_hw_allocation}, Table~\ref{tab:ch06_gpu_peak_line_items}, and your signed checklist---Chapter~7 will assume those numbers are already consensus on your team \citep{yirage2026,patel2025llminference,taxbreak2026}.
+
+\paragraph{Hands-on recap.}
+(1) Run four-step workflow on one decoder layer. (2) Fill tri-hardware table and peak worksheet. (3) Run memory pass on each backend. (4) Complete checklist. (5) Archive bytes/token proof alongside latency \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,dao2022flashattention,amd2024xdna,nvidia2022hopper,semianalysis2024tma,dlbook,wu2024mirage,rotem2018glow,mpk2025,kwon2023vllm,dao2023flashdecoding,liu2024deepseekv3}.
+If any step is missing, downstream MegaKernel work is premature \citep{chen2020compilerbasedhardw}.
+Teams that skip worksheets often rediscover the same spill bugs in Chapters~8--11 under higher time pressure \citep{taxbreak2026,memoryfloor2026,semianalysis2024tma}.
+Treat this recap as the exit criteria for Part~II residency literacy before entering Part~IV implementation depth \citep{patel2025llminference,yirage2026,mpk2025}.
+Archive worksheets in the same repository as benchmark TSV files so bisects correlate code, residency, and bytes/token in one timeline \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+When onboarding a new backend, start from Pattern~5: fill the tri-hardware row before tuning kernels---porting pain is usually residency mismatch, not missing intrinsics \citep{yirage2026,amd2024xdna,nvidia2022hopper,patel2025llminference}.
+Re-read Section~\ref{sec:industrial_hook} before your next fusion review---it states the thesis this chapter proves in worksheets and pass logs \citep{taxbreak2026,memoryfloor2026,dao2022flashattention}.
+Part~II ends here: you know the silicon (Ch3--5) and how to plan bytes on it (Ch6) \citep{chen2020compilerbasedhardw,yirage2026,patel2025llminference}.
+Enter Part~IV with worksheets, not hope, on every backend you ship in production \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
 
 \typeout{END_CHAPTER "ch06" \theabspage}

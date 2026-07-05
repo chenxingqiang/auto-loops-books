@@ -2,83 +2,212 @@
 \label{chap:dataflow_mindset}
 \typeout{START_CHAPTER "ch02" \theabspage}
 
-Chapter~\ref{chap:decode_bottlenecks} showed \emph{what} breaks in decode: launch storms, HBM round trips, and hardware-specific bottlenecks \citep{patel2025llminference}. A durable industry misconception is that the fix is ``one more fused op'' inside an otherwise operator-first stack---when the schedule itself still exports every intermediate to global memory between mathematically adjacent compute stages \citep{wang2026esup4supcimrramane}. This chapter completes the pivot: from \textbf{operator-driven} schedules (compute-first, memory-second) to \textbf{dataflow-driven} schedules (residency-first, compute as a consequence of placement) \citep{sun2019powerdrivendnndata}. Readers should leave with a decision procedure: given a decoder bottleneck measurement (kernels/token, bytes/token, HDBI, $R_{\mathrm{floor}}$), classify whether the next engineering dollar belongs in op micro-tuning or dataflow replanning---and default to replanning when Chapter~1 diagnostics show orchestration or HBM export dominance \citep{kim2025dataflowdrivenneur}.
+\section{Why Three Months of Kernel Tuning Barely Moved Decode Latency}
+\label{sec:industrial_hook}
 
-\section{Operator First}
-\label{sec:operator_first}
-% AUTO_VISUAL:fig_operator_graph
+Many teams have lived this story: six CUDA engineers spend a quarter pushing per-operator MMA utilization above 90\%, each matmul or norm kernel improves 15--20\% in isolation, and end-to-end single-token latency drops less than 5\%.
+The problem was never inside the kernels---it was \emph{between} them.
+Every operator boundary pays another host launch and another round trip through high-bandwidth memory (HBM) on the GPU, or through DRAM and last-level cache (LLC) on the CPU.
+Chapter~\ref{chap:decode_bottlenecks} named those taxes: kernels/token, bytes/token, and the goodput worksheet \citep{taxbreak2026,memoryfloor2026}.
+This chapter answers the design question that follows: \textbf{decode wins come from replanning the schedule, not from squeezing one more FLOP inside an operator-first stack} \citep{chen2020compilerbasedhardw,yirage2026}.
+
+\paragraph{Composite production case (7B dense decode).}
+A composite of several internal fleet migrations (not one named customer) illustrates the ranking.
+Operator-first tuning on H100 held single-token latency near 45\,ms at batch-1 while per-kernel profiles looked healthy.
+A three-stage dataflow migration---(A)~fuse RMSNorm+QKV+rotary, (B)~keep attention as an explicit KV-streaming stage, (C)~fuse SwiGLU MLP+norm+residual---cut launches from ${\sim}12$ to $2$ per layer step, reduced measured activation bytes by ${\sim}60\%$, and brought latency to ${\sim}22$\,ms with ${\sim}80\%$ higher concurrent chats per card and ${\sim}45\%$ lower inference opex on the same SKU \citep{memoryfloor2026,taxbreak2026}.
+The lesson is not a magic kernel; it is \textbf{export topology} \citep{patel2025llminference}.
+
+\paragraph{Why this chapter exists in the book arc.}
+Chapter~1 taught you to \emph{measure} decode pain: goodput counters, roofline placement, and framework tax \citep{taxbreak2026,memoryfloor2026}.
+Without a design mindset, those measurements become endless arguments about which kernel to tune next.
+This chapter teaches you to \emph{choose the schedule class} before touching tile sizes: operator-at-a-time versus residency-planned dataflow \citep{chen2020compilerbasedhardw,yirage2026}.
+Every later chapter---Hopper craft, MegaKernel hand coding, MLIR passes, YiRage automation---assumes you already believe that exports and launches are first-class design variables \citep{patel2025llminference}.
+
+\paragraph{Mechanical sympathy, schedule edition.}
+Fregly's mechanical sympathy for training becomes \textbf{schedule sympathy} in decode: align compute order with tier capacity before tuning FLOPs \citep{dlbook,patel2025llminference}.
+A schedule that ignores silicon shape looks correct in PyTorch and still loses to a smaller card with fewer launches \citep{memoryfloor2026}.
+Schedule sympathy is the cultural complement to the iron rules---rules tell you what forbidden exports look like; sympathy tells you to profile exports first on every context bucket change \citep{taxbreak2026}.
+
+\paragraph{Warehouse versus assembly-line analogy.}
+\textbf{Operator-first} thinking is a factory where every workstation ships partial product back to the central warehouse (HBM) before the next station starts---because each station is a different vendor (kernel).
+\textbf{Dataflow-first} thinking keeps the assembly line on one bench (registers, shared memory, or cache) until the layer completes \citep{dlbook}.
+\textbf{Data residency} means keeping the product as close to the worker as the bench allows: registers are ``in hand,'' shared memory is the workbench, HBM is the distant warehouse \citep{memoryfloor2026}.
+
+\paragraph{Anti-patterns we see in reviews.}
+\textbf{Graph capture without dataflow.} Teams record CUDA Graphs over eager subgraphs and celebrate launch drops while bytes/token stay flat---graphs fix dispatch, not residency \citep{nvidia2024cudagraphs,memoryfloor2026}.
+\textbf{FlashAttention without replanning.} Attention bytes improve while norm+QKV and MLP still ping-pong; layer-scope worksheets expose the partial win \citep{dao2022flashattention,taxbreak2026}.
+\textbf{Partial MLP fusion only.} Fusing down-proj while gate/up stay eager is a frequent false victory---Stage~C must treat SwiGLU as one region \citep{memoryfloor2026}.
+\textbf{GPU-only promotion.} A fusion that legalizes on Hopper but fails XDNA should not ship to heterogeneous fleets \citep{amd2024xdna,yirage2026}.
+Each anti-pattern is diagnosable with the counters and diagrams in this chapter before anyone opens an MMA config \citep{patel2025llminference}.
+
+\paragraph{Skillful engineering over hardware sprawl.}
+Once paging, flash kernels, and graphs are enabled, the remaining lever is compiler-scale dataflow planning with regression gates \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+A mid-range GPU running fused decode can beat a flagship GPU on an eager loop---Memory-Floor's L4 versus H100 cells are the business proof \citep{memoryfloor2026}.
+This chapter is the design half of that proof; Chapter~1 was the measurement half \citep{taxbreak2026,patel2025llminference}.
+
+\section{What You Will Be Able to Do After This Chapter}
+\label{sec:chapter_goals}
+
+After this chapter you should be able to:
+\begin{enumerate}
+\item Contrast operator-driven and dataflow-driven schedules on one decoder layer and count global export edges per token.
+\item Apply the three \textbf{iron rules} (registers, on-chip SRAM, global memory) as release gates, with profiler-backed checks.
+\item Sketch a five-step migration from an eager operator stack toward fused stages without a big-bang rewrite.
+\item Prove a mindset shift with export-edge reduction, bytes/token, and launches/token---not kernel-local timers alone \citep{taxbreak2026,memoryfloor2026}.
+\end{enumerate}
+
+\paragraph{Who should read which sections.}
+Serving engineers new to kernels: read this hook, goals, terminology bridge, two-mindsets contrast, iron rules, and five-step migration---skip the compiler IR prerequisite on first pass \citep{patel2025llminference}.
+CUDA kernel engineers arriving from training: read iron rules and the layer microscope under cross-hardware, then verification---your MMA skills apply \emph{inside} stages after exports are fixed \citep{taxbreak2026}.
+Compiler and ML engineers: read automation and IR prerequisite sections together with failure modes---they set up Part~VI \citep{yirage2026,chen2020compilerbasedhardw}.
+Managers: read organizational incentives and verification buckets---they define OKRs and CI gates that make mindset shifts stick \citep{memoryfloor2026}.
+
+\section{Terminology Bridge}
+\label{sec:glossary_bridge}
+
+These terms are used consistently in Chapters~3--11 and in YiRage pass names (Part~VI):
+\textbf{operator}---a named function with its own launch or library entry;
+\textbf{stage}---a fused region with one dispatch and internal on-chip residency;
+\textbf{dataflow}---the directed acyclic graph of tensor lifetimes and movement edges;
+\textbf{residency}---the storage tier holding a value at a program point;
+\textbf{MegaKernel}---a hand-authored stage at or near full-layer scope;
+\textbf{automation path}---compiler passes that derive stages from intermediate representation (IR) instead of hand-written CUDA \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Abbreviations introduced here.}
+\textbf{SSA} (static single assignment) names IR values with unique definitions---fusion legality is checked on SSA edges \citep{chen2020compilerbasedhardw}.
+\textbf{LDS} (local data share) is AMD GPU on-chip SRAM analogous to CUDA shared memory.
+\textbf{ADF} (AI Engine dataflow graph) is the compile-time spatial schedule on AMD XDNA-class NPUs.
+\textbf{TMA} (Tensor Memory Accelerator) is Hopper's async copy engine for staged movement \citep{nvidia2022hopper}.
+\textbf{MMA} (matrix multiply-accumulate) is the tensor-core instruction class inside GEMM kernels.
+
+\section{Operator-First vs Dataflow-First on One Decoder Layer}
+\label{sec:two_mindsets}
+
+Chapter~\ref{chap:decode_bottlenecks} diagnosed symptoms; here we name the competing \textbf{mindsets} that produce them.
+Operator-first design lists LayerNorm, QKV projection, attention, MLP, and residuals as separate tasks, tunes each kernel, and lets the runtime stitch launches \citep{dao2023flashdecoding}.
+Dataflow-first design names tensor lifetimes and movement \emph{before} operators, then lets kernels fall out of fused stages \citep{sun2019powerdrivendnndata,yirage2026}.
+As Chapter~1 noted, TaxBreak-style studies show MoE decode can multiply launch counts versus dense models---dataflow planning matters more as graphs grow \citep{taxbreak2026,liu2024deepseekv3}.
+
+% OPENTIKZ: mindset contrast (dual-panel TikZ)
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.9, transform shape]
- \node[vis arch node] (s0) at (-6.80,0) {\footnotesize LayerNorm\\};
- \node[vis arch node] (s1) at (-3.40,0) {\footnotesize QKV\\};
- \node[vis arch node] (s2) at (0.00,0) {\footnotesize Attn\\};
- \node[vis arch node] (s3) at (3.40,0) {\footnotesize MLP\\};
- \node[vis arch node] (s4) at (6.80,0) {\footnotesize HBM\\};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
- \draw[vis arrow] (s2.east) -- (s3.west);
- \draw[vis arrow] (s3.east) -- (s4.west);
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[font=\footnotesize\bfseries, visText] at (-4.2,2.1) {Operator-first};
+ \node[font=\footnotesize\bfseries, visText] at (4.2,2.1) {Dataflow-first};
+ \foreach \i/\name in {0/LN,1/QKV,2/Attn,3/MLP} {
+   \node[vis arch node] (op\i) at (-5.6+\i*1.5,0.8) {\footnotesize \name};
+ }
+ \node[vis arch node, fill=visFillAccent] (hbmL) at (-2.3,-0.9) {\footnotesize HBM};
+ \foreach \i in {0,1,2,3} {
+   \draw[vis arrow] (op\i.south) -- ++(0,-0.35) -| (hbmL.north);
+ }
+ \node[vis pipeline node, minimum width=2.8cm] (fuseA) at (2.8,0.9) {\footnotesize Fused norm+QKV+rotary};
+ \node[vis pipeline node, minimum width=2.2cm] (fuseB) at (5.6,0.9) {\footnotesize Attn stage};
+ \node[vis pipeline node, minimum width=2.4cm] (fuseC) at (4.2,-0.5) {\footnotesize Fused MLP+residual};
+ \node[vis arch node, fill=visFillAccent] (hbmR) at (4.2,-1.6) {\footnotesize HBM (weights/KV only)};
+ \draw[vis arrow] (fuseA) -- (fuseB);
+ \draw[vis arrow] (fuseB) -- (fuseC);
+ \draw[vis arrow, dashed] (fuseC.south) -- (hbmR.north);
+ \draw[vis arrow, dashed] (hbmR.north) -- ++(0,0.5) -| (fuseA.west);
 \end{tikzpicture}
-\caption{Operator-driven schedule: each op reads/writes global memory.}
-\label{fig:operator_graph}
+\caption{Mindset contrast on one decoder layer: operator-first exports every boundary to HBM (left); dataflow-first keeps producer--consumer pairs on-chip between stages (right).}
+\label{fig:mindset_contrast}
 \end{figure}
 
+Operator-first stacks fragment accountability: kernel owners optimize ``their'' op while no team owns HBM edges between ops---yet those edges dominate batch-1 decode \citep{patel2025llminference}.
+PyTorch eager mode is the canonical embodiment: correct math, emergent schedule \citep{kwon2023vllm}.
+Swapping in FlashAttention fixes attention IO inside one node; it does not replan exports between norm, QKV, and MLP unless a compiler merges regions \citep{dao2022flashattention}.
+CUDA Graphs amortize launches on graphs that still contain operator-first ping-pong inside recorded nodes---orchestration relief, not residency repair (Chapter~1) \citep{nvidia2024cudagraphs}.
 
-In production, most CUDA teams still begin decoder optimization by listing operators: LayerNorm, QKV projection, attention, MLP, residual adds \citep{dao2023flashdecoding}. Each op receives a tuned kernel; the runtime stitches them with separate launches \citep{liu2024deepseekv3}. The failure mode is predictable: \emph{compute} micro-optimizations improve individual kernels while end-to-end ms/token stalls because every boundary writes activations to HBM and pays another launch \citep{nvidia2022hopper}. Operator-first design treats memory as an implementation detail behind each op \citep{amd2024aie}. PyTorch eager mode is the canonical embodiment: the graph is correct, but the schedule is emergent \citep{semianalysis2024tma}. FlashAttention grafts faster replacements for single nodes; it does not change export/import between nodes unless a compiler pass merges regions \citep{dao2022flashattention}. On GPUs this yields hundreds to thousands of kernels per decode token; on CPUs LLC churn; on NPUs illegal dynamic schedules \citep{dlbook}. Teams can spend quarters shaving nanoseconds inside MMA loops while HDBI remains near zero. The operator-first workflow also fragments accountability: kernel owners optimize ``their'' op, while no team owns the HBM edges between ops---yet those edges dominate decode. Compiler stacks that expose only per-op autotuning (template GEMMs, library dispatch tables) reinforce this silo unless a higher pass owns cross-op lifetime analysis. Dataflow-first teams invert the org chart: one schedule owner, many op specializations \emph{inside} fused regions \citep{zhao2025incredflipincremen}.
+Dataflow-first commitments recur across targets:
+\begin{enumerate}
+\item \textbf{Static placement} where possible---lifetimes planned before codegen; NPUs require static ADF graphs \citep{amd2024xdna}.
+\item \textbf{On-chip residency first}---fusion depth ends at capacity conflicts, not at the op list.
+\item \textbf{Pipelined movement}---TMA on Hopper and DMA on AI Engines hide transfers when prefetch edges exist \citep{nvidia2022hopper,amd2024aie}.
+\item \textbf{Minimal synchronization}---the dispatch unit is the pipeline stage, not each elementary op.
+\end{enumerate}
+
+\paragraph{Operator-first habits that persist in mature stacks.}
+Even after teams adopt vLLM, FlashAttention, and CUDA Graphs, the \emph{mental model} often remains operator-first: replace one op, capture one subgraph, celebrate one kernel win \citep{kwon2023vllm,dao2022flashattention,nvidia2024cudagraphs}.
+Framework plugin boundaries reinforce silos---paging plugins, quant plugins, and attention plugins each optimize locally while the layer-level export graph stays emergent \citep{patel2025llminference}.
+Compiler ownership inverts the incentives: one schedule owner, many op specializations \emph{inside} fused regions \citep{yirage2026,chen2020compilerbasedhardw}.
+Kernel engineers remain essential---they implement epilogues and attention tiles---but success metrics attach to layer-scope counters, not per-op occupancy screenshots alone \citep{taxbreak2026}.
+
+\paragraph{Static dataflow versus dynamic serving.}
+Static dataflow does not mean frozen models: it means shapes and buffer slots are known at compile boundaries for a deployment SKU, with guarded recompilation when service configs change \citep{yirage2026}.
+Serving systems that mix dynamic batching with static fusion must separate \emph{scheduling} (which requests share a batch) from \emph{kernel} concerns (what stays on-chip during a fused step) \citep{kwon2023vllm}.
+Confusing the two produces graphs that are dynamically batched at the framework level but operator-fragmented inside each batch member---the worst of both worlds for tail latency \citep{patel2025llminference,memoryfloor2026}.
 
 \begin{example}
-A dense 7B decoder layer on H100 at batch-1 may spend ${\sim}15$--$25$\,$\mu$s in device compute per op group but ${\sim}30$--$50$\,$\mu$s waiting on launches and framework translation between groups.
-An operator-first team that speeds each compute group by 20\% saves only ${\sim}3$--$5$\,$\mu$s aggregate while launch gaps remain.
-A dataflow-first team that fuses three groups into one dispatch may eliminate two launch gaps (${\sim}60$--$100$\,$\mu$s class savings on launch-bound configs) even if per-op compute is unchanged.
-The example is qualitative---exact numbers vary by model and driver---but the \emph{ranking} of leverage is what production teams must internalize.
+On H100 at batch-1, a dense 7B layer may spend ${\sim}15$--$25$\,$\mu$s in device compute per operator group but ${\sim}30$--$50$\,$\mu$s in launch and framework gaps between groups.
+A 20\% compute win per group saves only ${\sim}3$--$5$\,$\mu$s aggregate while gaps remain.
+Fusing three groups into one dispatch can remove two launch gaps (${\sim}60$--$100$\,$\mu$s class on launch-bound configs) even if per-op compute is unchanged---the \emph{ranking} matters more than the exact microsecond table \citep{taxbreak2026}.
 \end{example}
 
-\section{Data Residency}
+\section{Data Residency and the Three Iron Rules}
 \label{sec:data_residency}
 
-The root cause is not insufficient FLOPs; it is \textbf{data residency} violated at every layer boundary. Activations that could live in registers or shared memory for the full QKV$\rightarrow$attention$\rightarrow$MLP chain are materialized to global memory after each sub-step. Each round trip pays full HBM bandwidth and pollutes CPU caches. Residency is a compile-time allocation problem: which tensors coexist, which tier holds them, for how many fused stages? On GPUs the tiers are registers $\rightarrow$ shared $\rightarrow$ L2 $\rightarrow$ HBM; on CPUs cache and NUMA; on XDNA/AIE hardware-enforced tile buffers \citep{amd2024xdna}. When residency succeeds, arithmetic intensity rises because bytes moved drop even if FLOPs stay constant. PagedAttention improves KV capacity but does not guarantee on-chip residency inside a fused decoder region \citep{kwon2023vllm}. Quantization changes residency economics: int4 weights reduce bytes streamed per layer, but only when kernels truly consume compressed layouts without dequant scratch in HBM. A residency plan must therefore co-design precision, layout, and fusion: nf4 weights with bf16 activations still ping-pong if every op dequantizes to global buffers. Industrial teams should measure \emph{bytes per token} and \emph{unique HBM touch count} per layer alongside FLOPs---metrics that residency planning directly minimizes.
+The root cause is not insufficient FLOPs; it is \textbf{data residency} violated at every layer boundary.
+Activations that could live in registers or shared memory across QKV$\rightarrow$attention$\rightarrow$MLP are materialized to global memory after each sub-step \citep{memoryfloor2026}.
+Each round trip pays full HBM bandwidth and pollutes CPU caches when the same pattern runs on x86 or Arm hosts.
 
-Residency analysis also exposes \textbf{anti-locality} in popular serving features. Continuous batching improves throughput by reusing weight matrices across requests, but if each request's activations still round-trip through HBM inside the layer, tail latency per request remains decode-bound. Speculative decoding adds draft-model traffic---another residency consumer---that operator-first stacks often bolt on without revisiting fusion boundaries. Dataflow planners must account for multi-model residency simultaneously: base model weights, draft model weights, and KV streams competing for bandwidth and on-chip space. The book's later compiler passes treat these as first-class buffer interference constraints rather than afterthought flags.
-
-\section{Dataflow Philosophy}
-\label{sec:dataflow_philosophy}
-% AUTO_VISUAL:fig_dataflow_residency
+% OPENTIKZ: memory hierarchy pyramid
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.9, transform shape]
- \node[vis pipeline node] (s0) at (-3.40,0) {\footnotesize On-chip tile\\Register / shared};
- \node[vis arch node] (s1) at (0.00,0) {\footnotesize Fused QKV+Attn\\No HBM export};
- \node[vis pipeline node] (s2) at (3.40,0) {\footnotesize Fused MLP\\Pipeline};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
+ \node[vis pipeline node, minimum width=5.5cm, minimum height=0.55cm] (r) at (0,2.0) {\footnotesize Registers --- ephemeral scalars, tile fragments (Iron Rule 1)};
+ \node[vis pipeline node, minimum width=5.8cm, minimum height=0.55cm] (s) at (0,1.1) {\footnotesize Shared / LDS / on-chip SRAM --- fusion regions (Rule 2)};
+ \node[vis arch node, minimum width=6.2cm, minimum height=0.55cm] (l2) at (0,0.2) {\footnotesize L2 / LLC --- staging, not ping-pong activations};
+ \node[vis arch node, fill=visFillAccent, minimum width=6.5cm, minimum height=0.55cm] (h) at (0,-0.9) {\footnotesize HBM / DRAM --- weights, KV streams, true outputs (Rule 3)};
+ \draw[vis arrow] (r.south) -- (s.north);
+ \draw[vis arrow] (s.south) -- (l2.north);
+ \draw[vis arrow] (l2.south) -- (h.north);
+ \node[font=\scriptsize, visText, align=left] at (4.2,0.2) {Higher = lower\\latency, smaller\\capacity};
 \end{tikzpicture}
-\caption{Dataflow-driven schedule: activations stay on-chip across fused stages.}
-\label{fig:dataflow_residency}
+\caption{Memory residency pyramid for decode: iron rules assign each tier a job; spills signal a wrong split \citep{yirage2026,dlbook}.}
+\label{fig:memory_pyramid}
 \end{figure}
 
+\textbf{Iron Rule 1 --- Registers} hold ephemeral scalars and narrow vectors, not whole feature maps; spills mean the split is wrong.
+\textbf{Iron Rule 2 --- Shared memory / LDS} holds fusion regions; depth ends at capacity conflicts, not when the op list ends.
+\textbf{Iron Rule 3 --- Global memory} is for weights, KV streams, and true outputs---not ping-pong activations between adjacent ops \citep{yirage2026}.
+Violations reproduce Chapter~1 pathologies: high kernels/token and low $R_{\mathrm{floor}}$ when export/import dominates \citep{memoryfloor2026}.
 
-\textbf{Dataflow} design names the schedule before operators.
-Four commitments recur across targets:
-\begin{enumerate}
-\item \textbf{Static placement} where possible---tensor lifetimes planned before codegen; NPUs require static ADF graphs.
-\item \textbf{On-chip residency first}---fusion depth keeps producer--consumer pairs in the fastest tier.
-\item \textbf{Pipelined movement}---TMA on Hopper and DMA on AIE hide transfers when the graph exposes prefetch edges.
-\item \textbf{Minimal synchronization}---dispatch unit is the pipeline stage, not each elementary op.
-\end{enumerate}
-Porting a CUDA operator list to XDNA without a static pipeline yields no legal schedule.
-On GPUs, ignoring dataflow still ``works''; on NPUs compile fails---explaining why operator-first CUDA expertise does not automatically transfer to edge fleets.
-Static dataflow does not mean frozen models: it means shapes and buffer slots are known at compile boundaries (per deployment SKU), with guarded recompilation when service configs change.
-Serving systems that mix dynamic batching with static fusion must separate \emph{scheduling} concerns (which requests share a batch) from \emph{kernel} concerns (what stays on-chip during a fused step).
-Confusing the two produces graphs that are dynamically batched at the framework level but still operator-fragmented inside each batch member---the worst of both worlds for tail latency.
+\paragraph{How to audit iron rules in practice.}
+Use \textbf{Nsight Compute} global load/store counters per kernel to see whether mathematically adjacent ops still write full activation tensors to HBM \citep{nvidia2022hopper}.
+Use \textbf{Nsight Systems} timelines to separate launch gaps from in-kernel time \citep{taxbreak2026}.
+On CPU paths, LLC miss profiles play the same role: fused MLP epilogues should keep head layouts hot across QKV and MLP \citep{patel2025llminference}.
+Reject schedules that insert a global round trip between producer--consumer SSA edges unless profiling documents unavoidable tier overflow---then shrink fusion depth or retile, do not accept ping-pong as normal \citep{chen2020compilerbasedhardw}.
 
-Dataflow philosophy also reframes \textbf{correctness work}.
+\paragraph{Register pressure versus fusion depth.}
+Register pressure on GPUs frequently triggers the false comfort of ``spilling is fine because the kernel still runs.''
+In decode, spilled activations often become HBM traffic that negates fusion \citep{memoryfloor2026}.
+Iron Rule~1 therefore pairs with occupancy discipline: if widening tile sizes forces spills, shrink fusion depth instead of celebrating higher theoretical occupancy on paper \citep{yirage2026}.
+CPU analogs apply to stack spills and false sharing when fusing across threads without cache-line-aware partitioning \citep{patel2025llminference}.
+The iron rules are not moral slogans---they are binary checks you can automate in compiler legality passes and manual design reviews \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Residency planning as a compile-time problem.}
+Residency is a compile-time allocation problem: which tensors coexist, which tier holds them, for how many fused stages \citep{yirage2026}.
+On GPUs the tiers are registers $\rightarrow$ shared memory $\rightarrow$ L2 $\rightarrow$ HBM; on CPUs cache and NUMA; on XDNA hardware-enforced tile buffers \citep{amd2024xdna,nvidia2022hopper}.
+When residency succeeds, arithmetic intensity rises because bytes moved drop even if FLOPs stay constant \citep{memoryfloor2026,dlbook}.
+Industrial teams should measure \emph{bytes per token} and \emph{unique HBM touch count} per layer alongside FLOPs---metrics that residency planning directly minimizes \citep{taxbreak2026}.
+
+PagedAttention improves KV \emph{capacity} but does not guarantee on-chip residency inside a fused decoder region \citep{kwon2023vllm}.
+Quantization changes residency economics only when kernels consume compressed layouts without dequant scratch in HBM---nf4 weights with bf16 activations still ping-pong if every op dequantizes to global buffers \citep{liu2024deepseekv3}.
+
+\paragraph{Anti-locality in serving features.}
+Continuous batching improves throughput by reusing weight matrices across requests, but if each request's activations still round-trip through HBM inside the layer, tail latency per request remains decode-bound \citep{kwon2023vllm}.
+Speculative decoding adds draft-model traffic---another residency consumer---that operator-first stacks often bolt on without revisiting fusion boundaries \citep{patel2025llminference}.
+Dataflow planners must account for multi-model residency simultaneously: base weights, draft weights, and KV streams competing for bandwidth and on-chip space.
+Later compiler passes treat these as buffer interference constraints, not afterthought feature flags \citep{yirage2026}.
+
+\paragraph{Dataflow testing discipline.}
 Operator-first testing validates per-op numerical parity against reference implementations.
-Dataflow-first testing must add \textbf{schedule parity}: fused pipelines must match unfused references within tolerance while preserving tier assignments across backends.
-Regression suites therefore include golden activation dumps at stage boundaries during development, then strip those dumps in production builds once parity is proven---a pattern YiRage CI adopts for multi-target codegen.
-The extra testing cost pays back when a single fusion bug would otherwise ship as a 1.5$\times$ silent slowdown on only one hardware class.
+Dataflow-first testing adds \textbf{schedule parity}: fused pipelines must match unfused references within tolerance while preserving tier assignments across backends \citep{chen2020compilerbasedhardw}.
+Regression suites include golden activation dumps at stage boundaries during development, then strip those dumps in production builds once parity is proven.
+The extra testing cost pays back when a single fusion bug ships as a 1.5$\times$ silent slowdown on only one hardware class \citep{yirage2026}.
 
-\section{Cross Hardware}
+\section{Cross-Hardware Dataflow: Same Math, Different Enforcement}
 \label{sec:cross_hardware}
 % AUTO_VISUAL:tab_mindset_hw
 \begin{table}[t]
@@ -90,107 +219,211 @@ The extra testing cost pays back when a single fusion bug would otherwise ship a
 \visTableHeader
 \textbf{Target} & \textbf{Data residency model} \\
 \midrule
-CUDA GPU & Software-managed hierarchy \\
-XDNA / AIE & Hardware-enforced spatial buffers \\
+CUDA GPU & Software-managed hierarchy (shared mem, registers) \\
+XDNA / AIE & Hardware-enforced spatial buffers (ADF) \\
 CPU & Cache hierarchy + explicit blocking \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+Cross-hardware comparison is how teams avoid shipping GPU-tuned schedules that fail on edge NPUs or underperform on co-located CPU nodes \citep{amd2024xdna,amd2024aie}.
+The same mathematical layer admits \emph{different optimal fusion depths}: GPUs tolerate medium fusion with shared-memory staging; CPUs need cache-aware blocking; NPUs require layer-scale or multi-layer static regions \citep{patel2025llminference}.
+Portability is portability of the \textbf{dataflow graph and lifetime annotations}, not of individual op implementations---YiRage backends swap codegen while preserving tier assignments (Parts~IV--VI) \citep{yirage2026,chen2020compilerbasedhardw}.
 
-Cross-hardware comparison is not an appendix exercise---it is how teams avoid shipping GPU-tuned schedules that silently fail on edge NPUs or underperform on CPU inference nodes co-located with GPU fleets. The book's benchmark harness (Appendix~B) always reports at least three SKUs when hardware access allows: one bandwidth-rich GPU, one orchestration-sensitive GPU, and one CPU or NPU class target. Mindset differences show up as \emph{different optimal fusion depths} on the same mathematical model, not as different models.
+For \textbf{CUDA GPUs}, shared memory sizing, register pressure, and occupancy cap fusion depth; Hopper TMA raises async movement ceilings but needs static copy edges \citep{nvidia2022hopper,semianalysis2024tma}.
+For \textbf{CPUs}, GPU-style mega-fusion can evict KV working sets from LLC---blocking beats monolithic kernels \citep{patel2025llminference}.
+For \textbf{XDNA / AIE}, dynamic shapes and per-op dispatch are mismatches; the ADF graph \emph{is} the program \citep{amd2024xdna}.
+Operator-first lists fail on every class for the same reason: no global residency contract.
 
-For \textbf{CUDA GPUs}, shared memory sizing, register pressure, and occupancy set fusion depth. CUDA Graphs amortize launches but replay a fixed dataflow; they do not invent residency that eager boundaries destroyed \citep{nvidia2024cudagraphs}. Hopper TMA raises async movement ceilings but needs static copy edges. For \textbf{CPUs}, residency maps to \textbf{cache} blocking and NUMA placement; GPU-style mega-fusion can evict KV working sets. SIMD kernels benefit when dataflow keeps head layouts hot across QKV and MLP epilogues. For \textbf{XDNA / AIE}, residency is hardware-enforced: spatial tiles, DMA routes, compile-time buffer tables. Dynamic shapes and per-op dispatch are mismatches; the dataflow graph \emph{is} the program. One mindset expresses differently per target, but operator-first lists fail everywhere for the same reason---no global residency contract. Table~\ref{tab:mindset_hw} summarizes enforcement models; the engineering consequence is that \textbf{fusion granularity} differs by class: GPUs tolerate medium fusion with shared-memory staging; CPUs need cache-aware blocking; NPUs require layer-scale or multi-layer static regions. Cross-hardware portability is portability of the \emph{dataflow graph and lifetime annotations}, not of individual op implementations. YiRage backends swap codegen while preserving tier assignments---the topic of Parts~IV--VI.
+\paragraph{GPU fusion depth in practice.}
+On Hopper-class GPUs, medium fusion---two or three stages per layer---often beats monolithic single-kernel attempts because attention KV streaming and register pressure force explicit boundaries \citep{dao2022flashattention,nvidia2022hopper}.
+TMA copy edges must be planned in the dataflow graph so weight tiles prefetch while the previous stage still consumes activations \citep{semianalysis2024tma}.
+Teams that copy CUDA fusion heuristics from training kernels frequently pick tile sizes that maximize MMA utilization while spilling activations to HBM---Iron Rule~1 violations dressed as ``high occupancy'' wins \citep{memoryfloor2026}.
 
-\section{Iron Rules}
-\label{sec:iron_rules}
+\paragraph{CPU and NPU consequences.}
+On CPU inference nodes co-located with GPU fleets, the winning schedule often fuses MLP epilogues and keeps KV hot in LLC while streaming weights once per layer \citep{patel2025llminference}.
+Blindly porting GPU mega-fusion depth can evict KV working sets and raise tail latency for chat workloads pinned to CPU fallback tiers.
+On XDNA, illegal graphs should fail compile during CI, not at the edge appliance in the field \citep{amd2024xdna,amd2024aie}.
+The book's triplet harness (Appendix~B) reports at least three SKUs when hardware access allows so mindset differences appear as \emph{different optimal fusion depths}, not as different models \citep{yirage2026}.
 
-\textbf{Rule 1 --- Registers} hold ephemeral scalars and narrow vectors, not whole feature maps; spills mean the split is wrong. \textbf{Rule 2 --- Shared memory / LDS / on-chip SRAM} holds fusion regions; depth ends at capacity conflicts, not when the op list ends. \textbf{Rule 3 --- Global memory} is for weights, KV streams, and true outputs---not ping-pong activations between adjacent ops. Violations produce Chapter~1 pathologies: high kernels/token and low $R_{\mathrm{floor}}$ when export/import dominates. Use iron rules as release gates: if a proposed schedule inserts a global round trip between ops that share a producer--consumer edge in the mathematical graph, reject it unless profiling proves the tier overflow is unavoidable. On GPUs, ``unavoidable'' should trigger shared-memory tiling or pipeline splitting, not acceptance of HBM ping-pong. On NPUs, overflow should fail compile and force graph refactoring---not runtime fallback loops on the host.
+\paragraph{Mindset comparison on one layer (microscope).}
+Consider batch-1 as the running microscope.
+\textbf{Operator-first execution} issues separate kernels for RMSNorm, QKV, rotary embedding, attention, output projection, second RMSNorm, gate/up/down MLP, activation, and residuals---each reading inputs from HBM and writing outputs back.
+Even optimized kernels may execute ${\sim}10$--$20$ global export/import cycles per token per layer, multiplied by host launches \citep{taxbreak2026}.
+Profiler heatmaps look healthy inside each kernel; end-to-end latency stalls.
 
-Register pressure on GPUs frequently triggers the false comfort of ``spilling is fine because the kernel still runs.''
-In decode, spilled activations often become HBM traffic that negates fusion. Iron Rule~1 therefore pairs with occupancy discipline: if widening tile sizes forces spills, shrink fusion depth instead of celebrating higher theoretical occupancy on paper. CPU analogs apply to stack spills and false sharing when fusing across threads without cache-line-aware partitioning.
+\textbf{Dataflow-first execution} partitions the same mathematics into two or three pipeline stages with explicit buffer assignments.
+Stage~A fuses RMSNorm+QKV+rotary into shared-memory tiles; Stage~B runs attention with KV streaming while keeping query tensors resident where budgets allow; Stage~C fuses MLP+norm+residual without global activation ping-pong.
+Launches drop from ${\sim}10$--$20$ toward $1$--$3$; bytes moved drop because producer--consumer pairs never left the fastest tier \citep{memoryfloor2026}.
+The mathematical layer is fixed; the \textbf{schedule topology} is the optimization variable \citep{chen2020compilerbasedhardw}.
 
-\section{MegaKernel Preview}
-\label{sec:megakernel_preview}
+\section{From Hand-Crafted MegaKernels to Compiler Automation}
+\label{sec:megakernel_automation}
 
-A \newterm{MegaKernel} dispatches an entire decoder layer with activations resident across QKV, attention, MLP, norms, and residuals---the antithesis of Figure~\ref{fig:operator_graph}. MegaKernels are fusion schedules with staged pipelines, not one giant matmul. Chaining vendor libraries without shared residency drops launches modestly but often not HBM traffic. True MegaKernels collapse both; TaxBreak still shows order-of-magnitude launch gaps on MoE graphs after partial fusion. They trade flexibility for performance---acceptable when model revisions are pinned per fleet. Part~V develops manual craft; Part~VI automates the same decisions in YiRage. MegaKernel engineering also clarifies \textbf{where not to fuse}: attention kernels that require global KV streaming may remain distinct stages while MLP+norm+residual fuse around them---dataflow does not mandate monolithic single-kernel binaries, it mandates explicit staging with minimal exports. Flash-Decoding parallelizes KV dimension while keeping decode batch-1 viable; a MegaKernel schedule must \emph{compose} with such attention stages rather than naively inlining them and destroying register budgets.
+A \newterm{MegaKernel} dispatches an entire decoder layer with activations resident across QKV, attention, MLP, norms, and residuals---the antithesis of Figure~\ref{fig:mindset_contrast}'s left panel \citep{memoryfloor2026}.
+MegaKernels are fusion \emph{schedules} with staged pipelines, not one giant matmul.
+On dense 7B-class models at batch-1 on H100, a well-staged layer MegaKernel often lands in the ${\sim}1.5\times$--$2.5\times$ end-to-end latency improvement band versus a mature operator-first stack \emph{before} heroic MMA tuning---exact factors depend on model width and attention pattern \citep{taxbreak2026,yirage2026}.
 
-\section{Automation Path}
-\label{sec:automation_path}
+\paragraph{Part~V and Part~VI preview.}
+Part~V develops manual MegaKernel craft on Hopper and XDNA: how experts stage pipelines when compilers are not yet in the loop \citep{nvidia2022hopper,amd2024xdna}.
+Part~VI shows the same decisions derived automatically from YiRage IR: fusion passes, lifetime analysis, and backend lowering with regression gates \citep{yirage2026,chen2020compilerbasedhardw}.
+Readers should treat this chapter as the \textbf{why} for those parts---without mindset alignment, hand-tuned kernels and compiler output fight each other across teams \citep{patel2025llminference}.
 
-\textbf{YiRage} ingests decoder graphs, plans lifetimes globally, runs fusion passes, and emits CUDA, CPU, or XDNA backends from one dataflow IR \citep{memoryfloor2026}. The automation path encodes expert workflow---probe hardware, plan residency, fuse, codegen, regress---as compiler logic. Each backend re-instantiates the same dataflow with different tier rules: GPU shared-memory fusion and graph capture; CPU cache blocking; XDNA static buffers and DMA ping-pong. YiRage fails compile when residency cannot be proved---preferable to silent production slowdowns. Optimize dataflow first; let operators fall out of the schedule second. Automation must preserve human-debuggable artifacts: lifetime graphs, fusion decision logs, and regression tables comparing bytes/token and kernels/token against PyTorch eager and framework servers. Without those artifacts, compiler automation reintroduces opacity---teams cannot tell whether a regression is a bad tile size or a violated iron rule. YiRage treats diagnostics as first-class outputs alongside generated kernels, echoing TaxBreak and memory-floor methodologies from Chapter~1.
+\paragraph{MoE and wide-model caveats.}
+Mixture-of-experts decoders multiply operator boundaries per layer; routing and expert dispatch can dominate launches even when MLP experts fuse \citep{liu2024deepseekv3,taxbreak2026}.
+Dataflow planning must count routing tax separately from dense MLP fusion---a schedule that fuses experts but leaves routing eager may show flat bytes/token \citep{memoryfloor2026}.
+The mindset still applies: exports and launches are the design variables; expert GEMMs are epilogues inside stages once routing topology is explicit \citep{yirage2026}.
 
-\subsection{Compiler IR View}
-\label{sec:compiler_ir_view}
+% OPENTIKZ: export-edge before/after
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+ \node[font=\footnotesize\bfseries] at (-3.2,1.6) {Before (operator-first)};
+ \node[font=\footnotesize\bfseries] at (3.2,1.6) {After (two-stage dataflow)};
+ \foreach \i/\n in {0/LN,1/QKV,2/Attn,3/MLP} {
+   \node[vis arch node, minimum width=1.1cm] (b\i) at (-4.4+\i*1.35,0.6) {\scriptsize \n};
+ }
+ \node[below=0.05cm of b1, font=\scriptsize, visAccent] {8 export edges};
+ \draw[vis arrow, visAccent] (b0.east) -- (b1.west);
+ \draw[vis arrow, visAccent] (b1.east) -- (b2.west);
+ \draw[vis arrow, visAccent] (b2.east) -- (b3.west);
+ \node[vis pipeline node, minimum width=2.6cm] (a0) at (1.8,0.7) {\scriptsize Stage A: norm+QKV};
+ \node[vis pipeline node, minimum width=2.6cm] (a1) at (4.8,0.7) {\scriptsize Stage B: MLP+res};
+ \draw[vis arrow] (a0) -- node[above, font=\scriptsize] {on-chip} (a1);
+ \node[below=0.2cm of a0, font=\scriptsize, visSecondary] {3 export edges};
+\end{tikzpicture}
+\caption{Export-edge audit on one layer: operator-first schedules materialize many HBM round trips; staged dataflow removes edges between fused-able ops \citep{memoryfloor2026}.}
+\label{fig:export_edges}
+\end{figure}
 
-At the compiler layer, the mindset shift appears as a change in primary IR artifacts. Operator-first pipelines lower high-level frameworks (Torch, ONNX) into op sequences early; each op lowers independently to LLVM, Triton, or CUDA C++ with late, local fusion peephole passes. Dataflow-first pipelines retain a \emph{lifetime graph} on tensors until hardware tier assignment completes: SSA values carry storage class annotations (\texttt{reg}, \texttt{shared}, \texttt{global\_stream}) and fusion legality is checked on inter-value edges. GPU backends emit kernels per fused region; CPU backends emit blocked loops; XDNA backends emit ADF graphs with DMA edges. The IR difference is why ``drop in FlashAttention'' is not equivalent to ``run the fusion pass pipeline'': the former swaps an op implementation; the latter rewrites the graph topology.
+Chaining vendor libraries without shared residency drops launches modestly but often not bytes/token.
+True MegaKernels collapse both; partial fusion that only wraps MLP while QKV stays eager is a common false win---launch counters improve while bytes/token flatlines \citep{taxbreak2026}.
+Attention stages that require global KV streaming may remain explicit while MLP+norm+residual fuse around them---dataflow mandates explicit staging with minimal exports, not mandatory single-kernel binaries \citep{dao2022flashattention,dao2023flashdecoding}.
 
-\subsection{Failure Modes When Mixing Mindsets}
-\label{sec:mixed_failure}
+\textbf{YiRage} ingests decoder graphs, plans lifetimes globally, runs fusion passes, and emits CUDA, CPU, or XDNA backends from one dataflow IR \citep{yirage2026,chen2020compilerbasedhardw}.
+The automation path encodes expert workflow---probe hardware, plan residency, fuse, codegen, regress---as compiler logic.
+Each backend re-instantiates the same dataflow with different tier rules; compile fails when residency cannot be proved---preferable to silent production slowdowns \citep{yirage2026}.
 
-Hybrid stacks---dataflow planning in a planner service but operator-first codegen in backends---produce characteristic failures. \textbf{Planner drift:} fusion regions computed on a meta-graph diverge from what the backend actually emits, reintroducing hidden exports. \textbf{Partial graph capture:} CUDA Graphs record a subgraph that still contains HBM ping-pong inside recorded nodes. \textbf{False residency:} shared-memory buffers declared fused but spilled registers silently increase global traffic. \textbf{NPU illegalize late:} graphs accepted on GPU fail XDNA buffer allocation in production edge builds. Guard against hybrids with single-source dataflow IR and fail-fast legality checks per backend, the YiRage default posture.
+\paragraph{Prerequisite: compiler IR (skim if new to compilers).}
+At the IR layer, operator-first pipelines lower frameworks into independent op lowers with late local peepholes.
+Dataflow-first pipelines retain a \textbf{lifetime graph}: SSA values carry storage-class annotations (\texttt{reg}, \texttt{shared}, \texttt{global\_stream}) and fusion legality is checked on inter-value edges \citep{chen2020compilerbasedhardw}.
+If you are new to compiler IR, read the commitments above and return here after Part~VI---the rest of this chapter does not require SSA details.
 
-\section{Contrasting Schedules on One Decoder Layer}
-\label{sec:layer_contrast}
+\paragraph{YiRage pass pipeline (conceptual).}
+YiRage-style automation typically sequences: import high-level graph $\rightarrow$ lifetime analysis and tier assignment $\rightarrow$ fusion legality on SSA edges $\rightarrow$ backend-specific tiling and codegen $\rightarrow$ regression against eager baselines \citep{yirage2026,chen2020compilerbasedhardw}.
+Passes emit logs explaining why edges remain global---for example, attention KV streaming or shared-memory overflow---so engineers learn schedule constraints instead of fighting opaque binaries \citep{patel2025llminference}.
+Compile failure on illegal residency is a feature: it prevents shipping silent 1.5$\times$ slowdowns on edge SKUs \citep{amd2024xdna}.
+Manual MegaKernel authors follow the same sequence by hand; automation scales the discipline to every layer and backend \citep{memoryfloor2026,taxbreak2026}.
 
-Consider a single transformer decoder layer at batch-1 as the book's running microscope. \textbf{Operator-first execution} issues separate kernels for RMSNorm, QKV linear, rotary embedding, attention, output projection, second RMSNorm, gate/up/down MLP projections, activation, and residual adds---each reading inputs from HBM and writing outputs back. Even if every kernel is ``optimized,'' the layer may execute ${\sim}10$--$20$ global export/import cycles per token per layer, multiplied by host launches documented in TaxBreak. Profiler heatmaps look healthy inside each kernel; end-to-end latency does not move.
+\paragraph{Failure modes when mixing mindsets.}
+Hybrid stacks---dataflow planning in a planner service but operator-first codegen in backends---produce \textbf{planner drift} (planned fusion $\neq$ emitted kernels), \textbf{false residency} (declared fused buffers that spill registers into HBM), and \textbf{NPU illegalize late} (GPU-legal graphs fail ADF allocation in edge builds) \citep{yirage2026}.
+Guard with single-source dataflow IR and fail-fast legality per backend.
 
-\textbf{Dataflow-first execution} partitions the same mathematics into two or three pipeline stages with explicit buffer assignments. Stage~A might fuse RMSNorm+QKV+rotary into shared-memory tiles; Stage~B runs attention with KV streaming while keeping query tensors resident; Stage~C fuses MLP+norm+residual without global activation ping-pong. Launches drop from ${\sim}10$--$20$ toward $1$--$3$; bytes moved drop because producer--consumer pairs never left the fastest tier. On H100-class GPUs this is how CUDA Graphs and MegaKernels compound: graphs fix dispatch; dataflow fixes bytes.
+\paragraph{Historical note (why operator-first won temporarily).}
+2010s CUDA culture optimized large-batch training where operator coverage mattered more than decode residency \citep{dlbook}.
+Inference at batch-1 was treated as ``training with batch 1'' long after production proved otherwise.
+FlashAttention, PagedAttention, and graph capture each fixed a slice without overturning the op-list mental model \citep{dao2022flashattention,kwon2023vllm,nvidia2024cudagraphs}.
+Dataflow-first design returns because deployment reality---MoE launch inflation, disaggregated decode fleets, edge NPUs---punishes export edges more than it rewards isolated MMA wins \citep{taxbreak2026,liu2024deepseekv3}.
 
-The contrast is sharper on \textbf{CPU}: operator-first eager PyTorch thrashes LLC moving the same activation lines through DRAM for every sub-op. Dataflow-first blocking keeps the MLP epilogue in L2 while weights stream once per layer. On \textbf{XDNA}, operator-first schedules may not legalize at all; dataflow-first ADF graphs assign each stage to tile columns with DMA prefetch of weights while SRAM holds activations. The layer microscope therefore generalizes: the mathematical layer is fixed; the \emph{schedule topology} is the optimization variable.
+\paragraph{Where not to fuse.}
+Attention kernels that require global KV streaming may remain distinct stages while MLP+norm+residual fuse around them \citep{dao2022flashattention,dao2023flashdecoding}.
+Flash-Decoding parallelizes the KV dimension while keeping decode batch-1 viable; a MegaKernel schedule must \emph{compose} with such attention stages rather than naively inlining them and destroying register budgets \citep{dao2023flashdecoding}.
+Rotary embedding between QKV and attention is a frequent hidden export in operator-first stacks---Stage~A benchmarks should include rotary inside the fusion region, not as an orphan op \citep{patel2025llminference}.
+SwiGLU MLP chains triple export events (gate, up, down); Stage~C should treat them as one residency region \citep{taxbreak2026}.
 
-\subsection{Migration Checklist: Operator Stack to Dataflow IR}
-\label{sec:migration_checklist}
+\paragraph{Automation artifacts engineers should demand.}
+Compiler automation must preserve human-debuggable outputs: lifetime graphs, fusion decision logs, and regression tables comparing bytes/token and kernels/token against PyTorch eager and framework servers \citep{yirage2026}.
+Without those artifacts, automation reintroduces opacity---teams cannot tell whether a regression is a bad tile size or a violated iron rule \citep{chen2020compilerbasedhardw}.
+Treat diagnostics as first-class deliverables alongside generated kernels, echoing TaxBreak and memory-floor methodologies from Chapter~1 \citep{taxbreak2026,memoryfloor2026}.
 
-Teams porting production decoder stacks should not ``rewrite everything'' day one.
-A pragmatic migration applies five checks to each layer group:
+\section{Five-Step Migration: Operator Stack to Dataflow Schedule}
+\label{sec:migration_playbook}
+
+Teams should not rewrite every kernel day one.
+Use this \textbf{five-step playbook} on each decoder layer group:
+
 \begin{enumerate}
-\item \textbf{Export audit.} List tensors written to global memory between mathematically fused-able ops; each edge is a candidate fusion edge.
-\item \textbf{Launch audit.} Count kernels per token; if ${\gg}100$ on dense decode, graph capture or fusion passes are higher ROI than MMA tuning.
-\item \textbf{Tier budget.} Estimate shared-memory or cache footprint for candidate fusion; split stages when capacity exceeds hardware limits rather than spilling silently.
-\item \textbf{Attention boundary.} Keep KV-global attention stages explicit unless register/shared budgets prove full inlining safe.
-\item \textbf{Regression matrix.} Re-run bytes/token and ms/token on GPU, CPU, and NPU SKUs after each fusion tranche---not only the device that authored the kernel.
+\item \textbf{Export-edge audit.} Draw the operator graph (Figure~\ref{fig:mindset_contrast}) and count HBM read/write edges per token.
+Use Nsight Compute global traffic or framework profiler exports; each edge between fused-able ops is a candidate fusion edge \citep{memoryfloor2026}.
+
+\item \textbf{Launch audit.} Count kernels per token with TaxBreak or equivalent; if ${\gg}100$ on dense decode, graph capture or fusion passes beat MMA tile tuning \citep{taxbreak2026}.
+
+\item \textbf{Tier budget.} Estimate shared-memory or cache footprint for candidate fusion; split stages when capacity exceeds hardware limits rather than spilling silently \citep{yirage2026}.
+
+\item \textbf{Phased fusion.} Stage~A: norm+QKV+rotary; Stage~B: attention boundary (KV global unless proven safe to inline); Stage~C: MLP+norm+residual.
+Benchmark bytes/token after \emph{each} tranche---partial MLP fusion without QKV is a classic false win \citep{memoryfloor2026,taxbreak2026}.
+
+\item \textbf{Triplet regression.} Re-run bytes/token, launches/token, and ms/token on GPU, CPU, and NPU SKUs after each tranche---not only the device that authored the kernel \citep{amd2024xdna,yirage2026}.
 \end{enumerate}
-YiRage encodes these checks as pass gates; manual teams should encode them as CI benchmarks even before automation lands.
 
-\subsection{Organizational Incentives}
-\label{sec:org_incentives}
+\paragraph{Stage sizing worked example.}
+Suppose Stage~A (norm+QKV+rotary) requires 48\,KB shared memory for tile shapes at hidden size 4096, but your SKU exposes 40\,KB per SM without splitting \citep{nvidia2022hopper}.
+Iron Rule~2 says split Stage~A into norm+QKV and rotary+attention prefetch rather than spilling to HBM \citep{yirage2026}.
+Document the split in the export-edge table: you may add one launch while still removing multiple global activations---launches and bytes both belong on the worksheet \citep{taxbreak2026,memoryfloor2026}.
+Promotion reviews should accept launch increases only when accompanied by byte wins and iron-rule justification \citep{patel2025llminference}.
 
-Operator-first stacks persist partly because performance reviews reward visible kernel wins---ns saved in cuBLAS, occupancy graphs in Nsight---while dataflow wins appear ``distributed'' across fewer exports and launches. Staffing mirrors the stack: siloed kernel engineers without a compiler owner cannot hold global residency accountability. Industrial leaders align incentives with bytes/token and kernels/token OKRs tied to product p99 latency, not single-kernel FLOP counters. This organizational point matters for adoption: dataflow-first design is a \emph{process} change as much as a code change.
+\paragraph{Documentation contract for migrations.}
+Publish operator graph, dataflow stage diagram, export-edge count, bytes/token, and launches/token at ctx${=}2048$ with every fusion promotion \citep{taxbreak2026,memoryfloor2026}.
+Partners and future-you cannot replay schedule regressions when benchmarks live only in private spreadsheets \citep{yirage2026}.
+Version those artifacts next to compiler fingerprints in CI so bisect compares topology, not only binary hashes \citep{chen2020compilerbasedhardw}.
 
-\subsection{Glossary Bridge}
-\label{sec:glossary_bridge}
+\paragraph{Onboarding copy-paste block.}
+New hires should paste this sentence at the top of fusion design docs: \emph{``We optimize exports and launches across the decoder layer before we tune MMA tiles inside ops.''} \citep{taxbreak2026,patel2025llminference}
+Then attach Figure~\ref{fig:mindset_contrast} and the export-edge table before the first kernel meeting \citep{memoryfloor2026}.
+Culture follows the diagram on the wall and the counters in CI---not the slogan alone \citep{yirage2026}.
 
-To align vocabulary across hardware chapters:
-\textbf{operator} means a mathematically named function with its own launch or library entry;
-\textbf{stage} means a fused pipeline region with one dispatch and internal register/shared residency;
-\textbf{dataflow} means the directed acyclic graph of tensor lifetimes and movement edges;
-\textbf{residency} means the storage tier holding a value at a program point;
-\textbf{MegaKernel} means a manually authored stage at or near full-layer scope;
-\textbf{automation path} means compiler passes that derive stages from IR instead of hand CUDA/HIP. These terms are used consistently in Chapters~3--11 and in YiRage pass names in Part~VI.
+\paragraph{Bridge back to Chapter~1.}
+When Chapter~1's worksheet classifies your cell as orchestration-limited, start with launch audits and staged fusion \citep{taxbreak2026,nvidia2024cudagraphs}.
+When it classifies bandwidth-limited, prioritize bytes/token and quantization that actually reads narrow weights end-to-end---but still remove avoidable exports; bandwidth and orchestration problems often co-exist \citep{memoryfloor2026,liu2024deepseekv3}.
+This chapter tells you \emph{how to design} once Chapter~1 tells you \emph{what hurts} \citep{patel2025llminference}.
+Carry both chapters' worksheets into every fusion review; neither alone is sufficient for production promotion \citep{taxbreak2026,memoryfloor2026,yirage2026}.
+If you change only one habit after reading: draw the export graph before opening the kernel profiler \citep{patel2025llminference}.
+That single discipline prevents most expensive operator-first detours in decode fleets \citep{taxbreak2026,memoryfloor2026}.
+Schedule sympathy starts on paper with export counts per token step, not in Nsight alone \citep{patel2025llminference,nvidia2022hopper,taxbreak2026}.
 
-\subsection{Historical Note: Why Operator-First Won (Temporarily)}
-\label{sec:historical_note}
+\paragraph{Organizational incentives.}
+Operator-first stacks persist because reviews reward visible kernel wins while dataflow wins look ``distributed'' across fewer exports \citep{patel2025llminference}.
+Staffing mirrors the stack: siloed kernel engineers without a compiler owner cannot hold global residency accountability.
+Align OKRs with bytes/token and kernels/token tied to product p99 latency, not single-kernel TFLOPS counters.
 
-Operator-first CUDA culture dominated the 2010s because training workloads were compute-heavy, batches were large, and framework ecosystems competed on op coverage. Inference---especially decode---was treated as ``training with batch 1'' long after production traffic proved otherwise. FlashAttention, PagedAttention, and graph capture each corrected a slice of the inference gap without overturning the op-list mental model. The dataflow-first resurgence in this book is driven by deployment reality: disaggregated decode fleets, MoE launch inflation, edge NPUs, and cross-hardware SKUs that cannot afford per-device hero kernels. Understanding \emph{why} operator-first habits persist helps teams plan migrations without dismissing past kernel investments---those kernels become \emph{epilogues inside stages}, not the architecture itself.
+\paragraph{Framework versus compiler ownership.}
+Framework teams own batching, KV paging, and request scheduling; compiler teams own fusion boundaries inside the decode step box defined in Chapter~1 \citep{kwon2023vllm,yirage2026}.
+Conflating those layers sends organizations to tune paging when launch count is the binder, or tune attention when bytes/token is already at the roof \citep{memoryfloor2026}.
+Dataflow migration playbooks should name a \textbf{schedule owner} with authority across norm, attention, and MLP boundaries---the role is closer to a pipeline architect than a matmul specialist \citep{patel2025llminference}.
 
-\subsection{Practice Problems (Engineering, Not Exercises)}
-\label{sec:practice_problems}
+\paragraph{Training versus inference guardrails.}
+Training teams rewarded for large-batch GEMM wins often propose decode ``optimizations'' that increase exports---for example, inserting debug dumps or auxiliary tensors between ops \citep{dlbook}.
+Decode mindset gates reject changes that improve prefill TFLOPS but raise launches/token at batch-1 \citep{taxbreak2026}.
+Onboarding docs for kernel hires from training backgrounds should include the export audit on day one so residency constraints are explicit before MMA tile experiments \citep{patel2025llminference}.
 
-Use these audits on your own decoder deployment:
+\paragraph{Practice audits (portable).}
 \begin{enumerate}
-\item Draw the operator graph for one layer and mark every HBM read/write edge; count edges per token. \item Propose a two-stage dataflow that removes at least half those edges; estimate shared-memory or cache bytes required. \item Run TaxBreak-style launch counting or equivalent framework profilers; compare kernels/token before and after fusion. \item Measure $R_{\mathrm{floor}}$ on your GPU SKU at batch-1; if high, prioritize bytes; if low, prioritize launches. \item If targeting NPU, attempt to legalize the same graph statically; document which edges force DDR spill. \end{enumerate}
-Solutions appear implicitly in Parts~V--VI through YiRage pass implementations; the audits themselves are portable across vendors.
+\item Mark every HBM edge on one layer; propose a two-stage dataflow removing at least half.
+\item Estimate shared-memory bytes for that fusion; split if over cap.
+\item Run TaxBreak-style launch counting before and after \citep{taxbreak2026}.
+\item Read $R_{\mathrm{floor}}$ from Chapter~1's worksheet at batch-1; high $R_{\mathrm{floor}}$ $\Rightarrow$ prioritize bytes, low $\Rightarrow$ prioritize launches \citep{memoryfloor2026}.
+\item If targeting NPU, attempt static legalization; document which edges force DDR spill \citep{amd2024xdna}.
+\end{enumerate}
 
-Readers building internal playbooks should copy the audits into onboarding docs for new kernel hires---especially those arriving from training-focused CUDA backgrounds---so decode residency constraints are explicit on day one rather than rediscovered via quarter-long latency firefights. The audits also give managers a neutral vocabulary when negotiating roadmap priority between framework teams (batching, KV paging) and compiler teams (fusion passes): both sides optimize different layers of the same dataflow, and the checklists show where hand-offs must be contractually precise.
+\paragraph{Worked export audit (dense 7B layer).}
+For batch-1, operator-first schedules typically materialize RMSNorm output, QKV tensors, attention output, and MLP intermediates to HBM---four to eight export events before residuals \citep{memoryfloor2026,taxbreak2026}.
+A two-stage dataflow removing norm+QKV and MLP+residual exports cuts events by half in the common case; benchmark bytes/token before claiming stage count \citep{yirage2026}.
+Attach the before/after diagram (Figure~\ref{fig:export_edges}) to design docs so reviewers see removed edges, not only kernel names \citep{patel2025llminference}.
 
+\paragraph{Vendor library trap.}
+Vendor GEMM wins inside isolated ops do not prove operator-first schedules are optimal \citep{dlbook,patel2025llminference}.
+When swapping cuBLAS or hipBLAS versions, re-run mindset worksheets with fusion topology held constant---the variable is export topology, not MMA kernel choice \citep{memoryfloor2026}.
+Library bumps that speed ops but leave exports unchanged are upgrades; library bumps that enable deeper fusion without replanning are missed opportunities \citep{chen2020compilerbasedhardw}.
 
-\section{Dataflow mindset benchmarking methodology}
-\label{sec:ch02_dataflow_benchmark}
+\section{Proving the Mindset Shift: Verification Without the Checklist Novel}
+\label{sec:verification_method}
 
-\textbf{Benchmarking the mindset shift} must measure \emph{schedule quality and export topology}, not isolated kernel FLOPs \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Build paired decode cells on the same model: operator-first eager baseline versus dataflow-first fused schedule, BS${=}1$, ctx buckets $\{512,2048,8192\}$, pinned weights and framework version \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+Benchmarking a mindset shift measures \textbf{schedule quality}, not isolated kernel FLOPs \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+Build paired decode cells on the same model: operator-first eager baseline versus dataflow-first fused schedule, batch-1, context buckets $\{512,2048,8192\}$, pinned weights and framework version.
+Warm-up must include graph construction and ${\ge}1000$ steady decode steps---single-step microbenches that never cross operator boundaries lie \citep{patel2025llminference}.
 
-Warm-up must include framework graph construction and at least one thousand steady decode steps---single-step microbenches that never cross operator boundaries mislead teams into operator-first wins \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Report launches/token, bytes/token, and ms/token together; a fusion that cuts launches but not bytes failed residency planning \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+Report \textbf{launches/token}, \textbf{bytes/token}, and \textbf{ms/token} together.
+Fusion that cuts launches but not bytes failed residency planning; fusion that cuts bytes but not ms/token may still be framework-limited---isolate in-step counters per Chapter~1 \citep{memoryfloor2026,kwon2023vllm}.
 
 \begin{table}[t]
 \centering
@@ -200,177 +433,128 @@ Warm-up must include framework graph construction and at least one thousand stea
 \textbf{Metric} & \textbf{Mindset comparison meaning} \\
 \midrule
 Launches/token & Operator graph vs fused stages \\
-Bytes/token & HBM export count between adjacent ops \\
-$R_{\mathrm{floor}}$ & Memory-bandwidth headroom after fusion \\
-Fusion depth & Number of global exports per layer \\
-Triplet legality & Same IR legal on GPU/CPU/NPU \\
+Bytes/token & HBM export volume between adjacent ops \\
+$R_{\mathrm{floor}}$ & Bandwidth headroom after fusion (Chapter~1) \\
+Export-edge count & Global materializations per layer step \\
+Triplet legality & Same IR compiles on GPU / CPU / NPU \\
 \bottomrule
 \end{tabular}
-\caption{Dataflow mindset counter worksheet (extends Chapter~1).}
+\caption{Mindset verification worksheet (extends Chapter~1 goodput counters).}
 \label{tab:ch02_dataflow_benchmark}
 \end{table}
 
+\paragraph{Four verification buckets (details in Appendix).}
+\textbf{(1) Core metrics}---export-edge count, bytes/token, launches/token, ms/token on three context lengths.
+\textbf{(2) Process}---paired operator/dataflow scripts in CI; bisect fusion passes before MMA tiles when bytes regress \citep{yirage2026}.
+\textbf{(3) Cross-scenario checks}---long-context stress (paging can reintroduce exports), MoE routing tax counted separately from dense MLP fusion \citep{liu2024deepseekv3,kwon2023vllm}.
+\textbf{(4) CI gates}---export reduction ratio ${\ge}0.4$ for layer-scope promotions unless documented attention-boundary exceptions; triplet compile green on pinned artifact hash \citep{taxbreak2026,memoryfloor2026}.
+Fine-grained checklist items (release train gates, JSON artifact schema, executive readout templates) live in Appendix~F's \emph{Dataflow Optimization Verification Checklist} so this chapter stays narrative, not a policy manual.
+
+\paragraph{Regression bisect order.}
+When bytes/token regresses after a fusion merge, bisect fusion passes before bisecting MMA tiles---export-edge diffs localize faster than nanosecond kernel diffs \citep{yirage2026,memoryfloor2026}.
+When launches/token regresses, inspect graph capture scope and framework dispatch before rewriting dataflow stages \citep{nvidia2024cudagraphs,taxbreak2026}.
+When ms/token regresses but counters improve, audit batching policy and measurement cells---queue effects mimic optimization wins \citep{kwon2023vllm,patel2025llminference}.
+
+\paragraph{Goodput linkage.}
+Mindset shifts matter only when ms/token moves together with bytes/token and launches/token---publish all three on one dashboard row weekly \citep{patel2025llminference,taxbreak2026,memoryfloor2026}.
+Higher concurrency per card follows lower bytes/token; better p99 streaming follows lower launches/token; CFO-visible opex follows both \citep{fan2025ellieenergyefficie}.
+Slides that show TFLOPs without layer-scope counters restart the expensive operator-first debate without evidence \citep{dlbook}.
+
+\paragraph{Continuous batching and fleet goodput.}
+Fleet batching improves weight reuse but does not fix per-request export edges inside layers \citep{kwon2023vllm}.
+Benchmark batch-1 mindset counters separately from fleet goodput---wins must appear in both when products mix interactive chat with high-throughput APIs \citep{patel2025llminference}.
+A schedule that helps BS${=}1$ tail latency but breaks at fleet batch sizes still needs framework scheduling work; a schedule that helps fleet averages but not BS${=}1$ fails chat SLOs \citep{memoryfloor2026}.
+Mindset benchmarks for this chapter focus on decode cells---do not accept prefill-only TFLOPS charts as proof of dataflow success \citep{taxbreak2026}.
+Industrial postmortems that mix prefill throughput slides with decode SLO misses hide the mindset gap this chapter closes \citep{memoryfloor2026}.
+
+\paragraph{Long-context and paging interaction.}
+Extend mindset benchmarks to long context when paging is enabled---fusion plans that work at 2K can reintroduce exports at 32K when block tables grow \citep{kwon2023vllm,dao2022flashattention}.
+Fail promotion when export-edge count rises with context while launches/token stays flat \citep{memoryfloor2026}.
+Paging solves capacity; dataflow solves per-step activation residency---teams need both ledgers \citep{patel2025llminference}.
+
+\paragraph{Quantization and scale tensors.}
+INT8 and FP8 paths need explicit scale tensors in benchmark exports so fusion legality checks do not fold away dequant boundaries \citep{liu2024deepseekv3,yirage2026}.
+Operator-first stacks often dequantize to global buffers per op; dataflow plans should keep scales in-register or in shared tiers when mathematically legal \citep{chen2020compilerbasedhardw}.
+Quantization without residency replanning buys weight bandwidth but leaves activation ping-pong untouched \citep{memoryfloor2026}.
+
+\paragraph{Handoff to hardware chapters.}
+Pin completed mindset worksheets---operator graph, dataflow stage diagram, export-edge table, triplet legality summary---before entering Chapter~\ref{chap:ch03}.
+Hardware constraint chapters should not re-derive export counts that this chapter already measured; they should explain which tier budgets are feasible on each silicon class \citep{nvidia2022hopper,amd2024xdna}.
+
 \begin{example}
-Mindset gate: fusing three adjacent ops must cut global exports by ${\ge}2$ and bytes/token by ${\ge}10\%$ at ctx${=}2048$ \emph{or} document why iron rules forced a stage split; attach residency diagram \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+Promotion gate: a three-op fusion must cut global exports by ${\ge}2$ edges and bytes/token by ${\ge}10\%$ at ctx${=}2048$, \emph{or} document which iron rule forced a stage split with profiler evidence \citep{memoryfloor2026,yirage2026}.
+Attach the residency diagram and export-edge table to the PR---reviewers cannot judge dataflow claims without topology \citep{taxbreak2026}.
 \end{example}
 
-\paragraph{Export-edge audit.} Draw the operator graph for one decoder layer; count HBM read/write edges per token \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Each edge between mathematically fused-able ops is a dataflow candidate; benchmark before/after removing edges, not before/after retuning MMA tiles \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Triplet regression discipline.} Export the same high-level decoder from YiRage IR to CUDA, CPU, and XDNA backends; diff legality failures before celebrating GPU ms/token \citep{yirage2026,chen2020compilerbasedhardw,amd2024xdna,amd2024aie,taxbreak2026,memoryfloor2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Operator-first schedules that legalize only on Hopper should fail CI when edge fleets include Ryzen AI or CPU fallback nodes \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Organizational metrics.} Align team OKRs with bytes/token and launches/token, not single-kernel TFLOPS \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Review PRs with residency diagrams and export-edge deltas---operator-first microbench wins without counter movement are rejected \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Migration benchmark cadence.} When porting operator stacks to dataflow IR, benchmark after each fusion tranche: Stage~A (norm+QKV), Stage~B (attention boundary), Stage~C (MLP+residual) \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention,taxbreak2026,memoryfloor2026,patel2025llminference,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Partial migrations that fuse MLP but leave QKV eager often show launch wins without bytes wins---document both \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Cross-stack triage.} When decode latency stalls after a fusion merge, sequence: (1) count export edges; (2) diff bytes/token worksheet; (3) diff launches/token; (4) verify triplet legality; (5) only then tune MMA tiles \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Skipping export audit keeps teams in operator-first thrash \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Documentation contract.} Publish mindset benchmark artifacts with every fusion promotion: operator graph, dataflow stage diagram, export-edge count, bytes/token, launches/token at ctx${=}2048$ \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Without published ledgers, field teams cannot tell schedule regressions from framework drift \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Release checklist.} Before tagging a dataflow schedule for production, require green triplet compile, export-edge reduction versus baseline, and ms/token delta on all three ctx buckets \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Partial green is how fleets inherit operator-first relapses \citep{memoryfloor2026,taxbreak2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Handoff to Chapter~3.} Mindset benchmarks complete when residency diagrams and triplet legality notes are pinned for the hardware constraint chapter \citep{nvidia2022hopper,amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,semianalysis2024tma}. Missing artifacts force Chapter~3 readers to guess tier budgets \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,nvidia2022hopper,amd2024aie,amd2024xdna,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,semianalysis2024tma}.
-
-\paragraph{Closing note.} Treat dataflow benchmarking as a product contract---without nightly export-edge replay artifacts stored in CI, every latency spike reopens the costly operator-first versus dataflow-first debate without evidence \citep{yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Speculative and multi-model residency.} Draft-verify stacks add second weight streams; benchmark acceptance-rate sweeps with separate export-edge ledgers per model \citep{patel2025llminference,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024xdna,amd2024aie,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Operator-first stacks bolt draft models on without revisiting fusion boundaries---dataflow audits must count both models \citep{yirage2026,kwon2023vllm,patel2025llminference,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Long-context stress.} Extend mindset benchmarks to ctx${=}16384$ when paging allows; fusion plans that work at 2K often reintroduce exports at 32K when block tables grow \citep{kwon2023vllm,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Fail CI when export-edge count rises with context while launches/token stays flat \citep{memoryfloor2026,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Efficiency metric.} Track \emph{schedule-attributed decode efficiency}: measured tokens/s divided by roofline tokens/s after subtracting framework overhead, with explicit operator-graph baseline in the denominator \citep{patel2025llminference,memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Compiler teams own fused-schedule numerator; framework teams own eager baseline---publish both weekly \citep{yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Regression harness.} Check golden mindset scripts into CI: same model, ctx buckets, export-edge assertions, and TaxBreak launches/token nightly \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Submodule or pass changes that increase export edges without documented iron-rule splits fail the gate \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Summary.} Dataflow mindset benchmarks are complete when operator and dataflow worksheets agree within published tolerances on all three ctx buckets---anything else is still an integration draft, not yet a shippable production schedule release candidate \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Continuous batching interaction.} Fleet batching improves weight reuse but does not fix per-request export edges inside layers \citep{kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark BS${=}1$ counters separately from fleet goodput---mindset wins must appear in both \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Quantization and residency.} INT8 and FP8 paths need explicit scale tensors in benchmark exports so fusion legality checks do not fold away dequant boundaries \citep{liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Operator-first stacks often dequantize to global buffers per op---dataflow plans must keep scales in-register or in shared tiers \citep{liu2024deepseekv3,yirage2026,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Observability hooks.} Instrument fused stages with stable names derived from dataflow stage ids so profilers map samples back to export edges without re-running the full compiler \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Production builds strip verbose tags but retain stage hashes in release notes \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Practitioner checklist.} Before merging any fusion PR, confirm: residency diagram attached, export-edge delta documented, bytes/token and launches/token updated, triplet export compiles, and end-to-end ms/token measured---never kernel-only timers alone \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Skipping end-to-end comparison is how operator-first microbench wins reach production undetected \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{MoE launch inflation.} Mixture-of-experts decoders multiply operator boundaries per layer; mindset benchmarks must count launches/token per expert dispatch, not only dense-layer baselines \citep{liu2024deepseekv3,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Dataflow plans that fuse MLP experts but leave routing eager often show flat bytes/token---document routing tax separately \citep{liu2024deepseekv3,yirage2026,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Operator library trap.} Vendor GEMM wins inside isolated ops do not prove operator-first schedules are optimal \citep{patel2025llminference,dlbook,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark paired schedules on identical library versions; the variable is export topology, not MMA kernel choice \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Mechanical sympathy recap.} Fregly's mechanical sympathy appears here as \emph{schedule sympathy}: align compute order with tier capacity before tuning FLOPs \citep{patel2025llminference,dlbook,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Publish mindset worksheets beside every schedule promotion so Chapter~3 hardware constraints have measurable inputs \citep{nvidia2022hopper,amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,semianalysis2024tma}.
-
-
-\paragraph{Prefill versus decode mindset.} Prefill benefits from compute-heavy GEMMs where operator-first tuning can help; decode at batch-1 is residency-dominated \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Mindset benchmarks for this chapter focus on decode cells---do not accept prefill-only evidence as proof of dataflow success \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Operator graph visualization gate.} Require a figure or table listing every global export between LayerNorm, QKV, attention, and MLP in the baseline; the dataflow PR must show removed edges highlighted \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Reviewers who cannot see export topology cannot judge dataflow mindset claims \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Goodput linkage.} Mindset shifts matter only when ms/token moves with bytes/token and launches/token---publish all three counters on the same dashboard row weekly \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{CI golden pair policy.} Store operator-first and dataflow-first decode scripts side by side in CI; any PR that moves bytes/token or launches/token in the wrong direction versus baseline fails before merge \citep{taxbreak2026,memoryfloor2026,yirage2026,patel2025llminference,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Golden pairs prevent silent and costly operator-first relapses when teams optimize isolated kernels without updating the fused schedule \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Closing checklist.} Ship operator graph, dataflow stage diagram, export-edge table, and triplet legality summary with every schedule promotion in CI---no exceptions \citep{yirage2026,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Worked export audit.} For a 7B decoder layer at batch-1, operator-first schedules typically materialize RMSNorm output, QKV tensors, attention output, and MLP intermediates to HBM---four to eight export events before residuals \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. A two-stage dataflow removing norm+QKV and MLP+residual exports cuts events by half class; benchmark bytes/token before claiming stage count \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Hybrid failure benchmarks.} Teams mixing planner-side fusion with operator-first backends should benchmark \emph{planner drift}: compare planned fusion regions to emitted kernels weekly \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Hidden exports reappear when codegen ignores lifetime metadata---CI should diff export-edge counts, not only pass logs \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{CPU and NPU mindset deltas.} GPU mindset wins often fail on CPU when fusion depth evicts KV working sets from LLC \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. XDNA schedules may require layer-scale static regions where GPU schedules used three medium fusions---triplet benchmarks expose the delta early \citep{amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Training versus inference mindset guard.} Training teams rewarded for large-batch GEMM wins often propose decode ``optimizations'' that increase exports \citep{patel2025llminference,dlbook,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Decode mindset benchmarks reject changes that improve prefill TFLOPS but raise launches/token at batch-1 \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{FlashAttention composition benchmarks.} Replacing attention ops with FlashAttention without replanning exports fixes attention bytes but may leave norm+QKV and MLP ping-pong intact \citep{dao2022flashattention,dao2023flashdecoding,memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark full-layer counters after attention swaps---mindset progress requires layer-scope worksheets \citep{memoryfloor2026,dao2022flashattention,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Graph capture without dataflow.} CUDA Graphs recording operator-first subgraphs fix launches but freeze HBM ping-pong inside recorded nodes \citep{nvidia2024cudagraphs,taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark bytes/token alongside graph capture---graphs are orchestration relief, not residency fixes \citep{memoryfloor2026,nvidia2024cudagraphs,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Iron rules in benchmarks.} Each benchmark report should state which iron rule justified every global export that remains \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Unexplained exports fail review---dataflow mindset is auditable, not aesthetic \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Automation path benchmarks.} YiRage compile failures on illegal residency are preferable to silent slowdowns---track compile reject rates and reasons in CI dashboards \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Rising reject rates often indicate operator-first edits bypassing lifetime IR \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Fleet A/B discipline.} Canary dataflow schedules must compare export-edge counts and bytes/token against operator baseline on identical traffic slices---not only p50 latency \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Tail latency improvements without counter movement suggest queue luck, not mindset wins \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Documentation for operators.} Publish mindset migration playbooks with export audits, migration checklist results, and triplet legality summaries in versioned artifact stores \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Partners cannot replay schedule regressions when benchmarks stay in private spreadsheets \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Stage sizing benchmarks.} When splitting a layer into stages, benchmark shared-memory or cache bytes per stage against hardware caps \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding}. Stage splits justified only by spills should show bytes/token regression versus a smaller fusion---document the iron-rule violation that forced the split \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Attention boundary benchmarks.} Keep KV-global attention as an explicit stage unless register and shared budgets prove safe inlining \citep{dao2022flashattention,dao2023flashdecoding,kwon2023vllm,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark attention-stage bytes separately from MLP fusion---teams often conflate FlashAttention wins with full-layer dataflow wins \citep{dao2022flashattention,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,taxbreak2026,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Residual and norm fusion benchmarks.} RMSNorm and residual adds look cheap in operator-first profilers but dominate export counts when every sub-op writes HBM \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark norm+MLP fusion tranches explicitly---early wins here build organizational trust in dataflow migration \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{PagedAttention interaction benchmarks.} Paging fixes KV capacity, not activation residency between ops inside a layer \citep{kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark paging layouts with identical fusion plans---mindset metrics must not confound paging block size changes with export removal \citep{kwon2023vllm,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Multi-GPU mindset benchmarks.} Tensor-parallel decode splits heads but should not reintroduce operator-first exports between shards \citep{liu2024deepseekv3,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark per-rank export-edge counts; balanced fleet averages hide straggler ranks with operator-style shard boundaries \citep{memoryfloor2026,taxbreak2026,yirage2026,liu2024deepseekv3,chen2020compilerbasedhardw,patel2025llminference,kwon2023vllm,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Release train gates.} Block production promotion when operator baseline and dataflow candidate worksheets diverge without signed iron-rule exceptions \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Partial promotion is how fleets run mixed schedules behind one load balancer---bimodal latency follows \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Final summary metric.} Define \emph{export reduction ratio} = (baseline export edges $-$ fused export edges) / baseline export edges; require ${\ge}0.4$ for layer-scope promotions unless documented and reviewed attention-boundary exceptions apply \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Pair with bytes/token and launches/token gates---export ratio alone is insufficient but catches fake fusion \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Onboarding benchmarks.} New kernel hires from training backgrounds should run export audits on day one before proposing MMA tile changes \citep{patel2025llminference,dlbook,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Onboarding docs must include paired operator and dataflow worksheets---culture follows metrics \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Vendor library A/B policy.} When swapping cuBLAS or hipBLAS versions, re-run mindset worksheets---library speedups inside ops do not validate operator-first schedules \citep{patel2025llminference,dlbook,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Hold fusion topology constant across library bumps \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Framework plugin boundaries.} Benchmark in-step counters separately from framework queue time---mindset wins must appear inside the decode box defined in Chapter~1 \citep{kwon2023vllm,patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Plugin integrations that add host syncs can erase fusion wins unless worksheets isolate framework tax \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Regression bisect protocol.} When bytes/token regresses, bisect fusion passes before bisecting MMA tiles---export-edge diffs localize faster than ns-level kernel diffs \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. When launches/token regresses, inspect graph capture and framework dispatch before rewriting dataflow stages \citep{taxbreak2026,nvidia2024cudagraphs,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Closing synthesis.} Dataflow mindset benchmarking is complete when export reduction ratio, bytes/token, launches/token, and ms/token align on three ctx buckets with triplet legality pinned---ship the worksheets publicly or keep the schedule in lab only \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Rotary and QKV fusion benchmarks.} Rotary embedding between QKV and attention is a frequent hidden export in operator-first stacks \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Benchmark norm+QKV+rotary fusion as Stage~A; skipping rotary in export audits understates operator-first tax \citep{memoryfloor2026,taxbreak2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{SwiGLU MLP fusion benchmarks.} Gate, up, and down projections triple export events in operator-first MLP chains \citep{taxbreak2026,memoryfloor2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Dataflow Stage~C should benchmark SwiGLU as one residency region---partial down-proj fusion without gate/up is a common false win \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Cross-chapter worksheet handoff.} Attach completed mindset worksheets to Chapter~3 hardware constraint reviews so tier budgets are evidence-backed, not assumed \citep{nvidia2022hopper,amd2024xdna,amd2024aie,yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,semianalysis2024tma}. Chapter~3 readers should not re-derive export counts that Chapter~2 already measured \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,nvidia2022hopper,amd2024aie,amd2024xdna,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,dlbook,dao2023flashdecoding,semianalysis2024tma}.
-
-\paragraph{Nightly CI cadence.} Run mindset golden pairs nightly on pinned GPU CI runners with fixed seeds; CPU and NPU triplet legs weekly when hardware pools allow \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Flaky tests that skip export assertions teach teams to ignore critical dataflow mindset gates in every release \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Executive readout template.} One-page promotion summaries must show operator versus dataflow counter deltas side by side---executives approve schedules, not kernel names \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Hide counter regressions behind p50 latency charts and fleets rediscover operator-first habits \citep{patel2025llminference,kwon2023vllm,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Postmortem discipline.} Decode incidents should replay export-edge counts from canary worksheets before blaming drivers or hardware \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Missing worksheets force multi-week debates that dataflow benchmarks are meant to prevent \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Benchmark artifact schema.} Store JSON lines per decode step with schedule id, export-edge count, bytes estimate, launches count, and ctx length \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Aggregates belong in dashboards; per-step JSON enables postmortems \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw,kwon2023vllm,memoryfloor2026,taxbreak2026,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-\paragraph{Final gate sentence.} Do not merge mindset changes without green export reduction ratio and triplet compile on the same pinned artifact hash \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Anything less is costly operator-first drift wearing dataflow labels \citep{memoryfloor2026,taxbreak2026,patel2025llminference,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Worksheet archive policy.} Version mindset worksheets in the same artifact store as compiler fingerprints so bisect can compare export topology across releases \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,taxbreak2026,memoryfloor2026,kwon2023vllm,liu2024deepseekv3,nvidia2024cudagraphs,dao2022flashattention,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Schedule sympathy mantra.} Profile exports first, fuse second, tune FLOPs third, re-profile on every ctx bucket change \citep{patel2025llminference,taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}. Post the schedule sympathy mantra beside every mindset worksheet template in the team wiki \citep{yirage2026,chen2020compilerbasedhardw,patel2025llminference,memoryfloor2026,taxbreak2026,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
-
-
-\paragraph{Acceptance criteria recap.} Green mindset promotion on all three ctx buckets requires export reduction ratio ${\ge}0.4$, bytes/token down, launches/token down or flat, ms/token down, and triplet legality on pinned hashes \citep{taxbreak2026,memoryfloor2026,yirage2026,chen2020compilerbasedhardw,patel2025llminference,dao2022flashattention,liu2024deepseekv3,kwon2023vllm,nvidia2024cudagraphs,amd2024aie,amd2024xdna,dlbook,dao2023flashdecoding,nvidia2022hopper,semianalysis2024tma}.
+\paragraph{Executive and incident readouts.}
+One-page promotion summaries should show operator versus dataflow counter deltas side by side---executives approve schedules, not kernel names \citep{patel2025llminference,memoryfloor2026}.
+Decode incidents should replay export-edge counts from canary worksheets before blaming drivers or hardware \citep{taxbreak2026}.
+Missing worksheets recreate the multi-week debates that paired benchmarking is meant to prevent \citep{yirage2026}.
+Store mindset artifacts in the same versioned bucket as compiler fingerprints so bisect can compare export topology across releases \citep{chen2020compilerbasedhardw}.
+
+\paragraph{Closing verification mantra.}
+Profile exports first, fuse second, tune FLOPs third, re-profile on every context bucket change \citep{taxbreak2026,memoryfloor2026,patel2025llminference}.
+Green mindset promotion on three context buckets requires export reduction ratio ${\ge}0.4$, bytes/token down, launches/token down or flat, ms/token down, and triplet legality on pinned hashes---partial green is how fleets inherit operator-first relapses behind a single load balancer \citep{yirage2026,kwon2023vllm}.
 
 \section{Key Takeaways}
 \label{sec:ch02_key_takeaways}
 
 \begin{itemize}
-\item \textbf{Operator-first thinking is the default trap.}
-Listing a decoder as LayerNorm, QKV, attention, MLP, and residuals and tuning each kernel in isolation stitches them with separate launches, so the failure is structural rather than per-kernel \citep{dao2023flashdecoding,taxbreak2026}. No amount of single-operator tuning removes the launch-and-spill tax that the operator boundaries themselves create \citep{memoryfloor2026}.
+\item \textbf{Schedule before operators.}
+Decode optimization wins when you replan exports and launches across the layer, not when you squeeze one more percent inside an isolated matmul \citep{taxbreak2026,memoryfloor2026}.
+\textbf{Action:} run export-edge and TaxBreak launch audits before accepting any kernel-only PR; default to fusion when Chapter~1 classifies orchestration dominance.
 
-\item \textbf{Residency, not FLOPs, is the root cause.}
-Activations that could live in registers or shared memory across the QKV$\rightarrow$attention$\rightarrow$MLP chain are instead materialized to HBM at every operator boundary, which is the real source of decode latency \citep{memoryfloor2026,dao2022flashattention}. The dataflow mindset names the schedule and tensor lifetimes before operators so those activations stay on-chip \citep{yirage2026}.
+\item \textbf{Residency is the root lever.}
+Activations that could live on-chip across QKV$\rightarrow$attention$\rightarrow$MLP must not round-trip through HBM between mathematically adjacent ops \citep{memoryfloor2026,dao2022flashattention}.
+\textbf{Action:} enforce the three iron rules as release gates; use Nsight Compute global traffic and LLC profiles to catch ping-pong.
 
-\item \textbf{The iron rules assign each tier its job.}
-Registers hold ephemeral scalars and narrow vectors, on-chip SRAM holds fusion regions up to its capacity, and a spill is the signal the split is wrong---these are checkable invariants, not guidelines \citep{yirage2026,dlbook}. Encoding them as metadata is what lets a compiler reject an illegal schedule before codegen \citep{chen2020compilerbasedhardw}.
+\item \textbf{Cross-hardware from day one.}
+GPU fusion depth, CPU blocking, and NPU static ADF regions differ for the same math---port the dataflow graph, not the CUDA kernel list \citep{amd2024xdna,yirage2026}.
+\textbf{Action:} add a CPU or NPU leg to every fusion promotion; reject GPU-only evidence for fleet-wide schedules.
 
-\item \textbf{Cross-hardware is a design input, not an appendix.}
-A GPU-tuned schedule silently fails on an edge NPU's static fabric and underperforms on a co-located CPU node, so the mindset must be multi-target from the start \citep{amd2024xdna,amd2024aie}. The same dataflow plan yields different bytes/token per class, which only a cross-hardware comparison reveals \citep{taxbreak2026}.
+\item \textbf{Prove shifts with paired counters.}
+Operator-first and dataflow-first baselines must move bytes/token, launches/token, and ms/token together on identical cells \citep{patel2025llminference,taxbreak2026}.
+\textbf{Action:} store paired worksheets in CI; block merge when export reduction ratio and triplet legality fail.
 
-\item \textbf{The MegaKernel is the mindset materialized.}
-Dispatching an entire decoder layer with activations resident across QKV, attention, MLP, norms, and residuals is the antithesis of the operator graph, and YiRage automates it by planning lifetimes globally from one dataflow IR \citep{yirage2026,memoryfloor2026}. The shift is from optimizing kernels to optimizing the schedule that ties them together \citep{patel2025llminference}.
+\item \textbf{Automate the mindset.}
+MegaKernels materialize the schedule; YiRage automates lifetime planning and backend codegen from one IR \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Action:} treat compile rejections on illegal residency as gifts---fix the graph, do not bypass with eager fallbacks.
+
+\item \textbf{Make the culture match the metrics.}
+Operator-first habits survive famous kernel libraries until organizations reward layer-scope counters in review and CI \citep{taxbreak2026,patel2025llminference,kwon2023vllm}.
+\textbf{Action:} pair operator and dataflow golden scripts in nightly CI; reject kernel-only PRs that do not update export-edge tables \citep{memoryfloor2026,yirage2026}.
 \end{itemize}
 
 \section{Conclusion}
 \label{sec:ch02_conclusion}
 
-The operator-driven and dataflow-driven mindsets are not two styles of the same craft; they are different theories of what a decoder layer \emph{is}---a list of kernels to tune versus a schedule of residency to plan \citep{taxbreak2026,memoryfloor2026}. The dataflow mindset is the one this book commits to, because at batch-1 decode the operator boundaries themselves are the cost, and only a residency-first schedule---materialized as a MegaKernel and enforced by YiRage's iron rules---removes them \citep{yirage2026,dao2022flashattention}. That mindset is empty, however, without the hardware facts it must plan against: Chapter~\ref{chap:ch03} supplies the concrete memory hierarchies, parallelism grains, and scheduling models of GPUs, CPUs, and NPUs that every later compiler pass encodes \citep{nvidia2022hopper,amd2024aie}.
+Operator-driven and dataflow-driven mindsets are different theories of what a decoder layer \emph{is}: a list of kernels to tune versus a schedule of residency to plan \citep{chen2020compilerbasedhardw,dlbook}.
+This book commits to the dataflow theory because at batch-1 decode the operator boundaries themselves are the cost, and only residency-first schedules---hand-crafted as MegaKernels or derived by YiRage---remove them \citep{yirage2026,memoryfloor2026}.
+
+That mindset is empty without hardware facts.
+Chapter~\ref{chap:ch03} supplies concrete memory hierarchies, parallelism grains, and scheduling models for GPUs, CPUs, and NPUs that every later compiler pass encodes \citep{nvidia2022hopper,amd2024xdna,amd2024aie}.
+Bring your export-edge worksheet from this chapter; Chapter~3 tells you which tier budgets are physically achievable on each silicon class.
+
+\paragraph{Worksheet gate (repeat for memory).}
+Before changing a kernel in Parts~IV--VI, state whether Chapter~1 classifies your cell as orchestration- or bandwidth-limited, and whether this chapter's export audit shows unnecessary HBM edges between fused-able ops \citep{taxbreak2026,memoryfloor2026}.
+If you cannot answer, run TaxBreak and draw the operator graph first \citep{taxbreak2026}.
+Dataflow-first design is not anti-kernel---it is anti-\emph{boundary}; kernels remain how you implement stages once the schedule is sane \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Hands-on next step.}
+Open your decoder trace and mark every global export between LayerNorm, QKV, attention, and MLP on one layer \citep{memoryfloor2026}.
+If you count more than four exports, your next experiment is staged fusion or graph replanning---not another MMA tile sweep \citep{taxbreak2026,yirage2026}.
+Write before/after bytes/token and launches/token in the Appendix~F spreadsheet before requesting headcount for kernel tuning \citep{patel2025llminference}.
+
+\paragraph{Index anchors for cross-reference.}
+\index{Dataflow-driven design}
+\index{Operator-driven design}
+\index{Data residency}
+\index{MegaKernel}
+\index{Iron rules}
+\index{Export edge}
+Decode optimization vocabulary in later chapters assumes these index terms: \textbf{dataflow-driven} schedules plan lifetimes first; \textbf{operator-driven} schedules list ops first; \textbf{export edges} are global materializations between fused-able ops; \textbf{MegaKernel} is the manual full-layer stage pattern; \textbf{iron rules} assign registers, on-chip SRAM, and HBM roles \citep{yirage2026,dlbook}.
+When Part~IV introduces TMA and shared-memory staging, you are implementing Rule~2 under Hopper-specific caps \citep{nvidia2022hopper}.
+When Part~VI introduces YiRage fusion passes, you are automating the five-step migration at IR scale \citep{chen2020compilerbasedhardw}.
+Keeping vocabulary anchored here prevents every chapter from redefining the same mindset in different words \citep{patel2025llminference}.
 
 \typeout{END_CHAPTER "ch02" \theabspage}

@@ -2,157 +2,1038 @@
 \label{chap:ch08}
 \typeout{START_CHAPTER "ch08" \theabspage}
 
-Chapter~7 fixed roles so the consumer units never wait on a scheduler; this chapter makes sure they never wait on data either, by pipelining asynchronous movement so the next tile is already arriving while the current one is consumed \citep{shah2024flashattention3,semianalysis2024tma}. The stakes are the decode metrics established in Chapter~1: at batch-1 the model re-reads weights and the growing KV cache every token, so the load path, not the matmul, sets ms/token, and any cycle a compute unit spends idle waiting for a load is a cycle of pure latency \citep{taxbreak2026,kwon2023vllm}. Dense Llama-3.2-1B already issues 847.5 launches per token on H100 and OLMoE-1B/7B issues 9{,}305; collapsing those launches only pays off if the resulting fused kernel keeps its compute units fed \citep{memoryfloor2026,nvidia2024cudagraphs}.
-The mistake to avoid is treating data movement as synchronous---load, then compute, then load. That serializes the two and exposes the full memory latency every step. The fix, across every hardware class, is a \textbf{double-buffer} \textbf{pipeline}: overlap the movement of tile $n{+}1$ with the computation on tile $n$, so latency is hidden behind useful work \citep{dao2022flashattention,amd2024aie}.
+\section{The Fused-Kernel Ceiling Is the Pipeline}
+\label{sec:industrial_hook}
+
+A team fused twelve ops and cut launches to one---then consumers still stalled because loads were synchronous \citep{shah2024flashattention3,memoryfloor2026,taxbreak2026}.
+Chapter~\ref{chap:ch06} budgeted bytes; Chapter~\ref{chap:ch07} assigned producer/consumer roles; \textbf{this chapter makes roles never wait on data} \citep{yirage2026,semianalysis2024tma,dao2022flashattention}.
+
+\textbf{Fusion solves ``fewer trips to HBM''; pipelines solve ``no idle wait on each trip.''} At batch-1 decode, ms/token is set by how fast weight and KV bytes stream, not peak TFLOPs \citep{patel2025llminference,kwon2023vllm,memoryfloor2026}.
+\textbf{This chapter is the MegaKernel execution pillar}---asynchronous movement that hides latency behind compute \citep{shah2024flashattention3,amd2024aie}.
+
+\paragraph{Bridge from Chapters~6--7.}
+Pipeline depth consumes fast memory---must joint-check with Ch.~6 peak footprint \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+Producer warps from Ch.~7 issue async loads; this chapter defines \emph{when} buffers flip and barriers fire \citep{shah2024flashattention3,semianalysis2024tma}.
+Decode metrics methodology: Chapter~\ref{chap:ch03}; hardware primitives: Chapters~\ref{chap:ch04}--\ref{chap:ch05} \citep{patel2025llminference,nvidia2022hopper,amd2024xdna}.
+
+\paragraph{What you will be able to do.}
+(1)~Run three-step pipeline depth decision, (2)~size weight vs KV streams independently, (3)~fill tri-hardware pipeline table, (4)~interpret YiRage pipeline-pass output, (5)~complete pipeline checklist \citep{yirage2026,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Organization map.}
+Depth method (\S\ref{sec:ch08_pipeline_theory}), GPU TMA (\S\ref{sec:ch08_gpu_tma}), CPU prefetch (\S\ref{sec:ch08_cpu_dma}), NPU DMA (\S\ref{sec:ch08_npu_pipeline}), YiRage pass (\S\ref{sec:ch08_yirage_pipeline_gen}), joint budget (\S\ref{sec:ch08_joint_budget}), pitfalls (\S\ref{sec:ch08_pipeline_pitfalls}), patterns (\S\ref{sec:ch08_pipeline_patterns}), review workflow, takeaways, bridge to Chapter~\ref{chap:ch09} \citep{semianalysis2024tma,patel2025llminference}.
+
+\paragraph{Decode-first thesis.}
+Prefill runs many thick tiles---prologue cost amortizes \citep{kwon2023vllm,shah2024flashattention3}.
+Decode runs few thin tiles per token---prologue/epilogue share matters \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+Do not copy prefill pipeline depth; use Section~\ref{sec:ch08_pipeline_theory} worksheets \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Anti-pattern preview.}
+Section~\ref{sec:ch08_pipeline_pitfalls} lists five pipeline failures---review before TMA merge \citep{yirage2026,semianalysis2024tma}.
+Culture: no ``enabled double buffer'' without depth worksheet and Ch.~6 byte accounting \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Case study sketch (fused attention, batch-1).}
+Baseline: fused kernel with synchronous loads---consumers idle ${\sim}40\%$ of cycles waiting on HBM \citep{shah2024flashattention3,memoryfloor2026,patel2025llminference}.
+Ping-pong TMA: steady-state hides compute behind next-tile load---consumer idle drops toward barrier overhead only \citep{semianalysis2024tma,nvidia2022hopper}.
+Triple-buffer attempt: third buffer overflows Ch.~6 shared cap---spill to local memory erases win \citep{yirage2026,dao2022flashattention,taxbreak2026}.
+Document each step with stall counters and bytes/token, not FLOPs \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{Budget--structure--execution stack.}
+Chapter~\ref{chap:ch06} asked whether bytes fit; Chapter~\ref{chap:ch07} asked which unit moves them; this chapter asks whether movement overlaps compute \citep{yirage2026,shah2024flashattention3,dao2022flashattention}.
+Illegal depth without residency update is the most common post-fusion regression \citep{memoryfloor2026,wu2024mirage,chen2020compilerbasedhardw}.
+Megakernel assembly (Chapters~9--11) assumes all three worksheets are green \citep{mpk2025,semianalysis2024tma}.
+
+\paragraph{Industrial narrative.}
+Teams celebrate fusion launch drops then plateau on ms/token---often synchronous movement inside the fused kernel \citep{taxbreak2026,patel2025llminference,memoryfloor2026}.
+FlashAttention-3's warp specialization only pays when TMA pipelines feed consumers \citep{shah2024flashattention3,semianalysis2024tma}.
+Pipelining is the mechanical sympathy layer between Ch.~7 roles and Ch.~4 hardware \citep{nvidia2022hopper,yirage2026}.
+
+\paragraph{Reader paths.}
+\textbf{Kernel engineers:} depth worksheet + GPU barrier rules + pitfalls \citep{shah2024flashattention3,taxbreak2026}.
+\textbf{Compiler authors:} YiRage pipeline pass I/O + fixed-point loop with memory/tiling \citep{yirage2026,wu2024mirage,mpk2025}.
+\textbf{Fleet operators:} tri-hardware table + per-backend golden IR \citep{amd2024xdna,patel2025llminference,chen2020compilerbasedhardw}.
+All paths end at the checklist before Chapter~\ref{chap:ch09} \citep{semianalysis2024tma,dao2022flashattention}.
+
+\paragraph{Who should read this chapter.}
+Kernel engineers wiring TMA/ping-pong, compiler authors implementing pipeline pass, serving leads diagnosing ``fused but slow'' decode \citep{shah2024flashattention3,yirage2026,patel2025llminference}.
+Complete Ch.~6--7 worksheets first---pipeline depth without budget and roles is guesswork \citep{memoryfloor2026,dao2022flashattention,taxbreak2026}.
+
+\paragraph{What this chapter is not.}
+Not a TMA programming manual (Ch.~4), not an XDNA DMA catalog (Ch.~5), not a residency tutorial (Ch.~6) or role-split tutorial (Ch.~7) \citep{nvidia2022hopper,amd2024xdna,chen2020compilerbasedhardw}.
+We teach pipeline \emph{decisions} given those inputs \citep{yirage2026,dlbook}.
+
+\paragraph{Terminology alignment.}
+\textbf{Software pipeline} = explicit stage overlap in time \citep{dao2022flashattention,semianalysis2024tma}.
+\textbf{Ping-pong} = depth-2 double buffer swap \citep{shah2024flashattention3,yirage2026}.
+\textbf{Prologue/epilogue} = warm-up/drain before/after steady overlap \citep{dlbook,patel2025llminference}.
+\textbf{Stream} = independent operand movement path (weight vs KV) \citep{kwon2023vllm,dao2023flashdecoding}.
+Use consistently in worksheets and CI logs \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Bridge to Chapter~9.}
+This chapter places barriers for ping-pong; Chapter~\ref{chap:ch09} generalizes hierarchical sync when many producers, consumers, and tiles coordinate \citep{taxbreak2026,shah2024flashattention3,patel2025llminference}.
+Carry mbarrier indices and stream schedules forward \citep{yirage2026,semianalysis2024tma}.
+
+\paragraph{Execution pillar in MegaKernel stack.}
+Residency (Ch.~6) minimizes bytes; roles (Ch.~7) eliminate dispatch; pipelines (this chapter) hide latency on remaining bytes \citep{dao2022flashattention,shah2024flashattention3,yirage2026,memoryfloor2026}.
+Skipping pipelines yields ``fused but idle'' kernels---the most common post-Ch.~7 disappointment in decode serving \citep{taxbreak2026,patel2025llminference,semianalysis2024tma}.
+Chapter~11 assembly assumes all three layers are co-designed \citep{mpk2025,wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Quantitative anchor.}
+The Llama-3.2-1B worksheet uses ${\sim}400/300$ load/compute cycles---your model will differ, but the \emph{method} is portable \citep{taxbreak2026,shah2024flashattention3,kwon2023vllm}.
+Replace numbers; keep steps 1--3 and multi-stream split \citep{yirage2026,patel2025llminference,memoryfloor2026}.
+Depth without measurement is technical debt \citep{chen2020compilerbasedhardw,dao2022flashattention}.
+
 \index{TMA}
 \index{Double buffering}
 \index{Asynchronous copy}
+\index{Software pipeline}
 
-\section{Pipeline theory}
+\section{Double-Buffer Pipelines: Depth Decision Method}
 \label{sec:ch08_pipeline_theory}
 
-% AUTO_VISUAL:fig_pipeline_theory_pipeline
+A software pipeline overlaps stage $n{+}1$ load with stage $n$ compute \citep{dao2022flashattention,dlbook,semianalysis2024tma}.
+\textbf{Double-buffering} is the minimum depth (two buffers); deeper pipelines help only until the bottleneck stage saturates \citep{shah2024flashattention3,memoryfloor2026}.
 
+\paragraph{Serial vs overlapped baseline.}
+Without pipeline, each tile pays $t_{\mathrm{load}} + t_{\mathrm{compute}}$ serially \citep{dlbook,patel2025llminference,semianalysis2024tma}.
+With ideal ping-pong on load-bound tiles, steady state pays $\max(t_{\mathrm{load}}, t_{\mathrm{compute}})$ per tile after prologue \citep{shah2024flashattention3,dao2022flashattention}.
+The gap is the pipeline dividend---bounded by bandwidth, not arithmetic peak \citep{memoryfloor2026,taxbreak2026,yirage2026}.
+
+\paragraph{When not to pipeline.}
+If $t_{\mathrm{compute}} \gg t_{\mathrm{load}}$, deeper buffers do not help---fix compute or add consumers (Ch.~7) \citep{shah2024flashattention3,patel2025llminference}.
+If $N{=}1$ tile per token and depth$>2$, prologue may erase benefit---stay serial or use persistent outer loop \citep{mpk2025,nvidia2024cudagraphs,taxbreak2026}.
+If Ch.~6 cannot fit $2b$ bytes, do not pipeline---split fusion first \citep{memoryfloor2026,yirage2026,chen2020compilerbasedhardw}.
+
+% AUTO_VISUAL:fig_pipeline_theory_pipeline
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[vis base, scale=0.86, transform shape]
  \node[vis pipeline node] (s0) at (-5.4,0) {\footnotesize Load tile $n$};
  \node[vis arch node] (s1) at (-1.9,0) {\footnotesize Compute $n$\\$\parallel$ load $n{+}1$};
- \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Compute $n{+}1$\\$\parallel$ load $n{+}2$};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize Steady-state\\overlap};
+ \node[vis pipeline node] (s2) at (1.8,0) {\footnotesize Steady\\overlap};
+ \node[vis arch node] (s3) at (5.4,0) {\footnotesize Epilogue\\drain};
  \draw[vis arrow] (s0.east) -- (s1.west);
  \draw[vis arrow] (s1.east) -- (s2.west);
  \draw[vis arrow] (s2.east) -- (s3.west);
 \end{tikzpicture}
-\caption{A double-buffer pipeline: after a one-tile prologue, each compute step overlaps with the load of the next tile, hiding memory latency behind compute.}
+\caption{Double-buffer pipeline: prologue, steady overlap, epilogue (decode: few tiles $\Rightarrow$ prologue share grows).}
 \label{fig:pipeline_theory_pipeline}
 \end{figure}
 
-The theory of a software \textbf{pipeline} is simple and general: split a stream of work into stages, give each stage its own buffer, and run the stages concurrently so that while one stage consumes buffer $A$, the previous stage fills buffer $B$ \citep{dlbook,dao2022flashattention}. The idea is borrowed directly from hardware instruction pipelines and from classical producer-consumer queueing, and the same intuition applies: throughput is set by the slowest stage, and latency is hidden as long as there is buffered work for the consumer to do while the producer runs ahead.
-
-The reason a \textbf{pipeline} is the right frame for decode specifically is that decode is a stream of nearly identical, small units of work---one token's layer computation after another, each reading a predictable working set \citep{kwon2023vllm,taxbreak2026}. Streaming, regular work is the ideal case for pipelining: the stages are stable, the buffer sizes are known, and the depth can be fixed at compile time. This is in contrast to irregular, data-dependent work where the next tile's size or location is not known until the current one finishes, which is harder to pipeline and is one reason prefill and decode want different schedules \citep{dao2023flashdecoding,memoryfloor2026}.
-
- \textbf{Double-buffer}ing is the two-stage instance---one buffer being computed on, one being loaded---and it is the minimum needed to overlap movement with compute. The cost is doubled buffer footprint, which is exactly the residency charge Chapter~6 told the planner to account for; the benefit is that, after a one-tile prologue, the memory latency of every subsequent load is hidden behind the compute of the previous tile \citep{semianalysis2024tma,memoryfloor2026}.
-
-Two quantities govern a \textbf{pipeline}'s effectiveness. The first is depth: a deeper \textbf{pipeline}, with more than two buffers in flight, hides more latency because more loads can be outstanding, but it consumes proportionally more fast memory \citep{shah2024flashattention3}. The second is the balance between the stages: if the load stage is slower than the compute stage, the \textbf{pipeline} is memory-bound and stalls no matter how deep it is, and if compute is slower, the loads complete early and the extra depth is wasted. For batch-1 decode the load stage usually dominates---the matmul is a thin matrix-vector product while the load is a full weight tile---so the design goal is to make the load as asynchronous and as overlapped as the hardware allows, then size the \textbf{pipeline} depth to the available fast memory \citep{taxbreak2026,kwon2023vllm}.
-
-A worked latency argument shows why depth matters. Suppose a tile load takes 400 cycles of memory latency and the compute on a tile takes 300 cycles. With no pipeline, each step costs $400+300 = 700$ cycles, and the unit is idle 57\% of the time. With a two-stage \textbf{double-buffer}, the steady-state step cost drops to $\max(400,300) = 400$ cycles---the load and compute overlap, so the step is bounded by the slower stage---and the memory latency is fully hidden behind compute only if compute were the longer stage \citep{semianalysis2024tma,dao2022flashattention}. Here the load is longer, so the \textbf{pipeline} is memory-bound at 400 cycles per tile, and adding a third buffer does not help because the bottleneck is load bandwidth, not the number of outstanding loads. This is the quantitative form of the balance rule: deepen the \textbf{pipeline} only until the bottleneck stage saturates, then stop.
-
-The same arithmetic explains a counter-intuitive decode result. Because decode is memory-bound, the best a \textbf{pipeline} can do is hide the compute behind the load, which means the achievable token latency is bounded below by the time to stream the per-token working set---the weights and KV slice---no matter how clever the overlap \citep{taxbreak2026,memoryfloor2026}. Pipelining cannot beat that floor; it can only ensure the kernel reaches it instead of paying load-plus-compute serially. This is why Chapter~6's residency work and this chapter's movement work are complementary: residency reduces how many bytes must be streamed, and pipelining ensures the bytes that are streamed overlap with compute, and only together do they approach the memory-bandwidth floor \citep{kwon2023vllm,patel2025llminference}.
-
-The crucial enabling property is asynchrony. A \textbf{pipeline} only overlaps if the load can be issued and then proceed in the background while the issuing unit moves on to compute; a synchronous copy that blocks until it completes cannot overlap with anything \citep{semianalysis2024tma}. Every hardware class therefore provides some asynchronous movement primitive, and the chapters that follow are really a tour of those primitives---TMA on a GPU, prefetch and async copy on a CPU, DMA on an NPU---and of how a compiler builds a correct \textbf{double-buffer} \textbf{pipeline} on top of each. The common requirement is a completion signal: the consumer must know when buffer $B$ is full before it reads it, so each primitive pairs with a barrier or token that the \textbf{pipeline} uses to sequence the stages \citep{shah2024flashattention3,amd2024aie}.
-
-\section{GPU TMA}
-\label{sec:ch08_gpu_tma}
-
-% AUTO_VISUAL:fig_gpu_tma_architecture
+\paragraph{Three-step depth decision.}
+\textbf{Step 1---Stage throughput ratio:} measure $t_{\mathrm{load}}$ and $t_{\mathrm{compute}}$ per tile \citep{shah2024flashattention3,patel2025llminference}.
+Bottleneck $B = \max(t_{\mathrm{load}}, t_{\mathrm{compute}})$; steady-state step cost $\approx B$ after prologue \citep{semianalysis2024tma,dao2022flashattention}.
+\textbf{Step 2---Buffer budget:} from Ch.~6 fast-memory cap, subtract resident tensors and sync metadata; divide by tile bytes for max depth $D_{\max}$ \citep{yirage2026,chen2020compilerbasedhardw,dao2022flashattention}.
+\textbf{Step 3---Marginal benefit:} with $N$ tiles/token, prologue/epilogue cost $\approx (D-1)\cdot B$ each; deepen only if $N \gg 2(D-1)$ and $D \le D_{\max}$ \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[vis base, scale=0.84, transform shape]
- \node[vis arch node] (s0) at (-5.5,0) {\footnotesize HBM\\(global)};
- \node[vis arch node] (s1) at (-1.9,0) {\footnotesize TMA\\async bulk copy};
- \node[vis arch node] (s2) at (1.8,0) {\footnotesize Shared mem\\double buffer};
- \node[vis arch node] (s3) at (5.4,0) {\footnotesize WGMMA\\consumer};
- \draw[vis arrow] (s0.east) -- (s1.west);
- \draw[vis arrow] (s1.east) -- (s2.west);
- \draw[vis arrow] (s2.east) -- (s3.west);
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+ \draw[->] (0,0) -- (6,0) node[right, font=\scriptsize] {pipeline depth};
+ \draw[->] (0,0) -- (0,2.5) node[above, font=\scriptsize] {step latency};
+ \draw[thick, red!70] (0.5,2.2) -- (1.5,2.2) node[midway, above, font=\scriptsize] {serial};
+ \draw[thick, blue!70] (2.0,1.4) -- (4.0,1.4) node[midway, above, font=\scriptsize] {2-buffer};
+ \draw[thick, green!60!black] (4.5,1.2) -- (5.5,1.2) node[midway, above, font=\scriptsize] {3+ (if mem-bound, flat)};
 \end{tikzpicture}
-\caption{On Hopper, TMA issues asynchronous bulk copies from HBM into a double-buffered shared-memory region that WGMMA consumers drain.}
-\label{fig:gpu_tma_architecture}
+\caption{Pipeline depth vs per-step latency: deepening stops helping when load-bound \citep{semianalysis2024tma,memoryfloor2026}.}
+\label{fig:ch08_depth_latency}
 \end{figure}
 
-On a \textbf{Hopper} GPU the asynchronous movement primitive is the Tensor Memory Accelerator (\textbf{TMA}), and it is purpose-built for the \textbf{double-buffer} \textbf{pipeline} this chapter describes. \textbf{TMA} performs asynchronous bulk copies between global and shared memory, and crucially it is issued by a single thread rather than by every thread in a warp, which frees the other threads' registers and address-generation work for compute \citep{shah2024flashattention3}. This is why FlashAttention-3 assigns \textbf{TMA} to a dedicated producer warp: one thread kicks off the bulk load, the producer moves on, and the consumer warpgroup runs WGMMA on the previously loaded tile \citep{shah2024flashattention3}.
-
-Completion is signaled through transaction barriers. A \textbf{TMA} copy is associated with a shared-memory barrier that tracks how many bytes have arrived, and the consumer waits on that barrier before reading the buffer; because the barrier is transaction-based, the hardware knows when the full tile has landed rather than relying on a thread count \citep{shah2024flashattention3,nvidia2022hopper}. This is the completion signal the \textbf{pipeline} theory required, and it is what lets the compiler build a correct multi-stage pipeline: each buffer has its own barrier, the producer fills buffer $n{+}1$ and arrives at its barrier while the consumer waits on buffer $n$'s barrier, and the two proceed in lockstep one tile apart.
-
-\textbf{TMA} also carries optimizations that matter for decode residency. It can multicast a single load to the shared memory of all CTAs in a thread-block cluster in one operation, so a weight tile read once is delivered to several consumers without re-reading HBM---a direct bytes/token saving when the same weights feed multiple CTAs \citep{shah2024flashattention3,nvidia2022hopper}. It also exposes an L2 promotion hint that biases the cache toward keeping \textbf{TMA}-loaded lines resident when the same input tile is consumed by many CTAs, as in a GEMM where each weight column feeds every row \citep{semianalysis2024tma,nvidia2022hopper}. Both are mechanisms the \textbf{pipeline} builder uses to ensure that the bytes a tile needs are either already on chip or arriving asynchronously, never fetched synchronously on the critical path.
-
-There is a register dimension to \textbf{TMA} that is easy to miss and directly relevant to the residency budget. On older async-copy paths every thread in a warp participated in address generation, consuming registers and instruction slots that then could not be used for compute \citep{dao2022flashattention}. Because \textbf{TMA} is issued by a single thread with a hardware-resident multidimensional descriptor, it frees the rest of the warp's registers, and combined with Hopper's warpgroup-wide register reallocation from Chapter~7 this lets the consumer warpgroup claim a larger share of the 65{,}536-register file for accumulators \citep{shah2024flashattention3,nvidia2022hopper}. The movement primitive and the residency budget are thus coupled: choosing \textbf{TMA} is not only a movement decision but a register decision, and a \textbf{pipeline} built on it can sustain deeper compute tiles than one built on the older per-thread copy.
-
-The interaction with the transaction barrier is what makes deep \textbf{TMA} pipelines correct rather than merely fast. Each buffer in the \textbf{pipeline} gets its own barrier object in shared memory; the producer thread issues the \textbf{TMA} for buffer $k$ and records the expected byte count on that buffer's barrier, and the consumer warpgroup waits on barrier $k$ before reading buffer $k$ \citep{shah2024flashattention3}. With $s$ buffers the producer can run up to $s$ tiles ahead, and the barriers form a circular list that sequences the stages---a structure CUTLASS encapsulates in reusable pipeline classes precisely because managing the barriers by hand is error-prone \citep{shah2024flashattention3,nvidia2022hopper}. For a compiler this is ideal: the barrier discipline is mechanical and can be generated, which is exactly what the YiRage \textbf{pipeline} pass does.
-
-The predecessor primitive, \texttt{cp.async}, shipped on Ampere and established the pattern \textbf{TMA} perfected: asynchronously copy from global to shared memory and commit groups of copies that the consumer can wait on \citep{dao2022flashattention}. \textbf{TMA} improves on it by handling multidimensional tile descriptors in hardware, issuing from one thread, and integrating with the transaction barrier, which is why the deepest decode pipelines target \textbf{Hopper}'s \textbf{TMA} path \citep{shah2024flashattention3,semianalysis2024tma}.
-
-A practical caution applies when reasoning about \textbf{TMA} for decode rather than prefill. \textbf{TMA}'s headline benefits---bulk multidimensional copies, multicast across a cluster, L2 promotion for reused inputs---are largest when the same tile feeds many consumers, the GEMM-like sharing pattern of prefill \citep{semianalysis2024tma,nvidia2022hopper}. At batch-1 decode the reuse is lower: a weight tile is read once per token by a thin matrix-vector product, so the multicast and L2-promotion wins shrink and the dominant benefit reduces to the plain asynchrony---issuing the load early and overlapping it \citep{taxbreak2026,kwon2023vllm}. The design lesson is to use \textbf{TMA} for what decode actually needs (cheap asynchronous loads that free registers) without assuming the prefill-shaped sharing wins transfer, which is another instance of the book's theme that prefill intuitions mislead at the decode operating point.
-
-
-
-\section{CPU DMA}
-\label{sec:ch08_cpu_dma}
-
-A \textbf{cpu} has no programmer-managed scratchpad and no \textbf{TMA}, so its version of the \textbf{double-buffer} \textbf{pipeline} is built from prefetching and the cache hierarchy rather than explicit asynchronous copies into shared memory \citep{dlbook}. The hardware prefetcher already overlaps movement with compute opportunistically: on a detected sequential access pattern it pulls the next cache lines ahead of demand, which for a streaming weight read is effectively a \textbf{pipeline} the hardware builds for free \citep{dlbook}. The kernel's job is to make the access pattern predictable enough for the prefetcher to track and to block the computation so the working set of each tile stays cache-resident across its reuse, as Chapter~6 described.
-
-When the hardware prefetcher is insufficient, software prefetch instructions let the kernel issue an explicit hint to begin loading a cache line some distance ahead of its use, which is the \textbf{cpu} analogue of issuing an asynchronous load early in a \textbf{pipeline} \citep{dlbook}. The distance---how many iterations ahead to prefetch---plays the role of \textbf{pipeline} depth: too short and the load does not complete before the data is needed, too long and the prefetched line is evicted before use or displaces something hot. Tuning that distance against the memory latency and the per-iteration compute is the \textbf{cpu} equivalent of choosing the number of buffers on a GPU.
-
-The absence of a scratchpad changes what ``double buffering'' even means on a \textbf{cpu}. There is no second explicit buffer to fill; instead the two stages share the cache, and the prefetch distance determines how far ahead the next tile's lines are brought in before eviction pressure or the prefetcher's own heuristics stop it \citep{dlbook}. This makes the \textbf{cpu} \textbf{pipeline} softer than a GPU's---there is no hard barrier guaranteeing buffer $B$ is full, only the statistical likelihood that the prefetched lines arrived---so correctness is never at risk (a cache miss just stalls) but performance is more variable. The practical implication is that \textbf{cpu} decode tuning is validated empirically by measuring cache-miss rates and achieved bandwidth at the decode operating point, rather than by reasoning about a fixed \textbf{pipeline} depth as on a GPU.
-
-Some server CPUs add a dedicated \textbf{dma}-style data-movement engine that can copy memory regions asynchronously and offload bulk transfers from the cores, which brings the \textbf{cpu} closer to the explicit asynchronous model of a GPU or NPU \citep{dlbook}. Where available, such an engine lets a decode kernel stage a weight or KV block while the cores compute, an explicit \textbf{double-buffer} between memory tiers. But the dominant reality on a \textbf{cpu} is that residency and overlap are governed by the cache and prefetcher, so the \textbf{pipeline} is largely implicit; the multi-hardware contrast with the GPU is that the GPU programmer builds the pipeline explicitly with \textbf{TMA} and barriers, while the \textbf{cpu} programmer shapes access patterns and prefetch distance to coax the hardware into building an equivalent one \citep{semianalysis2024tma,memoryfloor2026}. For a decode kernel this means the highest-leverage \textbf{cpu} move is often simply ensuring the weight stream is contiguous and sequentially accessed so the prefetcher tracks it perfectly, rather than hand-rolling an explicit \textbf{double-buffer} that the hardware would have built anyway \citep{dlbook,kwon2023vllm}. The compiler's job on a \textbf{cpu} is therefore as much about laying out data for predictable access as about scheduling explicit transfers.
-
-\section{NPU pipeline}
-\label{sec:ch08_npu_pipeline}
-
-On a spatial \textbf{npu} the \textbf{double-buffer} \textbf{pipeline} is the most explicit of all and is the native execution model. Each AMD XDNA / AIE-ML compute tile has a dedicated \textbf{dma} engine that moves data between streams and the tile's 64\,KB local SRAM, and the architecture provides task queues and task-completion-tokens so the \textbf{dma} can run ahead of compute and signal when a buffer is ready \citep{amd2024aie,amd2024xdna}. The completion token is the \textbf{npu}'s version of the GPU's transaction barrier: the vector unit waits on the token before consuming a buffer, and the \textbf{dma} fills the other buffer in the meantime.
-
-Because there is no cache to absorb a late load, double buffering is not an optimization on an \textbf{npu}---it is mandatory. A compute tile that waits on its \textbf{dma} simply idles, so the schedule ping-pongs between two buffers in the tile SRAM: load buffer $B$ via the \textbf{dma} engine while the vector unit consumes buffer $A$, then swap, with the task-completion-tokens sequencing the swap \citep{amd2024aie,amd2024xdna}. This halves the usable tile SRAM for the double-buffered operand, which is the residency charge the planner of Chapter~6 must include, and it is why the tile shapes are sized so that two copies of the streamed operand plus the accumulators fit the 64\,KB budget.
-
-The AIE-ML \textbf{dma} is more capable than a simple copy engine, and those features map directly onto \textbf{pipeline} needs. It supports task queues, so multiple transfers can be enqueued and run back-to-back without per-transfer setup from the vector unit, and task-completion-tokens, so the consumer can wait on a specific transfer's completion rather than a coarse fence \citep{amd2024aie}. It also offers multidimensional addressing, which lets a single \textbf{dma} task gather a strided tile---a row of a weight matrix, say---without the vector unit computing addresses, the \textbf{npu} analogue of \textbf{TMA}'s multidimensional descriptor \citep{amd2024aie,amd2024xdna}. These features exist because on a fabric with no cache the \textbf{dma} must do all the work of keeping the compute fed, so it is engineered to run a deep, autonomous \textbf{pipeline} with minimal vector-unit involvement.
-
-The spatial structure gives the \textbf{npu} \textbf{pipeline} a dimension the GPU and \textbf{cpu} lack: the stages can be different physical tiles. A producer tile can stream data into a neighbor's local memory, which computes and forwards to the next tile, so a multi-stage \textbf{pipeline} is laid out across the array with each tile a fixed stage and the \textbf{dma}/stream interconnect carrying data between them \citep{amd2024xdna,amd2024aie}. This is the spatial analogue of a deep software \textbf{pipeline}: instead of one unit cycling through buffers, several units form an assembly line, and the on-chip \textbf{dma} keeps each stage fed. The decode payoff is the same as everywhere---intermediate results never leave on-chip SRAM, so only inputs and final outputs traverse DDR \citep{dao2022flashattention,memoryfloor2026}.
-
-The trade the spatial \textbf{pipeline} makes is depth for latency and balance. A pipeline spread across $k$ tiles can keep $k$ stages busy and hide more latency, but it also has a longer fill and drain, and it requires the per-stage work to be balanced so no tile becomes the bottleneck that starves the rest \citep{amd2024xdna,amd2024aie}. Because the assignment of stages to tiles is fixed at configuration time, the compiler must balance the stages statically---splitting a heavy stage across two tiles, or fusing two light stages onto one---which is the spatial counterpart to choosing a GPU \textbf{pipeline}'s depth. Getting this balance wrong does not merely slow the kernel; on a fabric with no cache fallback it idles whole tiles, so the \textbf{npu} \textbf{pipeline} demands the most careful static planning of the three classes, and rewards it with the most deterministic per-token cost \citep{semianalysis2024tma,patel2025llminference}.
+\paragraph{Worked example (Llama-3.2-1B attention, H100, batch-1).}
+Hidden $d{=}2048$; weight tile ${\sim}32$\,KB; est.\ $t_{\mathrm{load}}{=}400$ cycles, $t_{\mathrm{compute}}{=}300$ cycles \citep{taxbreak2026,shah2024flashattention3,kwon2023vllm}.
 
 \begin{table}[t]
 \centering
-\caption{Asynchronous-movement primitive and completion signal per hardware class; all build the same double-buffer pipeline \citep{shah2024flashattention3,amd2024aie}.}
-\label{tab:ch08_async_primitives}
-\begin{tabular}{lll}
+\small
+\caption{Pipeline depth worksheet (illustrative decode attention tile).}
+\label{tab:ch08_depth_worked_example}
+\begin{tabular}{@{}ll@{}}
 \toprule
-Class & Async primitive & Completion signal \\
+\textbf{Item} & \textbf{Value} \\
 \midrule
-GPU (Hopper) & TMA bulk copy & Transaction (mbarrier) \\
-CPU & Prefetch / DMA engine & Cache fill / engine status \\
-NPU (XDNA) & Tile DMA engine & Task-completion-token \\
+Bottleneck stage & Load ($400 > 300$ cycles) \\
+Steady step (2-buffer) & ${\sim}400$ cycles \\
+$D_{\max}$ from Ch.~6 budget & 2--4 buffers (tile size dep.) \\
+Tiles per token (thin GEMV) & Small $N$ $\rightarrow$ limit depth \\
+Chosen depth & 2 (ping-pong); 3 only if $N$ large enough \\
+Latency hide rate & Compute fully hidden; load still bounds \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{YiRage pipeline generation}
+\paragraph{Bandwidth floor.}
+Pipelining cannot beat bytes/token bandwidth limit---it removes serial load+compute waste \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+Residency (Ch.~6) reduces bytes; pipeline ensures remaining bytes overlap compute \citep{dao2022flashattention,kwon2023vllm,yirage2026}.
+
+\paragraph{Multi-stream rule.}
+Weight and KV streams have different sizes and lifetimes---separate depth per stream \citep{kwon2023vllm,dao2023flashdecoding,shah2024flashattention3}.
+Unified depth is anti-pattern~4 (Section~\ref{sec:ch08_pipeline_pitfalls}) \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Pipeline economics (qualitative).}
+\begin{table}[t]
+\centering
+\small
+\caption{Pipeline depth trade-offs (decode).}
+\label{tab:ch08_pipeline_economics}
+\begin{tabular}{@{}p{2.2cm}p{2.8cm}p{2.8cm}p{2.8cm}@{}}
+\toprule
+\textbf{Depth} & \textbf{Memory cost} & \textbf{Latency win} & \textbf{Decode fit} \\
+\midrule
+1 (serial) & Lowest & None---full expose & Only if $N{=}1$ tiny \\
+2 (ping-pong) & $2\times$ tile bytes & Hides compute if load-bound & Default decode \\
+3--4 & $3$--$4\times$ tile & Diminishing if still BW-bound & Prefill or large $N$ \\
+5+ & Often spills & Negative if spill & Avoid decode \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Attention-layer pipeline sketch.}
+QKV projection: weight stream dominates---depth from weight tile bytes \citep{taxbreak2026,shah2024flashattention3}.
+Attention matmul: KV stream joins---split streams before depth search \citep{kwon2023vllm,dao2023flashdecoding,dao2022flashattention}.
+Output projection: similar to QKV---reuse weight stream template \citep{yirage2026,patel2025llminference}.
+Document per-subgraph depth in pipeline IR---monolithic depth fails \citep{chen2020compilerbasedhardw,wu2024mirage}.
+
+\paragraph{MoE and pipeline.}
+Expert weights increase bytes/step---load-bound regime strengthens \citep{taxbreak2026,liu2024deepseekv3}.
+Pipeline hides latency but not expert routing dispatch (Ch.~7 L3) \citep{mpk2025,wu2024mirage,patel2025llminference}.
+Per-expert fusion still needs ping-pong inside expert GEMV \citep{yirage2026,memoryfloor2026,shah2024flashattention3}.
+
+\paragraph{Quantization interaction.}
+INT4/FP8 weights shrink tile bytes---may reduce $D_{\max}$ need but increase pack/unpack compute \citep{taxbreak2026,patel2025llminference}.
+Re-run step 1 after quant---bottleneck may flip to compute \citep{shah2024flashattention3,yirage2026,memoryfloor2026}.
+Pipeline pass should re-search when dtype changes \citep{wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Benchmarking methodology (Ch.~3 link).}
+Report ms/token at batch-1 with pipeline on/off \citep{patel2025llminference,kwon2023vllm}.
+Include stall breakdown: memory throttle vs barrier wait \citep{memoryfloor2026,shah2024flashattention3}.
+Include bytes/token---pipeline should not increase bytes \citep{taxbreak2026,dao2022flashattention}.
+Compare same fusion region---apples-to-apples with Ch.~6 residency held constant \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Prologue/epilogue accounting (decode).}
+Let $N$ = tiles per token, $D$ = pipeline depth, $B$ = bottleneck stage cycles \citep{patel2025llminference,dlbook}.
+Serial cost $\approx N \cdot (t_{\mathrm{load}} + t_{\mathrm{compute}})$; pipelined cost $\approx (D{-}1)B + N B + (D{-}1)B$ \citep{semianalysis2024tma,dao2022flashattention}.
+When $N$ is small (decode), $(D{-}1)B$ dominates---shallow $D$ often wins \citep{memoryfloor2026,taxbreak2026,patel2025llminference}.
+Persistent kernels (Ch.~7 L2) amortize prologue across tokens---pair with shallow in-kernel depth \citep{mpk2025,nvidia2024cudagraphs,shah2024flashattention3}.
+
+\paragraph{Step 1 procedure (measurement).}
+Profile or model per-tile load latency (TMA completion to mbarrier) and consumer matmul cycles \citep{shah2024flashattention3,patel2025llminference}.
+Use Nsight memory throttle vs math throttle warps---not SM occupancy alone \citep{memoryfloor2026,yirage2026}.
+Repeat at batch-1 decode operating point---prefill profiles mislead \citep{kwon2023vllm,taxbreak2026}.
+
+\paragraph{Step 2 procedure (budget).}
+From Ch.~6 peak worksheet: $M_{\mathrm{fast}}$ = available shared/tile SRAM after residents \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+Per-buffer bytes $b$ = tile operand footprint; $D_{\max} = \lfloor M_{\mathrm{fast}} / b \rfloor$ for single-stream \citep{memoryfloor2026,semianalysis2024tma}.
+Multi-stream: sum buffer regions---weight and KV buffers do not share addresses \citep{kwon2023vllm,shah2024flashattention3}.
+
+\paragraph{Step 3 procedure (marginal benefit).}
+If $t_{\mathrm{load}} > t_{\mathrm{compute}}$, deepening past 2 helps only when extra buffers hide residual load stalls without exceeding $D_{\max}$ \citep{semianalysis2024tma,patel2025llminference}.
+If $t_{\mathrm{compute}} > t_{\mathrm{load}}$, pipeline depth cannot hide compute---add consumers (Ch.~7) or shrink tile \citep{shah2024flashattention3,yirage2026}.
+Reject depth that fails $N \gg 2(D{-}1)$ for decode layers \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Reading the worksheet.}
+Load-bound tile (${\sim}400/300$) $\Rightarrow$ steady step ${\sim}400$ cycles; compute fully hidden \citep{shah2024flashattention3,semianalysis2024tma}.
+Small $N$ $\Rightarrow$ stay at depth 2; depth 3 needs enough tiles to amortize extra prologue \citep{patel2025llminference,taxbreak2026}.
+Cross-check Ch.~7 producer ratio---pipeline depth does not replace producer capacity \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Decode vs prefill (operational).}
+Prefill: large $N$, thick tiles---deeper pipelines and TMA multicast can help \citep{kwon2023vllm,shah2024flashattention3}.
+Decode: small $N$, thin tiles---prologue share and descriptor overhead cap depth \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+Maintain separate depth worksheets per regime \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Latency hide rate.}
+Define hide rate $= 1 - t_{\mathrm{exposed}} / (t_{\mathrm{load}} + t_{\mathrm{compute}})$ under serial baseline \citep{dlbook,semianalysis2024tma}.
+Ideal ping-pong on load-bound tiles approaches $t_{\mathrm{compute}} / (t_{\mathrm{load}} + t_{\mathrm{compute}})$ \citep{shah2024flashattention3,patel2025llminference}.
+Cannot exceed bandwidth-implied minimum step time \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{FA3 lessons without FA3 copy-paste.}
+Take async overlap pattern from FlashAttention-3 \citep{shah2024flashattention3}.
+Do not take prefill tile shapes, depth-4 defaults, or multicast schedules for batch-1 decode \citep{patel2025llminference,taxbreak2026,semianalysis2024tma}.
+Table~\ref{tab:ch08_depth_worked_example} replaces FA3 depth tables for decode \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Simulation before silicon.}
+Pipeline worksheets are hypotheses---validate with stall replay or cycle simulation \citep{patel2025llminference,yirage2026,shah2024flashattention3}.
+Reject configs that improve overlap metrics but not tokens/sec at batch-1 \citep{kwon2023vllm,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Operator fusion boundary.}
+Pipeline depth applies per fused region---do not assume one depth for whole model \citep{yirage2026,wu2024mirage,dao2022flashattention}.
+Attention subgraph may be load-bound at depth 2; MLP subgraph may be compute-bound at depth 1 \citep{shah2024flashattention3,patel2025llminference,memoryfloor2026}.
+Mirage search may propose different fusion boundaries---re-run pipeline pass per candidate \citep{mpk2025,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Carrier tensors and pipelines.}
+Softmax carriers from Ch.~6--7 consume register or smem budget---reduce $D_{\max}$ when carriers are large \citep{dao2022flashattention,shah2024flashattention3,yirage2026}.
+Pipeline buffers and carriers share the same fast-memory envelope \citep{memoryfloor2026,nvidia2022hopper,amd2024aie}.
+Chapter~10 details carrier placement; pipeline pass must reserve carrier home before allocating ping-pong \citep{dao2022flashattention,patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach depth worksheet before enabling ping-pong in codegen \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+
+\section{GPU TMA Pipeline Design (Decode)}
+\label{sec:ch08_gpu_tma}
+
+Hopper \textbf{TMA} is the async bulk-movement primitive for producer warps (Ch.~7)---hardware detail in Chapter~\ref{chap:ch04} \citep{nvidia2022hopper,semianalysis2024tma,shah2024flashattention3}.
+This section covers \emph{pipeline rules}, not ISA catalogs \citep{yirage2026}.
+
+\paragraph{Producer-consumer handshake.}
+Ch.~7 fixed \emph{who} issues TMA; this section fixes \emph{when} consumers may read \citep{shah2024flashattention3,yirage2026,semianalysis2024tma}.
+The handshake is always: async issue $\rightarrow$ byte-complete signal $\rightarrow$ consumer matmul $\rightarrow$ buffer flip \citep{nvidia2022hopper,dao2022flashattention}.
+Breaking any step yields stalls, races, or silent wrong answers \citep{patel2025llminference,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Decode GEMV pipeline shape.}
+Batch-1 decode matmuls are thin---consumer warpgroups may finish before next TMA completes \citep{patel2025llminference,shah2024flashattention3,memoryfloor2026}.
+That is acceptable when producers stay ahead; it is failure when consumers wait on mbarrier \citep{semianalysis2024tma,yirage2026}.
+Tune producer count (Ch.~7) and pipeline depth jointly---depth alone does not fix insufficient TMA issue bandwidth \citep{shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Persistent kernel interaction.}
+Ch.~7 L2 persistent grids loop tokens without relaunch \citep{mpk2025,nvidia2024cudagraphs,shah2024flashattention3}.
+Pipeline prologue runs once per grid launch; steady ping-pong runs each token inside the loop \citep{patel2025llminference,yirage2026}.
+This is how decode amortizes prologue while keeping shallow in-kernel depth \citep{taxbreak2026,memoryfloor2026,dao2022flashattention}.
+
+\paragraph{L2 multicast caveat (decode).}
+Prefill benefits from multicast when many blocks share weights \citep{kwon2023vllm,shah2024flashattention3}.
+Batch-1 decode often sees one consumer block---multicast setup may not repay \citep{taxbreak2026,patel2025llminference,semianalysis2024tma}.
+Profile bytes moved and descriptor overhead before enabling multicast in decode graphs \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Nsight validation checklist.}
+Report memory throttle vs math throttle warp cycles \citep{shah2024flashattention3,patel2025llminference}.
+Report mbarrier wait time per consumer warp \citep{semianalysis2024tma,nvidia2022hopper}.
+Pipeline success: memory throttle high in producers, math throttle high in consumers, low barrier wait \citep{yirage2026,memoryfloor2026,taxbreak2026}.
+
+% AUTO_VISUAL:fig_gpu_tma_architecture
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.88, transform shape]
+    \node[vis arch node] (s0) at (-5.03,0) {\footnotesize HBM\\stream};
+    \node[vis arch node] (s1) at (-1.68,0) {\footnotesize TMA\\producer};
+    \node[vis arch node] (s2) at (1.67,0) {\footnotesize Ping-pong\\smem};
+    \node[vis arch node] (s3) at (5.03,0) {\footnotesize WGMMA\\consumer};
+    \draw[vis arrow] (s0.east) -- (s1.west);
+    \draw[vis arrow] (s1.east) -- (s2.west);
+    \draw[vis arrow] (s2.east) -- (s3.west);
+\end{tikzpicture}
+\caption{GPU decode pipeline: TMA producer fills ping-pong shared buffers for WGMMA consumers (Ch.~4 primitives).}
+\label{fig:gpu_tma_architecture}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[font=\scriptsize\bfseries] at (-3.6,2.1) {GPU};
+ \node[font=\scriptsize\bfseries] at (0,2.1) {CPU};
+ \node[font=\scriptsize\bfseries] at (3.6,2.1) {NPU};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,1.0) {\footnotesize TMA time};
+ \node[vis arch node, minimum width=2.0cm] at (-3.6,0.0) {\footnotesize mbarrier};
+ \node[vis arch node, minimum width=2.0cm] at (0,1.0) {\footnotesize Prefetch};
+ \node[vis arch node, minimum width=2.0cm] at (0,0.0) {\footnotesize Cache};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,1.0) {\footnotesize Tile DMA};
+ \node[vis arch node, minimum width=2.0cm] at (3.6,0.0) {\footnotesize Spatial};
+\end{tikzpicture}
+\caption{Tri-hardware pipeline styles (detail in Ch.~4--5).}
+\label{fig:ch08_tri_hw_pipeline}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Tri-hardware pipeline comparison (decode).}
+\label{tab:ch08_tri_hw_pipeline}
+\begin{tabular}{@{}p{1.8cm}p{1.6cm}p{1.8cm}p{2.0cm}p{1.6cm}p{1.4cm}@{}}
+\toprule
+\textbf{Class} & \textbf{Async primitive} & \textbf{Pipeline type} & \textbf{Depth drivers} & \textbf{Sync} & \textbf{Typ.\ depth} \\
+\midrule
+GPU & TMA & Time software & Smem cap, load/compute & mbarrier & 2--4 \\
+CPU & Prefetch & Implicit cache & Cache, hit rate & Cache fill & 3--8 dist. \\
+NPU & Tile DMA & Spatial+time & Tile SRAM, balance & Token & 2 + stages \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{TMA vs cp.async boundary.}
+Very thin decode tiles may pay descriptor overhead with TMA---switch to \texttt{cp.async} when tile bytes below platform threshold (profile on target) \citep{dao2022flashattention,semianalysis2024tma,patel2025llminference}.
+TMA wins on bulk multidimensional tiles and single-thread issue freeing registers \citep{shah2024flashattention3,nvidia2022hopper}.
+
+\paragraph{Transaction barrier rules.}
+One mbarrier per ping-pong buffer; producer signals byte count; consumer waits before read \citep{shah2024flashattention3,semianalysis2024tma}.
+Mis-ordered waits cause races or bubbles---mirror Ch.~7 barrier walkthrough \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Multi-stream TMA scheduling.}
+\textbf{Weight stream:} larger tiles, high reuse within layer \citep{taxbreak2026,kwon2023vllm}.
+\textbf{KV stream:} grows with context; may need separate buffer pair and depth \citep{dao2023flashdecoding,shah2024flashattention3}.
+Assign non-overlapping smem regions---no alias between streams \citep{yirage2026,dao2022flashattention}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.85, transform shape]
+ \draw[vis arrow] (0,0) -- (8,0) node[right, font=\scriptsize] {time};
+ \draw[thick, blue!70] (0.5,1.2) -- (3.5,1.2) node[midway, above, font=\scriptsize] {weight TMA};
+ \draw[thick, green!60!black] (1.0,0.4) -- (4.0,0.4) node[midway, above, font=\scriptsize] {KV TMA};
+ \draw[thick, orange!80] (2.0,-0.4) -- (5.5,-0.4) node[midway, above, font=\scriptsize] {WGMMA};
+\end{tikzpicture}
+\caption{Multi-stream overlap: weight and KV loads interleave with compute when buffers are independent.}
+\label{fig:ch08_multi_stream_timeline}
+\end{figure}
+
+\paragraph{Decode caveat.}
+Multicast/L2 promotion wins shrink at batch-1---primary win is asynchrony + register relief, not prefill sharing patterns \citep{taxbreak2026,semianalysis2024tma,patel2025llminference}.
+
+\paragraph{TMA vs cp.async decision tree.}
+(1) If tile bytes $\lt$ threshold and issue rate matters $\rightarrow$ cp.async \citep{dao2022flashattention,patel2025llminference}.
+(2) If multidimensional bulk copy with single producer thread $\rightarrow$ TMA \citep{semianalysis2024tma,nvidia2022hopper}.
+(3) If producer warps are register-starved $\rightarrow$ TMA offloads address math \citep{shah2024flashattention3,yirage2026}.
+Profile both on target silicon---thresholds are not portable \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Barrier walkthrough (A/B ping-pong).}
+Iteration $n$: producer TMA$\rightarrow$buffer A; signal mbarrier$_A$ with byte count \citep{semianalysis2024tma,shah2024flashattention3}.
+Consumer waits mbarrier$_A$, WGMMA on A; concurrently producer loads B \citep{nvidia2022hopper,yirage2026}.
+Iteration $n{+}1$: swap---consumer on B while producer fills A \citep{dao2022flashattention,semianalysis2024tma}.
+Barrier indices must alternate consistently---off-by-one causes silent corruption \citep{patel2025llminference,taxbreak2026}.
+
+\paragraph{Avoiding pipeline bubbles.}
+Bubble = consumer ready but buffer not signaled---usually insufficient producer warps (Ch.~7) or TMA queue stall \citep{shah2024flashattention3,memoryfloor2026}.
+Deadlock = consumer waits wrong barrier or producer signals before copy completes---audit emit order in pipeline IR \citep{yirage2026,semianalysis2024tma,nvidia2022hopper}.
+Target ${\lt}5\%$ consumer stall from barriers in steady state \citep{patel2025llminference,shah2024flashattention3}.
+
+\paragraph{Weight vs KV buffer map.}
+Reserve disjoint smem regions: e.g.\ weight ping-pong at offset 0, KV ping-pong at offset $2w$ \citep{yirage2026,dao2022flashattention,kwon2023vllm}.
+Pipeline pass emits map as IR metadata---codegen must not reorder \citep{chen2020compilerbasedhardw,wu2024mirage}.
+KV growth with context may force smaller KV tiles or separate depth---re-run worksheet per context bucket \citep{dao2023flashdecoding,patel2025llminference}.
+
+\paragraph{WGMMA consumer timing.}
+Consumers start only after mbarrier proves bytes resident---premature WGMMA reads garbage \citep{shah2024flashattention3,semianalysis2024tma}.
+Schedule consumer warpgroups so matmul duration $\approx$ next TMA duration in steady state \citep{memoryfloor2026,yirage2026}.
+Thin decode GEMV may finish before TMA---acceptable if producer keeps ahead \citep{patel2025llminference,taxbreak2026}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Cross-hardware decode pipeline effect (same Llama-class layer, illustrative).}
+\label{tab:ch08_cross_hw_decode}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Metric} & \textbf{GPU H100} & \textbf{CPU server} & \textbf{NPU XDNA} \\
+\midrule
+Async primitive & TMA & SW prefetch & Tile DMA \\
+Typ.\ depth & 2 ping-pong & dist.\ 4--6 & 2 + spatial \\
+Consumer stall (serial) & High & High & High \\
+After pipeline & Low (load-bound) & LLC-bound & MAC-fed \\
+Primary limit & HBM BW & DRAM BW & DDR + tile BW \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Document weight vs KV buffer map and mbarrier indices on GPU pipeline PRs \citep{shah2024flashattention3,yirage2026}.
+
+\section{CPU Async Pipeline Design (Decode)}
+\label{sec:ch08_cpu_dma}
+
+CPU has no programmer scratchpad---pipeline is \textbf{prefetch-shaped} (Ch.~6 blocking) \citep{dlbook,patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{Why CPU pipelines differ.}
+GPUs name buffers in shared memory; CPUs rely on cache hierarchy as implicit buffers \citep{dlbook,nvidia2022hopper,semianalysis2024tma}.
+You cannot insert mbarrier---you tune prefetch distance and blocking so LLC hits overlap SIMD work \citep{patel2025llminference,yirage2026,chen2020compilerbasedhardw}.
+Decode on CPU is almost always DRAM-bandwidth bound---pipeline wins are smaller but still measurable at batch-1 \citep{memoryfloor2026,taxbreak2026,kwon2023vllm}.
+
+\paragraph{Weight streaming on CPU.}
+Dense 1B decode reads full weight columns per token---sequential streams favor hardware prefetchers \citep{kwon2023vllm,patel2025llminference,dlbook}.
+Blocked micro-tiles from Ch.~6 must fit LLC---otherwise each tile is a cold miss and pipeline collapses \citep{yirage2026,dao2022flashattention,memoryfloor2026}.
+Co-locate weight shards with compute threads---NUMA mistakes look like ``pipeline does not work'' \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{KV streaming on CPU.}
+PagedAttention scatters KV---prefetch trains break \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}.
+CPU decode pipelines often accept lower KV reuse---focus prefetch on hot weight streams first \citep{yirage2026,memoryfloor2026}.
+Re-run prefetch distance when page layout changes \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Prefetch distance formula (sketch).}
+Let $L$ = memory latency (cycles), $C$ = compute per iteration \citep{dlbook,memoryfloor2026}.
+Prefetch distance $d \approx \lceil L / C \rceil$ iterations ahead---tune empirically \citep{patel2025llminference,yirage2026}.
+Too small: stalls; too large: cache pollution/eviction \citep{dlbook,taxbreak2026}.
+
+\paragraph{NUMA-aware pipelining.}
+Partition weight/KV blocks per socket; reader threads prefetch local pages only \citep{patel2025llminference,kwon2023vllm,memoryfloor2026}.
+Cross-NUMA prefetch breaks pipeline---remote latency dominates \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{SIMD alignment.}
+Prefetch cache-line granularity; align blocks to SIMD width to avoid partial-line waste \citep{dlbook,patel2025llminference}.
+Sequential contiguous weight streams maximize hardware prefetcher tracking \citep{kwon2023vllm,yirage2026}.
+
+\paragraph{Explicit DMA (when available).}
+Some server CPUs offer async copy engines---explicit double-buffer between DRAM and compute buffers \citep{dlbook}.
+Validate with bandwidth counters; implicit prefetch often suffices for decode GEMV \citep{patel2025llminference,memoryfloor2026}.
+
+\paragraph{CPU pipeline as implicit software pipeline.}
+No programmer-visible ping-pong---L1/L2/LLC act as hidden buffers \citep{dlbook,chen2020compilerbasedhardw}.
+\textbf{Design rule:} keep working set $\lt$ LLC slice per socket; sequential access patterns maximize hit rate \citep{patel2025llminference,memoryfloor2026}.
+Blocking factors from Ch.~6 must fit cache hierarchy---oversized tiles evict pipeline stages \citep{yirage2026,dao2022flashattention}.
+
+\paragraph{Prefetch distance worked example.}
+Suppose $L{=}300$ cycles DRAM latency, $C{=}40$ cycles per SIMD micro-tile \citep{dlbook,patel2025llminference}.
+$d \approx \lceil 300/40 \rceil = 8$ iterations ahead---start with 4, binary search for LLC miss minimum \citep{yirage2026,taxbreak2026}.
+Decode GEMV with small $N$: prologue analog is cold-cache first tiles---warm persistent threads help \citep{mpk2025,patel2025llminference}.
+
+\paragraph{NUMA pinning procedure.}
+(1) Pin reader threads to socket owning weight shard \citep{kwon2023vllm,patel2025llminference}.
+(2) Allocate KV pages local to compute socket when possible \citep{memoryfloor2026}.
+(3) Never prefetch across sockets for hot loop \citep{taxbreak2026,chen2020compilerbasedhardw}.
+Remote DRAM doubles effective $L$---depth worksheet must use measured remote latency \citep{patel2025llminference,yirage2026}.
+
+\paragraph{SIMD + prefetch alignment.}
+Use \texttt{\_mm\_prefetch} or compiler hints at cache-line boundaries \citep{dlbook}.
+Align micro-tile rows to AVX-512 width (64 bytes) to avoid unaligned loads breaking prefetch train \citep{patel2025llminference}.
+Weight matrices in decode are often row-major streams---favor contiguous producer loops \citep{kwon2023vllm,yirage2026}.
+
+\paragraph{CPU vs GPU pipeline contrast.}
+GPU: explicit smem ping-pong + mbarrier \citep{semianalysis2024tma,shah2024flashattention3}.
+CPU: implicit cache pipeline + software prefetch distance \citep{dlbook,patel2025llminference}.
+Same depth worksheet math applies---only buffer tier and sync mechanism differ \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Measure LLC miss rate and NUMA remote \% at decode operating point \citep{patel2025llminference,taxbreak2026}.
+
+\section{NPU Spatial Pipeline Design (Decode)}
+\label{sec:ch08_npu_pipeline}
+
+XDNA pipelines are \textbf{mandatory explicit DMA}---no cache fallback (Ch.~5) \citep{amd2024xdna,amd2024aie,yirage2026}.
+
+\paragraph{Why NPU pipelines are non-optional.}
+GPU can fall back to synchronous global loads (slow); NPU MAC array stalls if DMA does not refill tile SRAM \citep{amd2024aie,amd2024xdna,patel2025llminference}.
+Every fused decode cell on XDNA needs a documented DMA schedule---not an optional optimization \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+Chapter~\ref{chap:ch05} documents DMA mechanics; this section documents scheduling policy \citep{amd2024xdna,taxbreak2026}.
+
+\paragraph{Time vs space pipeline.}
+Temporal ping-pong: buffer A/B on one tile \citep{amd2024aie,dao2022flashattention}.
+Spatial pipeline: stage $k$ on tile row $k$, data flows neighbor-to-neighbor \citep{amd2024xdna,patel2025llminference}.
+Large fused regions may need both---YiRage pipeline pass selects mix per subgraph \citep{yirage2026,wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Ping-pong on tile SRAM.}
+DMA fills buffer B while MAC consumes A; completion tokens sequence swap \citep{amd2024aie,amd2024xdna,dao2022flashattention}.
+$2\times$ operand bytes in Ch.~6 peak---depth usually 2 on tile \citep{yirage2026,memoryfloor2026}.
+
+\paragraph{Spatial stage balancing.}
+Split compute across tiles so per-stage latency is balanced---slow stage idles downstream array \citep{amd2024xdna,patel2025llminference}.
+Fuse light stages; split heavy ops across tiles \citep{amd2024aie,chen2020compilerbasedhardw}.
+
+\paragraph{DMA priority queues.}
+Weights (critical path) $>$ KV stream $>$ debug/scratch \citep{amd2024xdna,dao2023flashdecoding,shah2024flashattention3}.
+Mis-prioritized queues starve MAC array \citep{yirage2026,patel2025llminference}.
+
+\paragraph{Multi-tile cascade.}
+Use neighbor tile links for assembly-line stages---intermediate tensors stay on-chip \citep{amd2024aie,amd2024xdna,dao2022flashattention}.
+Watch stream-switch bandwidth---do not oversubscribe column links \citep{patel2025llminference,memoryfloor2026,taxbreak2026}.
+
+\paragraph{Spatial balance procedure.}
+(1) Profile per-stage cycles on single tile \citep{amd2024xdna,patel2025llminference}.
+(2) Identify slowest stage---downstream tiles idle waiting \citep{amd2024aie,yirage2026}.
+(3) Split heavy op across tiles or fuse light ops with neighbor \citep{chen2020compilerbasedhardw}.
+(4) Re-run DDR bytes/token---spatial imbalance shows as MAC util gap \citep{memoryfloor2026,taxbreak2026}.
+
+\paragraph{DMA queue design.}
+Priority 1: weight tiles for current layer \citep{taxbreak2026,amd2024xdna}.
+Priority 2: KV slices for active context \citep{kwon2023vllm,dao2023flashdecoding}.
+Priority 3: scratch/intermediate spill (avoid if possible) \citep{yirage2026,patel2025llminference}.
+Starvation of priority 1 is anti-pattern---profile DMA completion vs MAC start \citep{amd2024aie,shah2024flashattention3}.
+
+\paragraph{Decode on NPU specifics.}
+Thin batch-1 tiles underfill MAC arrays---spatial pipeline keeps array busy while DMA refills SRAM \citep{patel2025llminference,amd2024aie}.
+Depth rarely exceeds 2 on tile SRAM---invest in stage balance over deeper time pipeline \citep{yirage2026,memoryfloor2026,amd2024xdna}.
+Chapter~\ref{chap:ch05} covers XDNA DMA mechanics; here we fix scheduling policy \citep{amd2024xdna,chen2020compilerbasedhardw}.
+
+\paragraph{NPU vs GPU pipeline contrast.}
+GPU overlaps time stages in one SM with smem \citep{semianalysis2024tma,nvidia2022hopper}.
+NPU overlaps space stages across tiles \emph{and} time ping-pong on each tile \citep{amd2024aie,amd2024xdna}.
+YiRage lowers one pipeline IR to both---backend pass selects spatial vs temporal schedule \citep{yirage2026,wu2024mirage,patel2025llminference}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Verify DDR bytes/token drops when spatial pipeline is enabled \citep{memoryfloor2026,amd2024aie}.
+
+\section{Joint Budget with Chapters~6--7}
+\label{sec:ch08_joint_budget}
+
+Pipeline depth is not independent of residency or roles \citep{yirage2026,dao2022flashattention,shah2024flashattention3,chen2020compilerbasedhardw}.
+
+\paragraph{Why triple coupling exists.}
+Depth multiplies fast-memory bytes; roles decide who touches each buffer; residency caps total bytes \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
+Changing any one without revisiting the others is the dominant source of ``mysterious spill'' bugs after fusion merges \citep{chen2020compilerbasedhardw,wu2024mirage,taxbreak2026}.
+Treat Ch.~6--8 as one optimization surface---not three tickets \citep{mpk2025,patel2025llminference,shah2024flashattention3}.
+
+\paragraph{Memory pass coupling.}
+Each buffer $\times$ depth adds bytes to Ch.~6 peak---deepening without worksheet update causes spill \citep{memoryfloor2026,yirage2026}.
+Pipeline pass must reject depths that overflow memory-pass cap \citep{wu2024mirage,chen2020compilerbasedhardw}.
+
+\paragraph{Role pass coupling.}
+Only producer roles issue async copies---pipeline IR references role IDs from Ch.~7 tiling pass \citep{shah2024flashattention3,yirage2026,mpk2025}.
+Changing roles without regenerating pipeline breaks barrier mapping \citep{semianalysis2024tma,patel2025llminference}.
+
+\paragraph{Fixed-point loop.}
+Memory $\rightarrow$ tiling $\rightarrow$ pipeline $\rightarrow$ re-validate memory; split fusion if no fixed point \citep{yirage2026,wu2024mirage,mpk2025,dao2022flashattention}.
+
+\paragraph{Worked joint example.}
+Ch.~6 peak allows ${\sim}96$\,KB ping-pong after residents; tile $32$\,KB $\Rightarrow$ $D_{\max}{=}2$ single-stream \citep{yirage2026,dao2022flashattention,taxbreak2026}.
+Adding KV stream second pair needs ${\sim}64$\,KB more---may exceed cap $\Rightarrow$ shrink tile or split fusion \citep{kwon2023vllm,memoryfloor2026,shah2024flashattention3}.
+Ch.~7 assigned 4 producer warps---pipeline pass must emit TMA order matching those role IDs \citep{semianalysis2024tma,yirage2026}.
+
+\paragraph{Triple legality reports.}
+Ship one bundle: memory legality (Ch.~6), role legality (Ch.~7), pipeline legality (Ch.~8) \citep{chen2020compilerbasedhardw,yirage2026,wu2024mirage}.
+CI should fail if any report drifts without coordinated regen \citep{taxbreak2026,patel2025llminference,mpk2025}.
+
+\paragraph{Spill as joint failure.}
+Spill after pipeline merge means depth or stream map violated Ch.~6---not a codegen bug to patch with local memory \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
+Rollback depth first; split fusion second; never silently spill \citep{chen2020compilerbasedhardw,wu2024mirage}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Ship Ch.~6 peak + Ch.~7 role + Ch.~8 depth worksheets together \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{YiRage Pipeline Generation Pass}
 \label{sec:ch08_yirage_pipeline_gen}
 
-The book's reference compiler turns pipeline construction into a generated, per-target artifact. \textbf{YiRage} carries a \textbf{pipeline}-generation pass that, given a fused region and a target, emits the correct \textbf{double-buffer} \textbf{pipeline}: \textbf{TMA} producer warps plus transaction barriers on \textbf{Hopper}, prefetch-shaped access patterns on a \textbf{cpu}, and ping-pong \textbf{dma} with completion tokens on an XDNA \textbf{npu} \citep{yirage2026,shah2024flashattention3}. Because the residency budget and the role assignment are already fixed by the passes of Chapters~6 and~7, the \textbf{pipeline} pass knows how much fast memory is available for buffers and which units are producers, so it can choose the \textbf{pipeline} depth that fits and wire the completion signals correctly \citep{wu2024mirage,amd2024aie}.
+\textbf{YiRage} emits per-target async pipelines after tiling pass, before codegen \citep{yirage2026,shah2024flashattention3,wu2024mirage}.
 
-Pipeline depth is the parameter the pass tunes per target. On a \textbf{Hopper} GPU with a 228\,KB shared-memory budget it can afford several \textbf{TMA} buffers in flight, hiding more latency; on a 64\,KB XDNA tile it can usually afford only the mandatory two, so the \textbf{pipeline} is shallow and the tile shapes shrink accordingly \citep{nvidia2022hopper,amd2024aie}. Getting this wrong in either direction is a measurable decode regression: too shallow and the compute units stall on loads, too deep and the buffers crowd out the working set and force a spill that reintroduces the HBM traffic the \textbf{pipeline} was meant to hide \citep{taxbreak2026,memoryfloor2026}. The pass therefore solves depth jointly with the residency check rather than applying a fixed constant.
+\paragraph{Pass position in lowering stack.}
+Order: fusion search $\rightarrow$ memory pass (Ch.~6) $\rightarrow$ tiling pass (Ch.~7) $\rightarrow$ \textbf{pipeline pass} $\rightarrow$ codegen $\rightarrow$ runtime \citep{yirage2026,wu2024mirage,mpk2025,chen2020compilerbasedhardw}.
+Skipping pipeline pass emits synchronous loads inside otherwise fused kernels---common regression after manual CUDA merges \citep{shah2024flashattention3,taxbreak2026,patel2025llminference}.
+Chapter~20 megakernel search re-invokes pipeline pass inside candidate evaluation \citep{mpk2025,wu2024mirage,yirage2026}.
 
-The pass also has to reason about a subtlety the hardware exposes: the \textbf{pipeline} prologue and epilogue. The first $s{-}1$ tiles of an $s$-deep \textbf{pipeline} only fill buffers without producing output (the prologue), and the last $s{-}1$ steps only drain buffers without issuing new loads (the epilogue); these transient phases are not overlapped and their cost is fixed per kernel invocation \citep{shah2024flashattention3,dao2022flashattention}. For a long-running prefill GEMM the prologue cost is negligible against thousands of steady-state steps, but for a short batch-1 decode kernel that processes few tiles per token the prologue can be a meaningful fraction of the runtime. This is precisely why persistent kernels from Chapter~7 matter here: by keeping the kernel resident across tokens, the \textbf{pipeline} stays warm and the prologue is paid once rather than per token, so movement pipelining and static residency reinforce each other \citep{shah2024flashattention3,mpk2025}.
+\paragraph{IR fields (conceptual).}
+Per stream: depth $D$, buffer offsets, tile schedule, prologue/epilogue counts \citep{yirage2026,dao2022flashattention,semianalysis2024tma}.
+Per barrier: index, expected byte count, producer role id, consumer role id \citep{shah2024flashattention3,nvidia2022hopper,chen2020compilerbasedhardw}.
+Per backend: chosen primitive (TMA, cp.async, prefetch, tile DMA) \citep{amd2024xdna,dlbook,patel2025llminference}.
 
-A second decision the pass makes is whether to pipeline the KV-cache stream separately from the weight stream. The two have different lifetimes and sizes---weights are reused across all positions of a layer while the KV slice grows with context---so a single \textbf{pipeline} depth is rarely optimal for both \citep{kwon2023vllm,dao2023flashdecoding}. The pass can assign separate buffers and depths to each stream, deepening the KV \textbf{pipeline} when context is long and the KV read dominates, and the weight \textbf{pipeline} when the model is wide and weight streaming dominates. This per-stream tuning is the kind of decision that is tedious and error-prone by hand but mechanical for a compiler that knows the shapes and the residency budget, and it is where a generated \textbf{pipeline} can beat a hand-written one that uses a single uniform depth \citep{yirage2026,memoryfloor2026}.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[vis base, scale=0.82, transform shape]
+ \node[vis pipeline node] (til) at (-3.6,0) {\footnotesize Tiling\\pass};
+ \node[vis arch node] (pip) at (0,0) {\footnotesize Pipeline\\pass};
+ \node[vis pipeline node] (cg) at (3.6,0) {\footnotesize Codegen};
+ \draw[vis arrow] (til) -- (pip) -- (cg);
+ \node[font=\scriptsize, visText] at (0,-1.0) {Depth search + barriers + stream schedule};
+\end{tikzpicture}
+\caption{YiRage pipeline pass after role assignment (Ch.~7), before codegen.}
+\label{fig:ch08_yirage_pipeline_pass}
+\end{figure}
 
-What makes the \textbf{YiRage} \textbf{pipeline} pass composable is that it is the movement counterpart to the static role assignment of Chapter~7: roles decide which unit does what, and the \textbf{pipeline} pass decides when each unit's data arrives \citep{yirage2026,shah2024flashattention3}. Together they realize a fused region as a schedule-free, fully overlapped kernel, and they compose with the megakernel search of Chapter~20---the superoptimizer proposes the fusion, the memory pass certifies its footprint, the tiling pass assigns roles, and the \textbf{pipeline} pass overlaps the movement, all per target and all checked before codegen \citep{wu2024mirage,mpk2025}. The result is that the asynchronous, double-buffered pipeline a CUDA expert once hand-wrote becomes a compiler output, regenerated correctly for each SKU in a heterogeneous fleet.
+\begin{table}[t]
+\centering
+\small
+\caption{YiRage pipeline pass: I/O and capabilities.}
+\label{tab:ch08_pipeline_pass_io}
+\begin{tabular}{@{}p{2.4cm}p{5.0cm}p{3.2cm}@{}}
+\toprule
+\textbf{Item} & \textbf{Content} & \textbf{On failure} \\
+\midrule
+Input & Fused subgraph + residency + role metadata & --- \\
+Output & Pipeline IR: buffers, depths, barriers, emit order & Error + split hint \\
+Search & Per-stream depth, tile schedule, prologue/epilogue & Reduce depth or split \\
+Coupling & Memory pass overflow $\rightarrow$ backoff depth & Document reason \\
+Fallback & TMA $\rightarrow$ cp.async if threshold & Emit downgrade note \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Closed loop with Mirage.}
+Superoptimizer proposes fusion; memory certifies footprint; tiling assigns roles; pipeline overlaps movement \citep{wu2024mirage,mpk2025,yirage2026,shah2024flashattention3}.
+Chapter~20 consumes full IR stack \citep{mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{Prologue/epilogue generation.}
+Pass emits warm-up and drain phases; persistent kernels (Ch.~7 L2) amortize across tokens \citep{shah2024flashattention3,mpk2025,nvidia2024cudagraphs,patel2025llminference}.
+
+\paragraph{Regression tests.}
+Golden pipeline IR per canonical layer; CI fails on depth/barrier drift \citep{yirage2026,wu2024mirage,taxbreak2026}.
+
+\paragraph{Pass search algorithm (sketch).}
+For each stream $s$: enumerate $D \in \{2,\ldots,D_{\max}\}$ \citep{yirage2026,dao2022flashattention}.
+Score by simulated steady-step cycles + prologue penalty for decode $N$ \citep{patel2025llminference,semianalysis2024tma}.
+Reject candidates failing memory pass; pick Pareto-min step time \citep{wu2024mirage,chen2020compilerbasedhardw,memoryfloor2026}.
+Emit prologue/epilogue skeleton and barrier graph \citep{shah2024flashattention3,yirage2026}.
+
+\paragraph{Collaboration with memory pass.}
+On overflow: (a) reduce $D$, (b) shrink tile, (c) split subgraph---log chosen branch in IR comment \citep{yirage2026,wu2024mirage,mpk2025}.
+Memory pass may increase tile if depth drops---re-run search \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+
+\paragraph{Collaboration with tiling pass.}
+Pipeline IR references producer role IDs for emit sites \citep{shah2024flashattention3,yirage2026,semianalysis2024tma}.
+If tiling changes warp count, regenerate pipeline---barrier fan-in changes \citep{nvidia2022hopper,patel2025llminference}.
+
+\paragraph{Backend lowering hooks.}
+GPU: TMA descriptors + mbarrier indices \citep{semianalysis2024tma,nvidia2022hopper}.
+CPU: prefetch intrinsics + loop peel for prologue \citep{dlbook,yirage2026}.
+NPU: DMA task list + token sync \citep{amd2024xdna,amd2024aie,chen2020compilerbasedhardw}.
+Chapter~20 megakernel search treats pipeline pass as mandatory stage \citep{mpk2025,wu2024mirage}.
+
+\paragraph{Fallback and downgrade.}
+Unsupported TMA on older GPU $\rightarrow$ cp.async pipeline with adjusted depth \citep{dao2022flashattention,yirage2026}.
+Emit downgrade note in build log for fleet audits \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Archive pipeline-pass excerpt on every async movement PR \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\section{Pipeline Pitfalls, Checklist, and Debug}
+\label{sec:ch08_pipeline_pitfalls}
+
+\subsection{Five common pipeline anti-patterns}
+\begin{enumerate}
+\item \textbf{Depth excessive.}
+\emph{Symptom:} Ch.~6 spill after adding buffers \citep{memoryfloor2026,yirage2026}.
+\emph{Root cause:} depth up without byte budget \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+\emph{Fix:} reduce depth or split fusion \citep{wu2024mirage}.
+\emph{Prevention:} step 2 of depth method; Pattern~1 mandatory \citep{yirage2026,taxbreak2026}.
+
+\item \textbf{Depth insufficient.}
+\emph{Symptom:} consumer stalls on mbarrier \citep{shah2024flashattention3,patel2025llminference}.
+\emph{Root cause:} synchronous load path or depth=1 \citep{semianalysis2024tma}.
+\emph{Fix:} enable ping-pong; add producer capacity (Ch.~7) \citep{yirage2026}.
+\emph{Prevention:} measure $t_{\mathrm{load}}$ vs $t_{\mathrm{compute}}$ before merge \citep{memoryfloor2026,shah2024flashattention3}.
+
+\item \textbf{Sync errors.}
+\emph{Symptom:} races, deadlock, bubbles \citep{shah2024flashattention3,nvidia2022hopper}.
+\emph{Root cause:} barrier misplacement or byte-count mismatch \citep{semianalysis2024tma}.
+\emph{Fix:} one barrier pair per buffer stage; golden IR diff \citep{yirage2026,chen2020compilerbasedhardw}.
+\emph{Prevention:} barrier walkthrough in Section~\ref{sec:ch08_gpu_tma} \citep{semianalysis2024tma,patel2025llminference}.
+
+\item \textbf{Single-stream parameters.}
+\emph{Symptom:} KV path idle while weight path congested \citep{kwon2023vllm,dao2023flashdecoding}.
+\emph{Root cause:} unified depth for heterogeneous streams \citep{patel2025llminference}.
+\emph{Fix:} independent depth per stream; Figure~\ref{fig:ch08_multi_stream_timeline} \citep{yirage2026,shah2024flashattention3}.
+\emph{Prevention:} Pattern~2 on all attention fusion PRs \citep{dao2022flashattention,taxbreak2026}.
+
+\item \textbf{Prefill copy-paste.}
+\emph{Symptom:} deep pipeline, few tiles, slow decode \citep{shah2024flashattention3,taxbreak2026}.
+\emph{Root cause:} high prologue share; large $D$ with small $N$ \citep{patel2025llminference,memoryfloor2026}.
+\emph{Fix:} shallow depth + persistent kernel (Ch.~7 L2) \citep{mpk2025,nvidia2024cudagraphs}.
+\emph{Prevention:} separate decode/prefill depth worksheets \citep{kwon2023vllm,yirage2026}.
+\end{enumerate}
+
+\paragraph{Anti-pattern culture.}
+Treat ``we enabled double buffer'' without worksheet as review blocker \citep{yirage2026,dao2022flashattention,chen2020compilerbasedhardw}.
+Celebrate overlap metrics only with tokens/sec at batch-1 \citep{patel2025llminference,taxbreak2026,memoryfloor2026}.
+Pipeline depth is not a merit badge---it is a budgeted trade \citep{memoryfloor2026,semianalysis2024tma,shah2024flashattention3}.
+
+\subsection{Pipeline design self-check}
+\begin{itemize}
+\item[$\square$] Per-tile $t_{\mathrm{load}}$, $t_{\mathrm{compute}}$ measured; bottleneck named
+\item[$\square$] Depth fits Ch.~6 fast-memory budget (ping-pong counted)
+\item[$\square$] Weight and KV streams have independent depth/buffers
+\item[$\square$] Barriers verified---no deadlock or excess bubbles
+\item[$\square$] Prologue/epilogue share assessed for decode tile count $N$
+\item[$\square$] Residency + role + pipeline legality reports archived
+\end{itemize}
+
+\paragraph{Postmortem.}
+Replay depth worksheet $\rightarrow$ stall counters $\rightarrow$ bytes/token $\rightarrow$ bisect barrier or depth \citep{shah2024flashattention3,yirage2026,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Debug playbook.}
+\textbf{Stalls high, bytes/token flat:} depth insufficient or sync bubbles---check mbarrier timeline \citep{semianalysis2024tma,patel2025llminference}.
+\textbf{Spill after merge:} depth excessive---reconcile with Ch.~6 \citep{memoryfloor2026,yirage2026}.
+\textbf{Correctness bug:} barrier order or buffer alias---dump pipeline IR \citep{chen2020compilerbasedhardw,shah2024flashattention3}.
+\textbf{Decode regression only:} compare $N$ and prologue share vs prefill config \citep{taxbreak2026,kwon2023vllm}.
+
+\section{Pipeline Engineering Patterns}
+\label{sec:ch08_pipeline_patterns}
+
+\paragraph{Pattern 1: Depth worksheet first.}
+\textbf{Scene:} ``enable double buffer'' PR without numbers \citep{dao2022flashattention,yirage2026}.
+\textbf{Solution:} Table~\ref{tab:ch08_depth_worked_example} + Ch.~6 peak + measured $t_{\mathrm{load}}$/$t_{\mathrm{compute}}$ \citep{chen2020compilerbasedhardw,shah2024flashattention3}.
+\textbf{Benefit:} avoids spill and false depth \citep{memoryfloor2026,taxbreak2026}.
+\textbf{Notes:} depth $\not=$ always 2; decode $N$ caps $D$ \citep{patel2025llminference,semianalysis2024tma}.
+\textbf{When:} every pipeline PR; first gate in review \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Pattern 2: Split streams.}
+\textbf{Scene:} long-context KV dominates attention step \citep{kwon2023vllm,dao2023flashdecoding}.
+\textbf{Solution:} independent KV pipeline depth and smem region \citep{shah2024flashattention3,yirage2026}.
+\textbf{Benefit:} weight path no longer starves KV or vice versa \citep{patel2025llminference,memoryfloor2026}.
+\textbf{Notes:} Figure~\ref{fig:ch08_multi_stream_timeline}; re-run per context bucket \citep{semianalysis2024tma,taxbreak2026}.
+\textbf{When:} paged KV or variable context serving \citep{kwon2023vllm,nvidia2024cudagraphs}.
+
+\paragraph{Pattern 3: Persistent warm pipeline.}
+\textbf{Scene:} prologue tax visible every token at batch-1 \citep{mpk2025,patel2025llminference}.
+\textbf{Solution:} Ch.~7 L2 persistent grid + shallow in-kernel ping-pong \citep{shah2024flashattention3,nvidia2024cudagraphs}.
+\textbf{Benefit:} amortize warm-up across token loop \citep{taxbreak2026,memoryfloor2026}.
+\textbf{Notes:} pairs Ch.~7 staticization ladder; do not deepen kernel to fix launch tax \citep{yirage2026,mpk2025}.
+\textbf{When:} ms/token flat after fusion but launches already at 1 \citep{patel2025llminference,dao2022flashattention}.
+
+\paragraph{Pattern 4: Triplet pipeline row.}
+\textbf{Scene:} GPU TMA schedule fails on NPU or CPU backend \citep{amd2024xdna,taxbreak2026}.
+\textbf{Solution:} Table~\ref{tab:ch08_tri_hw_pipeline} + Table~\ref{tab:ch08_cross_hw_decode} per target \citep{yirage2026,chen2020compilerbasedhardw}.
+\textbf{Benefit:} fleet-safe IR; same depth math \citep{patel2025llminference,amd2024aie}.
+\textbf{Notes:} primitives differ; worksheets identical \citep{nvidia2022hopper,dlbook,amd2024xdna}.
+\textbf{When:} multi-backend YiRage builds \citep{wu2024mirage,yirage2026}.
+
+\paragraph{Pattern 5: Pipeline pass golden.}
+\textbf{Scene:} hand-edited mbarrier index lost on rebase \citep{shah2024flashattention3,yirage2026}.
+\textbf{Solution:} CI golden pipeline IR per canonical layer \citep{wu2024mirage,chen2020compilerbasedhardw}.
+\textbf{Benefit:} reproducible barriers and depth \citep{semianalysis2024tma,taxbreak2026}.
+\textbf{Notes:} pair Ch.~6 memory and Ch.~7 tiling goldens \citep{yirage2026,mpk2025}.
+\textbf{When:} any change to pipeline pass or barrier lowering \citep{chen2020compilerbasedhardw,shah2024flashattention3}.
+
+\paragraph{Pattern 6: Tri-hardware regression row.}
+\textbf{Scene:} GPU pipeline lands; NPU build breaks DMA schedule \citep{amd2024xdna,taxbreak2026}.
+\textbf{Solution:} Table~\ref{tab:ch08_cross_hw_decode} + per-backend golden \citep{yirage2026,patel2025llminference}.
+\textbf{Benefit:} fleet parity \citep{chen2020compilerbasedhardw}.
+\textbf{Notes:} same depth math, different primitives \citep{amd2024aie,nvidia2022hopper}.
+\textbf{When:} every multi-backend release train \citep{wu2024mirage,yirage2026,mpk2025}.
+
+\paragraph{Pattern catalog summary.}
+Patterns~1--2 are decode attention essentials \citep{dao2022flashattention,kwon2023vllm,shah2024flashattention3}.
+Pattern~3 pairs Ch.~7 persistent kernels \citep{mpk2025,nvidia2024cudagraphs}.
+Patterns~4--6 are fleet/CI hygiene \citep{patel2025llminference,chen2020compilerbasedhardw,taxbreak2026}.
+Adopt all six before claiming pipeline maturity \citep{yirage2026,memoryfloor2026,semianalysis2024tma}.
+
+\paragraph{Pattern usage.}
+Pattern~1 on all pipeline PRs; Pattern~2 on context-sensitive models; Pattern~5--6 in CI \citep{yirage2026,taxbreak2026,shah2024flashattention3,patel2025llminference}.
+
+\section{Pipeline Review Workflow}
+\label{sec:ch08_pipeline_review}
+
+\paragraph{R1--R5.}
+R1: depth worksheet; R2: Ch.~6 peak with buffers; R3: Ch.~7 role map; R4: pipeline pass IR; R5: checklist \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3,dao2022flashattention}.
+\textbf{Gate A:} spill after pipeline merge \citep{memoryfloor2026}.
+\textbf{Gate B:} mbarrier stalls $\gg$ compute \citep{shah2024flashattention3,patel2025llminference}.
+\textbf{Gate C:} bytes/token flat \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Reviewer questions.}
+Does depth worksheet match measured $t_{\mathrm{load}}$/$t_{\mathrm{compute}}$? \citep{patel2025llminference,yirage2026}
+Are weight and KV buffers disjoint in IR? \citep{kwon2023vllm,dao2023flashdecoding}
+Is decode $N$ documented for prologue decision? \citep{taxbreak2026,memoryfloor2026}
+Does CI include golden pipeline IR diff? \citep{wu2024mirage,chen2020compilerbasedhardw}
+Is downgrade path logged for older GPUs? \citep{dao2022flashattention,yirage2026}
+
+\paragraph{Sign-off bundle.}
+Attach: Table~\ref{tab:ch08_depth_worked_example}, buffer map, mbarrier index table, pipeline-pass JSON excerpt, checklist screenshot \citep{yirage2026,semianalysis2024tma,shah2024flashattention3,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Review timeline.}
+Day 0: author completes depth worksheet and pipeline IR \citep{yirage2026,dao2022flashattention}.
+Day 1: reviewer verifies Ch.~6 peak includes $D \times b$ bytes \citep{memoryfloor2026,chen2020compilerbasedhardw}.
+Day 2: silicon owner confirms stall profile matches bottleneck hypothesis \citep{shah2024flashattention3,patel2025llminference}.
+Merge only after Gate A--C green \citep{taxbreak2026,wu2024mirage,mpk2025}.
+
+\paragraph{Escalation paths.}
+If Gate A (spill): reduce depth or split fusion---do not widen tile \citep{memoryfloor2026,yirage2026,dao2022flashattention}.
+If Gate B (stalls): add producers (Ch.~7) or fix barriers---do not deepen blindly \citep{shah2024flashattention3,semianalysis2024tma}.
+If Gate C (bytes flat): pipeline is not your bottleneck---return to Ch.~6 residency \citep{taxbreak2026,chen2020compilerbasedhardw,patel2025llminference}.
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Block merge without triple worksheet bundle (Ch.~6--8) \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+
+\section{Decode Pipeline Benchmarking Methodology}
+\label{sec:ch08_pipeline_benchmarking}
+
+Pipeline changes must be judged with the same decode-first metrics as Chapter~\ref{chap:ch03}---not isolated kernel FLOPs \citep{patel2025llminference,kwon2023vllm,taxbreak2026}.
+
+\paragraph{Minimum benchmark bundle.}
+Run batch-1 ms/token with pipeline enabled vs disabled on the \emph{same} fused region and Ch.~6 residency plan \citep{yirage2026,dao2022flashattention,memoryfloor2026}.
+Record bytes/token (should be unchanged), launches/token (unchanged if already fused), and stall breakdown \citep{taxbreak2026,shah2024flashattention3,chen2020compilerbasedhardw}.
+Pipeline success is visible in consumer stall reduction, not TFLOPs counters \citep{patel2025llminference,semianalysis2024tma}.
+
+\paragraph{GPU stall metrics.}
+Export Nsight Compute: memory throttle on producer warps, math throttle on consumer warps, mbarrier wait cycles \citep{shah2024flashattention3,nvidia2022hopper,yirage2026}.
+Healthy ping-pong: producers memory-bound, consumers math-bound, barrier waits ${\lt}5\%$ of consumer cycles \citep{semianalysis2024tma,memoryfloor2026,taxbreak2026}.
+If barrier waits dominate, fix sync before deepening buffers \citep{patel2025llminference,chen2020compilerbasedhardw}.
+
+\paragraph{CPU cache metrics.}
+LLC miss rate per decode step; remote NUMA access percentage \citep{dlbook,patel2025llminference,memoryfloor2026}.
+Prefetch win shows as miss rate drop without bytes/token increase \citep{yirage2026,taxbreak2026,kwon2023vllm}.
+If misses flat, blocking factor or NUMA placement failed---not prefetch distance tuning alone \citep{chen2020compilerbasedhardw,dao2022flashattention}.
+
+\paragraph{NPU DDR metrics.}
+DDR bytes per token with spatial+time pipeline on vs off \citep{amd2024xdna,amd2024aie,memoryfloor2026}.
+MAC utilization estimate from cycle counters---imbalanced spatial stages show low util despite low DDR \citep{patel2025llminference,yirage2026,amd2024aie}.
+Pipeline should increase MAC busy fraction without increasing DDR \citep{taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{A/B discipline.}
+Never compare pipelined prefill kernel to non-pipelined decode path \citep{kwon2023vllm,shah2024flashattention3,taxbreak2026}.
+Never compare different quantizations or context lengths in the same chart \citep{patel2025llminference,dao2022flashattention}.
+Document $N$, $D$, and stream split in benchmark metadata \citep{yirage2026,chen2020compilerbasedhardw,memoryfloor2026}.
+
+\paragraph{Regression CI hooks.}
+Golden pipeline IR diff on canonical layers \citep{wu2024mirage,yirage2026,shah2024flashattention3}.
+Optional silicon smoke: stall threshold gates on nightly H100 + Ryzen AI cells \citep{amd2024xdna,nvidia2022hopper,patel2025llminference}.
+Fail CI on barrier index drift without worksheet update \citep{semianalysis2024tma,chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Worked reporting template.}
+Report: model, layer, batch, context, $t_{\mathrm{load}}$, $t_{\mathrm{compute}}$, chosen $D$, weight/KV depths, ms/token delta, stall delta \citep{taxbreak2026,shah2024flashattention3,yirage2026}.
+Attach Table~\ref{tab:ch08_depth_worked_example} and buffer map \citep{dao2022flashattention,chen2020compilerbasedhardw}.
+This template is what reviewers expect in Pattern~1 PRs \citep{patel2025llminference,memoryfloor2026,mpk2025}.
+
+\paragraph{Fleet triplet parity.}
+Run the same template row on GPU, CPU, and NPU backends from one YiRage IR \citep{yirage2026,patel2025llminference,amd2024xdna,nvidia2022hopper}.
+Depth math should match; only primitive columns differ in Table~\ref{tab:ch08_tri_hw_pipeline} \citep{chen2020compilerbasedhardw,taxbreak2026,amd2024aie}.
+Ship all three rows or document explicit backend deferral \citep{wu2024mirage,mpk2025}.
+
+\paragraph{When pipeline is not the lever.}
+If bytes/token is high, return to Ch.~6 residency before more buffering \citep{memoryfloor2026,dao2022flashattention,yirage2026}.
+If launches/token is high, return to Ch.~7 staticization before overlap tuning \citep{taxbreak2026,mpk2025,nvidia2024cudagraphs}.
+Pipeline optimizes timing of \emph{legal} bytes---not volume of bytes or dispatch count \citep{patel2025llminference,shah2024flashattention3,semianalysis2024tma}.
+
+\paragraph{Microbenchmark trap.}
+Isolated TMA or prefetch microbenchmarks can show huge speedups that disappear in fusion---barriers, prologue, and stream interaction dominate real kernels \citep{shah2024flashattention3,semianalysis2024tma,yirage2026}.
+Always benchmark inside the fused subgraph with Ch.~7 roles enabled \citep{mpk2025,patel2025llminference,taxbreak2026}.
+If microbenchmark and fused cell disagree, trust the fused cell \citep{memoryfloor2026,chen2020compilerbasedhardw,dao2022flashattention}.
+
+\paragraph{Context-length sweeps.}
+KV stream bytes grow with context---depth worksheets at 4K context may fail at 128K \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}.
+Bucket graphs by context and store separate pipeline IR per bucket \citep{nvidia2024cudagraphs,yirage2026,shah2024flashattention3}.
+Serving SLOs should cite which bucket was validated \citep{taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+
+\paragraph{Sign-off evidence bar.}
+Reviewers should see: worksheet, stall screenshot, bytes/token unchanged, pipeline IR hash \citep{yirage2026,shah2024flashattention3,semianalysis2024tma}.
+Missing any item returns PR to author---no ``trust me, overlap is on'' merges \citep{chen2020compilerbasedhardw,taxbreak2026,patel2025llminference}.
+
+\paragraph{Reporting table (template).}
+\begin{table}[t]
+\centering
+\small
+\caption{Pipeline optimization PR evidence template.}
+\label{tab:ch08_pr_template}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Field} & \textbf{Required content} \\
+\midrule
+Worksheet & Table~\ref{tab:ch08_depth_worked_example} filled \\
+Streams & Weight depth; KV depth; buffer map \\
+Stalls & Before/after consumer wait cycles \\
+ms/token & Batch-1, same fusion region \\
+Artifacts & Pipeline IR hash; checklist \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{$\checkmark$ Practice checkpoint.}
+Attach benchmark bundle (ms/token, stalls, worksheet) to every pipeline optimization PR \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
 
 \section{Key Takeaways}
 \label{sec:ch08_key_takeaways}
 
+Asynchronous pipelines complete the movement layer opened in Chapters~\ref{chap:ch06}--\ref{chap:ch07}: residency budgets and static roles become timed overlap that hides memory latency \citep{yirage2026,shah2024flashattention3,semianalysis2024tma,dao2022flashattention}.
+The principles below pair design rules with actions your team can adopt this sprint \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026,patel2025llminference}.
+
 \begin{itemize}
-\item \textbf{Overlap movement with compute via a double-buffer pipeline.}
-A synchronous load-then-compute loop exposes full memory latency every step; a double-buffer pipeline hides it behind the previous tile's compute after a one-tile prologue, and deepening the pipeline helps only until the bottleneck stage saturates \citep{dao2022flashattention,semianalysis2024tma}. At batch-1 decode the load stage dominates, so overlap is the win \citep{taxbreak2026}.
+\item \textbf{Latency-hiding principle.}
+Pipeline overlaps movement with compute; cannot beat bandwidth floor \citep{memoryfloor2026,semianalysis2024tma,patel2025llminference}.
+Serial load+compute wastes cycles every tile at batch-1 decode \citep{taxbreak2026,kwon2023vllm}.
+\textbf{Action:} name bottleneck stage first (step 1); attach stall replay \citep{shah2024flashattention3,yirage2026}.
 
-\item \textbf{TMA is Hopper's asynchronous movement primitive.}
-Issued by a single thread (saving registers), TMA performs async bulk gmem$\to$smem copies signaled by transaction barriers, with cluster multicast and L2 promotion hints \citep{shah2024flashattention3,nvidia2022hopper}. FlashAttention-3 pairs TMA producers with WGMMA consumers \citep{semianalysis2024tma}.
+\item \textbf{Depth-adaptation principle.}
+Depth from memory budget, load/compute ratio, and decode tile count $N$ \citep{dao2022flashattention,chen2020compilerbasedhardw,taxbreak2026}.
+Blind depth-4 from prefill configs is anti-pattern~5 \citep{shah2024flashattention3,patel2025llminference}.
+\textbf{Action:} complete Table~\ref{tab:ch08_depth_worked_example} and Table~\ref{tab:ch08_pipeline_economics} \citep{yirage2026,memoryfloor2026}.
 
-\item \textbf{CPU pipelines are prefetch- and cache-shaped.}
-With no scratchpad, a CPU overlaps through hardware prefetch, software prefetch distance (its pipeline depth), and sometimes a DMA engine; the kernel shapes access patterns so the hardware builds the pipeline \citep{dlbook,memoryfloor2026}. Residency is governed by the cache.
+\item \textbf{Multi-stream principle.}
+Weight and KV get independent pipeline parameters \citep{kwon2023vllm,dao2023flashdecoding,shah2024flashattention3}.
+Unified depth starves one stream while buffering the other \citep{patel2025llminference,yirage2026}.
+\textbf{Action:} separate buffer regions, depths, and barrier chains per stream \citep{semianalysis2024tma,dao2022flashattention}.
 
-\item \textbf{NPU double buffering is mandatory and explicit.}
-An XDNA tile's DMA engine ping-pongs two buffers in 64\,KB SRAM with task-completion-tokens, and multi-stage pipelines span physical tiles across the array \citep{amd2024aie,amd2024xdna}. With no cache fallback on the fabric, a stalled DMA simply idles the whole compute tile.
+\item \textbf{Hardware-adaptation principle.}
+GPU explicit software pipeline; CPU implicit prefetch; NPU spatial DMA \citep{nvidia2022hopper,dlbook,amd2024xdna,amd2024aie}.
+Same worksheet math; different primitives and sync \citep{yirage2026,chen2020compilerbasedhardw,taxbreak2026}.
+\textbf{Action:} fill Table~\ref{tab:ch08_tri_hw_pipeline} per backend in CI \citep{patel2025llminference,amd2024aie}.
 
-\item \textbf{Generate the pipeline per target.}
-The YiRage pipeline pass emits TMA+barriers, prefetch patterns, or ping-pong DMA per class and solves pipeline depth jointly with the residency budget, with separate depths for the weight and KV streams \citep{yirage2026,nvidia2022hopper}. Too shallow stalls; too deep spills \citep{taxbreak2026}.
+\item \textbf{Compiler-automation principle.}
+Pipeline generation is a pass coupled to memory and tiling passes \citep{yirage2026,wu2024mirage,mpk2025,shah2024flashattention3}.
+Hand barrier edits do not survive model or hardware churn \citep{chen2020compilerbasedhardw,semianalysis2024tma}.
+\textbf{Action:} attach pipeline IR + checklist to CI; block drift without worksheet updates \citep{yirage2026,taxbreak2026}.
 \end{itemize}
+
+\paragraph{How this chapter connects.}
+Chapter~\ref{chap:ch06} planned bytes; Chapter~\ref{chap:ch07} assigned producers/consumers; this chapter timed movement between them \citep{dao2022flashattention,shah2024flashattention3,semianalysis2024tma}.
+Chapter~\ref{chap:ch04}--\ref{chap:ch05} hardware async features are \emph{used} by pipelines, not re-taught here \citep{nvidia2022hopper,amd2024xdna,patel2025llminference}.
+Chapter~\ref{chap:ch09} generalizes sync when coordination scales beyond ping-pong \citep{taxbreak2026,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Megakernel stack preview.}
+Pipelines (Ch.~8) $\rightarrow$ hierarchical sync (Ch.~9) $\rightarrow$ softmax carriers (Ch.~10) $\rightarrow$ assembly (Ch.~11) \citep{dao2022flashattention,semianalysis2024tma,shah2024flashattention3,mpk2025,patel2025llminference}.
+Skipping pipeline design produces fused kernels that still wait on HBM every tile \citep{memoryfloor2026,taxbreak2026,yirage2026}.
 
 \section{Conclusion}
 \label{sec:ch08_conclusion}
 
-Asynchronous movement is what keeps the statically assigned consumers of Chapter~7 from stalling: a double-buffer pipeline overlaps the load of the next tile with the compute on the current one, hiding the memory latency that otherwise dominates batch-1 decode \citep{shah2024flashattention3,memoryfloor2026}. Each hardware class provides the primitive---TMA with transaction barriers on Hopper, prefetch and DMA engines on a CPU, ping-pong tile DMA with completion tokens on an XDNA NPU---and the YiRage pipeline pass generates the correct, depth-tuned pipeline per target, with separate depths for the weight and KV streams where their sizes differ, composing with the residency, role, and search passes of the surrounding chapters \citep{yirage2026,amd2024aie,wu2024mirage}. A pipeline only works if its stages synchronize correctly, however, and at the scale of a megakernel spanning many units the synchronization itself becomes a design problem---which is the subject of Chapter~\ref{chap:ch09}: hierarchical synchronization and communication across threads, warps, tiles, and devices \citep{taxbreak2026,patel2025llminference}.
+Asynchronous pipelines spend Chapters~\ref{chap:ch06}--\ref{chap:ch07}'s budget and roles on timed movement: every producer issues ahead of every consumer without per-tile dispatch \citep{shah2024flashattention3,yirage2026,semianalysis2024tma,dao2022flashattention}.
+The three-step depth method, tri-hardware tables, YiRage pipeline pass, and pitfall catalog turn overlap from folklore into repeatable engineering \citep{patel2025llminference,chen2020compilerbasedhardw,taxbreak2026,mpk2025}.
+
+\paragraph{Closing metaphor.}
+If Chapter~\ref{chap:ch06} is the warehouse layout and Chapter~\ref{chap:ch07} is the org chart, this chapter is the conveyor timing---trucks arrive while assemblers work \citep{dao2022flashattention,yirage2026,shah2024flashattention3}.
+Perfect roles with synchronous loads still have assemblers standing idle at the belt each tile \citep{memoryfloor2026,taxbreak2026}.
+Pipelines eliminate that idle; Chapter~\ref{chap:ch09} coordinates when many belts cross \citep{semianalysis2024tma,patel2025llminference}.
+
+Chapter~\ref{chap:ch09} addresses \textbf{hierarchical synchronization}---when many producers and consumers coordinate, barriers themselves become a design problem \citep{taxbreak2026,patel2025llminference,shah2024flashattention3}.
+Carry depth worksheets, stream maps, and barrier indices into sync design \citep{yirage2026,semianalysis2024tma,chen2020compilerbasedhardw}.
+
+\paragraph{Part~IV bridge.}
+Residency (Ch.~6) + roles (Ch.~7) + pipelines (this chapter) + sync (Ch.~9) assemble the megakernel execution stack \citep{dao2022flashattention,shah2024flashattention3,mpk2025}.
+Chapter~20's search assumes pipeline-annotated IR---skipping here breaks the compiler story \citep{wu2024mirage,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Budget--structure--execution recap.}
+Chapter~\ref{chap:ch06}: where bytes live \citep{dao2022flashattention,yirage2026,chen2020compilerbasedhardw}.
+Chapter~\ref{chap:ch07}: which units touch bytes \citep{shah2024flashattention3,mpk2025,patel2025llminference}.
+Chapter~\ref{chap:ch08}: when bytes arrive relative to compute \citep{semianalysis2024tma,amd2024aie,nvidia2022hopper}.
+Together they define a deployable decode cell---not an isolated microbenchmark \citep{taxbreak2026,memoryfloor2026}.
+
+\paragraph{Teaching vs production.}
+Whiteboard pipeline timelines (Figures~\ref{fig:pipeline_theory_pipeline}, \ref{fig:ch08_multi_stream_timeline}) for onboarding \citep{shah2024flashattention3,dlbook}.
+Automate Patterns~1--6 and golden IR in CI for fleet scale \citep{yirage2026,patel2025llminference,mpk2025}.
+Concepts in \S\ref{sec:ch08_pipeline_theory}--\ref{sec:ch08_npu_pipeline}; gates in \S\ref{sec:ch08_pipeline_pitfalls}--\ref{sec:ch08_pipeline_review} \citep{chen2020compilerbasedhardw,taxbreak2026}.
+
+\paragraph{Summary sentence.}
+Chapter~\ref{chap:ch06} budgeted bytes; Chapter~\ref{chap:ch07} assigned actors; Chapter~\ref{chap:ch08} synchronized their movement; Chapter~\ref{chap:ch09} will discipline coordination at scale \citep{dao2022flashattention,semianalysis2024tma,yirage2026,shah2024flashattention3}.
+That sequence is the MegaKernel spine \citep{mpk2025,wu2024mirage,memoryfloor2026,patel2025llminference,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{MegaKernel spine recap.}
+Residency $\rightarrow$ roles $\rightarrow$ pipelines $\rightarrow$ sync (Ch.~9) $\rightarrow$ carriers (Ch.~10) $\rightarrow$ assembly (Ch.~11) \citep{dao2022flashattention,mpk2025,wu2024mirage,amd2024xdna,nvidia2022hopper,kwon2023vllm,dlbook,amd2024aie,rotem2018glow,liu2024deepseekv3,dao2023flashdecoding,nvidia2024cudagraphs}.
+
+\paragraph{Done criteria.}
+Bottleneck stage named, depth worksheet signed, multi-stream plan documented, pipeline-pass artifact archived, checklist complete \citep{yirage2026,shah2024flashattention3,patel2025llminference,taxbreak2026,memoryfloor2026,chen2020compilerbasedhardw}.
+Proceed to Chapter~\ref{chap:ch09} with mbarrier/token index table attached \citep{semianalysis2024tma,dao2022flashattention}.
+Bring Ch.~6--8 worksheet bundle---Chapter~9 assumes ping-pong barriers are already legal \citep{yirage2026,shah2024flashattention3,dao2022flashattention,mpk2025,chen2020compilerbasedhardw}.
+
+\paragraph{Hands-on recap.}
+(1) Fill depth worksheet. (2) Split weight/KV streams. (3) Run pipeline pass. (4) Triple legality with Ch.~6--7. (5) Complete checklist \citep{taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025,amd2024xdna,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,memoryfloor2026,wu2024mirage,nvidia2024cudagraphs,kwon2023vllm,dlbook,chen2020compilerbasedhardw,amd2024aie,dao2023flashdecoding}.
+Pipelining without residency and roles optimizes the wrong layer \citep{dao2022flashattention,yirage2026,memoryfloor2026}.
+
+\paragraph{Chapter~20 preview.}
+Megakernel superoptimization searches fusion and tiling; pipeline pass must re-run inside the search inner loop \citep{mpk2025,wu2024mirage,yirage2026}.
+Candidates without legal async schedule are pruned early---saves silicon budget \citep{chen2020compilerbasedhardw,taxbreak2026,patel2025llminference}.
+
+\paragraph{Serving stack note.}
+PagedAttention and continuous batching change $N$ and KV stream shape---re-run depth worksheets per serving bucket \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}.
+Static pipeline IR should be bucketed like CUDA graphs \citep{nvidia2024cudagraphs,yirage2026,shah2024flashattention3}.
+
+\paragraph{Final spine position.}
+Ch.~6 residency $\rightarrow$ Ch.~7 roles $\rightarrow$ \textbf{Ch.~8 pipelines} $\rightarrow$ Ch.~9 sync $\rightarrow$ Ch.~10 carriers $\rightarrow$ Ch.~11 assembly \citep{dao2022flashattention,mpk2025,semianalysis2024tma,amd2024xdna,wu2024mirage}.
+You now have the execution timing layer; next chapter makes coordination explicit at scale \citep{taxbreak2026,patel2025llminference,shah2024flashattention3,yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Fleet note.}
+Triplet deployments need three pipeline lowerings from one IR---GPU TMA, CPU prefetch, NPU DMA \citep{patel2025llminference,yirage2026,amd2024aie,nvidia2022hopper,chen2020compilerbasedhardw}.
+Do not ship CUDA-only barrier metadata to Ryzen AI endpoints \citep{amd2024xdna,taxbreak2026,memoryfloor2026}.
+
+\paragraph{Long-context note.}
+Paged KV changes KV stream bytes per step---re-run depth worksheets per context bucket \citep{kwon2023vllm,dao2023flashdecoding,patel2025llminference}.
+Pipeline IR should be bucketed like CUDA graphs when context length varies \citep{nvidia2024cudagraphs,yirage2026,shah2024flashattention3}.
+
+\paragraph{Hands-on exercises.}
+(1) Measure serial vs ping-pong stall profile. (2) Fill depth worksheet. (3) Split weight/KV streams. (4) Run pipeline pass. (5) Complete checklist \citep{taxbreak2026,shah2024flashattention3,yirage2026,patel2025llminference,mpk2025,amd2024xdna,nvidia2022hopper,semianalysis2024tma,dao2022flashattention,memoryfloor2026,wu2024mirage,nvidia2024cudagraphs,kwon2023vllm,dlbook,chen2020compilerbasedhardw,amd2024aie,dao2023flashdecoding}.
+Compare decode vs prefill pipeline depth on the same fused region if you maintain both paths \citep{kwon2023vllm,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Compiler author note.}
+Pipeline pass authors should treat depth search as constrained optimization: minimize steady-step time subject to Ch.~6 legality and Ch.~7 role legality \citep{yirage2026,wu2024mirage,chen2020compilerbasedhardw,mpk2025}.
+Log rejected candidates with reasons---those logs are gold for Chapter~20 search pruning \citep{mpk2025,patel2025llminference,taxbreak2026}.
+Expose pipeline IR in debug builds so kernel engineers can diff barrier graphs without reading assembly \citep{shah2024flashattention3,semianalysis2024tma,yirage2026}.
+
+\paragraph{Kernel engineer note.}
+When hand-tuning CUDA, mirror pipeline IR fields in comments: stream id, buffer offset, mbarrier id, depth \citep{nvidia2022hopper,semianalysis2024tma,chen2020compilerbasedhardw}.
+Hand tuning without those fields does not port to YiRage or fleet backends \citep{yirage2026,amd2024xdna,patel2025llminference}.
+Promote successful hand schedules into golden IR tests \citep{wu2024mirage,shah2024flashattention3,taxbreak2026}.
+
+\paragraph{Serving operator note.}
+Pipeline parameters are not ``set once''---model updates, quant changes, and context buckets all invalidate prior depth choices \citep{kwon2023vllm,patel2025llminference,yirage2026}.
+Treat pipeline worksheets like hyperparameters: versioned, reviewed, and tied to benchmark bundles \citep{chen2020compilerbasedhardw,taxbreak2026,memoryfloor2026}.
+When ms/token regresses after a model swap, replay checklist before touching tile shapes \citep{shah2024flashattention3,dao2022flashattention,mpk2025}.
+
+\paragraph{One-sentence chapter thesis.}
+If Chapter~\ref{chap:ch06} is \emph{how many bytes} and Chapter~\ref{chap:ch07} is \emph{who moves them}, Chapter~\ref{chap:ch08} is \emph{never wait idle while they move}---implemented as depth-bounded, stream-aware, compiler-generated async pipelines \citep{dao2022flashattention,shah2024flashattention3,semianalysis2024tma,yirage2026,patel2025llminference,memoryfloor2026,taxbreak2026,chen2020compilerbasedhardw}.
+
+\paragraph{Exit artifacts.}
+Leave this chapter with: signed depth worksheet, weight/KV stream map, mbarrier index table, pipeline-pass IR excerpt, completed checklist, and batch-1 benchmark delta \citep{yirage2026,chen2020compilerbasedhardw,shah2024flashattention3,patel2025llminference,taxbreak2026,semianalysis2024tma,mpk2025,wu2024mirage}.
+Chapter~\ref{chap:ch09} consumes the barrier index table directly---gaps here become sync bugs there \citep{taxbreak2026,dao2022flashattention,nvidia2022hopper}.
+Without these artifacts, hierarchical sync design in the next chapter is guesswork \citep{yirage2026,shah2024flashattention3,patel2025llminference,chen2020compilerbasedhardw}.
+The MegaKernel trilogy---budget, structure, execution---is incomplete until all three worksheet bundles are archived for your decode cell \citep{dao2022flashattention,memoryfloor2026,taxbreak2026,mpk2025,wu2024mirage}.
+Proceed to Chapter~\ref{chap:ch09} only when pipeline legality, stall replay, and checklist are green \citep{semianalysis2024tma,shah2024flashattention3,yirage2026,chen2020compilerbasedhardw,patel2025llminference}.
+That gate is the handoff from execution timing to hierarchical synchronization \citep{taxbreak2026,dao2022flashattention,mpk2025,memoryfloor2026}.
+Bring the barrier index table---Chapter~\ref{chap:ch09} builds on it, not around it \citep{semianalysis2024tma,yirage2026,shah2024flashattention3,nvidia2022hopper}.
+End of Chapter~\ref{chap:ch08}---execution pillar complete for decode serving.
 
 \typeout{END_CHAPTER "ch08" \theabspage}

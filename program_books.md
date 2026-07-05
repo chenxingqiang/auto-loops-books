@@ -97,49 +97,73 @@ commit	coverage_pct	word_count	citations	quality_score	status	description
 
 ## Literature research (`research_tools.py`)
 
-Research is **mandatory before writing or expanding** a chapter. Keywords are **auto-locked** from three sources — no manual keyword lists:
+Research is **mandatory before writing or expanding** a chapter. Keywords and Scholar queries use a **three-layer** strategy:
 
-| Source | What it contributes |
-|--------|---------------------|
-| `book_prepare.OUTLINE` | Chapter title, section labels, coverage regex → English terms |
-| `book_content.md` | `#### 第N章` bullets + Chinese→English term mapping |
-| `books/build/chapters/<file>.tex` | `\section`, `\index`, `\newterm`, high-frequency body terms |
+| Layer | Source | Role |
+|-------|--------|------|
+| **1. Custom specs** | `books/research/keyword_specs.json` | Per-chapter curated `queries` (latest literature) + high-weight `keywords` |
+| **2. Auto-lock** | `OUTLINE` + `book_content.md` + chapter `.tex` | Section labels, coverage patterns, body terms |
+| **3. Prior chapters** | `citation_catalog.json` / `search_data.json` from ch01…ch(N−1) | Re-score and reuse high-relevance papers (no duplicate SerpAPI cost) |
+
+Edit `keyword_specs.json` to tune Scholar queries per chapter. Regenerate baseline from OUTLINE:
+
+```bash
+python3 research_keyword_specs.py --generate
+python3 research_keyword_specs.py --validate
+```
 
 ### Commands
 
 ```bash
-# Preview locked keywords + queries (no API calls)
+# Preview locked keywords + queries + inherited count (no API calls)
 uv run research_tools.py --chapter ch01 --dry-run
 
-# Full search for one chapter (no paper-count cap)
+# Full search for one chapter (custom queries + prior-chapter reuse + new Scholar pages)
 uv run research_tools.py --chapter ch01
 
-# All chapters currently in OUTLINE (ch01–ch03)
+# Skip inheriting prior chapters (force fresh search only)
+uv run research_tools.py --chapter ch04 --no-inherit
+
+# All chapters in OUTLINE
 uv run research_tools.py --all
 ```
 
-Optional flags: `--min-relevance N` (default 1), `--max-pages-per-query N` (default: paginate until empty), `--query-delay SEC` (default 2).
+Optional flags: `--min-relevance N` (default 1), `--max-pages-per-query N` (default: paginate until empty), `--query-delay SEC` (default 2), `--no-inherit`, `--specs-path PATH`.
+
+Per-chapter spec fields (`keyword_specs.json` → `chapters.chXX`):
+
+| Field | Meaning |
+|-------|---------|
+| `queries` | Scholar query strings (include year hints for latest work, e.g. `2024 2025`) |
+| `keywords` | `{term, weight}` seeds merged with auto-extracted terms |
+| `year_lo` | Minimum publication year for Scholar (`as_ylo`) |
+| `inherit_prior_chapters` | `false` for ch01; `true` reuses prior `citation_catalog` papers |
+| `reuse_min_score` | Min re-scored relevance to keep an inherited paper (default 12) |
+| `max_inherited_papers` | Cap inherited pool per chapter (default 25) |
 
 ### Output layout (per chapter)
 
 ```
-books/research/<chapter_id>/
-  keywords.json           # locked terms + weights
+books/research/
+  keyword_specs.json      # edit per-chapter queries/keywords (committed)
+  <chapter_id>/
+  keywords.json           # locked terms + weights (merged)
   queries.json            # Scholar queries used
   search_results.md       # full report (abstracts, scores)
   references.md           # sorted reference list
   section_references.md   # papers grouped by OUTLINE section label
-  search_data.json        # structured payload for bib/cite workflow
+  search_data.json        # structured payload (includes inherited_from)
   runs/<timestamp>/       # snapshot of each run (same files)
 ```
 
 ### Agent workflow: research → bib → write
 
-1. **Run search** for the target chapter id.
-2. **Read** `section_references.md` for the weakest/missing section; use `search_results.md` for abstracts and benchmark claims.
-3. **Add bib entries** to `books/book.bib` from `search_data.json` fields: `title`, `reference`, `link`, `abstract`. Prefer arXiv/official docs; never fabricate numbers — copy only from paper abstract or linked source.
-4. **Cite** in `.tex` with `\citep{key}`; map each new subsection to at least one external source.
-5. **Re-run research** when a chapter draft changes substantially (new sections, major rewrites) so keywords track the updated `.tex`.
+1. **Customize** `keyword_specs.json` queries for the target chapter (latest literature angles).
+2. **Run search** — `uv run research_tools.py --chapter chXX` (inherits prior chapters by default).
+3. **Read** `section_references.md` for the weakest/missing section; use `search_results.md` for abstracts and benchmark claims.
+4. **Add bib entries** to `books/book.bib` from `search_data.json` fields: `title`, `reference`, `link`, `abstract`. Prefer arXiv/official docs; never fabricate numbers — copy only from paper abstract or linked source.
+5. **Cite** in `.tex` with `\citep{key}`; map each new subsection to at least one external source.
+6. **Re-run research** when a chapter draft changes substantially (new sections, major rewrites) so keywords track the updated `.tex`.
 
 **Research rule:** Every new subsection needs at least one external citation unless it is pure methodology from this book's framework.
 
@@ -227,6 +251,32 @@ books/visuals/<chapter_id>/
 **Figure rule:** Prefer TikZ (`pipeline_figure`, `roofline_figure`) for concepts; use `placeholder_figure` until measured data exists.
 
 **Iteration:** When 目录 adds a section, extend `SECTION_VISUAL_RECIPES` in `book_visuals.py` (or edit `plan.json` directly), then `--plan --render`.
+
+### OpenTikZ（架构 / 流水线 / 系统框图）
+
+**数据图**（roofline、bar、benchmark 表）仍走 `book_visuals.py` + `visuals_style` token。  
+**概念图**（~80% 常规插图）走 **[`books/OPENTIKZ.md`](books/OPENTIKZ.md)** + Cursor Skill **`using-opentikz`**：
+
+| 模式 | 场景 |
+|------|------|
+| 图标复用 | GPU、CPU、queue、attention 等 — `OTROOT/icons/` → `\input` |
+| **模板编辑** | `system-block-diagram`, `inference-serving`, `encoder-decoder`, `flowchart`, `distributed-training` — 必读 `edit_contract` |
+| PNG→TikZ | 旧位图 / 草稿统一为矢量 |
+| 描述生成 | YiRage 流水线等无模板原创图 |
+
+**输出**：`books/visuals/<chapter_id>/opentikz/*.tex`（Git 版本化；**Mode A** 只改副本，不改 `~/.cursor/skills/opentikz`）。
+
+**Phase 2 工作流**（与 §5.6 Layer 2 对齐）：
+
+```bash
+uv run book_visuals.py --chapter ch01 --plan --audit
+uv run book_visuals.py --chapter ch01 --render          # 数据图 → generated/
+# Agent: using-opentikz → visuals/ch01/opentikz/fig_*.tex
+uv run book-loop insert-visuals --chapter ch01
+cd books && bash make-chapter.sh ch01
+```
+
+**分轨规则**：benchmark 数字 **禁止** 在 OpenTikZ 手写 — 仅用 `book_visuals` + `verified_facts.jsonl` / `\citep{}`。交付前 `compile_ok`；图内注释 `% OPENTIKZ: <template-id>`。
 
 ### Visual style (matching book template)
 
