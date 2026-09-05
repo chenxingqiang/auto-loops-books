@@ -99,3 +99,4 @@ ch15-20260905	100.0	5010	20	94.0	keep	R50: full XLA chapter expansion: entry poi
 ch16-20260905	100.0	5016	18	94.0	keep	R51: full TVM chapter expansion: import, Relax/TIR passes, codegen, search objective, case (2169->5016)
 ch17-20260905	100.0	5019	16	94.1	keep	R52: full Triton chapter expansion: TTGIR residency, cache/ptxas, config lists, fused-attention case (2117->5019)
 ch18-20260905	100.0	5007	15	94.0	keep	R53: full IREE chapter expansion: dispatch regions, stream/VM schedule, HAL codegen, tuning, case (2038->5007)
+ch19-20260905	100.0	5005	15	94.0	keep	R54: full Glow chapter expansion: primitives, stacking, static memory, PGQ, edge case (2019->5005)
