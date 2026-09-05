@@ -91,3 +91,4 @@ ch05-202606140728	100.0	0	0	95.5	keep	conclusion: real synthesis + bridge to ch0
 ch14-202606140728	100.0	0	0	94.5	keep	conclusion: real synthesis + bridge to ch15
 ch22-202606140728	100.0	0	0	94.4	keep	conclusion: add bridge to ch23
 ch04-20260905	100.0	5014	18	94.0	keep	R45: add SLO-bucket comparison guidance in Benchmarking/Verification (4977->5014)
+ch05-20260905	100.0	5003	16	94.0	keep	R46: add toolchain/chip-model pin guidance in YiRage XDNA backend (4922->5003)

@@ -539,6 +539,11 @@ Graph emit & Scheduled IR $\rightarrow$ AIE binary & Triplet legality report \\
 YiRage CI compiles the same decoder export for CUDA and XDNA on every merge, publishing legality diffs \citep{yirage2026,chen2020compilerbasedhardw}.
 When XDNA compile fails, errors cite buffer table rows and tile IDs---not opaque backend codes \citep{amd2024aie,patel2025llminference}.
 
+\paragraph{Toolchain and chip-model pins.}
+XDNA legality depends on the AIE toolchain and the chip model your YiRage backend loads, not just the graph IR \citep{amd2024aie,yirage2026}.
+A graph that fits the current tile map can change legality after a driver or firmware bump; pin the toolchain and chip-model commit in decode CI and re-run the five gates on every upgrade \citep{amd2024xdna,patel2025llminference}.
+Treat a silent legality flip as a compile error, not a benchmark curiosity---the same IR export must remain shippable across the fleet before any performance claim is compared against the pinned baseline \citep{yirage2026,amd2024aie}.
+
 \paragraph{IREE-style portability.}
 Modular retargeting treats backends as plugins over shared IR \citep{iree2024,yirage2026,chen2020compilerbasedhardw}.
 XDNA tile capacities live in the plugin chip model, not scattered in hand-written kernels \citep{patel2025llminference,amd2024xdna,amd2024aie}.
