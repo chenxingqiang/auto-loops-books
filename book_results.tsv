@@ -97,3 +97,4 @@ ch12-20260905	100.0	5016	15	94.1	keep	R48: expand eager/graph/MegaKernel/mode-se
 ch13-20260905	100.0	5041	15	94.1	keep	R49: deepen five compiler-theory pillars with ledgers, contracts, and triplet policy (3143->5041)
 ch15-20260905	100.0	5010	20	94.0	keep	R50: full XLA chapter expansion: entry points, HLO passes, thunks/capture, tuning, case study (1682->5010)
 ch16-20260905	100.0	5016	18	94.0	keep	R51: full TVM chapter expansion: import, Relax/TIR passes, codegen, search objective, case (2169->5016)
+ch17-20260905	100.0	5019	16	94.1	keep	R52: full Triton chapter expansion: TTGIR residency, cache/ptxas, config lists, fused-attention case (2117->5019)
