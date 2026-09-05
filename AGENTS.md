@@ -671,6 +671,9 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 > Agent 每轮 append 3～5 行：日期、轨（内容/harness）、主攻、验证命令、结果、下一轮建议。**勿删历史。**
 
+- **Loop R45（2026-09-05，内容轨）**：**ch04 ready** — Hopper Benchmarking/Verification 节补「Choosing the comparison window」段（SLO 绑定 ctx bucket、ablation 行矩阵 ship 而非 headline median）；4977→**5014** words，cov=100%，cites=18，q=94.0，compile_ok；`uv run book_prepare.py --chapter ch04` gate 通过；**13/30** ready，Part III 1/2；下一轮 ch05（4922/5000，q=99.7）。
+- **Loop R45 preamble（2026-09-05，Harness/运维）**：补 push R32–R44 积压 — origin/master `16bc6b7` → `8071830`；远程无未合入分支/PR。
+
 - **基线（2026-06）**：30/30 `chapter_ready`；CI **Build book PDF** 绿（[run #1](https://github.com/chenxingqiang/auto-loops-books/actions/runs/27386473852)）；本地无 pdflatex 时以 CI artifact 为准。
 - **Fregly 映射**：`WRITING_STYLE.md` §七；样章 [`reference-chapter-1.pdf`](reference-chapter-1.pdf)。
 - **AGENT_SKIP（深度章）**：ch01–ch05、ch10、ch11、**ch12**、**ch13**、ch14 — batch 禁止覆盖。

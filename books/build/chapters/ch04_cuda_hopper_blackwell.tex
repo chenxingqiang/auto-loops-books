@@ -927,6 +927,10 @@ Hopper-tuned kernels are not portable to L4 cells without re-roofline analysis \
 Profile end-to-end decode first; cut activation bytes second; collapse launches third; tune tensor cores fourth; re-profile on every driver and ctx bucket change \citep{taxbreak2026,memoryfloor2026,patel2025llminference,semianalysis2024tma}.
 Teach teammates to read residency diagrams before PTX diffs \citep{yirage2026,chen2020compilerbasedhardw}.
 
+\paragraph{Choosing the comparison window.}
+Benchmarks that compare only a single ctx bucket hide fusion regressions at the longest decode step \citep{memoryfloor2026,kwon2023vllm,taxbreak2026}.
+When ablation rows disagree across buckets, trust the bucket your SLO actually binds and ship the row matrix, not one headline median \citep{patel2025llminference,yirage2026}.
+
 \section{Key Takeaways}
 \label{sec:ch04_key_takeaways}
 
