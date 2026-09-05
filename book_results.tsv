@@ -95,3 +95,4 @@ ch05-20260905	100.0	5003	16	94.0	keep	R46: add toolchain/chip-model pin guidance
 ch10-20260905	100.0	5028	15	94.1	keep	R47: add block/split sizing, mask handling, carrier reset, micro-repro sections (4063->5028)
 ch12-20260905	100.0	5016	15	94.1	keep	R48: expand eager/graph/MegaKernel/mode-selection engineering depth (3003->5016)
 ch13-20260905	100.0	5041	15	94.1	keep	R49: deepen five compiler-theory pillars with ledgers, contracts, and triplet policy (3143->5041)
+ch15-20260905	100.0	5010	20	94.0	keep	R50: full XLA chapter expansion: entry points, HLO passes, thunks/capture, tuning, case study (1682->5010)

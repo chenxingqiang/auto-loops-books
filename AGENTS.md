@@ -671,6 +671,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 > Agent 每轮 append 3～5 行：日期、轨（内容/harness）、主攻、验证命令、结果、下一轮建议。**勿删历史。**
 
+- **Loop R50（2026-09-05，内容轨）**：**ch15 ready** — XLA 章全书级扩写：编译入口（JAX/TF/torch-xla/PjRt/AOT）、StableHLO 版本契约、decode-relevant HLO passes/顺序/remat/HLO dump、HLO→thunks/command buffer 语义/Triton 发射边界/custom-call、tuning 面/工作流/bucket/A-B、逐层 case study/MoE 场景/failure autopsy/运维 runbook；1682→**5010** words，cov=100%，cites=20，q=94.0，compile_ok；**18/30** ready，Part VI 3/10；下一轮 ch16（2169/5000，q=88.7）。
 - **Loop R49（2026-09-05，内容轨）**：**ch13 ready** — Core Theory 五大柱实操深化：tile 居留类/扫描方法/capacity ledger、fusion IR 契约/顺序/spill 记账、layout 正规化/paged KV/权重转换时机、并行轴排序/带宽饱和测试/merge 成本、backend ownership 矩阵/partition copy 成本/triplet 容差策略/golden IR diff；3143→**5041** words，cov=100%，cites=15，q=94.1，compile_ok；**17/30** ready，Part VI 2/10；下一轮 ch15（1682/5000，q=86.7）。
 - **Loop R48（2026-09-05，内容轨）**：**ch12 ready** — 三模式章节实质扩写：eager 子图盘点/每阶段诊断/适用边界/迁移 checklist、graph 捕获生命周期/bucket 集/allocator+fallback/跨硬件限制、MegaKernel 分层信封/合法性清单/确定性/融合分期、mode selection 决策输入/混合模式/场景演练/重测 cadence；3003→**5016** words，cov=100%，cites=15，q=94.1，compile_ok；**16/30** ready，Part V **3/3** ✓；下一轮 ch13（3143/5000，q=92.6）。
 - **Loop R47（2026-09-05，内容轨）**：**ch10 ready** — 增实质工程内容：KV block/split 选型约束、mask/padding/score-bias 处理、carrier reset/query-row 布局、sizing 决策 IR 属性、微复现 harness（三变体归因）；4063→**5028** words，cov=100%，cites=15，q=94.1，compile_ok；**15/30** ready，Part V 2/3；下一轮 ch12（3003/5000，q=92.0）。
