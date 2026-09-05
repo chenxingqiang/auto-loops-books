@@ -88,11 +88,26 @@ Table~\ref{tab:online_softmax} explains why ``online'' is a \textbf{residency co
 Decode cell (BS${=}1$, ctx${=}2048$, block${=}64$): 32 KV blocks per head. Materialized softmax writes 32 partial $P$ tiles to HBM; online softmax keeps three scalars/vectors per warp group on-chip \citep{dao2022flashattention,memoryfloor2026,taxbreak2026}.
 \end{example}
 
+\subsection{KV block and split sizing}
+\label{sec:ch10_block_sizing}
+
+Choosing how many KV positions one online step consumes is a joint constraint problem, not a fixed template. Each step needs one score tile, one $K$ tile, one $V$ tile, and room for the carriers; the product of head dimension, bytes per element, and the two KV copies determines how many bytes must arrive per step, while the on-chip budget decides whether a larger block or a second split is the better fit \citep{memoryfloor2026,dao2022flashattention}.
+
+On Hopper-class GPUs the sizing loop starts from the memory system: pick a candidate block, compute its $K/V$ staging against shared memory, subtract the score tile and carrier footprint, and accept the largest block that leaves a full double-buffer slot for the next tile \citep{semianalysis2024tma,nvidia2022hopper}. Blocks that undershoot the transfer granularity leave bandwidth idle; blocks that overshoot spill score tiles or force carrier export. Either failure shows up as bytes/token drift before latency does, so the worksheet must record the chosen block size next to the measured counters \citep{memoryfloor2026,taxbreak2026}.
+
+The sizing question has a second axis on parallel hardware: when one block would exceed per-warpgroup staging, split the KV range across groups and merge with the online equations from this section. Use the smallest split count that satisfies residency, because every additional split adds a merge step and a synchronization point \citep{dao2023flashdecoding,patel2025llminference}. XDNA compiles the same choice into a static DMA schedule, so a block size that needs dynamic spill fails compile and makes the constraint visible earlier than on GPU \citep{amd2024aie,amd2024xdna}. CPU sizing replaces the shared-memory budget with L1/L2 cache lines and replaces split synchronization with SIMD lanes, but the ordering---bytes per step, staging budget, then merge cost---stays identical \citep{dlbook,yirage2026}.
+
 \paragraph{FlashAttention and Flash-Decoding.} FlashAttention uses online softmax inside SRAM tiles for prefill-like parallelism \citep{dao2022flashattention}. Flash-Decoding splits KV across SMs while preserving online state per split, then merges splits with a second online reduction \citep{dao2023flashdecoding}. Decode MegaKernels must choose split strategy \emph{inside} one launch or pay multiplied graph steps \citep{taxbreak2026,nvidia2024cudagraphs}. Split-merge is easy to get wrong: an extra global sync per split negates Flash-Decoding wins \citep{patel2025llminference}.
 
 \paragraph{Split-KV merge protocol.} When SM $s$ finishes block range $[b_s, b_e)$ with local $(m_s,\ell_s,o_s)$, a tree reduction combines pairs using the same merge equations until one global $(m,\ell,o)$ remains \citep{dao2023flashdecoding}. Implementations either use a dedicated merge kernel (bad for launches/token) or warp-specialized epilogue warps inside the MegaKernel (preferred) \citep{taxbreak2026,yirage2026}. Profile merge separately---it becomes visible at long context when split count grows \citep{patel2025llminference}.
 
 \paragraph{GQA and MQA carrier savings.} Grouped-query attention shares $K/V$ across query heads, reducing KV bytes/token but not eliminating online softmax per query group \citep{liu2024deepseekv3,kwon2023vllm}. Carrier count scales with query groups, not raw head count---compiler passes must not allocate per-head carriers when groups share scores \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\paragraph{Carrier reset and query-row layout.}
+Every decode token begins a fresh online softmax over the current KV history, so the carrier state resets once per query row, not once per kernel launch \citep{dao2022flashattention,kwon2023vllm}. In batch-1 decode that reset is a register write before the first KV block; in chunked prefill or continuous batching, several query rows share the same KV pass and carriers must be laid out row-major so each row\'s $(m,\ell,o)$ merges independently \citep{dao2023flashdecoding,patel2025llminference}. A bug that reuses the previous token\'s $\ell$ across steps is invisible in unit tests that run a single query but produces drifting attention weights in production, so reset behavior belongs in the same IR lifetime analysis as the carriers themselves \citep{yirage2026,chen2020compilerbasedhardw}. Treat the reset as an explicit SSA initialization in lowering; a pass that hoists it out of the per-token loop is changing model semantics, not optimizing it \citep{memoryfloor2026}.
+
+\paragraph{Recording the sizing decision.}
+Block size, split count, and carrier layout are performance decisions with correctness impact: changing any of them changes the bytes/token worksheet and the merge tree that stability tests must cover \citep{taxbreak2026,yirage2026}. Store them as IR attributes on the online softmax region so a later refactor cannot alter residency silently \citep{chen2020compilerbasedhardw,memoryfloor2026}. Code review should show the attributes changing when the kernel changes, which keeps autotuners honest about what they are actually searching \citep{patel2025llminference}.
 
 
 \section{Numerical Stability}
@@ -148,6 +163,15 @@ $o$ (value acc) & Rarely sufficient & Often OK & Best \\
 
 \paragraph{Attention sinks and bias terms.} Some models add attention sinks or ALiBi-style biases before softmax \citep{liu2024deepseekv3}. Online updates must incorporate biases into block-local max and exp before merge---a separate bias kernel between $QK^\top$ and softmax reintroduces Boundary A breaks \citep{taxbreak2026,dao2022flashattention}.
 
+\subsection{Causal masks, padding, and score biases}
+\label{sec:ch10_masks_padding}
+
+Decode normally makes the mask implicit: the current query attends only to KV positions written before it, so no upper-triangular filter exists inside the loop \citep{dao2023flashdecoding,kwon2023vllm}. Masks become explicit in chunked prefill, when pages contain padding, when cross-attention reads encoder state, or when a model prepends a fixed sink token and must exclude filler rows \citep{liu2024deepseekv3,dao2022flashattention}.
+
+Apply masked positions as $-\infty$ before the block-local max, never by subtracting a bias after \emph{exp}. A post-hoc zero creates an apparent softmax mass that must be renormalized out later; a negative bias leaks a small nonzero weight into the accumulator; both corrupt $(m,\ell,o)$ in ways that grow with context length \citep{dao2022flashattention,memoryfloor2026}. The carrier update itself does not change: the block-local max still drives the exponentials, and masked lanes simply never contribute to $\ell$ or $o$ \citep{dao2023flashdecoding,patel2025llminference}.
+
+Padding rows deserve a compile-time decision, not a per-position runtime branch. When the number of real tokens is known per request, choose the block layout and page order so masked lanes collapse at block edges; when padding is scattered, mask flags must feed the same reduction tree as scores so no lane produces a separate softmax over filler positions \citep{yirage2026,chen2020compilerbasedhardw}. Attention sinks are the intentional exception: treat them as regular keys whose bias participates in the block-local max, because the sink only shapes the output if its score flows through the same stable \emph{exp} path as real positions \citep{liu2024deepseekv3,taxbreak2026}.
+
 
 \section{Cross-Hardware Online Softmax}
 \label{sec:ch10_cross_hardware}
@@ -182,6 +206,9 @@ Identical Llama head at ctx${=}2048$: Hopper fused online softmax keeps carriers
 \paragraph{Autotuner guardrails.} Search algorithms that reward FLOPs or occupancy may break Boundary B \citep{chen2020compilerbasedhardw,yirage2026}. Hard-constrain IR: no global stores on carrier SSA values; penalize $P$ materialization with infinite cost \citep{memoryfloor2026,taxbreak2026}.
 
 \paragraph{Serving engine integration.} vLLM and TensorRT-LLM integrate flash-style attention but expose different fusion depth to custom compilers \citep{kwon2023vllm,patel2025llminference}. When exporting graphs to YiRage, preserve online regions through Boundaries A--B or explicitly document breaks for regression tests \citep{yirage2026,liu2024deepseekv3}.
+
+\paragraph{Serving engine integration contract.}
+An engine that already calls a fused attention kernel still leaves an integration contract: which context buckets use the online path, which use eager fallback, and which page-table shapes are legal for the current carrier layout \citep{kwon2023vllm,patel2025llminference}. Record that boundary metadata at export time so a later framework upgrade cannot silently switch a decoder layer back to materialized softmax without a regression gate noticing \citep{yirage2026,memoryfloor2026}. The engine layer should be benchmarked end-to-end, but the bytes/token and kernels/token counters decide whether a given integration is really running the online path \citep{taxbreak2026,chen2020compilerbasedhardw}.
 
 
 \paragraph{Where online softmax ends.} The \textbf{fuse} decision is not ``softmax kernel + matmul kernel.'' It is: do $(m,\ell,o)$ and the $PV$ accumulator survive into the $O$ projection and MLP without HBM export \citep{taxbreak2026,memoryfloor2026,dao2022flashattention}? Chapter~11's MegaKernel assumes the answer is yes \citep{taxbreak2026,yirage2026}. Breaking fusion here forces separate launches and full-width tensors \citep{nvidia2024cudagraphs,kwon2023vllm}.
@@ -273,6 +300,15 @@ Table~\ref{tab:fusion_boundary} ties MegaKernel planning to TaxBreak counters \c
 \paragraph{Profile-first workflow (Fregly-aligned).} Start from user-visible ms/token at batch-1, then decompose with TaxBreak-style launch accounting and Memory-Floor-style bandwidth floors \citep{taxbreak2026,memoryfloor2026}. If $R_{\mathrm{floor}}$ is low on H100, prioritize eliminating $P$ materialization and Boundary B breaks before tuning \textbf{exp} microkernels \citep{memoryfloor2026,patel2025llminference}. If $R_{\mathrm{floor}}$ is high on L4, bytes/token from materialized softmax may still dominate---online carriers remain mandatory \citep{memoryfloor2026,dao2022flashattention}.
 
 \paragraph{Nsight Compute signals.} High \texttt{memory\_throughput} with low \texttt{sm\_\_throughput} during softmax regions suggests $P$ traffic or spill \citep{patel2025llminference,semianalysis2024tma}. High \texttt{warp\_stall\_math} on \textbf{exp} may justify SFU tuning \emph{after} residency is fixed \citep{nvidia2022hopper}. Treat profiler screenshots as release artifacts tied to IR hashes \citep{yirage2026,chen2020compilerbasedhardw}.
+
+\subsection{Micro-reproduction harness}
+\label{sec:ch10_micro_repro}
+
+Production regressions arrive with many variables entangled, so the first step of any softmax investigation is to build a repro that isolates attention. The harness should pin the model and head layout, the context bucket, the page-table shape, the KV block size and split count, the carrier dtypes, and the driver and compiler IR hash \citep{patel2025llminference,taxbreak2026}. Changing any one of those pins invalidates comparisons, which is why the config belongs beside the kernel rather than in a private experiment folder \citep{yirage2026,memoryfloor2026}.
+
+Run three variants in the same graph body: eager SDPA, online softmax inside the KV loop without Boundary B fusion, and online softmax with the attention output carried through to the MLP seam \citep{dao2022flashattention,chen2020compilerbasedhardw}. Each variant must emit ms/token, kernels/token, and bytes/token under identical warm-up and context conditions so the three levers---latency, launches, and memory traffic---can be attributed independently \citep{memoryfloor2026,taxbreak2026}. When only the third variant moves all three counters, the fix is a residency fix; when only launches move, the fix is orchestration; when only latency moves without bytes, re-check the profiler configuration before celebrating \citep{patel2025llminference,kwon2023vllm}.
+
+Keep the harness small enough to run in a CI job on every candidate kernel, and archive its config hash with the result table. A regression that takes an engineer a week to reproduce is a process failure; the same regression caught by a one-layer harness is a one-line revert \citep{yirage2026,dao2023flashdecoding}.
 
 \paragraph{Framework-level visibility.} PyTorch profiler timelines that show distinct \texttt{softmax} ops per layer per token indicate Boundary A breaks in eager stacks \citep{dlbook,taxbreak2026}. torch.compile may fuse some epilogues but cannot invent on-chip carriers if the graph exports $P$ \citep{chen2020compilerbasedhardw,patel2025llminference}. Compare against a hand-written online reference kernel on identical shapes before trusting compiler fusion \citep{dao2022flashattention,yirage2026}.
 
