@@ -671,6 +671,7 @@ rg -l '\\section\{Chapter Summary\}' books/build/chapters/ || true
 
 > Agent 每轮 append 3～5 行：日期、轨（内容/harness）、主攻、验证命令、结果、下一轮建议。**勿删历史。**
 
+- **Loop R48（2026-09-05，内容轨）**：**ch12 ready** — 三模式章节实质扩写：eager 子图盘点/每阶段诊断/适用边界/迁移 checklist、graph 捕获生命周期/bucket 集/allocator+fallback/跨硬件限制、MegaKernel 分层信封/合法性清单/确定性/融合分期、mode selection 决策输入/混合模式/场景演练/重测 cadence；3003→**5016** words，cov=100%，cites=15，q=94.1，compile_ok；**16/30** ready，Part V **3/3** ✓；下一轮 ch13（3143/5000，q=92.6）。
 - **Loop R47（2026-09-05，内容轨）**：**ch10 ready** — 增实质工程内容：KV block/split 选型约束、mask/padding/score-bias 处理、carrier reset/query-row 布局、sizing 决策 IR 属性、微复现 harness（三变体归因）；4063→**5028** words，cov=100%，cites=15，q=94.1，compile_ok；**15/30** ready，Part V 2/3；下一轮 ch12（3003/5000，q=92.0）。
 - **Loop R46（2026-09-05，内容轨）**：**ch05 ready** — YiRage XDNA Backend 增「Toolchain and chip-model pins」（toolchain/chip-model 版本 pin、silent legality flip = compile error）；4922→**5003** words，cov=100%，cites=16，q=94.0，compile_ok；**14/30** ready，Part III **2/2** ✓；下一轮 ch10（4063/5000，q=96.3）。
 - **Loop R45（2026-09-05，内容轨）**：**ch04 ready** — Hopper Benchmarking/Verification 节补「Choosing the comparison window」段（SLO 绑定 ctx bucket、ablation 行矩阵 ship 而非 headline median）；4977→**5014** words，cov=100%，cites=18，q=94.0，compile_ok；`uv run book_prepare.py --chapter ch04` gate 通过；**13/30** ready，Part III 1/2；下一轮 ch05（4922/5000，q=99.7）。

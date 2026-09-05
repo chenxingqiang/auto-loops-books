@@ -93,3 +93,4 @@ ch22-202606140728	100.0	0	0	94.4	keep	conclusion: add bridge to ch23
 ch04-20260905	100.0	5014	18	94.0	keep	R45: add SLO-bucket comparison guidance in Benchmarking/Verification (4977->5014)
 ch05-20260905	100.0	5003	16	94.0	keep	R46: add toolchain/chip-model pin guidance in YiRage XDNA backend (4922->5003)
 ch10-20260905	100.0	5028	15	94.1	keep	R47: add block/split sizing, mask handling, carrier reset, micro-repro sections (4063->5028)
+ch12-20260905	100.0	5016	15	94.1	keep	R48: expand eager/graph/MegaKernel/mode-selection engineering depth (3003->5016)
