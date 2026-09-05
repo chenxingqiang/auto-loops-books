@@ -102,3 +102,4 @@ ch18-20260905	100.0	5007	15	94.0	keep	R53: full IREE chapter expansion: dispatch
 ch19-20260905	100.0	5005	15	94.0	keep	R54: full Glow chapter expansion: primitives, stacking, static memory, PGQ, edge case (2019->5005)
 ch20-20260905	100.0	5018	21	94.1	keep	R55: full Mirage/Emerging chapter expansion: mugraph search, verification, MPK, budgets (2109->5018)
 ch21-20260905	100.0	5022	21	94.1	keep	R56: full unified-benchmark chapter expansion: rating method, overhead, binding, routing (2103->5022)
+ch22-20260905	100.0	5002	17	94.0	keep	R57: full E2E-tuning chapter expansion: profile protocol, classification, workflow, gates (1775->5002)
