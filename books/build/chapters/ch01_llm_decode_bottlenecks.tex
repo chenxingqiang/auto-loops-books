@@ -214,9 +214,9 @@ Concurrent streams and CUDA Graphs overlap some of that cost, but the ${\approx}
  \draw[vis axis] (0,0) -- (24,0);
  \foreach \x/\lbl in {0/0, 5/2k, 10/4k, 15/6k, 20/8k, 24/10k}
    \draw (\x,0) -- (\x,-3) node[below, font=\scriptsize] {\lbl};
- \fill[vis arch fill] (1,0) rectangle (4.2,84.8) node[midway, rotate=90, font=\scriptsize] {Llama-1B};
- \fill[vis pipeline fill] (6,0) rectangle (9.2,93.1) node[midway, rotate=90, font=\scriptsize] {OLMoE};
- \fill[vis arch fill!70] (11,0) rectangle (14.2,67.0) node[midway, rotate=90, font=\scriptsize] {Qwen-MoE};
+ \fill[visFillSecondary] (1,0) rectangle (4.2,84.8) node[midway, rotate=90, font=\scriptsize] {Llama-1B};
+ \fill[visFillPrimary] (6,0) rectangle (9.2,93.1) node[midway, rotate=90, font=\scriptsize] {OLMoE};
+ \fill[visFillSecondary!70] (11,0) rectangle (14.2,67.0) node[midway, rotate=90, font=\scriptsize] {Qwen-MoE};
  \node[below, font=\scriptsize, text=visText] at (12,-8) {H100 decode; TaxBreak BS${=}4$, SL${=}2048$, $m{=}10$ \citep{taxbreak2026}};
 \end{tikzpicture}
 \caption{Kernel launches per output token: MoE stacks amplify dispatch cost (${\approx}9.3$k launches/token for OLMoE).}
@@ -436,7 +436,7 @@ Flash-Decoding reports up to ${\approx}8\times$ \emph{attention-kernel} gains at
  \node[anchor=east, font=\scriptsize] at (0,1) {Flash-Decoding};
  \node[anchor=east, font=\scriptsize] at (0,0) {PyTorch eager};
  \foreach \y/\w in {0/1.0, 1/1.4, 2/1.8, 3/2.4, 4/3.2}
-   \draw[fill=vis arch fill] (0.1,\y) rectangle (\w,\y+0.7);
+   \draw[fill=visFillSecondary] (0.1,\y) rectangle (\w,\y+0.7);
  \draw[vis axis] (0,-0.8) -- (3.6,-0.8) node[right, font=\scriptsize] {relative headroom};
  \node[below, font=\scriptsize, text=visText, align=center] at (1.8,-1.6) {Conceptual ladder: each rung removes one\\bottleneck class (not universal speedups)};
 \end{tikzpicture}

@@ -258,7 +258,7 @@ Updating \texttt{hidden\_in} for the next iteration is a register/shared pointer
 \paragraph{Compiler lowering view.} YiRage (and similar MLIR pipelines) annotate memref lifetimes on each temporary before emitting this structure \citep{yirage2026,chen2020compilerbasedhardw}. Generic bufferization that inserts alloca in the per-token path invalidates the walkthrough---review IR diffs for unexpected \texttt{memref.alloc} nodes \citep{memoryfloor2026,kwon2023vllm}.
 
 \begin{example}
-Code review checklist for one decode step: (1) count \texttt{__syncthreads} between fusion stages---should match planned pipeline depth; (2) verify no \texttt{store} of full $d$-vectors between attention and MLP; (3) confirm KV append uses in-kernel offsets, not host callbacks \citep{taxbreak2026,yirage2026}.
+Code review checklist for one decode step: (1) count \texttt{\_\_syncthreads} between fusion stages---should match planned pipeline depth; (2) verify no \texttt{store} of full $d$-vectors between attention and MLP; (3) confirm KV append uses in-kernel offsets, not host callbacks \citep{taxbreak2026,yirage2026}.
 \end{example}
 
 \paragraph{Review gate.} Require a side-by-side diff of unfused vs.\ MegaKernel IR or CUDA showing eliminated global stores between QKV, attention, and MLP \citep{chen2020compilerbasedhardw,memoryfloor2026}.

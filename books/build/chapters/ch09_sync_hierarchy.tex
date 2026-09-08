@@ -257,7 +257,7 @@ acquire/release fences, atomics, coherence protocol &
 HW maintains coherence; fences/atomics constrain ordering explicitly &
 Hidden cost: local fast; remote NUMA atomics 2--3$\times$; false sharing inflates traffic &
 (1)~Partition data---minimize cross-core sharing\newline
-(2)~Lightest acquire/release; avoid \texttt{seq\__cst} on hot path\newline
+(2)~Lightest acquire/release; avoid \texttt{seq\_cst} on hot path\newline
 (3)~Pad to cache line---no false sharing &
 Hard to prove fully static; runtime tools; high debug cost \\
 \midrule
@@ -362,7 +362,7 @@ No scratchpad barriers---memory ordering and coherence do the work (Ch.~6 blocki
 
 \paragraph{Fence level selection.}
 Producer publishes with \texttt{release}; consumer loads with \texttt{acquire} \citep{dlbook,patel2025llminference}.
-Use \texttt{seq\__cst} only when global total order required---decode hot loops rarely need it \citep{yirage2026,taxbreak2026}.
+Use \texttt{seq\_cst} only when global total order required---decode hot loops rarely need it \citep{yirage2026,taxbreak2026}.
 
 \paragraph{False sharing quantified.}
 Two threads on one cache line (${\sim}64$\,B): coherence ping-pong can cut effective bandwidth 30--50\% \citep{dlbook,memoryfloor2026}.
@@ -383,7 +383,7 @@ Before: 8 threads false-share on one line; after: LLC miss rate drops, ms/token 
 \paragraph{CPU decode helper threading model.}
 Many deployments run token sampling, logits post-processing, or small expert routers on CPU while GPU runs the megakernel \citep{patel2025llminference,kwon2023vllm}.
 Handoff uses a single-producer single-consumer queue: producer publishes slot index with \texttt{release}, consumer loads with \texttt{acquire} \citep{dlbook,yirage2026}.
-Do not use \texttt{seq\__cst} on every token---batch-1 decode issues one fence per step at most on the hot path \citep{taxbreak2026,chen2020compilerbasedhardw}.
+Do not use \texttt{seq\_cst} on every token---batch-1 decode issues one fence per step at most on the hot path \citep{taxbreak2026,chen2020compilerbasedhardw}.
 If multiple CPU threads reduce partial statistics for speculative decoding, give each thread a cache-line-aligned accumulator---mirrors GPU shuffle-before-atomic discipline at core granularity \citep{memoryfloor2026,patel2025llminference}.
 
 \paragraph{When CPU sync matters for fused stacks.}

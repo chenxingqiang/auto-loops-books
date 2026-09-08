@@ -24,7 +24,7 @@ Decode wins come from keeping activations off the warehouse route; hardware cons
 
 \paragraph{Composite tri-hardware case (7B dense layer).}
 The same mathematics, three deployment outcomes (composite internal migrations):
-\textbf{GPU}---operator-first 42\,ms/token at batch-1; hardware-aware fusion ${\sim}18$\,ms/token (${\sim}2.3$\times$) when shared-memory tiling respects SM caps \citep{memoryfloor2026,taxbreak2026}.
+\textbf{GPU}---operator-first 42\,ms/token at batch-1; hardware-aware fusion ${\sim}18$\,ms/token (${\sim}2.3\times$) when shared-memory tiling respects SM caps \citep{memoryfloor2026,taxbreak2026}.
 \textbf{CPU}---naively porting the GPU fusion evicted KV from LLC and ran 15\% \emph{slower} than native blocking; cache-aware retile gained ${\sim}35\%$ over eager PyTorch \citep{patel2025llminference,rotem2018glow}.
 \textbf{NPU}---dynamic per-op dispatch did not legalize; static ADF tile+DMA plan compiled and beat a same-power GPU class by ${\sim}40\%$ on per-token latency in one edge SKU \citep{amd2024xdna,amd2024aie}.
 Matching architecture yields gains; ignoring constraints yields disasters \citep{yirage2026}.
