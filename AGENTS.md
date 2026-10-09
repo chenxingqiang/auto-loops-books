@@ -36,8 +36,9 @@
 
 | 层级 | 标准 |
 |------|------|
-| **书稿终态** | **30** 章 **Fregly-ready**（非仅 `chapter_ready`）；Part VIII = runtime + 推理框架 + YiRage 协同 |
+| **书稿终态** | **30** 章 **Fregly-ready**（非仅 `chapter_ready`）；Part VIII = runtime + 推理框架 + **S2C2IR 协同**（YiRage 降级为次要参考，见 §1.4） |
 | **样章对照** | [`reference-chapter-1.pdf`](reference-chapter-1.pdf) — mechanical sympathy、goodput、profile-first、**Key Takeaways → Conclusion** |
+| **逐章金标准分析** | [`books/fregly/ch01–ch20_analysis.md`](books/fregly/README.md)（写作逻辑/核心价值/关键事实/套路/对齐建议）+ [`books/fregly/S2C2IR-alignment.md`](books/fregly/S2C2IR-alignment.md)（S2C2IR 深度对齐） — **写作与事实引用的强制参照** |
 | **文风契约** | [`books/WRITING_STYLE.md`](books/WRITING_STYLE.md) §I–§VIII，§七 Fregly 映射；**风格生产流程**见本文 §5.6 |
 | **Harness 终态** | Agent 少猜、少重复劳动：`book-loop` 一步产出完整 `agent_tasks` + 可复现 gate；协议单源、路径一致 |
 
@@ -46,6 +47,32 @@
 - 用户未喊停 → **验证通过 → commit → push → 立即 Loop R{n+1}**
 - **不要**新建「一键跑完全阶段」mega-orchestrator，除非用户明确要求
 - 优先 **扩展现有 `book-loop` / `iterate.py` / agent_tasks**，而非平行脚本
+
+### 1.4 S2C2IR-first 编译栈政策（2026-10-09 起）
+
+> **决策**：全书编译栈主线从 YiRage 切换为 **S2C2IR**（本地仓库 `/Users/xingqiangchen/S2C2IR`，commit `f0ae2ad`）。YiRage 保留为「历史实现/对照引擎」，**不再作为叙事主角**。
+
+**强制参照（每轮涉及编译器/runtime/pass 章节时）：**
+
+1. [`books/fregly/S2C2IR-alignment.md`](books/fregly/S2C2IR-alignment.md) — S2C2IR 实际架构（HB 语义、Realization Space、五级 Rewrite License 门禁、Capability Schema、4090+910B 双实测）↔ 本书章节精确映射
+2. [`books/fregly/chNN_analysis.md`](books/fregly/README.md) — 对应 Fregly 章的风格/事实/对齐建议
+3. 事实锚点引用本地文档路径（如 `docs/design/realization-space.md`），不用 GitHub URL
+
+**术语映射（写稿时替换）：**
+
+| 旧（YiRage 叙事） | 新（S2C2IR 叙事） |
+|---|---|
+| YiRage 五层栈（API→Backend→Search→Threadblock→PK runtime） | S²C² 四方言（stor/comp/comm/sched）+ 编译执行脊柱（#136–#141 冻结链） |
+| YiRage passes（bufferization/tiling/pipeline/sync） | S2C2IR dialect passes + Realization Transform `T: P→P'`（HB 相等才接受） |
+| HardwareRegistry / detect_current_chip | CapabilityProfile / Capability Schema v1（硬件中立，4090+910B 实测 `v3-dataset/`） |
+| YiRage search / superoptimize / RL autotune | Evidence-Bounded Search（`--s2c2-enumerate/argmin/walk` 冻结）+ **Rewrite License 五级门禁**（sufficient→authorized→licensed→plan→applied） |
+| same IR, three backends（triplet） | 同一 S²C² IR + 不同 CapabilityProfile → 不同合法调度（已实测） |
+| YiRage legality invariants | `HB_M = HB_source`（Realization Space 成员资格）+ `IsLegal(P,D,M)` |
+| 「无证据不重写」（口号级） | `serial ∧ applicable ∧ measured ∧ benefit proven ⇒ rewrite_license = yes`（形式化） |
+
+**边界提醒**：CUDA/Ascend 目前是 **measurement adapter ≠ compiler backend**（`Rank(Cost) ≈ Rank(Latency)` 验证层，V3 未 claim）——行文不得写成「S2C2IR 已生产代码生成」。
+
+**迁移计划**：见 [`books/fregly/YiRage-to-S2C2IR-migration.md`](books/fregly/YiRage-to-S2C2IR-migration.md)（分章改造优先级，ch03/ch13/ch14/ch21/ch25/ch29 优先）。
 
 ---
 
@@ -113,7 +140,8 @@ uv run book-loop status
 | [`book_loop.py`](book_loop.py) | CLI shim |  rarely | — |
 | `books/build/chapters/*.tex` | **正文主路径** |  prose / structure | 模板 infra |
 | [`book_content.md`](book_content.md) | 中文目录 spec（**intent 源**） | **增删改章/节、模块划分、写作意图** | 改后必须同步 OUTLINE + tex |
-| [`deps/YiRage`](deps/YiRage) | **YiRage 上游子模块**（runtime/compiler 工程锚点） | pin 版本、文档引用路径 | 勿手改 vendor 树（在 upstream 改） |
+| [`/Users/xingqiangchen/S2C2IR`](/Users/xingqiangchen/S2C2IR) | **S2C2IR 本地仓库**——全书编译栈主线锚点（四方言 + evidence-bounded 脊柱 + 910B/4090 数据） | 引用设计文档路径、命令、事实 | **勿手改**（在 S2C2IR 仓库改）；引用见 §1.4 |
+| [`deps/YiRage`](deps/YiRage) | YiRage 上游子模块（**降级**：历史实现/对照引擎锚点） | pin 版本、文档引用路径 | 新叙事主角是 S2C2IR（§1.4） |
 | [`deps/`](deps/) | **编译器 + DeepSeek 推理基建子模块** | pin SHA、ch14–19 / ch23–24 对照 | 见 [`deps/README.md`](deps/README.md)；**完整 DeepSeek 推理引擎未开源** |
 | [`deps/README.md`](deps/README.md) | 子模块 init / build 说明 | 随 submodule 流程更新 | — |
 | `books/research/<id>/` | 研究 + `verified_facts.jsonl` | 核验日志 | 捏造 URL |

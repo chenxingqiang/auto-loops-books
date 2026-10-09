@@ -262,7 +262,7 @@ books/visuals/<chapter_id>/
 | 图标复用 | GPU、CPU、queue、attention 等 — `OTROOT/icons/` → `\input` |
 | **模板编辑** | `system-block-diagram`, `inference-serving`, `encoder-decoder`, `flowchart`, `distributed-training` — 必读 `edit_contract` |
 | PNG→TikZ | 旧位图 / 草稿统一为矢量 |
-| 描述生成 | YiRage 流水线等无模板原创图 |
+| 描述生成 | S2C2IR 四方言/编译脊柱等无模板原创图（术语映射见 `AGENTS.md` §1.4） |
 
 **输出**：`books/visuals/<chapter_id>/opentikz/*.tex`（Git 版本化；**Mode A** 只改副本，不改 `~/.cursor/skills/opentikz`）。
 

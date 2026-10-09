@@ -1,0 +1,38 @@
+About the Author
+Chris Fregly is a performance engineer and AI product leader who has driven inno‐
+vations at Netflix, Databricks, Amazon Web Services (AWS), and multiple startups.
+He has led performance-focused engineering teams that built AI/ML products, scaled
+go-to-market initiatives, and reduced cost for large-scale generative-AI and analytics
+workloads. Chris coauthored Data Science on AWS and Generative AI on AWS
+(O’Reilly), and created the O’Reilly course “High-Performance AI in Production with
+NVIDIA GPUs.” His work spans kernel-level tuning, compiler-driven acceleration,
+distributed training, and high-throughput inference. Chris organizes the global AI
+Performance Engineering meetup with over 100,000 members worldwide.
+
+Colophon
+The animal on the cover of AI Systems Performance Engineering is a northeast African
+cheetah (Acinonyx jubatus soemmeringii), also known as the Sudan cheetah. This sub‐
+species of cheetah is predominantly found in northeast Africa, including regions of
+Ethiopia, Somalia, and South Sudan.
+The northeast African cheetah shares the iconic slender body and long limbs character‐
+istic of all cheetahs, which facilitates its incredible speed (up to 65–75 miles per hour).
+It differs from its southern relatives in having more variation in tear marks (the black
+stripes that run from the corner of each eye down to the mouth) and a thicker coat.
+Cheetahs eat medium-sized ungulates like gazelles, zebras, and impalas. They are skil‐
+led hunters. Their strategy relies on a blend of stealth and an explosive, short burst of
+speed. They consume their meals quickly to avoid losing it to other predators like
+lions or hyenas, who are able to overpower them. Unlike many other big cats, chee‐
+tahs cannot roar but instead use a variety of purrs, chirps, hisses, and growls to com‐
+municate. They are particularly vocal in mating season or when females are
+communicating with their cubs. A litter typically contains three to five cubs, who live
+with their mother for the first year and a half. Male cheetahs tend to be more social,
+forming loose coalitions that groom and hunt together.
+Most cheetah species are considered vulnerable or endangered by the IUCN, due to
+habitat loss and poaching. Many of the animals on O’Reilly covers are endangered; all
+of them are important to the world.
+The cover illustration is by José Marzan Jr., based on an original illustration for
+O’Reilly Media. The series design is by Edie Freedman, Ellie Volckhausen, and Karen
+Montgomery. The cover fonts are Gilroy Semibold and Guardian Sans. The text font
+is Adobe Minion Pro; the heading font is Adobe Myriad Condensed; and the code
+font is Dalton Maag’s Ubuntu Mono.
+
