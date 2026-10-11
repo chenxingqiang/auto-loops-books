@@ -1,6 +1,6 @@
 # YiRage → S2C2IR 迁移计划（全书叙事主线切换）
 
-> 决策日期：2026-10-09。政策：`AGENTS.md` §1.4（S2C2IR-first）。术语映射与架构事实见 [`S2C2IR-alignment.md`](S2C2IR-alignment.md)。
+> 决策日期：2026-10-09。政策：`AGENTS.md` §1.4（S2C2IR-first）。术语映射与架构事实见 [`S2C2IR-alignment.md`](S2C2IR-alignment.md)；**Token Factory 叙事与前沿模型案例**（DeepSeek-V4 / Kimi K3 / Rubin / 集群形式化，源自 2026.09 行业汇报）见 [`S2C2IR-tokenfactory-narrative.md`](S2C2IR-tokenfactory-narrative.md)。
 > 原则：**不改章 id、不动 OUTLINE 结构**（`book_prepare.py` 评分冻结），只替换叙事主角、术语与事实锚点。YiRage 降级为「历史实现/对照引擎」，可在正文以对照形式保留 1–2 处。
 
 ## 迁移优先级与分章动作
@@ -32,8 +32,17 @@
 
 ## 执行规范（对齐 loops 协议）
 
-1. 每轮 1 章（PSIVE 单点突破）；改章时**必须**先读 `books/fregly/S2C2IR-alignment.md` + 对应 `chNN_analysis.md`（Fregly 侧）。
-2. 事实锚点用本地路径（`docs/design/<doc>.md`）；数字来自 `v3-dataset/` 或设计文档，进 `verified_facts.jsonl`。
+1. 每轮 1 章（PSIVE 单点突破）；改章时**必须**先读 `books/fregly/S2C2IR-alignment.md` + 对应 `chNN_analysis.md`（Fregly 侧）；涉及开篇/模型案例/集群章时加读 `S2C2IR-tokenfactory-narrative.md`。
+2. 事实锚点用本地路径（`docs/design/<doc>.md`）；数字来自 `v3-dataset/` 或设计文档，进 `verified_facts.jsonl`；PPT 引用数字必须保留 paper-reported 口径。
 3. 禁止表述「S2C2IR 已生产代码生成」——当前 CUDA/Ascend 是 measurement adapter；V3 未 claim。
 4. 术语替换对照 `AGENTS.md` §1.4 映射表；`grep -ri yirage books/build/chapters/` 应随迁移递减（终态：仅对照性提及 ≤10 处）。
 5. 每章迁移后跑 `book_prepare.py --chapter <id>` 保持 gate 绿；`book_results.tsv` 记录 keep/discard。
+
+## 增补（2026-10-11，Token Factory 叙事接入）
+
+- **ch01–02（P1 提升）**：开篇钩子换用 Token Factory 框架——「一个 token 的生成路径触发四类编译问题（数据在哪/算在哪/怎么搬/何时发生）」；保留 TaxBreak/Memory-Floor 增量；文献链 2018–2026（TVM→…→MPK）作演进证据。
+- **ch10**：online softmax 章引 DeepSeek-V4 CSA/HCA 压缩 KV 作前沿案例（IR sketch 见 narrative 文档 §四）。
+- **ch23**：MoE 编译章用 Kimi K3（Top-16/896 + KDA/Gated MLA 混合注意力）作集群级案例；`sched.pipeline dispatch(k+1) ‖ expert_compute(k)` 直接入正文。
+- **ch28**：hybrid cache（logical prefix object + paged KV + KDA 递归 state 原地更新）作 S2C2IR Storage 语义的 serving 实例。
+- **ch24/ch21**：集群编译对象四元组 `Program × Device × Topology × Realization` + 模型统一坐标系表入正文。
+- **ch03**：Rubin 四问表（kernel→path / memory→hierarchy+context / PCIe→fabric / static→agentic）作产业信号小节；CMX context tier 入硬件约束矩阵。
